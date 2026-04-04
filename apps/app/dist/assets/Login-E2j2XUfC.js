@@ -1,0 +1,1 @@
+import{j as o,A as t,l as r}from"./index-BA-eXXHp.js";const e=()=>o.jsx(o.Fragment,{children:o.jsx(t,{title:"Login to your account",description:"Enter your email below to login to your account",children:o.jsx(r,{})})});export{e as default};

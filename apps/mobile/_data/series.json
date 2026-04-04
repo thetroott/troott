@@ -1,0 +1,10 @@
+Sermon Series
+
+title: string;
+description: string;
+preacher: ObjectId | any; // name of the preacher
+sermons: Array<ObjectId | any>; // list the title of all the parts of the series
+imageUrl?: string; // image of the series
+part: Number; // how many parts
+totalDuration: string; // total mb size of all the sermons in the series
+tags: Array;

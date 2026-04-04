@@ -1,0 +1,27 @@
+---
+description: Use react-native-track-player with Expo (engine patterns, setup, background service)
+globs: engine/**/*, index.ts, app/_layout.tsx
+alwaysApply: false
+---
+
+# react-native-track-player + Expo (managed app)
+
+## Registration and setup
+
+- **Entry point**: Register the playback service once in `index.ts` with `TrackPlayer.registerPlaybackService(() => playerBackgroundService)`. Do not register elsewhere.
+- **Player setup**: Call `startPlayerService()` from `@/engine/player/setup` in `app/_layout.tsx` (e.g. in a `useEffect`). Wait for it before hiding splash / rendering app. Optionally run `Initialize()` from `engine/helpers/initialization.ts` after setup to restore last queue and position from store.
+- **Do not** call `TrackPlayer.updateOptions` during setup. RNTP 5.x can NPE if the native service is not ready. Use `useUpdateOptions` from `@/engine/player/useUpdateOptions` when the service is active (e.g. when loading queue or toggling favorite). Capabilities live in `engine/constants/capabilities.ts`.
+
+## Engine usage
+
+- **Setup**: `engine/player/setup.ts` (iOS/Android options, buffer config), `engine/player/background.ts` (Event listeners: RemotePlay, RemotePause, RemoteSeek, RemotePrevious with threshold, RemoteDuck, etc.). Background service must be `async` and register all required RNTP events.
+- **Queue and state**: Use `engine/core/queue.ts` for `loadQueue`, `playNextInQueue`, `playLaterInQueue`; use `engine/queries/current-track.ts` and `@/stores/player/queue` (e.g. `usePlayerQueueStore`, `useCurrentTrack`). Query keys are in `engine/queries/query-keys.ts`. Keep store in sync when active track changes (e.g. `handleActiveTrackChanged` where appropriate).
+- **Shuffle / skip**: Use `engine/core/shuffle.ts` (`handleShuffle`, `handleDeshuffle`) and `engine/core/skip-previous.ts` (previous uses `SKIP_TO_PREVIOUS_THRESHOLD` from `engine/constants/engine.ts`: below threshold = skip to previous track, else seek to 0).
+- **Controls**: Use hooks from `engine/hooks/useControl.ts`: `usePlay`, `useSkip`, `usePrevious`, `useSeekTo`, `useLoadNewQueue`, `useAddToQueue`, `useToggleShuffle`, `useToggleRepeatMode`, `useRemoveFromQueue`, `useReorderQueue`, `useResetQueue`. Use `engine/queries/playback-queries.ts` for `useProgress(UPDATE_INTERVAL)` and `usePlaybackState()`; intervals and threshold in `engine/constants/engine.ts`.
+- **Track type**: Use project DTOs (`SermonTrackDTO`) and `engine/utils/mappers.ts` (`mapDtoToTrack`) when calling `TrackPlayer.add` / setting queue. Map `artist`/`minister` and `artwork`/`image` for compatibility.
+- **Offline**: Pass `networkStatus` into `loadQueue`; queue loading uses `filterTracksOnNetworkStatus` and `getAudioCache()` from `engine/utils/offline.tsx` so only playable (e.g. downloaded) tracks are enqueued when offline.
+
+## Expo-specific
+
+- **Background audio**: In `app.json`, iOS `UIBackgroundModes` must include `"audio"`. Use Expo config plugins as needed; entry remains `index.ts` with `main` in app.json.
+- **Native modules**: Use `expo-dev-client` for development builds when using react-native-track-player.

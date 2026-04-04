@@ -1,0 +1,141 @@
+
+import Toast from 'react-native-toast-message'
+
+import TrackPlayer from 'react-native-track-player'
+import { isUndefined } from 'lodash'
+import { SermonTrackDTO } from '@/dtos/sermon.dto'
+import { usePlayerQueueStore } from '@/stores/player/queue'
+import { shuffleSermonTracks } from '../helpers/helpers'
+
+
+export async function handleShuffle(): Promise<SermonTrackDTO[]> {
+	const currentIndex = await TrackPlayer.getActiveTrackIndex()
+	const currentTrack = (await TrackPlayer.getActiveTrack()) as SermonTrackDTO
+	const playQueue = (await TrackPlayer.getQueue()) as SermonTrackDTO[]
+
+	// Don't shuffle if queue is empty or has only one track
+	if (!playQueue || playQueue.length <= 1 || isUndefined(currentIndex) || !currentTrack) {
+		Toast.show({
+			text1: 'Nothing to shuffle',
+			type: 'info',
+		})
+		return Promise.resolve([])
+	}
+
+	// Save off unshuffledQueue
+	usePlayerQueueStore.getState().setUnshuffledQueue([...playQueue])
+
+	const unusedTracks = playQueue
+		.filter((_, index) => currentIndex != index)
+		.map((track, index) => {
+			return { track, index }
+		})
+
+	await TrackPlayer.move(currentIndex, 0)
+
+	await TrackPlayer.removeUpcomingTracks()
+	// Get the current track (if any)
+	let newShuffledQueue: SermonTrackDTO[] = []
+
+	// If there are upcoming tracks to shuffle
+	if (unusedTracks.length > 0) {
+		const { shuffled: shuffledUpcoming } = shuffleSermonTracks(
+			unusedTracks.map(({ track }) => track),
+		)
+
+		// Create new queue: played tracks + current + shuffled upcoming
+		newShuffledQueue = shuffledUpcoming
+		console.debug(
+			`Shuffled ${shuffledUpcoming.length} upcoming tracks. Current track and history preserved.`,
+		)
+	} else {
+		// Approach 2: If no upcoming tracks, shuffle entire queue but keep current track position
+		// This handles the case where user is at the end of the queue
+		if (currentTrack) {
+			// Remove current track, shuffle the rest, then put current track back at its position
+			const otherTracks = playQueue!.filter((_, index) => index !== currentIndex)
+			const { shuffled: shuffledOthers } = shuffleSermonTracks(otherTracks)
+
+			// Create new queue with current track in the middle
+			newShuffledQueue = [
+				...shuffledOthers.slice(0, currentIndex),
+				currentTrack,
+				...shuffledOthers.slice(currentIndex),
+			]
+
+			console.debug(
+				`Shuffled entire queue with current track preserved at index ${currentIndex}.`,
+			)
+		} else {
+			// No current track, shuffle everything
+			const { shuffled: shuffledAll } = shuffleSermonTracks(playQueue!)
+
+			newShuffledQueue = shuffledAll
+
+			console.debug(`Shuffled entire queue.`)
+		}
+	}
+
+	await TrackPlayer.add(newShuffledQueue)
+
+	return [currentTrack, ...newShuffledQueue]
+
+	// // Prepare the next few tracks in TrackPlayer for smooth transitions
+	// try {
+	// 	await ensureUpcomingTracksInQueue(newShuffledQueue, currentIndex ?? 0)
+	// } catch (error) {
+	// 	console.warn('Failed to prepare upcoming tracks after shuffle:', error)
+	// }
+}
+
+// Current track → what’s playing right now.
+// Queue / manual additions → what you explicitly want next.
+// Context / playlist / album → the “default pipeline” of tracks.
+// Autoplay / recommendations → the fallback when the queue/context runs out.
+
+
+
+export async function handleDeshuffle() {
+	const shuffled = usePlayerQueueStore.getState().shuffled
+	const unshuffledQueue = usePlayerQueueStore.getState().unShuffledQueue
+	const currentIndex = await TrackPlayer.getActiveTrackIndex()
+	const currentTrack = (await TrackPlayer.getActiveTrack()) as SermonTrackDTO
+	const playQueue = (await TrackPlayer.getQueue()) as SermonTrackDTO[]
+
+	// Don't deshuffle if not shuffled or no unshuffled queue stored
+	if (!shuffled || !unshuffledQueue || unshuffledQueue.length === 0) return
+
+	// Move currently playing track to beginning of queue to preserve playback
+	await TrackPlayer.move(currentIndex!, 0)
+
+	// Find tracks that aren't currently playing, these will be used to repopulate the queue
+	const missingQueueItems = unshuffledQueue.filter(
+		(track) => track.item.id !== currentTrack?.item.id,
+	)
+
+	// Find where the currently playing track belonged in the original queue, it will be moved to that position later
+	const newCurrentIndex = unshuffledQueue.findIndex(
+		(track) => track.item.id === currentTrack?.item.id,
+	)
+
+	// Clear Upcoming tracks
+	await TrackPlayer.removeUpcomingTracks()
+
+	// Add the original queue to the end, without the currently playing track since that's still in the queue
+	await TrackPlayer.add(missingQueueItems)
+
+	// Move the currently playing track into position
+	console.debug(
+		`Moving active playing track from previous index of ${currentIndex} to ${newCurrentIndex}`,
+	)
+	console.debug(`Queue length is ${playQueue?.length}`)
+	await TrackPlayer.move(0, newCurrentIndex)
+
+	// Just-in-time approach: Don't disrupt current playback
+	// The queue will be updated when user skips or when tracks change
+	console.debug(
+		`Restored original app queue, ${unshuffledQueue.length} tracks. TrackPlayer queue will be updated as needed.`,
+	)
+
+	usePlayerQueueStore.getState().setUnshuffledQueue([])
+}

@@ -1,0 +1,13 @@
+Ministers:
+id: string
+firstName: string;
+lastName: string;
+ministerialName: string
+avatar: string;
+gender: string;
+// Ministry & Content
+
+ministryName: string;
+description: string;
+ministryHq: string; //location
+ministryWebsite: string;

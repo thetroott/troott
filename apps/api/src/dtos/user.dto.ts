@@ -1,0 +1,138 @@
+import { PasswordType, UserType } from "../utils/enums.util";
+
+export interface inviteUserDTO {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  userType: UserType;
+  role?: string;
+  permissions?: Array<string>;
+}
+
+export interface createUserDTO {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  passwordType: PasswordType
+  userType: UserType;
+  createdBy?: string
+  role?: string;
+  permissions?: Array<string>;
+  location?: {
+    address?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+};
+}
+
+export interface EditUserDTO {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  phoneCode?: string;
+  country?: string;
+  avatar?: string;
+  dateOfBirth?: Date;
+  gender?: string;
+  isActive?: boolean;
+}
+
+export interface UserProfileDTO {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  phoneCode?: string;
+  avatar?: string;
+  country?: string;
+  gender?: string;
+  dateOfBirth?: Date;
+  isActive: boolean;
+  userType: string;
+  roles: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UserDTO {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+
+  phoneNumber?: string;
+  phoneCode?: string;
+  country?: string;
+
+  avatar?: string;
+  dateOfBirth?: Date;
+  gender?: string;
+
+  userType: string;
+  isSuper: boolean;
+  isStaff: boolean;
+  isMinister: boolean;
+  isCreator: boolean;
+  isListener: boolean;
+  isActive: boolean;
+  isLocked: boolean;
+  lockedUntil: Date | null;
+
+  notificationPreferences: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+  };
+
+  roles: string[];
+  profiles: {
+    listener?: string;
+    creator?: string;
+    minister?: string;
+    staff?: string;
+  };
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RoleDTO {
+  id: string;
+  name: string;
+  permissions: string[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+
+
+export interface IPassportProfileDTO {
+  id: string
+  emails: { value: string }[];
+  name: { givenName: string; familyName: string };
+  picture: string;
+}
+
+
+export interface createSocialUserDTO{
+
+  firstName: string;
+
+  lastName: string;
+
+  email: string;
+
+  userType: UserType;
+
+  googleId?: string;
+
+  githubId?: string;
+
+  appleId?: string;
+
+}

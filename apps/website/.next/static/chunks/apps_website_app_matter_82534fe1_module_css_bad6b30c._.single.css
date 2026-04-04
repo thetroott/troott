@@ -1,0 +1,107 @@
+/* [project]/apps/website/app/matter_82534fe1.module.css [app-client] (css) */
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_Heavy-s.p.b0b2bbc2.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_HeavyItalic-s.p.bd80c766.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_Bold-s.p.fe9a2812.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_BoldItalic-s.p.749b59ce.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_SemiBold-s.p.d7136482.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_SemiBoldItalic-s.p.bef98b32.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_Medium-s.p.499f8837.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_MediumItalic-s.p.22932b97.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_Regular-s.p.b8a24b9a.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_Light-s.p.ab31e594.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: matter;
+  src: url("../media/Matter_LightItalic-s.p.01ee46b5.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: matter Fallback;
+  src: local(Arial);
+  ascent-override: 78.82%;
+  descent-override: 18.49%;
+  line-gap-override: 19.46%;
+  size-adjust: 102.76%;
+}
+
+.matter_82534fe1-module__ACSq8a__className {
+  font-family: matter, matter Fallback;
+}
+
+.matter_82534fe1-module__ACSq8a__variable {
+  --font-matter: "matter", "matter Fallback";
+}
+
+/*# sourceMappingURL=apps_website_app_matter_82534fe1_module_css_bad6b30c._.single.css.map*/

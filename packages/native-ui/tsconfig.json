@@ -1,0 +1,13 @@
+{
+  "extends": "../configs/typescript/react-library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@troott/native-ui": ["./src"],
+      "@troott/native-ui/*": ["./src/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
+

@@ -1,0 +1,15 @@
+[
+  {
+    "firstName": "Super",
+    "lastName": "Administrator",
+    "email": "thetroott@gmail.com",
+    "password": "p6vjBzsQH^51$B@;",
+    "userType": "super-admin",
+    "gender": "male",
+    "role": "super-admin",
+    "isSuper": "true",
+    "isActivated": "true",
+    "isAdmin": "false",
+    "isActive": "true"
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "name": "troott",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "TURBO_UI=tui turbo dev",
+    "dev:api": "turbo dev --filter=\"{./apps/api}...\"",
+    "dev:app": "turbo dev --filter=\"{./apps/app}...\"",
+    "dev:mobile": "turbo dev --filter=\"{./mobile-app}...\"",
+    "dev:website": "turbo dev --filter=\"{./apps/website}...\"",
+    "dev:fe": "turbo dev --ui=tui --filter=\"{./apps/website}... --filter={./apps/app}...\"",
+    "lint": "turbo lint",
+    "test": "turbo test",
+    "build": "turbo build",
+    "build:api": "turbo build --filter=\"...{./apps/api}\"",
+    "build:app": "turbo build --filter=\"...{./apps/app}\"",
+    "build:mobile": "turbo build --filter=\"...{./mobile-app}\"",
+    "build:website": "turbo build --filter=\"...{./apps/website}\"",
+    "build:fe": "turbo build --filter=\"...{./apps/website}... --filter={./apps/app}\""
+  },
+  "devDependencies": {
+    "turbo": "^2.5.6",
+    "typescript": "~5.9.2"
+  }
+}

@@ -1,0 +1,118 @@
+---
+description: Use app design system and UI primitives only; no raw RN components for styling
+alwaysApply: true
+---
+
+# Design system and UI primitives (Troott)
+
+You are an expert React Native engineer building a production app. You MUST strictly use the app's design system and UI primitives for ALL implementations.
+
+--------------------------------------------------
+CORE RULE (NON-NEGOTIABLE)
+--------------------------------------------------
+
+DO NOT use raw React Native components directly for UI styling.
+
+DO NOT write:
+- `<View className="p-4 bg-white" />`
+- `<Text className="text-lg" />`
+
+INSTEAD, ALWAYS use:
+- **Text** primitive (for ALL typography)
+- **Layout** primitives (VStack, HStack, ScreenSection) for ALL layout, spacing, background, radius
+
+--------------------------------------------------
+DESIGN SYSTEM SOURCES
+--------------------------------------------------
+
+- **Tokens (Tailwind):** `theme.extend` from `constants/tailwind-bridge.cjs` (used by `tailwind.config.js`).
+- **JS/Reanimated:** `semanticColors` from `@/constants/tailwind-bridge` (hex values).
+- **Theme (typography, sizes, palette):** `@/constants/theme` — `theme.typography`, `theme.sizes`, `theme.colors`, `ColorPalette`, `Typography`, `Colors`.
+- **Sizes:** `constants/sizes.ts` — `sizes.typography`, `sizes.spacing`, `sizes.radius`.
+
+--------------------------------------------------
+CANONICAL UI IMPORTS (use these)
+--------------------------------------------------
+
+```tsx
+import { Text } from "@/components/ui/text";
+import { Button } from "@/components/ui/button";
+import { VStack, HStack, ScreenSection } from "@/components/ui/layout";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+```
+
+**Full primitives list (from `@/components/ui`):** AlertDialog, Avatar, Button, Card, Checkbox, Collapsible, VStack, HStack, ScreenSection, IconSymbol, Input, Label, Loader, OTPFormInput, Progress, RadioButton, RadioGroup, Separator, Slider, SelectionPill, SelectionPillGroup, Switch, TabBar, Text, BottomSheetModal. Use these; do not recreate patterns with raw View/Text.
+
+--------------------------------------------------
+ALLOWED PRIMITIVES
+--------------------------------------------------
+
+You may ONLY use:
+
+- **Text** (`@/components/ui/text`) — for all text. Props: `variant`, `weight`, `tone` (`foreground` | `muted` | `primary` | `onPrimary` | `destructive` | `card`), `className`, Slot / `asChild`. Variants: h1–h6, body1, body2, subtitle1, subtitle2, caption, small, button, buttonSecondary (from `constants/typography.types`).
+- **Layout** — `VStack` (gap: StackGap "2"–"8"), `HStack` (gap, justify, align), `ScreenSection` (inset for horizontal padding). Use with `className` for padding/bg/rounded.
+- **Button** — variants: `primary` | `secondary` | `tertiary` | `error` | `outline` | `ghost`; sizes: `default` | `sm` | `lg`.
+- **Card, Input, Checkbox, Label, Loader, Progress, RadioButton, RadioGroup, SelectionPill, SelectionPillGroup, Switch, TabBar, etc.** — use existing UI primitives from `@/components/ui`.
+
+If a needed UI pattern does not exist: CREATE a new primitive first (in `components/ui`), THEN use it.
+
+--------------------------------------------------
+STRICT IMPLEMENTATION RULES
+--------------------------------------------------
+
+1. NO HARDCODED VALUES
+- No raw font sizes (e.g. 17, 23).
+- No raw spacing (e.g. p-3, p-[14px]) — use design tokens.
+- No raw colors (e.g. #FFFFFF) — use semantic tokens only.
+
+2. TOKEN-ONLY STYLING
+- **Typography size:** use Text `variant` (e.g. body1, caption, h4) or theme `sizes.typography` keys: xs, sm, base, md, lg, xl, 2xl, 3xl, etc.
+- **Spacing:** use `sizes.spacing` (xs, sm, base, md, lg, xl, 2xl) or Tailwind token-based classes (e.g. p-4, gap-4) that align with the 4px grid; prefer VStack/HStack `gap` where possible.
+- **Radius:** use theme/Tailwind radius tokens: sm (4px), md (8px), lg (12px), xl (16px), 2xl (24px), full.
+- **Colors:** semantic tokens only — e.g. `bg-background`, `text-foreground`, `bg-card`, `text-muted-foreground`, `border-border`, `bg-primary`, `text-primary-foreground`, `bg-destructive`, `text-destructive`.
+
+3. TYPOGRAPHY RULE
+- ALL text must use the Text primitive from `@/components/ui/text`.
+- Font family, size, weight must come from tokens (variant + optional weight/tone).
+- NEVER use React Native `Text` directly for styled content.
+
+4. LAYOUT RULE
+- ALL layout must go through Layout primitives (VStack, HStack, ScreenSection) or Card.
+- Layout handles: stacking (vertical/horizontal), gap, justify, align; use `className` for padding, margin, flex, background, border radius (token-based only).
+
+5. CONSISTENCY RULE
+- Reuse existing primitives from `@/components/ui`.
+- Do NOT duplicate patterns (e.g. custom card with View + className).
+- Follow the same spacing and structure across screens (e.g. ScreenSection with inset for screen gutters).
+
+6. RN-PRIMITIVES INTEGRATION
+- `lib/rn-primitives` (Slot, etc.) handles behavior. Wrap rn-primitives with design-system components; NEVER style rn-primitives directly with raw hex or arbitrary values. Use semantic classes or primitives that consume tokens.
+
+7. FIGMA MAPPING RULE
+- NEVER copy raw Figma values (e.g. 14px, #252525) into code.
+- ALWAYS map to the closest token (e.g. spacing.sm, bg-card, text-muted-foreground).
+- Normalize inconsistencies per `docs/design-system/normalized-scales.md`.
+
+--------------------------------------------------
+SEMANTIC COLORS (dark-first shell)
+--------------------------------------------------
+
+Use in className or via semanticTokens: `background`, `foreground`, `card`, `cardForeground`, `muted`, `mutedForeground`, `border`, `primary`, `primaryForeground`, `primaryPressed`, `destructive`, `destructiveForeground`, `buttonDisabled`, `overlay`, `success`, `warning`. See `constants/tailwind-bridge.ts` and `tailwind-bridge.cjs`.
+
+--------------------------------------------------
+OUTPUT REQUIREMENTS
+--------------------------------------------------
+
+When generating UI:
+- Use ONLY approved primitives (Text, VStack, HStack, ScreenSection, Button, Card, Input, etc. from `@/components/ui`).
+- Ensure all styling is token-based (semantic colors, theme sizes, Tailwind extend).
+- Ensure consistency with existing patterns (see `docs/design-system/README.md`, `components/ui/index.ts`).
+
+If any rule is violated: STOP and refactor before continuing.
+
+--------------------------------------------------
+GOAL
+--------------------------------------------------
+
+Produce a clean, scalable, production-ready UI that strictly follows the design system and primitives. No exceptions.

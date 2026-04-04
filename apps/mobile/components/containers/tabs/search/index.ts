@@ -1,0 +1,1 @@
+export {default as RecentlyAdded} from './recently-added'

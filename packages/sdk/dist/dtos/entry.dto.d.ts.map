@@ -1,0 +1,1 @@
+{"version":3,"file":"entry.dto.d.ts","sourceRoot":"","sources":["../../src/dtos/entry.dto.ts"],"names":[],"mappings":"AAAA,UAAU,KAAK;IAGX,SAAS,EAAE,IAAI,CAAC;IAChB,SAAS,EAAE,IAAI,CAAC;IAChB,QAAQ,EAAE,MAAM,CAAC;IACjB,GAAG,EAAE,GAAG,CAAC;IACT,EAAE,EAAE,GAAG,CAAC;CAEX;AAED,eAAe,KAAK,CAAC"}

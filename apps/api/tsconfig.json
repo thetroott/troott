@@ -1,0 +1,16 @@
+{
+  "extends": "../../configs/typescript/base.node.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "noEmit": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "src/**/*", "src/_data/**/*"],
+  "exclude": ["node_modules", "dist", "tests"]
+}

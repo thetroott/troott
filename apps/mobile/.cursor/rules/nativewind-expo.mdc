@@ -1,0 +1,118 @@
+---
+description: NativeWind + Expo UI standards; prefer className, avoid StyleSheet unless required
+globs: "**/*.tsx", tailwind.config.js, metro.config.js, babel.config.*
+alwaysApply: false
+---
+
+# NativeWind + Expo UI Standards
+
+## Core principle
+
+All React Native styling must use **NativeWind utility classes via `className`**. `StyleSheet.create` is **prohibited unless absolutely unavoidable**. Inline style objects are **not allowed**. If generated code contains StyleSheet or inline styles, rewrite the UI using NativeWind classes.
+
+**Stack:** Expo, React Native, NativeWind, TypeScript, Expo Router. Do not generate code that requires manual native linking or non-Expo-compatible libraries.
+
+---
+
+## Styling rules
+
+- Use `className` on `View`, `Text`, `Pressable`, etc. Example: `<View className="flex-1 bg-white p-4"><Text className="text-lg font-semibold text-gray-900">Hello</Text></View>`.
+- For conditional or merged classes use `cn()` from `@/lib/util`: `className={cn('flex-1', isActive && 'opacity-70')}` or template strings: `` className={`p-4 rounded-xl ${active ? "bg-blue-500" : "bg-gray-200"}`} ``.
+- **Forbidden:** `style={{ padding: 16 }}`, `StyleSheet.create()`, mixing `className` with `style` for the same concern. Prefer Tailwind tokens (e.g. `bg-neutral-50`, `text-neutral-900`) over arbitrary hex colors.
+
+**When StyleSheet is allowed (and must be justified in a comment):** (1) Animated styles (react-native-reanimated, Animated API). (2) Runtime dynamic values (e.g. `width: screenWidth * 0.7`). (3) Unsupported properties (e.g. shadowPath, complex transforms).
+
+---
+
+## Config and types (project)
+
+- **Tailwind:** `presets: [require("nativewind/preset")]`; `content` includes `./app/**`, `./components/**`, `./screens/**` (add `engine/**` if styling there).
+- **Types:** Keep `/// <reference types="nativewind/types" />` in `nativewind-env.d.ts`.
+- **Metro:** `withNativeWind(config, { input: './global.css' })`; ensure `global.css` exists.
+- **Babel:** `jsxImportSource: "nativewind"` in babel-preset-expo and `"nativewind/babel"` preset.
+- **Pitfall:** Avoid dynamic class strings from runtime variables (e.g. `` `bg-[${color}]` ``). Use fixed classes, `cn()`, or `style` for dynamic values.
+
+---
+
+## Layout and spacing
+
+- Use flex utilities: `flex`, `flex-1`, `flex-row`, `items-center`, `justify-between`, `gap-2`, `gap-4`, `p-4`, `px-4`, `py-2`, `m-2`, `rounded-xl`. Prefer `flex-1`, `w-full`, `max-w-md` over fixed dimensions (e.g. `w-[350px]`) unless required.
+- **Spacing scale:** Prefer `p-2`, `p-4`, `p-6`, `p-8`; avoid ad hoc odd values like `p-3`, `p-5`, `p-7` for consistency.
+- **Screen structure:** Screen -> SafeAreaView -> ScrollView or View -> sections -> components. Wrap screens with `SafeAreaView` from `react-native-safe-area-context` (not from `react-native`). Example: `<SafeAreaView className="flex-1 bg-white">...</SafeAreaView>`.
+
+---
+
+## Components and touchables
+
+- Prefer **Pressable** over TouchableOpacity. Example: `<Pressable className="bg-blue-500 p-4 rounded-xl"><Text className="text-white font-semibold">Submit</Text></Pressable>`.
+- **Reusable UI:** Extract repeated class strings into components (e.g. `Card`, `Button` in `components/ui`). If a `className` appears more than 3 times, extract a component. Components should be pure and stateless where possible; keep under ~200 lines or split.
+- **Avoid deep nesting:** JSX deeper than 4 levels should be refactored into named components.
+
+---
+
+## Dark mode and lists
+
+- Support dark mode when in scope: e.g. `className="bg-white dark:bg-neutral-900"`, `className="text-black dark:text-white"`.
+- **Lists:** Use `FlatList` or `FlashList` from `@shopify/flash-list` for large lists; avoid `.map()` for big datasets. Handle loading, empty, and error states for any list or async UI.
+
+---
+
+## Images, icons, navigation
+
+- Use **Expo Image** when possible: `import { Image } from "expo-image"`. Use `react-native` Image only when required.
+- **Icons:** Prefer Expo-compatible icon libraries (e.g. `@expo/vector-icons`, `lucide-react-native`).
+- **Navigation:** Use Expo Router and file-based routing under `app/`. Do not add custom react-navigation setup unless requested.
+
+---
+
+## Music app specifics
+
+- **Mini player / now playing bar:** Use a fixed or absolute bottom container that respects safe area and tab bar. Use NativeWind for the bar (e.g. `className="flex-row items-center px-4 py-3 bg-neutral-900 border-t border-neutral-800"`). Ensure it does not overlap tab navigation; use `paddingBottom` or safe area insets if needed.
+- **Full-screen player:** Prefer immersive, dark layouts. Use NativeWind for layout and overlays (e.g. `flex-1`, `items-center`, `justify-between`, `p-4`, `rounded-full` for artwork). Gradient overlays on artwork can use `expo-linear-gradient`; container and spacing stay with `className`.
+- **Track list rows:** Dense, consistent rows: artwork (square, rounded; use Expo Image) + title/subtitle/duration. Use `flex-row items-center gap-3` (or similar), `flex-1 min-w-0` on the text container so long titles truncate. "Now playing" state: use `cn()` or conditional classes (e.g. `text-primary` vs `text-neutral-400`). Use FlashList for long queues; avoid inline StyleSheet for row layout.
+- **Artwork:** Square aspect ratio (e.g. `aspect-square`), rounded corners (`rounded-lg` or `rounded-full` for player). Use Expo Image with a placeholder; wrap in a `View` with `className` for size and shape.
+- **Progress / scrubber:** Slider track and thumb often need native or animated styles; that is an allowed StyleSheet exception. Use NativeWind for the surrounding layout (time labels, container). Keep scrubber in a dedicated component; document why StyleSheet or animated styles are used if needed.
+- **Playback state:** Use NativeWind for play/pause icon container and active state (e.g. `opacity-100` vs `opacity-60`). Loading spinners: style container with `className`; spinner lib may require `style` (allowed exception).
+- **Swipe actions / gestures:** Use `react-native-gesture-handler` for swipe-to-queue or reorder. Action panels (left/right) can use `className` for background and text (e.g. `bg-green-600`, `text-white`).
+- **Empty and offline:** "No tracks", "Nothing playing", "Downloaded" badge: use consistent spacing scale and typography (e.g. `text-neutral-500`, `text-sm`). Offline/downloaded indicators: small badge or icon with `className` (e.g. `rounded bg-neutral-700 px-2 py-0.5`).
+
+---
+
+## Forms and keyboard
+
+- Wrap forms in `KeyboardAvoidingView` (e.g. `behavior="padding"`). Prefer `react-hook-form` with `zod` for validation.
+
+---
+
+## Performance and patterns
+
+- Avoid unnecessary re-renders: use `React.memo`, `useCallback`, `useMemo`. For large lists prefer `FlashList`.
+- Prefer **derived values** over extra state (e.g. `useMemo` for filtered list instead of `useState`).
+- **Screens:** Screens should fetch data, compose components, and handle navigation; move complex UI into `components/`. Extract logic into hooks when data fetching, side effects, or business logic grows. Use TanStack Query for async data (loading/error handled by the library).
+- **Error boundaries:** Use error boundaries around major layouts to prevent full-app crashes.
+
+---
+
+## Accessibility and code style
+
+- Include accessibility where relevant: `accessibilityRole="button"`, `accessibilityLabel="..."`.
+- **Typing:** All components must have typed props; avoid `any`.
+- **Naming:** Components PascalCase; hooks useCamelCase; files PascalCase for components, camelCase for hooks.
+- **Imports order:** react -> react-native -> expo -> third-party -> internal components -> hooks -> utils -> types.
+- **Expo only:** Use only Expo-compatible libraries. Prefer `react-native-reanimated` (or `moti`) for animations; container layout still uses NativeWind.
+
+---
+
+## Folder structure
+
+Prefer: `app/`, `components/`, `components/ui/`, `hooks/`, `lib/`, `utils/`, `constants/`, `types/`, `assets/`.
+
+---
+
+## Self-check before returning code
+
+1. No inline styles; no unnecessary StyleSheet.
+2. NativeWind classes used throughout.
+3. Components are reusable where appropriate; repeated class strings extracted.
+4. Expo compatibility and SafeAreaView from safe-area-context where applicable.
+5. Prefer simple, readable code over clever abstractions; prioritize maintainability and clarity.

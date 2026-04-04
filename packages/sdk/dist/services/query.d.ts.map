@@ -1,0 +1,1 @@
+{"version":3,"file":"query.d.ts","sourceRoot":"","sources":["../../src/services/query.tsx"],"names":[],"mappings":"AAAA,OAAO,KAAK,KAAK,MAAM,OAAO,CAAA;AAK9B,UAAU,kBAAkB;IAC1B,QAAQ,EAAE,KAAK,CAAC,SAAS,CAAA;IACzB,cAAc,CAAC,EAAE,OAAO,CAAA;CACzB;AAWD,wBAAgB,aAAa,CAAC,EAC5B,QAAQ,EACR,cAA2B,EAC5B,EAAE,kBAAkB,2CAsCpB"}

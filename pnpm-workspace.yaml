@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+  - 'mobile-app'
+  - 'packages/*'
+  - 'configs/*'
+minimumReleaseAge: 1440
+nodeLinker: hoisted
