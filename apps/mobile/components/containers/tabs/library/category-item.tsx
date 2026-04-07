@@ -1,7 +1,9 @@
-import { Pressable } from "react-native";
-import React from "react";
-import Text from "@/components/ui/text";
-import { cn } from "@/lib/utils";
+import { Pressable, StyleSheet, View } from 'react-native'
+import React from 'react'
+import { ScrollView } from 'react-native-gesture-handler';
+
+import { theme } from '@/constants/theme';
+import Text from '@/components/ui/text';
 
 interface CategoryProp {
   selected?: boolean;
@@ -14,19 +16,22 @@ const CategoryItem = ({ selected, onPress, name, id }: CategoryProp) => {
   return (
     <Pressable
       key={id}
-      className={cn(
-        "mr-2 rounded px-4 py-4",
-        selected ? "bg-neutral-100" : "border border-neutral-600/50 bg-neutral-600/30"
-      )}
+      style={{
+        backgroundColor: selected ? theme.colors.grey[100]: "#54545450",
+        paddingVertical: theme.sizes.spacing.base,
+        borderRadius: theme.sizes.radius.sm,
+        marginRight: theme.sizes.spacing.sm,
+        paddingHorizontal: theme.sizes.spacing.md,
+        borderWidth: selected ? 0 : 1,
+        borderColor: "#54545480",
+      }}
       onPress={onPress}
     >
-      <Text
-        className={selected ? "text-neutral-900" : "text-neutral-100"}
-      >
-        {name}
-      </Text>
+      <Text color={selected ? theme.colors.black[50] : theme.colors.white[50]}>{name}</Text>
     </Pressable>
   );
 };
 
 export default CategoryItem;
+
+const styles = StyleSheet.create({})

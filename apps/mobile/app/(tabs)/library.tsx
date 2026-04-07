@@ -1,27 +1,31 @@
+import { Pressable, StyleSheet, View } from "react-native";
 import React from "react";
-import { Pressable, View } from "react-native";
 import ScreenView from "@/components/layouts/screenview";
+// import {
+//   CategoryItem,
+//   LibraryHeader,
+//   PlayListView,
+//   SortItem,
+// } from "@/components/library";
 import { ScrollView } from "react-native-gesture-handler";
+import Button from "@/components/ui/button";
 import { FlashList } from "@shopify/flash-list";
 import { theme } from "@/constants/theme";
 import Text from "@/components/ui/text";
-import { Heart } from "iconsax-react-nativejs";
 import { OutlineIcons, SolidIcons } from "@/assets/icons";
 import {
   BottomSheetModal,
   BottomSheetRef,
 } from "@/components/ui/bottom-sheet-modal";
+//import { PlayListCardItem, TrackCard } from "@/components/tracks";
+import { Grid1, Heart } from "iconsax-react-nativejs";
+//import { Tracks } from "@/_mock";
 import Animated from "react-native-reanimated";
 import { router } from "expo-router";
-import {
-  CategoryItem,
-  LibraryHeader,
-  PlayListView,
-  SortItem,
-} from "@/components/containers/tabs/library";
+import { CategoryItem, LibraryHeader, PlayListView, SortItem } from "@/components/containers/tabs/library";
 import { PlayListCardItem, TrackCard } from "@/components/containers/player-old";
+import { loadSermons as Tracks } from "@/_data/loader";
 import { tracks } from "@/_data/_mock/tracks";
-import { cn } from "@/lib/utils";
 
 type categoryKey = "All" | "Playlist" | "Sermon" | "Series" | "Preacher";
 
@@ -38,7 +42,9 @@ const Library = () => {
     sheetRef.current?.open();
   }
   const [sortValue, setSortValue] = React.useState<string>("Recent Activities");
-  const [displayStyle, setDisplayStyle] = React.useState<"grid" | "list">("list");
+  const [displayStyle, setDisplayStyle] = React.useState<"grid" | "list">(
+    "list"
+  );
   const [selectedCategory, setSelectedCategory] =
     React.useState<categoryKey>("All");
   const [subCategories, setSubCategories] = React.useState<string[]>([]);
@@ -55,63 +61,64 @@ const Library = () => {
       {
         name: "Recent Activities",
         selected: sortValue === "Recent Activities",
-        onPress: () => setSortValue("Recent Activities"),
+        onPress: () => {
+          setSortValue("Recent Activities");
+        },
       },
       {
         name: "Listening History",
         selected: sortValue === "Listening History",
-        onPress: () => setSortValue("Listening History"),
+        onPress: () => {
+          setSortValue("Listening History");
+        },
       },
       {
         name: "Alphabetical",
         selected: sortValue === "Alphabetical",
-        onPress: () => setSortValue("Alphabetical"),
+        onPress: () => {
+          setSortValue("Alphabetical");
+        },
       },
     ],
     Playlist: [
       {
         name: "Recently Updated",
         selected: sortValue === "Recent Updated",
-        onPress: () => setSortValue("Recent Updated"),
+        onPress: () => {
+          setSortValue("Recent Updated");
+        },
       },
       {
         name: "Recently Added",
         selected: sortValue === "Recently Added",
-        onPress: () => setSortValue("Recently Added"),
+        onPress: () => {
+          setSortValue("Recently Added");
+        },
       },
       {
         name: "Alphabetical",
         selected: sortValue === "Alphabetical",
-        onPress: () => setSortValue("Alphabetical"),
+        onPress: () => {
+          setSortValue("Alphabetical");
+        },
       },
     ],
-    Sermon: [
-      { name: "Recent Activities", selected: sortValue === "Recent Activities", onPress: () => setSortValue("Recent Activities") },
-      { name: "Alphabetical", selected: sortValue === "Alphabetical", onPress: () => setSortValue("Alphabetical") },
-    ],
-    Series: [
-      { name: "Recent Activities", selected: sortValue === "Recent Activities", onPress: () => setSortValue("Recent Activities") },
-      { name: "Alphabetical", selected: sortValue === "Alphabetical", onPress: () => setSortValue("Alphabetical") },
-    ],
-    Preacher: [
-      { name: "Alphabetical", selected: sortValue === "Alphabetical", onPress: () => setSortValue("Alphabetical") },
-    ],
   };
-  function handleFloatingButtonPress() {
-    router.push("/playlist/create-playlist");
+  function handleFloatingButtonPress (){
+    router.push('/playlist/create-playlist')
   }
   const categoriesComponentMap: Record<categoryKey, React.JSX.Element> = {
-    All: <View />,
     Playlist: <PlayListView isGrid={displayStyle == "grid"} />,
-    Sermon: <View />,
-    Series: <View />,
-    Preacher: <View />,
   };
   return (
     <ScreenView>
       <LibraryHeader />
-      <ScrollView nestedScrollEnabled>
-        <View className="gap-6">
+      <ScrollView
+        contentContainerStyle={{
+          gap: theme.sizes.spacing.lg,
+        }}
+        nestedScrollEnabled
+      >
         <FlashList
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -126,21 +133,29 @@ const Library = () => {
             />
           )}
         />
-        <View className="flex-row flex-wrap gap-4">
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            gap: theme.sizes.spacing.md,
+          }}
+        >
           {categories
             .find((item) => item.name === selectedCategory)
             ?.subs.map((sub, index) => (
               <Animated.View key={sub + index}>
-                <Pressable
-                  className={cn(
-                    "mb-2 py-2 rounded-full px-4",
-                    subCategories.includes(sub)
-                      ? "bg-teal-500"
-                      : "bg-neutral-600"
-                  )}
+                <Button
+                  variant="secondary"
+                  style={{
+                    marginBottom: theme.sizes.spacing.sm,
+                    backgroundColor: subCategories.includes(sub)
+                      ? theme.colors.teal[500]
+                      : theme.colors.grey[600],
+                    padding: theme.sizes.spacing.sm,
+                    borderRadius: theme.sizes.radius.full,
+                    paddingHorizontal: theme.sizes.spacing.md,
+                  }}
                   onPress={() => handleAddSubCategory(sub)}
-                  accessibilityRole="button"
-                  accessibilityLabel={sub}
                 >
                   <Text
                     size="xs"
@@ -152,16 +167,24 @@ const Library = () => {
                   >
                     {sub}
                   </Text>
-                </Pressable>
+                </Button>
               </Animated.View>
             ))}
         </View>
-        <View className="flex-row justify-between items-center">
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <Pressable
-            className="flex-row items-center gap-2"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: theme.sizes.spacing.sm,
+            }}
             onPress={openBottomSheet}
-            accessibilityRole="button"
-            accessibilityLabel="Sort options"
           >
             <SolidIcons.ArrowsUpDownIcon color={theme.colors.white[50]} />
             <Text color={theme.colors.white[50]} weight="medium" size="base">
@@ -172,18 +195,11 @@ const Library = () => {
             onPress={() => {
               setDisplayStyle((prev) => (prev === "grid" ? "list" : "grid"));
             }}
-            accessibilityRole="button"
-            accessibilityLabel="Toggle grid or list view"
           >
             {displayStyle === "list" && (
-              <SolidIcons.ListBulletIcon
-                color={theme.colors.white[50]}
-                size={24}
-              />
+              <SolidIcons.ListBulletIcon color={theme.colors.white[50]} size={24} />
             )}
-            {displayStyle === "grid" && (
-              <SolidIcons.Squares2X2Icon color={theme.colors.white[50]} />
-            )}
+            {displayStyle === "grid" && <Grid1 color={theme.colors.white[50]} />}
           </Pressable>
         </View>
         {sortValue === "Recent Activities" && (
@@ -192,7 +208,6 @@ const Library = () => {
         {sortValue === "Listening History" && (
           <ListeningHistory displayStyle={displayStyle} />
         )}
-        </View>
       </ScrollView>
 
       <BottomSheetModal.Root ref={sheetRef}>
@@ -202,19 +217,29 @@ const Library = () => {
           </Text>
         </BottomSheetModal.Title>
         <BottomSheetModal.Content>
-          <View className="gap-6 mt-6">
-            {(sortItemsMap[selectedCategory] || []).map((item, index) => (
+          <View
+            style={{
+              gap: theme.sizes.spacing.lg,
+              marginTop: theme.sizes.spacing.lg,
+            }}
+          >
+            {(sortItemsMap[selectedCategory]||[]).map((item, index) => (
               <SortItem {...item} key={index} />
             ))}
           </View>
         </BottomSheetModal.Content>
       </BottomSheetModal.Root>
-
+      {/* floating action button */}
       <Pressable
-        className="p-4 rounded bg-teal-500 absolute bottom-[120px] right-5"
+        style={{
+          padding: theme.sizes.spacing.md,
+          borderRadius: theme.sizes.radius.sm,
+          backgroundColor: theme.colors.teal[500],
+          position: "absolute",
+          bottom: 120,
+          right: 20,
+        }}
         onPress={handleFloatingButtonPress}
-        accessibilityRole="button"
-        accessibilityLabel="Create playlist"
       >
         <OutlineIcons.PlusIcon color={theme.colors.black[50]} size={24} />
       </Pressable>
@@ -222,13 +247,15 @@ const Library = () => {
   );
 };
 
-function AllElements({ isGrid = false }: { isGrid?: boolean }) {
+function AllElements({ isGrid = false }) {
   return (
     <View
-      className={cn(
-        "gap-4",
-        isGrid ? "flex-row flex-wrap justify-between" : "flex-col"
-      )}
+      style={{
+        gap: theme.sizes.spacing.md,
+        flexDirection: isGrid ? "row" : "column",
+        flexWrap: isGrid ? "wrap" : "nowrap",
+        justifyContent: isGrid ? "space-between" : "flex-start",
+      }}
     >
       <PlayListCardItem
         title="Liked Sermon"
@@ -252,6 +279,7 @@ function AllElements({ isGrid = false }: { isGrid?: boolean }) {
           width: isGrid ? theme.sizes.screen.width * 0.42 : "100%",
         }}
       />
+
       <PlayListCardItem
         title="Downloads"
         description="23 sermons"
@@ -277,11 +305,11 @@ function AllElements({ isGrid = false }: { isGrid?: boolean }) {
   );
 }
 
-function ListeningHistory({
-  displayStyle = "list",
-}: {
+interface ListeningHistoryProps {
   displayStyle?: "grid" | "list";
-}) {
+}
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
+function ListeningHistory({ displayStyle = "list" }: ListeningHistoryProps) {
   return (
     <AnimatedFlashList
       data={[1, 2, 3, 4, 5, 6, 7, 8]}
@@ -294,7 +322,7 @@ function ListeningHistory({
       renderItem={({ item, index }) => {
         const track = tracks[index % 3];
         return (
-          <View className="gap-2">
+          <View style={{ gap: 10 }}>
             <TrackCard
               key={index + "track"}
               title={track.title ?? ""}
@@ -318,6 +346,6 @@ function ListeningHistory({
   );
 }
 
-const AnimatedFlashList = Animated.createAnimatedComponent(FlashList);
-
 export default Library;
+
+const styles = StyleSheet.create({});

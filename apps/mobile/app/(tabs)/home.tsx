@@ -1,5 +1,5 @@
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import React from "react";
-import { Pressable, ScrollView, View } from "react-native";
 import ScreenView from "@/components/layouts/screenview";
 import Text from "@/components/ui/text";
 import { Notification } from "iconsax-react-nativejs";
@@ -10,48 +10,69 @@ import { TransformArray } from "@/utils/transform-array";
 import { TrackCard } from "@/components/containers/player-old";
 import UserHighlights from "@/components/containers/tabs/home/user-highlight";
 import LikedByUser from "@/components/containers/tabs/home/liked-by-user";
-import {
-  MoreFromPreacher,
-  TrendingPlaylist,
-} from "@/components/containers/tabs/home";
-import { SermonTrackDTO } from "@/dtos/sermon.dto";
+import { MoreFromPreacher, TrendingPlaylist } from "@/components/containers/tabs/home";
+import type { ISermonTrack } from "@/dtos/sermon.dto";
 import { tracks } from "@/_data/_mock/tracks";
-import { useSermonsCatalogQuery } from "@/engine/hooks/useSermonsCatalogQuery";
-import { usePlayFromCatalog } from "@/engine/hooks/usePlayFromCatalog";
+import { useSermonsCatalog } from "@/engine/hooks/useSermonsCatalog";
+import { usePlayFromCatalogList } from "@/hooks/player/use-play-from-catalog-list";
+
+const FALLBACK_TRACK_IMAGE = require("@/assets/images/liked.png");
 
 const Home = () => {
-  const { data: sermons, isLoading } = useSermonsCatalogQuery();
-  const playFromCatalog = usePlayFromCatalog("Library");
+  const { data: sermons, isLoading, error } = useSermonsCatalog();
+  const playFromCatalog = usePlayFromCatalogList("Library");
 
-  const handleTrackPress = async (track: SermonTrackDTO) => {
+  const handleTrackPress = async (track: ISermonTrack) => {
     try {
-      await playFromCatalog(track);
-    } catch (error) {
-      console.error("Failed to play track:", error);
+      const sermonsData =
+        sermons && sermons.length > 0 ? sermons : (tracks as ISermonTrack[]);
+      const index = sermonsData.findIndex((t) => t.id === track.id);
+      if (index === -1) return;
+      await playFromCatalog(sermonsData, index);
+    } catch (err) {
+      console.error("Failed to play track:", err);
     }
   };
 
   const SermonsForYou = () => {
     const sermonsData =
-      sermons && sermons.length > 0 ? sermons : tracks;
+      sermons && sermons.length > 0 ? sermons : (tracks as ISermonTrack[]);
 
     if (isLoading && (!sermonsData || sermonsData.length === 0)) {
       return (
-        <View className="gap-4">
-          <View className="flex-row justify-between items-center">
+        <View style={{ gap: theme.sizes.spacing.md }}>
+          <View style={styles.sectionHeader}>
             <Text size="md" color={theme.colors.white[100]} weight="semiBold">
               Sermons for you
             </Text>
-            <View className="rounded-full border border-neutral-600">
-              <Button variant="outline">
-                <Text size="xs" color={theme.colors.white[100]}>
-                  See more
-                </Text>
-              </Button>
-            </View>
+            <Button variant="outline" containerStyle={styles.seeMore}>
+              <Text size="xs" color={theme.colors.white[100]}>
+                See more
+              </Text>
+            </Button>
           </View>
-          <Text className="text-neutral-100 text-center py-6">
+          <Text style={{ color: theme.colors.white[100], textAlign: 'center', paddingVertical: 20 }}>
             Loading sermons...
+          </Text>
+        </View>
+      );
+    }
+
+    if (error && (!sermonsData || sermonsData.length === 0)) {
+      return (
+        <View style={{ gap: theme.sizes.spacing.md }}>
+          <View style={styles.sectionHeader}>
+            <Text size="md" color={theme.colors.white[100]} weight="semiBold">
+              Sermons for you
+            </Text>
+            <Button variant="outline" containerStyle={styles.seeMore}>
+              <Text size="xs" color={theme.colors.white[100]}>
+                See more
+              </Text>
+            </Button>
+          </View>
+          <Text style={{ color: theme.colors.grey[300], textAlign: 'center', paddingVertical: 20 }}>
+            Could not load sermons.
           </Text>
         </View>
       );
@@ -59,20 +80,18 @@ const Home = () => {
 
     if (!sermonsData || sermonsData.length === 0) {
       return (
-        <View className="gap-4">
-          <View className="flex-row justify-between items-center">
+        <View style={{ gap: theme.sizes.spacing.md }}>
+          <View style={styles.sectionHeader}>
             <Text size="md" color={theme.colors.white[100]} weight="semiBold">
               Sermons for you
             </Text>
-            <View className="rounded-full border border-neutral-600">
-              <Button variant="outline">
-                <Text size="xs" color={theme.colors.white[100]}>
-                  See more
-                </Text>
-              </Button>
-            </View>
+            <Button variant="outline" containerStyle={styles.seeMore}>
+              <Text size="xs" color={theme.colors.white[100]}>
+                See more
+              </Text>
+            </Button>
           </View>
-          <Text className="text-neutral-400 text-center py-6">
+          <Text style={{ color: theme.colors.grey[300], textAlign: 'center', paddingVertical: 20 }}>
             No sermons available at the moment.
           </Text>
         </View>
@@ -82,18 +101,16 @@ const Home = () => {
     const grouped = TransformArray(sermonsData, 4);
 
     return (
-      <View className="gap-4">
-        <View className="flex-row justify-between items-center">
+      <View style={{ gap: theme.sizes.spacing.md }}>
+        <View style={styles.sectionHeader}>
           <Text size="md" color={theme.colors.white[100]} weight="semiBold">
             Sermons for you
           </Text>
-          <View className="rounded-full border border-neutral-600">
-            <Button variant="outline">
-              <Text size="xs" color={theme.colors.white[100]}>
-                See more
-              </Text>
-            </Button>
-          </View>
+          <Button variant="outline" containerStyle={styles.seeMore}>
+            <Text size="xs" color={theme.colors.white[100]}>
+              See more
+            </Text>
+          </Button>
         </View>
 
         <FlashList
@@ -105,35 +122,24 @@ const Home = () => {
           decelerationRate={-1}
           estimatedItemSize={290}
           renderItem={({ item: group }) => (
-            <View className="gap-2 mr-2">
-              {group.map((track) => {
-                const sermonTrack = track as {
-                  id: string;
-                  url?: string;
-                  sermon?: string;
-                  title?: string;
-                  artist?: string;
-                  minister?: string;
-                  duration?: number;
-                  artwork?: string;
-                  image?: string;
-                };
+            <View style={{ gap: 10, marginRight: 10, borderWidth: 1, borderColor: '#ff00ff' }}>
+              {group.map((trackItem) => {
+                const sermonTrack = trackItem as ISermonTrack;
                 return (
                   <Pressable
-                    key={sermonTrack.id}
-                    onPress={() => handleTrackPress(sermonTrack as SermonTrackDTO)}
+                    key={sermonTrack.id ?? ""}
+                    onPress={() => handleTrackPress(sermonTrack)}
                   >
                     <TrackCard
-                      id={sermonTrack.id}
-                      url={sermonTrack.url || sermonTrack.sermon}
-                      title={sermonTrack.title ?? ""}
-                      artist={
-                        (sermonTrack.artist ?? sermonTrack.minister ?? "") as string
-                      }
+                      id={sermonTrack.id ?? undefined}
+                      url={sermonTrack.url ?? sermonTrack.sermon ?? undefined}
+                      sermon={sermonTrack.sermon ?? sermonTrack.url ?? undefined}
+                      title={String(sermonTrack.title ?? "")}
+                      artist={String(sermonTrack.artist ?? sermonTrack.minister ?? "")}
+                      minister={String(sermonTrack.minister ?? sermonTrack.artist ?? "")}
                       duration={sermonTrack.duration ?? 0}
-                      artwork={
-                        sermonTrack.artwork ?? sermonTrack.image ?? ""
-                      }
+                      artwork={(sermonTrack.artwork ?? sermonTrack.image) ?? undefined}
+                      image={sermonTrack.image ?? sermonTrack.artwork ?? FALLBACK_TRACK_IMAGE}
                       variant="small"
                     />
                   </Pressable>
@@ -149,24 +155,29 @@ const Home = () => {
   return (
     <ScreenView>
       <ScrollView
-        className="flex-1"
+        style={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 100,
+        }}
       >
         <Header />
-        <View className="gap-8">
+        <View style={{ gap: theme.sizes.spacing.xl }}>
           <ContinueListening />
-          <View className="flex-row justify-between">
+
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
             <UserHighlights />
             <LikedByUser />
           </View>
         </View>
-        <View className="mt-8" />
+        <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
         <SermonsForYou />
-        <View className="mt-8" />
+        <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
         <MoreFromPreacher />
-        <View className="mt-8" />
+        <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
         <TrendingPlaylist />
-        <View className="h-24" />
       </ScrollView>
     </ScreenView>
   );
@@ -175,13 +186,13 @@ const Home = () => {
 function Header() {
   return (
     <View>
-      <View className="flex-row justify-between items-center">
-        <View className="items-end">
+      <View style={styles.headerIcons}>
+        <View style={{ alignItems: "flex-end" }}>
           <Text size="xl" weight="medium" color={theme.colors.white[100]}>
             Hi Damola,
           </Text>
         </View>
-        <Pressable className="items-end" accessibilityRole="button" accessibilityLabel="Notifications">
+        <Pressable style={{ alignItems: "flex-end" }}>
           <Notification
             color={theme.colors.grey[100]}
             size={28}
@@ -204,3 +215,27 @@ function ContinueListening() {
 }
 
 export default Home;
+
+const styles = StyleSheet.create({
+  headerIcons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  seeMore: {
+    borderRadius: theme.sizes.radius.full,
+    width: "auto",
+    paddingHorizontal: theme.sizes.spacing.base,
+    height: "auto",
+    paddingVertical: theme.sizes.spacing.sm,
+    borderColor: theme.colors.grey[400],
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+});

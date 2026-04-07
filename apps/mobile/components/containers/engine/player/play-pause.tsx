@@ -5,7 +5,7 @@ import { isUndefined } from 'lodash'
 import React, { useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import { ActivityIndicator } from 'react-native'
-import { State } from 'react-native-track-player'
+import { UiPlaybackState } from "@/engine/constants/playback-ui"
 
 
 function PlayPauseButtonComponent({
@@ -22,11 +22,9 @@ function PlayPauseButtonComponent({
 
     const largeIcon = useMemo(() => isUndefined(size) || size >= 20, [size])
 
-    console.log('state', state)
-
     const button = useMemo(() => {
         switch (state) {
-            case State.Playing: {
+            case UiPlaybackState.Playing: {
                 return (
 
                     <Pressable onPress={togglePlayback}>
@@ -40,8 +38,8 @@ function PlayPauseButtonComponent({
                 )
             }
 
-            case State.Buffering:
-            case State.Loading: {
+            case UiPlaybackState.Buffering:
+            case UiPlaybackState.Loading: {
                 return <ActivityIndicator size="small" color="white" />
             }
 
@@ -62,14 +60,7 @@ function PlayPauseButtonComponent({
     }, [state, size, largeIcon, togglePlayback])
 
 
-    return (
-    <View
-      className="items-center justify-center"
-      style={flex !== undefined ? { flex } : undefined}
-    >
-      {button}
-    </View>
-  )
+    return <View style={{ justifyContent: 'center', alignItems: 'center', flex }}>{button}</View>
 }
 
 const PlayPauseButton = React.memo(PlayPauseButtonComponent)

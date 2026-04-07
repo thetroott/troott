@@ -1,20 +1,20 @@
 import { useState, useMemo, useCallback } from 'react';
-import { View, Text, Pressable, LayoutChangeEvent } from 'react-native';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import { View, Text, Pressable, LayoutChangeEvent, Image, type ImageSourcePropType } from 'react-native';
+import Animated, { useAnimatedStyle, type SharedValue } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
-import { BaseSermonDtoSlimified, SermonItemDTO } from '@/dtos/sermon.dto';
-import { Queue } from '@/engine/types/type';
+import type { BaseSermonDtoSlimified, SermonItemDTO } from "@/types/sermon"
+import type { Queue } from "@/types/queue-ref"
 import { useCurrentTrack, usePlayQueue } from '@/stores/player/queue';
-import { useAddToQueue, useLoadNewQueue } from '@/engine/hooks/useControl';
+import { useLoadNewQueue } from '@/engine/hooks/useControl';
 import { useNetworkStatus } from '@/stores/app/network';
-import { networkStatusTypes } from '../../shared/network-watcehr';
+import { networkStatusTypes } from "@/types/network-status"
 import { QueuingType } from '@/utils/enums.util';
 import SwipeableRow from './SwipeableRow';
+import type { SwipeableRowContextValue } from './swipeable-row-context';
 import { RunTimeTicks } from '@/engine/helpers/time-codes';
-import { useSwipeableRowContext } from './swipeable-row-context';
 import { SolidIcons } from '@/assets/icons';
 import { XMarkIcon } from 'react-native-heroicons/solid';
-import { NotificationCircle, NotificationFavorite } from 'iconsax-react-nativejs';
+import { Notification } from 'iconsax-react-nativejs';
 // import { ArrowRight, X, DotsThreeVertical } from 'phosphor-react-native'; // SolidIcons alternative
 
 // import { RunTimeTicks } from '../helpers/time-codes';
@@ -73,7 +73,6 @@ export default function SermonTrack(data: ISermon) {
   const nowPlaying = useCurrentTrack();
   const playQueue = usePlayQueue();
   const loadNewQueue = useLoadNewQueue();
-  const addToQueue = useAddToQueue();
   const [networkStatus] = useNetworkStatus();
   //const offlineAudio = useDownloadedTrack(track.Id);
   //const { data: mediaInfo } = useStreamedMediaInfo(track.Id);
@@ -89,6 +88,8 @@ export default function SermonTrack(data: ISermon) {
   const handlePress = useCallback(() => {
     if (onPress) return onPress();
     loadNewQueue({
+      api: undefined,
+      networkStatus: networkStatus ?? networkStatusTypes.ONLINE,
       track,
       index,
       tracklist: memoizedTracklist,
@@ -96,7 +97,7 @@ export default function SermonTrack(data: ISermon) {
       queuingType: QueuingType.FromSelection,
       startPlayback: true,
     });
-  }, [onPress, track, index, memoizedTracklist, queue]);
+  }, [onPress, track, index, memoizedTracklist, queue, networkStatus]);
 
   const handleLongPress = useCallback(() => {
     if (onLongPress) return onLongPress();
@@ -120,90 +121,124 @@ export default function SermonTrack(data: ISermon) {
         // downloadedInfo: offlineAudio?.mediaSourceInfo,
       },
     });
-  }, [showRemove, onRemove, track, mediaInfo?.MediaSources, offlineAudio]);
+  }, [showRemove, onRemove, track]);
 
   const textColorClass = useMemo(() => {
-    if (isPlaying) return "text-teal-500";
-    if (isOffline) return "text-neutral-500";
-    return "text-neutral-100";
+    if (isPlaying) return 'text-purple-500';
+    if (isOffline) return 'text-gray-400';
+    return 'text-gray-900';
   }, [isPlaying, isOffline]);
 
-  const artistsText = useMemo(() => track.minister?.join(', ') ?? '', [track.minister]);
+  const artistsText = useMemo(() => {
+    const m = track.minister;
+    if (m == null) return '';
+    if (Array.isArray(m)) return m.join(', ');
+    return String(m);
+  }, [track.minister]);
   const trackName = useMemo(() => track.title ?? 'Untitled', [track.title]);
   const indexNumber = useMemo(() => track.id?.toString() ?? '', [track.id]);
-  const shouldShowArtists = useMemo(() => showArtwork || (track.minister && track.minister.length > 1), [showArtwork, track.minister]);
+  const shouldShowArtists = useMemo(
+    () => showArtwork || (Array.isArray(track.minister) && track.minister.length > 1),
+    [showArtwork, track.minister],
+  );
 
-  // Swipe handlers
-  const swipeHandlers = useMemo(() => ({
-    addToQueue: async () => {
-      await addToQueue({ tracks: [track], queuingType: QueuingType.DirectlyQueued });
-    },
-    toggleFavorite: () => {
-      if (isFavoriteTrack) removeFavorite({ item: track });
-      else addFavorite({ item: track });
-    },
-    addToPlaylist: () => router.push({ pathname: '/add-to-playlist', params: { trackId: track.Id } }),
-  }), [addToQueue, track, addFavorite, removeFavorite, isFavoriteTrack, router]);
-
-  const swipeConfig = useMemo(() => buildSwipeConfig({ left: {}, right: {}, handlers: swipeHandlers }), [swipeHandlers]);
+  const swipeConfig = useMemo(() => ({}), []);
 
   const runtimeComponent = useMemo(
-    () => (
-      <RunTimeTicks className="min-w-[40px] text-right">
-        {track.duration}
-      </RunTimeTicks>
-    ),
-    [track.duration]
+    () => <RunTimeTicks className="text-right min-w-[40px]">{track.duration}</RunTimeTicks>,
+    [track.duration],
   );
 
   return (
     <SwipeableRow disabled={isNested} {...swipeConfig} onPress={handlePress} onLongPress={handleLongPress}>
-      <View className="flex-row items-center bg-neutral-900 p-2" testID={testID}>
-        {prependElement && <View className="mr-2">{prependElement}</View>}
+      {(row: SwipeableRowContextValue) => (
+        <View className="flex-row items-center p-2 bg-white" testID={testID}>
+          {prependElement && <View className="mr-2">{prependElement}</View>}
 
-        <View
-          className="mx-2 items-center justify-center"
-          onLayout={(e: LayoutChangeEvent) => setArtworkWidth(e.nativeEvent.layout.width)}
-        >
-          {showArtwork ? (
-            <HideableArtwork>
-              <ItemImage item={track} width={48} height={48} />
-            </HideableArtwork>
-          ) : (
-            <Text className={`w-12 text-center ${textColorClass}`}>{indexNumber}</Text>
-          )}
-        </View>
-
-        <SlidingTextArea leftGapWidth={artworkWidth} hasArtwork={!!showArtwork}>
-          <View className="flex-1 justify-center">
-            <Text className={`font-bold ${textColorClass} truncate`}>{trackName}</Text>
-            {shouldShowArtists && (
-            <Text className="truncate text-neutral-500">{artistsText}</Text>
-          )}
+          <View
+            className="mx-2 items-center justify-center"
+            onLayout={(e: LayoutChangeEvent) => setArtworkWidth(e.nativeEvent.layout.width)}
+          >
+            {showArtwork ? (
+              <HideableArtwork tx={row.tx}>
+                <SermonRowArtwork track={track} size={48} />
+              </HideableArtwork>
+            ) : (
+              <Text className={`w-12 text-center ${textColorClass}`}>{indexNumber}</Text>
+            )}
           </View>
-        </SlidingTextArea>
 
-        <View className="flex-row items-center ml-2 space-x-1">
-          <SolidIcons.ChevronUpDownIcon item={track} />
-          <NotificationCircle item={track} />
-          {runtimeComponent}
-          <Pressable onPress={handleIconPress}>
-            {showRemove ? <XMarkIcon size={20} /> : <SolidIcons.CreditCardIcon size={20} />}
-          </Pressable>
+          <SlidingTextArea
+            tx={row.tx}
+            rightWidth={row.rightWidth}
+            leftGapWidth={artworkWidth}
+            hasArtwork={!!showArtwork}
+          >
+            <View className="flex-1 justify-center">
+              <Text className={`font-bold ${textColorClass} truncate`}>{trackName}</Text>
+              {shouldShowArtists && <Text className="text-gray-400 truncate">{artistsText}</Text>}
+            </View>
+          </SlidingTextArea>
+
+          <View className="flex-row items-center ml-2 space-x-1">
+            <SolidIcons.ArrowsUpDownIcon color="#6b7280" size={20} />
+            <Notification size={20} variant="Outline" color="#6b7280" />
+            {runtimeComponent}
+            <Pressable onPress={handleIconPress}>
+              {showRemove ? <XMarkIcon size={20} /> : <SolidIcons.CreditCardIcon size={20} />}
+            </Pressable>
+          </View>
         </View>
-      </View>
+      )}
     </SwipeableRow>
   );
 }
 
-function HideableArtwork({ children }: { children: React.ReactNode }) {
-  const { tx } = useSwipeableRowContext();
+function sermonRowArtworkSource(track: SermonItemDTO): ImageSourcePropType | null {
+  const { image, artwork } = track;
+  if (typeof image === 'number') return image;
+  if (typeof artwork === 'number') return artwork;
+  const uri = (typeof image === 'string' && image.length > 0 ? image : null) ??
+    (typeof artwork === 'string' && artwork.length > 0 ? artwork : null);
+  return uri ? { uri } : null;
+}
+
+function SermonRowArtwork({ track, size }: { track: SermonItemDTO; size: number }) {
+  const source = sermonRowArtworkSource(track);
+  if (!source) {
+    return (
+      <View
+        style={{ width: size, height: size, borderRadius: 4, backgroundColor: '#e5e7eb' }}
+      />
+    );
+  }
+  return (
+    <Image
+      source={source}
+      style={{ width: size, height: size, borderRadius: 4 }}
+      accessibilityLabel={track.title ?? 'Artwork'}
+    />
+  );
+}
+
+function HideableArtwork({ tx, children }: { tx: SharedValue<number>; children: React.ReactNode }) {
   const style = useAnimatedStyle(() => ({ opacity: tx.value === 0 ? 1 : 0 }));
   return <Animated.View style={style}>{children}</Animated.View>;
 }
 
-function SlidingTextArea({ leftGapWidth, hasArtwork, children }: { leftGapWidth: number; hasArtwork: boolean; children: React.ReactNode }) {
-  const { tx, rightWidth } = useSwipeableRowContext();
+function SlidingTextArea({
+  tx,
+  rightWidth,
+  leftGapWidth,
+  hasArtwork,
+  children,
+}: {
+  tx: SharedValue<number>;
+  rightWidth: number;
+  leftGapWidth: number;
+  hasArtwork: boolean;
+  children: React.ReactNode;
+}) {
   const style = useAnimatedStyle(() => {
     const t = tx.value;
     let offset = 0;
@@ -211,9 +246,5 @@ function SlidingTextArea({ leftGapWidth, hasArtwork, children }: { leftGapWidth:
     else if (t < 0) offset = Math.min(-t, Math.max(0, rightWidth)) * 0.7;
     return { transform: [{ translateX: offset }] };
   });
-  return (
-    <Animated.View className="flex-1" style={style}>
-      {children}
-    </Animated.View>
-  );
+  return <Animated.View style={[{ flex: 1 }, style]}>{children}</Animated.View>;
 }

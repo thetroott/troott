@@ -1,61 +1,229 @@
-# Monorepo
-apps/*/credentials.json
-apps/*/build
-packages/*/build
+# =============================================================================
+# Troott monorepo — root .gitignore
+# Apps: mobile (Expo), website (Next.js), app (Vite), api (Node). Tooling: pnpm, Turbo.
+# =============================================================================
 
+# -----------------------------------------------------------------------------
+# Environment & secrets (never commit)
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.*.example
+!.env.sample
+!.env.template
+!.env.development.example
+!.env.production.example
+*.pem
+*.key
+!**/*.key.example
+secrets/
+*.secret
+
+# App / cloud credentials (paths also used by EAS / mobile)
+apps/*/credentials.json
+
+# -----------------------------------------------------------------------------
+# Dependencies
+# -----------------------------------------------------------------------------
+node_modules/
+
+# Use pnpm in this repo; ignore accidental npm / yarn lockfiles
+package-lock.json
+yarn.lock
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# -----------------------------------------------------------------------------
+# Build outputs & caches (Turbo, tsc, bundlers)
+# -----------------------------------------------------------------------------
+apps/*/build
+apps/*/dist
+packages/*/build
+packages/*/dist
+configs/*/dist
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.open-next/
+storybook-static/
+**/.tsbuildinfo
+*.tsbuildinfo
+
+# Vite
+**/.vite/
+vite.config.*.timestamp-*
+
+# Metro / RN
+node_modules/.cache/metro/
+
+# -----------------------------------------------------------------------------
 # Turborepo
+# -----------------------------------------------------------------------------
 .turbo
 
-# Expo
-.expo
-__generated__
-web-build
+# -----------------------------------------------------------------------------
+# Expo & React Native (@troott/mobile)
+# -----------------------------------------------------------------------------
+.expo/
+.expo-shared/
+web-build/
+__generated__/
 
-# macOS
+# apps/mobile android + ios: committed by default for reproducible dev-client builds.
+# Uncomment only if the team switches to a regenerate-only workflow:
+# apps/mobile/android/
+# apps/mobile/ios/
+
+# -----------------------------------------------------------------------------
+# Testing & coverage
+# -----------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# -----------------------------------------------------------------------------
+# Lint / format caches
+# -----------------------------------------------------------------------------
+.eslintcache
+.prettiercache
+.stylelintcache
+.ruff_cache/
+
+# -----------------------------------------------------------------------------
+# Deploy & hosting
+# -----------------------------------------------------------------------------
+.vercel
+.netlify
+
+# -----------------------------------------------------------------------------
+# OS files
+# -----------------------------------------------------------------------------
 .DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Node
-node_modules
-npm-debug.log
-yarn-error.log
-package-lock.json
+# -----------------------------------------------------------------------------
+# Editors & IDEs
+# -----------------------------------------------------------------------------
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+.history/
 
-# Ruby
-.direnv
+# VS Code — ignore local state; allow shared config if present
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
 
-# Emacs
+# Cursor / local tooling (optional local notes; many teams commit .cursor/rules)
+.me/
+
+# -----------------------------------------------------------------------------
+# direnv / Ruby / Cocoa (local only)
+# -----------------------------------------------------------------------------
+.direnv/
+.envrc
+
+# -----------------------------------------------------------------------------
+# Xcode (root ios/ or any *.xcodeproj)
+# -----------------------------------------------------------------------------
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xccheckout
+*.xcscmblueprint
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.hmap
+*.ipa
+*.moved-aside
+project.xcworkspace/
+.xcode.env.local
+
+# -----------------------------------------------------------------------------
+# Android / Gradle (root android/ or nested)
+# -----------------------------------------------------------------------------
+.gradle/
+local.properties
+.cxx/
+*.hprof
+
+# -----------------------------------------------------------------------------
+# Android / iOS signing & stores (never commit)
+# -----------------------------------------------------------------------------
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+*.certSigningRequest
+
+# -----------------------------------------------------------------------------
+# Logs & debug
+# -----------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# -----------------------------------------------------------------------------
+# Misc temp
+# -----------------------------------------------------------------------------
+tmp/
+temp/
+*.tmp
+*.temp
+
+# -----------------------------------------------------------------------------
+# Classic editors
+# -----------------------------------------------------------------------------
 *~
-
-# Vim
 .*.swp
 .*.swo
 .*.swn
 .*.swm
 
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-# Xcode
-*.pbxuser
-!default.pbxuser
-*.xccheckout
-*.xcscmblueprint
-xcuserdata
-
-# Android Studio
-*.iml
-.gradle
-.idea/libraries
-.idea/workspace.xml
-.idea/gradle.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/vcs.xml
-
+# -----------------------------------------------------------------------------
 # Eclipse
+# -----------------------------------------------------------------------------
 .project
-.settings
+.settings/
+.classpath
 
-# VSCode
-.history/
+# -----------------------------------------------------------------------------
+# Fastlane (if added under mobile)
+# -----------------------------------------------------------------------------
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output

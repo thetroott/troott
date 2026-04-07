@@ -1,4 +1,4 @@
-import { Image, ImageSourcePropType, View, ViewStyle } from "react-native";
+import { Image, ImageSourcePropType, Pressable, StyleSheet, View } from "react-native";
 import React from "react";
 import { IPlayListCard } from "./types";
 import Text from "@/components/ui/text";
@@ -16,35 +16,38 @@ const PlayList = ({
   church,
 }: IPlayListCard) => {
   return (
-    <View style={cardStyle} className="gap-6 rounded-2xl bg-neutral-600 p-4">
-      <View className="flex-row gap-4">
+    <View style={[styles.container, cardStyle]}>
+      <View style={styles.topContainer}>
         <Image
           source={
             (coverImage as ImageSourcePropType) ??
             require("@/assets/images/cover.jpg")
           }
-          className="h-24 w-24 rounded-2xl"
+          style={styles.image}
         />
-        <View className="gap-2">
-          <Text size="lg" weight="semiBold" className="text-neutral-100">
+        <View style={styles.textContainer}>
+          <Text size="lg" weight="semiBold" color={theme.colors.white[50]}>
             {title}
           </Text>
-          <Text className="text-neutral-400">{church}</Text>
-          <Text className="text-neutral-400">{tracks?.length ?? 0} Messages</Text>
-          <Button className="w-[70%] flex-row items-center justify-center gap-2 rounded-full bg-neutral-600 p-2">
+          <Text>{church}</Text>
+          <Text>{tracks?.length ?? 0} Messages</Text>
+          <Button style={styles.button}>
             <SolidIcons.PlayIcon color={theme.colors.grey[50]} />
             <Text>Play All</Text>
           </Button>
         </View>
       </View>
-      <Text className="text-neutral-400">{description}</Text>
-      <View className="gap-1">
+      <Text>{description}</Text>
+      <View style={styles.trackContainer}>
         {tracks?.map((item, index) => (
           <TrackCard
             key={index + "trending"}
             {...item}
             variant="small"
-            cardStyle={{ width: "100%", borderBottomWidth: 0 }}
+            cardStyle={{
+              width: "100%",
+              borderBottomWidth: 0,
+            }}
           />
         ))}
       </View>
@@ -53,3 +56,37 @@ const PlayList = ({
 };
 
 export default PlayList;
+
+const styles = StyleSheet.create({
+  topContainer: {
+    flexDirection: "row",
+    gap: theme.sizes.spacing.md,
+  },
+  textContainer: {
+    gap: theme.sizes.spacing.sm,
+  },
+  container: {
+    gap: theme.sizes.spacing.lg,
+    padding: theme.sizes.spacing.md,
+    borderRadius: theme.sizes.radius.md,
+    backgroundColor: theme.colors.grey[600],
+  },
+  trackContainer: {
+    gap: theme.sizes.spacing.xs,
+  },
+  image: {
+    width: 96,
+    height: 96,
+    borderRadius: theme.sizes.radius.base,
+  },
+  button: {
+    flexDirection: "row",
+    borderRadius: theme.sizes.radius.full,
+    gap: theme.sizes.spacing.sm,
+    alignItems: "center",
+    padding: theme.sizes.spacing.sm,
+    backgroundColor: "#545454",
+    justifyContent: "center",
+    width: "70%",
+  },
+});

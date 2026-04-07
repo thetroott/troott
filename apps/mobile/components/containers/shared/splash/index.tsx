@@ -1,13 +1,11 @@
+import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { View } from "react-native";
 import { SvgFromXml } from "react-native-svg";
+import { theme } from "@/constants/theme";
 
 const CustomSplashScreen = () => {
   return (
-    <View
-      style={{ flex: 1, backgroundColor: "#171717", justifyContent: "center", alignItems: "center" }}
-      className="flex-1 justify-center items-center bg-neutral-950"
-    >
+    <View style={styles.container}>
       <SvgFromXml
         xml={`<svg width="156" height="43" viewBox="0 0 156 43" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_1282_5004)">
@@ -31,3 +29,12 @@ const CustomSplashScreen = () => {
 };
 
 export default CustomSplashScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.black[50],
+  },
+});

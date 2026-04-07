@@ -75,7 +75,7 @@ const FullPlayer = () => {
           } else {
             translateX.value = withSpring(-220)
             runOnJS(trigger)("notificationSuccess")
-            runOnJS(skip)(undefined)
+            runOnJS(skip)(undefined)           
           }
 
           translateX.value = withDelay(160, withSpring(0))
@@ -101,11 +101,8 @@ const FullPlayer = () => {
     }, [])
   )
 
-  // Full player UI is commented out; uncomment and use className when restoring.
-  return null;
-
 //   return (
-//     <View className="flex-1 bg-neutral-950">
+//     <View className="flex-1 bg-black">
 //       {nowPlaying && (
 //         <View className="absolute inset-0">
 //           <BlurredBackground width={width} height={height} />

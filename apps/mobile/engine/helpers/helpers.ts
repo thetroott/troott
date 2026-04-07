@@ -1,8 +1,8 @@
-import { networkStatusTypes } from '@/components/containers/shared/network-watcehr'
-import { SermonDownload, SermonItemDTO, SermonTrackDTO } from '@/dtos/sermon.dto'
+import { networkStatusTypes } from "@/types/network-status"
+import type { SermonDownload, SermonItemDTO, SermonTrackDTO } from "@/types/sermon"
 import { QueuingType } from '@/utils/enums.util'
 import _, { isEmpty, isNull, isUndefined } from 'lodash'
-import TrackPlayer from 'react-native-track-player'
+import TrackPlayer from "@rntp/player"
 
 /**
  * Finds and returns the index of the player queue to insert additional tracks into
@@ -12,11 +12,11 @@ import TrackPlayer from 'react-native-track-player'
 export async function findPlayNextIndexStart(playQueue: SermonTrackDTO[]) {
 	if (isEmpty(playQueue)) return 0
 
-	const activeTrack = (await TrackPlayer.getActiveTrack()) as SermonTrackDTO
+	const activeTrack = TrackPlayer.getActiveMediaItem() as SermonTrackDTO | null
 
 	const activeIndex = playQueue.findIndex((track) => track.item.id === activeTrack?.item.id)
 
-	if (isUndefined(activeTrack) || activeIndex === -1) return 0
+	if (!activeTrack || activeIndex === -1) return 0
 	else return activeIndex + 1
 }
 

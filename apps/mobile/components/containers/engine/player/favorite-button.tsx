@@ -6,8 +6,8 @@ import Animated, { BounceIn, FadeIn, FadeOut } from 'react-native-reanimated'
 import { SermonItemDTO, SermonTrackDTO } from '@/dtos/sermon.dto'
 import { ActivityIndicator, View } from 'react-native'
 import { Pressable } from 'react-native'
-import { useRemoveFavorite, useAddFavorite } from '@/engine/hooks/useFavourites'
-import { useIsFavorite } from '@/engine/queries/query-keys'
+import { useRemoveFavorite, useAddFavorite } from "@/hooks/player/use-favourites"
+import { useIsFavorite } from "@/hooks/player/use-is-favorite"
 
 interface FavoriteButtonProps {
 	item: SermonTrackDTO

@@ -2,14 +2,15 @@ import {
   TextInput,
   TextInputProps,
   ViewStyle,
+  StyleSheet,
   Pressable,
   NativeSyntheticEvent,
   TextInputFocusEventData,
 } from "react-native";
 import React from "react";
 import { theme } from "@/constants/theme";
+import { sizes } from "@/constants/sizes";
 import { colors } from "@/constants/colors";
-import { cn } from "@/lib/utils";
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
@@ -19,14 +20,12 @@ import Animated, {
 import { Eye, EyeSlash } from "iconsax-react-nativejs";
 import Button from "./button";
 
-export interface InputProps extends TextInputProps {
+interface InputProps extends TextInputProps {
   containerstyle?: ViewStyle;
   label?: string;
   leftIcon?: React.ReactNode;
-  trailingIcon?: React.ReactNode;
   inputcontainerstyles?: ViewStyle;
   disabled?: boolean;
-  className?: string;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -38,10 +37,8 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       secureTextEntry,
       label,
       leftIcon,
-      trailingIcon,
       inputcontainerstyles,
       disabled,
-      className,
       onBlur,
       onFocus,
       autoCorrect = false,
@@ -49,6 +46,8 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
     }: InputProps,
     ref
   ) => {
+    const styles = dynamicStyles((disabled = false));
+
     const focusProgress = useSharedValue(0);
 
     const animatedStyles = useAnimatedStyle(() => ({
@@ -83,48 +82,55 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
 
     }
     return (
-      <AnimatedPressable
-        className={cn("h-12 rounded border border-neutral-700 bg-neutral-900 flex-row gap-1 justify-between items-center px-4", className)}
-        style={[animatedStyles, containerstyle]}
-      >
+      <AnimatedPressable style={[{...styles.container,...containerstyle}, animatedStyles]}>
         {leftIcon && leftIcon}
         <TextInput
           autoCorrect={false}
           placeholderTextColor={theme.colors.grey[400]}
           {...props}
           ref={ref}
-          style={[
-            {
-              width: "90%",
-              color: colors.grey[100],
-              height: "100%",
-              alignItems: "center",
-              fontFamily: theme.typography.regular,
-            },
-            inputcontainerstyles,
-          ]}
+          style={{...styles.inputContainer, ...inputcontainerstyles}}
           onBlur={handleBlur}
           onFocus={handleFocus}
           secureTextEntry={secureText}
         />
-        {trailingIcon && trailingIcon}
-        {secureTextEntry && (
-          <Button
-            variant="ghost"
-            onPress={handleToggle}
-            className="absolute right-4"
-          >
-            {secureText && (
-              <EyeSlash size={18} color={theme.colors.grey[400]} />
-            )}
-            {!secureText && <Eye size={18} color={theme.colors.grey[400]} />}
+       {
+          secureTextEntry && <Button  variant="ghost" onPress={handleToggle}  style={styles.eyeContainer}>
+            {secureText &&<EyeSlash  size={18} color={theme.colors.grey[400]} />}
+            {!secureText &&<Eye  size={18} color={theme.colors.grey[400]} />}
           </Button>
-        )}
+        }
       </AnimatedPressable>
     );
   }
 );
 
-// theme.typography.regular (fontFamily) kept in style; migration doc allows theme for typography when extended in Tailwind later.
+const dynamicStyles = (disabled: boolean) =>
+  StyleSheet.create({
+    container: {
+      height: 48,
+      borderRadius: theme.sizes.radius.xs,
+      borderWidth: 1,
+      borderColor: theme.colors.grey[800],
+      backgroundColor: theme.colors.grey[900],
+      flexDirection: "row",
+      gap: 5,
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: sizes.spacing.md,
+    },
+    inputContainer: {
+      width: "90%",
+      color: colors.grey[100],
+      height: "100%",
+      alignItems: "center",
+      fontFamily: theme.typography.regular,
+    },
+    eyeContainer:{
+      position:'absolute',
+      // top:12,
+      right:theme.sizes.spacing.md
+    }
+  });
 
 export default Input;

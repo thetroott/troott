@@ -1,30 +1,28 @@
-import React from "react";
-import { ViewStyle } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { cn } from "@/lib/utils";
+import {  StyleSheet, ViewStyle } from 'react-native'
+import React from 'react'
+import { SafeAreaProviderProps ,SafeAreaView} from 'react-native-safe-area-context'
+import { theme } from '@/constants/theme'
 
-interface ScreenViewProps {
-  children: React.ReactNode;
-  screenStyle?: ViewStyle;
-  className?: string;
-  [key: string]: unknown;
+interface ScreenViewProps extends SafeAreaProviderProps{
+    children:React.ReactNode,
+    screenStyle?:ViewStyle
+
 }
 
-const ScreenView = ({
-  children,
-  screenStyle,
-  className,
-  ...props
-}: ScreenViewProps) => {
+const ScreenView = ({children,screenStyle,...props}:ScreenViewProps) => {
   return (
-    <SafeAreaView
-      className={cn("flex-1 bg-neutral-950 px-4 gap-6", className)}
-      style={screenStyle}
-      {...props}
-    >
-      {children}
+    <SafeAreaView {...props} style={{...styles.container,...screenStyle}}>
+        {children}
     </SafeAreaView>
-  );
-};
+  )
+}
 
-export default ScreenView;
+const styles = StyleSheet.create({
+  container:{
+    paddingHorizontal:theme.sizes.spacing.md,
+    gap:theme.sizes.spacing.lg,
+    flex: 1,
+
+  }
+})
+export default ScreenView

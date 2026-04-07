@@ -1,22 +1,37 @@
+import { StyleSheet, View } from "react-native";
 import React from "react";
-import { VStack } from "@/components/shared";
 import FormInput from "@/components/ui/forminput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Lock, Sms } from "iconsax-react-nativejs";
 import { theme } from "@/constants/theme";
 import Button from "@/components/ui/button";
+
 import { router } from "expo-router";
 import { LoginSchema, LoginSchemaType } from "@/validation/login";
+import { useTrackStore } from "@/stores/player-store";
 
 const LoginForm = () => {
+  const setShowFullPlayer = useTrackStore((s) => s.setShowFullPlayer);
+  const setFullPlayerReturnPath = useTrackStore((s) => s.setFullPlayerReturnPath);
+
   const form = useForm<LoginSchemaType>({
-    defaultValues: { email: "", password: "" },
+    defaultValues: {
+      email: "",
+      password: "",
+    },
     resolver: zodResolver(LoginSchema),
   });
-
+  function handleSubmit(_data: LoginSchemaType) {
+    setShowFullPlayer(false);
+    setFullPlayerReturnPath(null);
+    router.replace("/home");
+  }
+  const handleFormSubmit = () => {
+    router.push("/onboarding/select-ministers");
+  };
   return (
-    <VStack className="w-full">
+    <View style={styles.container}>
       <FormInput
         name="email"
         control={form.control}
@@ -32,13 +47,25 @@ const LoginForm = () => {
         leftIcon={<Lock color={theme.colors.grey[400]} size={20} />}
       />
       <Button
-        onPress={form.handleSubmit((data) => router.push("/(tabs)/home"))}
+        onPress={form.handleSubmit(handleSubmit)}
         disabled={!form.formState.isValid}
         label="Continue"
-      />
-    </VStack>
+      ></Button>
+    </View>
   );
 };
 
 export default LoginForm;
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 20,
+  },
+  nameContainer: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+});
 

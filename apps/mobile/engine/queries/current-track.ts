@@ -1,10 +1,46 @@
-import TrackPlayer from 'react-native-track-player'
-import { queryClient } from '../../services/query-client'
-import { ACTIVE_INDEX_QUERY_KEY, NOW_PLAYING_QUERY_KEY, PLAY_QUEUE_QUERY_KEY } from '@/engine/queries/query-keys'
-import { SermonTrackDTO } from '@/dtos/sermon.dto'
-import { usePlayerQueueStore } from '@/stores/player/queue'
-import { useTrackStore } from '@/stores/player-store'
+import TrackPlayer from "@rntp/player"
+import { queryClient } from "../../services/query-client"
+import {
+	ACTIVE_INDEX_QUERY_KEY,
+	NOW_PLAYING_QUERY_KEY,
+	PLAY_QUEUE_QUERY_KEY,
+} from "@/engine/queries/query-keys"
+import type { SermonTrackDTO } from "@/types/sermon"
+import { recordLastPlayedFromTrack } from "@/engine/state/last-played-sync"
+import { usePlayerQueueStore } from "@/engine/state/player-queue-store"
 
+function trackStableId(t: SermonTrackDTO | undefined): string {
+	if (!t) return ""
+	return String(t.mediaId ?? t.item?.id ?? t.id ?? "")
+}
+
+/**
+ * RNTP often returns slim `getActiveMediaItem()` / `getQueue()` objects on iOS.
+ * Re-apply artwork and `item` fields from the last known rich queue.
+ */
+function mergeSermonTrackMetadata(
+	prev: SermonTrackDTO | undefined,
+	incoming: SermonTrackDTO | undefined,
+): SermonTrackDTO | undefined {
+	if (!incoming) return prev
+	if (!prev) return incoming
+	if (trackStableId(prev) !== trackStableId(incoming) || !trackStableId(prev)) {
+		return incoming
+	}
+	return {
+		...prev,
+		...incoming,
+		url: incoming.url ?? prev.url,
+		artwork: incoming.artwork ?? prev.artwork,
+		artworkUrl: incoming.artworkUrl ?? prev.artworkUrl,
+		item: {
+			...prev.item,
+			...incoming.item,
+			image: incoming.item?.image ?? prev.item?.image,
+			title: incoming.item?.title ?? prev.item?.title,
+		},
+	}
+}
 
 export function getActiveIndex(): number | undefined {
 	return queryClient.getQueryData(ACTIVE_INDEX_QUERY_KEY) as number | undefined
@@ -27,27 +63,24 @@ export function setPlayQueue(tracks: SermonTrackDTO[]): void {
 }
 
 export async function handleActiveTrackChanged(): Promise<void> {
-	const [queue, activeTrack, activeIndex] = await Promise.all([
-		TrackPlayer.getQueue(),
-		TrackPlayer.getActiveTrack(),
-		TrackPlayer.getActiveTrackIndex(),
-	])
+	const incomingQueue = TrackPlayer.getQueue() as SermonTrackDTO[]
+	const activeTrack = TrackPlayer.getActiveMediaItem() as SermonTrackDTO | undefined
+	const activeIndex = TrackPlayer.getActiveMediaItemIndex()
 
-	usePlayerQueueStore.getState().setQueue(queue as SermonTrackDTO[])
-	usePlayerQueueStore.getState().setCurrentTrack(activeTrack as SermonTrackDTO)
-	usePlayerQueueStore.getState().setCurrentIndex(activeIndex)
+	const prevQueue = usePlayerQueueStore.getState().queue
 
-	if (activeTrack) {
-		const t = activeTrack as SermonTrackDTO & {
-			artist?: string
-			artwork?: unknown
-			image?: unknown
-		}
-		useTrackStore.getState().setCurrentTrack({
-			...activeTrack,
-			minister: t.minister ?? t.artist,
-			image: t.image ?? t.artwork,
-			artwork: t.artwork ?? t.image,
-		} as unknown as SermonTrackDTO)
-	}
+	const mergedQueue = incomingQueue.map((track) => {
+		const prevMatch = prevQueue.find((p) => trackStableId(p) === trackStableId(track))
+		return mergeSermonTrackMetadata(prevMatch, track) ?? track
+	})
+
+	const prevCurrent =
+		activeIndex != null && activeIndex >= 0 ? prevQueue[activeIndex] : undefined
+	const prevById = prevQueue.find((p) => trackStableId(p) === trackStableId(activeTrack))
+	const mergedCurrent = mergeSermonTrackMetadata(prevById ?? prevCurrent, activeTrack)
+
+	usePlayerQueueStore.getState().setQueue(mergedQueue)
+	usePlayerQueueStore.getState().setCurrentTrack(mergedCurrent)
+	usePlayerQueueStore.getState().setCurrentIndex(activeIndex ?? undefined)
+	recordLastPlayedFromTrack(mergedCurrent)
 }

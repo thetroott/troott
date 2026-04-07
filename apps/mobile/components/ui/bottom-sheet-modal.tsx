@@ -1,5 +1,10 @@
-import { Pressable, ScrollView, View } from "react-native";
-import React, { forwardRef, useEffect, useImperativeHandle } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -30,58 +35,60 @@ export interface BottomSheetRef {
 interface BottomSheetRootProps {
   children?: React.ReactNode;
 }
+
+function isNearClosedY(y: number, closedY: number): boolean {
+  "worklet";
+  return Math.abs(y - closedY) < 1;
+}
+
 const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
   ({ children }, ref) => {
     const [showSheet, setShowSheet] = React.useState(false);
-    useImperativeHandle(
-      ref,
-      () => {
-        return {
-          open: () => {
-            sheetTranslateY.value = withTiming(0, {
-              duration: 300,
-            });
-            setShowSheet(true);
-          },
-          close: () => {
-            sheetTranslateY.value = withTiming(initialHeight + 300, {
-              duration: 300,
-            });
-            setShowSheet(false);
-          },
-        };
-      },
-      []
-    );
-    useEffect(() => {
-      if (showSheet) {
-        sheetTranslateY.value = withTiming(0, {
-          duration: 500,
-        });
-        return;
-      }
-    }, [showSheet]);
 
     const initialHeight = theme.sizes.screen.height * 0.5;
     const finalHeight = theme.sizes.screen.height * 0.9;
+    const closedTranslateY = initialHeight + 300;
+
     const sheetTranslateY = useSharedValue(initialHeight + 200);
     const sheetHeight = useSharedValue(initialHeight);
-    function handleCloseSheet() {
-      "worklet";
-      sheetTranslateY.value = withTiming(initialHeight + 300, {
-        duration: 300,
-      });
-    }
+
+    const runCloseAnimation = useCallback(() => {
+      sheetTranslateY.value = withTiming(closedTranslateY, { duration: 300 });
+    }, [closedTranslateY, sheetTranslateY]);
+
+    useImperativeHandle(
+      ref,
+      () => ({
+        open: () => {
+          setShowSheet(true);
+        },
+        close: () => {
+          runCloseAnimation();
+        },
+      }),
+      [runCloseAnimation]
+    );
+
+    useEffect(() => {
+      if (showSheet) {
+        sheetTranslateY.value = withTiming(0, { duration: 500 });
+      }
+    }, [showSheet, sheetTranslateY]);
+
     useAnimatedReaction(
-      () => sheetTranslateY,
-      (curr) => {
-        if (curr.value === initialHeight + 300 && showSheet) {
+      () => sheetTranslateY.value,
+      (current, previous) => {
+        if (
+          isNearClosedY(current, closedTranslateY) &&
+          previous !== null &&
+          !isNearClosedY(previous, closedTranslateY)
+        ) {
           sheetHeight.value = withSpring(initialHeight);
           runOnJS(setShowSheet)(false);
-          return;
         }
       }
     );
+
     const gesture = Gesture.Pan()
       .onUpdate((event) => {
         if (sheetHeight.value >= finalHeight) {
@@ -96,9 +103,8 @@ const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
         sheetTranslateY.value = event.translationY;
       })
       .onEnd((event) => {
-        // close the modal if the user drags down more than 400px
         if (event.translationY > 200) {
-          handleCloseSheet();
+          sheetTranslateY.value = withTiming(closedTranslateY, { duration: 300 });
           return;
         }
         if (sheetHeight.value >= finalHeight) {
@@ -136,21 +142,18 @@ const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
       height: sheetHeight.value,
       transform: [{ translateY: sheetTranslateY.value }],
     }));
+
     if (!showSheet) {
       return null;
     }
+
     return (
       <Portal name="bottom-sheet-modal">
-        <Pressable
-          className="flex-1 absolute inset-0 bg-black/70 justify-end"
-          onPress={handleCloseSheet}
-        >
+        <Pressable style={[styles.overlayContainer]} onPress={runCloseAnimation}>
           <GestureDetector gesture={gesture}>
-            <Animated.View style={animatedRootStyle}>
-              <View className="bg-neutral-900 rounded-t-[20px] py-6 overflow-hidden">
-                <View className="w-12 h-1 bg-neutral-500 rounded-full self-center absolute top-4" />
-                {children}
-              </View>
+            <Animated.View style={[styles.sheetContainer, animatedRootStyle]}>
+              <View style={styles.dragger} />
+              {children}
             </Animated.View>
           </GestureDetector>
         </Pressable>
@@ -166,18 +169,14 @@ interface SubProps {
 }
 
 function BottomSheetTitle({ children }: SubProps) {
-  return (
-    <Pressable className="p-4 pt-4 border-b border-neutral-700">
-      {children}
-    </Pressable>
-  );
+  return <Pressable style={styles.headerContainer}>{children}</Pressable>;
 }
 BottomSheetTitle.displayName = "BottomSheetTitle";
 
 function BottomSheetContent({ children }: SubProps) {
   return (
-    <ScrollView>
-      <View className="p-4 pt-2 pb-16">{children}</View>
+    <ScrollView contentContainerStyle={styles.contentContainer}>
+      {children}
     </ScrollView>
   );
 }
@@ -189,3 +188,42 @@ export const BottomSheetModal = {
   Content: BottomSheetContent,
 };
 
+const styles = StyleSheet.create({
+  overlayContainer: {
+    flex: 1,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "flex-end",
+  },
+  sheetContainer: {
+    backgroundColor: theme.colors.grey[900],
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: theme.sizes.spacing.lg,
+    overflow: "hidden",
+  },
+  headerContainer: {
+    padding: theme.sizes.spacing.md,
+    paddingTop: 16,
+    borderBottomWidth: 1.5,
+    borderBottomColor: theme.colors.grey[700],
+  },
+  dragger: {
+    width: theme.sizes.spacing.xl * 1.5,
+    height: 5,
+    backgroundColor: theme.colors.grey[500],
+    borderRadius: theme.sizes.radius.full,
+    alignSelf: "center",
+    position: "absolute",
+    top: theme.sizes.spacing.md,
+  },
+  contentContainer: {
+    padding: theme.sizes.spacing.md,
+    paddingTop: 10,
+    paddingBottom: theme.sizes.spacing.xl * 2,
+  },
+});

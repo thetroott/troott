@@ -9,7 +9,6 @@ import {
   RegisterOptions,
   useController,
 } from "react-hook-form";
-// Allowed exception: @rn-primitives/switch Root/Thumb use style (third-party API); Animated.View uses useAnimatedStyle.
 import * as Switch from "@rn-primitives/switch";
 import Animated, {
   interpolate,
@@ -17,7 +16,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { semanticColors } from "@/constants/tailwind-bridge";
 import { theme } from "@/constants/theme";
 
 interface FormInputProps<T extends FieldValues> {
@@ -73,7 +71,7 @@ const FormSwitch = <T extends FieldValues>({
                 width: theme.sizes.spacing.lg +4,
                 height: theme.sizes.spacing.lg +4,
                 borderRadius: theme.sizes.radius.full,
-                backgroundColor: semanticColors.cardForeground,
+                backgroundColor: "#ffffff",
               }}
             />
           </Animated.View>

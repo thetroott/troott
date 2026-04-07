@@ -1,11 +1,3 @@
-export interface OnboardingSlide {
-  id: string;
-  illustration: any;
-  illustrationSecondary: any;
-  title: string;
-  description: string;
-}
-
 export interface IAppState {
   player: IIPlayerState;
   auth: IAuthState;

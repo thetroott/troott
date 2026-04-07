@@ -1,12 +1,14 @@
-import { networkStatusTypes } from "@/components/containers/shared/network-watcehr"
-import { AddToQueueMutation, QueueMutationDTO } from "@/dtos/player.dto"
-import { SermonTrackDTO } from "@/dtos/sermon.dto"
-import { usePlayerQueueStore } from "@/stores/player/queue"
+import type { AddToQueueMutation, QueueMutationDTO } from "@/types/player-mutations"
+import { networkStatusTypes } from "@/types/network-status"
+import type { ISermonTrack, SermonTrackDTO } from "@/types/sermon"
+import { mergeAutoplayTail } from "@/engine/core/autoplay-tail"
+import { usePlayerQueueStore } from "@/engine/state/player-queue-store"
 import { getAudioCache } from "@/engine/utils/offline"
 import { filterTracksOnNetworkStatus, shuffleSermonTracks } from "../helpers/helpers"
 import { mapDtoToTrack } from "@/engine/utils/mappers"
+import { resolvePlaybackUrisForTrackPlayer } from "@/engine/utils/resolve-playback-uris"
 import { QueuingType } from "@/utils/enums.util"
-import TrackPlayer from "react-native-track-player"
+import TrackPlayer from "@rntp/player"
 import { isUndefined } from "lodash"
 import { getCurrentTrack } from "../queries/current-track"
 
@@ -21,132 +23,123 @@ export async function loadQueue({
 	queue: queueRef,
 	shuffled = false,
 	api,
-	//deviceProfile,
 	networkStatus = networkStatusTypes.ONLINE,
+	autoplayCatalogTail,
+	autoplayPreferMinister,
 }: QueueMutationDTO): Promise<LoadQueueResult> {
 	usePlayerQueueStore.getState().setQueueRef(queueRef)
 	usePlayerQueueStore.getState().setShuffled(shuffled)
 
 	const startIndex = index ?? 0
 
-	// Get the item at the start index
 	const startingTrack = tracklist[startIndex]
 
 	const downloadedTracks = getAudioCache()
 
-	const availableAudioItems = filterTracksOnNetworkStatus(
+	let availableAudioItems = filterTracksOnNetworkStatus(
 		networkStatus as networkStatusTypes,
 		tracklist,
 		downloadedTracks ?? [],
 	)
 
-	// Convert to SermonTrackDTOs first
+	if (autoplayCatalogTail?.length && availableAudioItems.length < 2) {
+		const prefer =
+			autoplayPreferMinister ??
+			startingTrack?.minister ??
+			(startingTrack as ISermonTrack | undefined)?.artist ??
+			null
+		const merged = mergeAutoplayTail(availableAudioItems, autoplayCatalogTail, {
+			preferMinister: prefer,
+			minItems: 2,
+		})
+		availableAudioItems = filterTracksOnNetworkStatus(
+			networkStatus as networkStatusTypes,
+			merged,
+			downloadedTracks ?? [],
+		)
+	}
+
 	let queue = availableAudioItems.map((item) =>
 		mapDtoToTrack("", item, QueuingType.FromSelection),
 	)
 
-	// Store the original unshuffled queue
-	usePlayerQueueStore.getState().setUnshuffledQueue(queue)
+	const resolvedUnshuffled = await resolvePlaybackUrisForTrackPlayer(queue)
+	usePlayerQueueStore.getState().setUnshuffledQueue(resolvedUnshuffled)
 
-	// Handle if a shuffle was requested
-	if (shuffled && queue.length > 1) {
-		console.debug('Shuffling queue...')
-
-		const { shuffled: shuffledTracks } = shuffleSermonTracks(queue)
+	if (shuffled && resolvedUnshuffled.length > 1) {
+		console.debug("Shuffling queue...")
+		const { shuffled: shuffledTracks } = shuffleSermonTracks([...resolvedUnshuffled])
 		queue = shuffledTracks
-		console.debug(`Shuffled entire queue as fallback`)
+		console.debug("Shuffled entire queue as fallback")
+	} else {
+		queue = resolvedUnshuffled
 	}
 
-	// The start index for the shuffled queue is always 0 (starting track is first)
 	const finalStartIndex = availableAudioItems.findIndex((item) => item.id === startingTrack.id)
 
+	const filteredOut = Math.max(0, tracklist.length - availableAudioItems.length)
 	console.debug(
-		`Filtered out ${
-			tracklist.length - availableAudioItems.length
-		} due to network status being ${networkStatus}`,
+		`loadQueue: ${availableAudioItems.length}/${tracklist.length} tracks after network filter (${networkStatus}); filtered ${filteredOut}`,
 	)
 
 	console.debug(`Final start index is ${finalStartIndex}`)
 
-	await TrackPlayer.stop()
-
-	/**
-	 *  Keep the requested track as the currently playing track so there
-	 * isn't any flickering in the miniplayer
-	 */
-	await TrackPlayer.setQueue([queue[finalStartIndex]])
-	await TrackPlayer.add([...queue.slice(0, finalStartIndex), ...queue.slice(finalStartIndex + 1)])
-	await TrackPlayer.move(0, finalStartIndex)
+	TrackPlayer.stop()
+	TrackPlayer.setMediaItems(queue, finalStartIndex >= 0 ? finalStartIndex : 0)
 
 	console.debug(
-		`Queued ${queue.length} tracks, starting at ${finalStartIndex}${shuffled ? ' (shuffled)' : ''}`,
+		`Queued ${queue.length} tracks, starting at ${finalStartIndex}${shuffled ? " (shuffled)" : ""}`,
 	)
 
 	return {
-		finalStartIndex,
+		finalStartIndex: finalStartIndex >= 0 ? finalStartIndex : 0,
 		tracks: queue,
 	}
 }
 
-/**
- * Inserts a track at the next index in the queue
- *
- * Keeps a copy of the original queue in {@link unshuffledQueue}
- *
- * @param item The track to play next
- */
 export const playNextInQueue = async ({ api, tracks }: AddToQueueMutation) => {
-	const tracksToPlayNext = tracks.map((item) =>
-		mapDtoToTrack('', item, QueuingType.PlayingNext),
-	)
+	const mapped = tracks.map((item) => mapDtoToTrack("", item, QueuingType.PlayingNext))
+	const tracksToPlayNext = await resolvePlaybackUrisForTrackPlayer(mapped)
 
-	const currentIndex = await TrackPlayer.getActiveTrackIndex()
-	const currentQueue = (await TrackPlayer.getQueue()) as SermonTrackDTO[]
+	const currentIndex = TrackPlayer.getActiveMediaItemIndex()
+	const currentQueue = TrackPlayer.getQueue() as SermonTrackDTO[]
 
 	console.debug(`Adding ${tracks.length} to the queue at index ${currentIndex}`)
 
-	// If we're already at the end of the queue, add the track to the end
-	if (currentIndex === currentQueue.length - 1) await TrackPlayer.add(tracksToPlayNext)
-	// Else as long as we have an active index, we'll add the track(s) after that
-	else if (!isUndefined(currentIndex)) await TrackPlayer.add(tracksToPlayNext, currentIndex + 1)
+	if (currentIndex === null || isUndefined(currentIndex)) {
+		TrackPlayer.addMediaItems(tracksToPlayNext)
+	} else if (currentIndex === currentQueue.length - 1) {
+		TrackPlayer.addMediaItems(tracksToPlayNext)
+	} else {
+		TrackPlayer.insertMediaItems(currentIndex + 1, tracksToPlayNext)
+	}
 
-	// Get the active queue, put it in Zustand
-	const updatedQueue = (await TrackPlayer.getQueue()) as SermonTrackDTO[]
+	const updatedQueue = TrackPlayer.getQueue() as SermonTrackDTO[]
 	usePlayerQueueStore.getState().setQueue([...updatedQueue])
 
-	// Add to the state unshuffled queue, using the currently playing track as the index
-	usePlayerQueueStore
-		.getState()
-		.setUnshuffledQueue([
-			...usePlayerQueueStore
-				.getState()
-				.unShuffledQueue.slice(
-					0,
-					usePlayerQueueStore.getState().unShuffledQueue.indexOf(getCurrentTrack()!) + 1,
-				),
+	const current = getCurrentTrack()
+	const uq = usePlayerQueueStore.getState().unShuffledQueue
+	const anchor = current ? uq.indexOf(current) : -1
+	if (anchor >= 0) {
+		usePlayerQueueStore.getState().setUnshuffledQueue([
+			...uq.slice(0, anchor + 1),
 			...tracksToPlayNext,
-			...usePlayerQueueStore
-				.getState()
-				.unShuffledQueue.slice(
-					usePlayerQueueStore.getState().unShuffledQueue.indexOf(getCurrentTrack()!) + 1,
-				),
+			...uq.slice(anchor + 1),
 		])
+	}
 }
 
 export const playLaterInQueue = async ({ api, tracks }: AddToQueueMutation) => {
 	console.debug(`Adding ${tracks.length} to queue`)
 
-	const newTracks = tracks.map((item) =>
-		mapDtoToTrack('', item, QueuingType.DirectlyQueued),
-	)
+	const mapped = tracks.map((item) => mapDtoToTrack("", item, QueuingType.DirectlyQueued))
+	const newTracks = await resolvePlaybackUrisForTrackPlayer(mapped)
 
-	// Then update RNTP
-	await TrackPlayer.add(newTracks)
+	TrackPlayer.addMediaItems(newTracks)
 
-	const updatedQueue = (await TrackPlayer.getQueue()) as SermonTrackDTO[]
+	const updatedQueue = TrackPlayer.getQueue() as SermonTrackDTO[]
 	usePlayerQueueStore.getState().setQueue(updatedQueue)
 
-	// Update unshuffled queue with the same mapped tracks to avoid duplication
 	usePlayerQueueStore
 		.getState()
 		.setUnshuffledQueue([...usePlayerQueueStore.getState().unShuffledQueue, ...newTracks])

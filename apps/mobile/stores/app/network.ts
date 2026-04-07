@@ -1,4 +1,4 @@
-import { networkStatusTypes } from '@/components/containers/shared/network-watcehr'
+import { networkStatusTypes } from "@/types/network-status"
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 

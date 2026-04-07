@@ -39,22 +39,33 @@ export async function loadSermons(): Promise<ISermonTrack[]> {
     "mastering-language.jpg": require(`@/assets/images/mastering-language.jpg`),
   };
 
-  const tracks: ISermonTrack[] = sermonsData.map((data) => ({
+  const tracks: ISermonTrack[] = sermonsData.map((data) => {
+    const audioModule =
+      sermonAudio[data.sermon.split("/").pop() as keyof typeof sermonAudio];
+    return {
+    // These are the REQUIRED keys for native player functionality
     id: data.id,
-    url: sermonAudio[data.sermon.split("/").pop() as keyof typeof sermonAudio],
+    sourceType: "stream",
+    url: audioModule,
+    /** Same as `url` — mocks use `sermon`; keeps {@link catalogRowToSermonItem} consistent. */
+    sermon: audioModule,
     title: data.title,
+    artist: data.minister,
     minister: data.minister,
     duration: data.duration,
-    image: sermonImages[data.image.split("/").pop() as keyof typeof sermonImages],
+    artwork: sermonImages[data.image.split('/').pop() as keyof typeof sermonImages],
     description: data.description,
+    genre: data.topic,
+    date: data.releaseDate,
+
+    // These are your custom properties for use in your UI
     topic: data.topic,
     tags: data.tags,
     isSeries: data.isSeries,
     size: data.size,
     releaseYear: data.releaseYear,
-    releaseDate: data.releaseDate,
-    sourceType: "stream",
-  }));
+  };
+  });
   
   console.log('loadSermons: Tracks mapped, count:', tracks.length);
   console.log('loadSermons: First track sample:', tracks[0]);

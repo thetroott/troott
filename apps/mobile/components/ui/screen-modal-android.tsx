@@ -1,3 +1,4 @@
+import { StyleSheet, Text, View, Platform, Pressable } from "react-native";
 import React from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -55,3 +56,5 @@ const ScreenModalAndroidView = ({ children }: ScreenModalAndroidViewProps) => {
 };
 
 export default ScreenModalAndroidView;
+
+const styles = StyleSheet.create({});

@@ -1,11 +1,6 @@
-import { UserDTO } from "@/dtos/user.dto"
-import {PlayerQueryKeys} from "../types/queries-type"
-import { SermonItemDTO } from "@/dtos/sermon.dto"
-import { useQuery } from "@tanstack/react-query"
-import auth from "@/api/auth"
+import { PlayerQueryKeys } from "../types/queries-type"
+import type { SermonItemDTO } from "@/types/sermon"
 import { QueryKeys } from "@/utils/enums.util"
-import { useUserStore } from "@/stores/user-store"
-
 
 export const ACTIVE_INDEX_QUERY_KEY = [PlayerQueryKeys.ActiveIndex]
 
@@ -21,26 +16,7 @@ export const UNSHUFFLED_QUEUE_QUERY_KEY = [PlayerQueryKeys.UnshuffledQueue]
 
 export const SHUFFLED_QUERY_KEY = [PlayerQueryKeys.Shuffled]
 
-
-
-export const UserDataQueryKey = (user: UserDTO, item: SermonItemDTO) => [
-	QueryKeys.UserData,
-	user.id as string,
-	item.id as string,
-]
-
-
-
-export const useIsFavorite = (item: SermonItemDTO) => {
-	const api = auth
-	const user = useUserStore()
-
-	return useQuery({
-		queryKey: UserDataQueryKey(user!, item),
-		queryFn: () => api,
-		select: (data) => typeof data === 'object' && data.logoutUser,
-		enabled: !!api && !!user && !!item.id, // Only run if we have the required data
-	})
-}
-
-
+export const UserDataQueryKey = (
+	user: { id: string } | null | undefined,
+	item: SermonItemDTO,
+) => [QueryKeys.UserData, user?.id as string, item.id as string]

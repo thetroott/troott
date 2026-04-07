@@ -1,71 +1,71 @@
-import { Image, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import React from "react";
 import { theme } from "@/constants/theme";
 import { FlashList } from "@shopify/flash-list";
 import Text from "@/components/ui/text";
 import { SeeMore } from "@/components/containers/navigation";
 import { TrackCard } from "@/components/containers/player-old";
+import { useSermonsCatalog } from "@/engine/hooks/useSermonsCatalog";
+import { ISermonTrack } from "@/dtos/sermon.dto";
 import { tracks } from "@/_data/_mock/tracks";
-import { useSermonsCatalogQuery } from "@/engine/hooks/useSermonsCatalogQuery";
+
+const FALLBACK_TRACK_IMAGE = require("@/assets/images/liked.png");
 
 const MoreFromMinister = () => {
-  const { data: sermons, isLoading } = useSermonsCatalogQuery();
+  const { data: sermons, isLoading } = useSermonsCatalog();
+  
+  // Use fallback data if sermons are not loaded
   const dataSource = sermons && sermons.length > 0 ? sermons : tracks;
-  const ministerSermons =
-    dataSource?.filter((sermon) => {
-      const legacy = sermon as { artist?: string | null; minister?: string | null };
-      const name = legacy.minister ?? legacy.artist;
-      return name?.includes("Apostle Joshua Selman");
-    }) ?? [];
-  const ministerName =
-    ministerSermons.length > 0
-      ? (() => {
-          const first = ministerSermons[0] as { artist?: string | null; minister?: string | null };
-          return first.minister ?? first.artist;
-        })()
-      : "Pastor Sam Adeyemi";
+  
+  // Filter sermons by a specific minister (Apostle Joshua Selman in this case)
+  const ministerSermons = dataSource?.filter(sermon => 
+    (sermon.artist || sermon.minister)?.includes("Apostle Joshua Selman")
+  ) || [];
 
+  console.log('MoreFromminister - dataSource length:', dataSource?.length, 'ministerSermons length:', ministerSermons.length);
+  
+  const ministerName = ministerSermons.length > 0 
+    ? (ministerSermons[0].artist || ministerSermons[0].minister) 
+    : "Pastor Sam Adeyemi";
+  
   if (isLoading && (!dataSource || dataSource.length === 0)) {
     return (
-      <View className="gap-6">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center gap-2.5">
+      <View style={styles.container}>
+        <View style={styles.titleContainer}>
+          <View style={styles.imageContainer}>
             <Image
+              style={styles.image}
               source={require("@/assets/images/2.jpg")}
-              className="h-12 w-12 rounded-full"
             />
-            <View className="gap-2">
+            <View style={{ gap: theme.sizes.spacing.sm }}>
               <Text>More From</Text>
-              <Text className="text-neutral-100" weight="semiBold" size="md">
+              <Text color={theme.colors.white[50]} weight="semiBold" size="md">
                 Loading...
               </Text>
             </View>
           </View>
           <SeeMore />
         </View>
-        <Text className="py-5 text-center text-neutral-400">
+        <Text style={{ color: theme.colors.grey[300], textAlign: 'center', paddingVertical: 20 }}>
           Loading sermons...
         </Text>
       </View>
     );
   }
-
-  const sermonsToShow =
-    ministerSermons.length > 0
-      ? ministerSermons.slice(0, 6)
-      : dataSource?.slice(0, 6) ?? [];
-
+  
+  const sermonsToShow = ministerSermons.length > 0 ? ministerSermons.slice(0, 6) : dataSource?.slice(0, 6) || [];
+  
   return (
-    <View className="gap-6">
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2.5">
+    <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <View style={styles.imageContainer}>
           <Image
+            style={styles.image}
             source={require("@/assets/images/2.jpg")}
-            className="h-12 w-12 rounded-full"
           />
-          <View className="gap-2">
+          <View style={{ gap: theme.sizes.spacing.sm }}>
             <Text>More From</Text>
-            <Text className="text-neutral-100" weight="semiBold" size="md">
+            <Text color={theme.colors.white[50]} weight="semiBold" size="md">
               {ministerName}
             </Text>
           </View>
@@ -81,15 +81,18 @@ const MoreFromMinister = () => {
         decelerationRate={-1}
         estimatedItemSize={290}
         renderItem={({ item }) => {
-          const sermon = item as any;
+          const sermon = item as any; // Handle both ISermonTrack and mock track types
           return (
             <TrackCard
               id={sermon.id}
-              url={sermon.url || sermon.sermon}
+              url={sermon.url ?? sermon.sermon}
+              sermon={sermon.sermon ?? sermon.url}
               title={sermon.title || ""}
               artist={sermon.artist || sermon.minister || ""}
+              minister={sermon.minister || sermon.artist || ""}
               duration={sermon.duration || 0}
-              artwork={sermon.artwork || sermon.image}
+              artwork={sermon.artwork ?? sermon.image}
+              image={sermon.image ?? sermon.artwork ?? FALLBACK_TRACK_IMAGE}
               variant="large"
               cardStyle={{
                 marginRight: theme.sizes.spacing.md,
@@ -104,3 +107,24 @@ const MoreFromMinister = () => {
 };
 
 export default MoreFromMinister;
+
+const styles = StyleSheet.create({
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  container: {
+    gap: theme.sizes.spacing.lg,
+  },
+  imageContainer: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+  },
+  image: {
+    height: 48,
+    width: 48,
+    borderRadius: theme.sizes.radius.full,
+  },
+});

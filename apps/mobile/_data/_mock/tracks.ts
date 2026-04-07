@@ -1,6 +1,6 @@
-import type { SermonItemDTO } from "@/dtos/sermon.dto";
+import type { ISermonTrack } from "@/dtos/sermon.dto";
 
-export const tracks: Partial<SermonItemDTO & { sermon?: string | number }>[] = [
+export const tracks: Partial<ISermonTrack>[] = [
   {
     id: "001",
     sermon: require("@/assets/audio/building-your-circle-of-intigators.mp3"),

@@ -1,57 +1,174 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { AppState, Platform } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { SplashScreen, Stack } from "expo-router";
+import "react-native-reanimated";
+import { logWorkletsRuntimeDiagnostics } from "@/engine/helpers/worklets-runtime-diagnostics";
+import { StatusBar } from "expo-status-bar";
 
-import { useColorScheme } from '@/components/useColorScheme';
+if (__DEV__) {
+  logWorkletsRuntimeDiagnostics();
+}
+import { useFonts } from "expo-font";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { matterFonts } from "@/constants/typography";
+import { ONE_DAY, queryClient } from "@/services/query-client";
+import CustomSplashScreen from "@/components/containers/shared/splash";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { PortalHost } from "@/components/ui/portal";
+import { theme } from "@/constants/theme";
+import { Toaster } from "@/components/ui/toast";
+import { requestStoragePermission } from "@/lib/permisson-helpers";
+import { queryClientPersister } from "@/services/storage";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { enableScreens } from 'react-native-screens'
+import { startPlayerService } from "@/engine/player/setup";
+import Initialize from "@/engine/helpers/initialization";
+import { useUpdateOptions } from "@/engine/player/useUpdateOptions";
+import { attachEnginePlaybackListeners } from "@/engine/player/background";
+import { mergeLastPlayedPosition } from "@/engine/state/last-played-sync";
+import MiniPlayer from "@/components/engine/mini-player";
+import TrackPlayer from "@rntp/player";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
+enableScreens(true)
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Prevent splash from auto hiding
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+const RootLayout = () => {
+
+  const [fontsLoaded, fontError] = useFonts(matterFonts);
+  const [playerIsReady, setPlayerIsReady] = useState<boolean>(false)
+  const androidSetupRetryRef = useRef(false)
+  const playerListenersAttachedRef = useRef(false)
+
+    useEffect(() => {
+      let cancelled = false
+
+      const bootstrapPlayer = async () => {
+        try {
+          await startPlayerService()
+          await Initialize()
+          await useUpdateOptions(false)
+          if (!cancelled && !playerListenersAttachedRef.current) {
+            attachEnginePlaybackListeners()
+            playerListenersAttachedRef.current = true
+          }
+          if (!cancelled) {
+            setPlayerIsReady(true)
+            androidSetupRetryRef.current = false
+          }
+        } catch (error: unknown) {
+          const message =
+            error && typeof error === "object" && "message" in error
+              ? String((error as { message: unknown }).message)
+              : String(error)
+          const code =
+            error && typeof error === "object" && "code" in error
+              ? String((error as { code: unknown }).code)
+              : ""
+
+          if (
+            Platform.OS === "android" &&
+            (code === "android_cannot_setup_player_in_background" ||
+              message.includes("android_cannot_setup_player_in_background"))
+          ) {
+            console.warn("[Player] Setup deferred until app is foreground:", message)
+            androidSetupRetryRef.current = true
+            if (!cancelled) setPlayerIsReady(true)
+            return
+          }
+
+          console.error("[Player] Bootstrap failed:", error)
+          if (!cancelled) {
+            setPlayerIsReady(true)
+          }
+        }
+      }
+
+      void bootstrapPlayer()
+      requestStoragePermission()
+
+      const sub = AppState.addEventListener("change", (state) => {
+        if (state !== "active" || !androidSetupRetryRef.current || cancelled) return
+        void bootstrapPlayer()
+      })
+
+      return () => {
+        cancelled = true
+        sub.remove()
+      }
+    }, []);
 
   useEffect(() => {
-    if (loaded) {
+    if (!playerIsReady) return;
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state !== "background" && state !== "inactive") return;
+      try {
+        const { position, duration } = TrackPlayer.getProgress();
+        mergeLastPlayedPosition(position, duration);
+      } catch {
+        /* player not initialized */
+      }
+    });
+    return () => sub.remove();
+  }, [playerIsReady]);
+
+  // Hide splash screen once fonts and player are ready
+  useEffect(() => {
+    if (fontsLoaded && playerIsReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [fontsLoaded, playerIsReady]);
 
-  if (!loaded) {
-    return null;
+  // Show splash until fonts AND player are ready
+  if (!fontsLoaded || !playerIsReady || fontError) {
+    return <CustomSplashScreen />;
   }
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+                  <PersistQueryClientProvider
+                      client={queryClient}
+                      persistOptions={{
+                      persister: queryClientPersister,
+                      /**
+                       * Maximum query data age of one day
+                       */
+                      maxAge: ONE_DAY,
+                      }}
+                    >
+
+                    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.black[50] }} >
+                        <Stack screenOptions={{ headerShown: false }} >
+                        <Stack.Screen name="index" />
+                        <Stack.Screen
+                          name="auth"
+                          options={{
+                            presentation: "modal",
+                          }}
+                        />
+                        <Stack.Screen name="onboarding" />
+                        <Stack.Screen
+                          name="track"
+                          options={{
+                            presentation: "fullScreenModal",
+                            animation: "slide_from_bottom",
+                          }}
+                        />
+                        <Stack.Screen name="player" />
+                      </Stack>
+                      <MiniPlayer />
+                      <StatusBar style="light" />
+                      <PortalHost />
+                      <Toaster />
+                    </SafeAreaView>
+                  </PersistQueryClientProvider>
+              </SafeAreaProvider>
+      </GestureHandlerRootView>
   );
-}
+};
+
+export default RootLayout;

@@ -6,9 +6,10 @@ export interface ITrackCard {
   variant: "small" | "large";
   minister: string;
   duration: string | number;
-  image: string;
+  image: string | number;
   cardStyle?: ViewStyle;
-  sermon?: string;
+  /** Bundled audio module id (`require(...)`) or legacy string */
+  sermon?: string | number;
 }
 
 export interface IPlayListCard {

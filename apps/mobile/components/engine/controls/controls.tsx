@@ -4,7 +4,7 @@ import { usePrevious, useSkip, useToggleRepeatMode, useToggleShuffle } from "@/e
 import { useRepeatModeStoreValue, useShuffle } from "@/stores/player/queue"
 import React from "react"
 import { View } from "react-native"
-import { RepeatMode } from "react-native-track-player"
+import { RepeatMode } from "@rntp/player"
 
 
 export default function Controls() {
@@ -56,7 +56,7 @@ export default function Controls() {
       {/* Repeat */}
       <Icon
         small
-        name={repeatMode === RepeatMode.Track ? "repeat-once" : "repeat"}
+        name={repeatMode === RepeatMode.One ? "repeat-once" : "repeat"}
         color={repeatMode === RepeatMode.Off ? "#ccc" : "#3B82F6"}
         onPress={() => toggleRepeatMode()}
       />

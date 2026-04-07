@@ -1,39 +1,89 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "troott-app",
+    "slug": "troott",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "automatic",
+    "scheme": "troottmobile",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/app-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#171717"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dmlscript.troottclient",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
+        "UIBackgroundModes": [
+          "audio"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#171717",
+        "foregroundImage": "./assets/app-icon.png",
+        "backgroundImage": "./assets/app-icon.png",
+        "monochromeImage": "./assets/app-icon.png"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "CALL_PHONE",
+        "CALL_PRIVILEGED"
+      ],
+      "package": "com.dmlscript.troottclient"
     },
     "web": {
-      "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
     },
+    "extra": {
+      "eas": {
+        "projectId": "48464c89-4d39-460d-b9b3-f451321cce9c"
+      }
+    },
+    "owner": "pacepard labs",
     "plugins": [
-      "expo-router"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "2.0.21",
+            "newArchEnabled": true
+          },
+          "ios": {
+            "deploymentTarget": "16.0",
+            "newArchEnabled": true
+          }
+        }
+      ],
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#171717",
+          "image": "./assets/app-icon.png",
+          "resizeMode": "contain",
+          "imageWidth": 200
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Troott to access your photos."
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-asset"
+    ]
   }
 }

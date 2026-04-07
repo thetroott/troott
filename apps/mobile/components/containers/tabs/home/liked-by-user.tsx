@@ -1,24 +1,27 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import React from "react";
 import liked from "@/assets/images/liked.png";
-import Text from "@/components/ui/text";
+import { Image } from "react-native";
 import { theme } from "@/constants/theme";
+import Text from "@/components/ui/text";
 
-const CARD_SIZE = theme.sizes.screen.width * 0.44;
-
+interface ILikedbyuser {
+  albumCovers: string[];
+}
 const LikedByUser = () => {
   return (
-    <Pressable className="gap-2.5" accessibilityRole="button" accessibilityLabel="Liked by you">
+    <Pressable style={{gap:10}}>
       <View style={styles.container}>
         <Image source={liked} style={styles.image} />
       </View>
-      <View className="gap-1.5">
-        <View className="flex-row items-center gap-1.5">
-          <Text className="text-neutral-100" weight="medium" size="base">
+      <View style={{gap:5}}>
+        <View style={styles.textContainer}>
+          
+          <Text color={theme.colors.white[50]} weight="medium" size="base">
             Liked by you
           </Text>
         </View>
-        <Text className="text-neutral-400">Saved to your Library</Text>
+        <Text>Saved to your Library</Text>
       </View>
     </Pressable>
   );
@@ -26,17 +29,21 @@ const LikedByUser = () => {
 
 export default LikedByUser;
 
-// Allowed exception: runtime dimension (screen width) for card size.
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    width: CARD_SIZE,
+    width: theme.sizes.screen.width * 0.44,
     flexWrap: "wrap",
     borderRadius: 10,
     overflow: "hidden",
   },
   image: {
-    height: CARD_SIZE,
-    width: CARD_SIZE,
+    height: theme.sizes.screen.width * 0.44,
+    width: theme.sizes.screen.width * 0.44,
+  },
+  textContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
 });

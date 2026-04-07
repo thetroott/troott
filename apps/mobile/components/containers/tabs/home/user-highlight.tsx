@@ -4,29 +4,36 @@ import { theme } from "@/constants/theme";
 import Text from "@/components/ui/text";
 import { SolidIcons } from "@/assets/icons";
 
-const BOX_SIZE = theme.sizes.screen.width * 0.44;
-
+interface IUserHighlights {
+  albumCovers: string[];
+}
 const UserHighlights = () => {
   return (
-    <Pressable className="gap-2.5" accessibilityRole="button" accessibilityLabel="Troott Highlights">
+    <Pressable style={{ gap: 10 }}>
       <View style={styles.container}>
         <View style={styles.box}>
-          <Pressable className="rounded-full bg-teal-400 p-4" accessibilityRole="button" accessibilityLabel="Play">
+          <Pressable style={styles.playBtn}>
             <SolidIcons.PlayIcon
               color={theme.colors.black[50]}
               size={28}
-              style={{ transform: [{ translateX: 1 }] }}
+              style={{
+                transform: [
+                  {
+                    translateX: 1,
+                  },
+                ],
+              }}
             />
           </Pressable>
         </View>
       </View>
-      <View className="gap-1.5">
-        <View className="flex-row items-center gap-1.5">
-          <Text className="text-neutral-100" weight="medium" size="base">
+      <View style={{ gap: 5 }}>
+        <View style={styles.textContainer}>
+          <Text color={theme.colors.white[50]} weight="medium" size="base">
             Troott Highlights
           </Text>
         </View>
-        <Text className="text-neutral-400">View Recent Updates</Text>
+        <Text>View Recent Updates</Text>
       </View>
     </Pressable>
   );
@@ -34,20 +41,30 @@ const UserHighlights = () => {
 
 export default UserHighlights;
 
-// Allowed exception: runtime dimension (screen width) for box size.
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    width: BOX_SIZE,
+    width: theme.sizes.screen.width * 0.44,
     flexWrap: "wrap",
     borderRadius: 10,
     overflow: "hidden",
+    color: "#252525",
   },
   box: {
-    height: BOX_SIZE,
-    width: BOX_SIZE,
+    height: theme.sizes.screen.width * 0.44,
+    width: theme.sizes.screen.width * 0.44,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#252525",
+  },
+  textContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  playBtn: {
+    padding: theme.sizes.spacing.md,
+    borderRadius: theme.sizes.radius.full,
+    backgroundColor: "#08FFDB",
   },
 });

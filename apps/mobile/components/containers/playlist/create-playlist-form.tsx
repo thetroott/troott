@@ -2,15 +2,18 @@ import { Image, Pressable, StyleSheet, View } from "react-native";
 import React from "react";
 import { SolidIcons } from "@/assets/icons";
 import { useForm } from "react-hook-form";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import FormInput from "@/components/ui/forminput";
 import { theme } from "@/constants/theme";
 import Text from "@/components/ui/text";
 import * as ImagePicker from "expo-image-picker";
 import FormSwitch from "@/components/ui/form-switch";
+
 import Button from "@/components/ui/button";
 import { PlayListValidationSchema, PlayListValidationSchemaType } from "@/validation/playlist";
 import { IncognitoIcon } from "@/components/containers/shared/Icons";
+;
 
 const CreatePlaylistForm = () => {
   const { control, handleSubmit, formState, setValue, getValues } =
@@ -44,23 +47,18 @@ const CreatePlaylistForm = () => {
 
   return (
     <View>
-      <Pressable
-        style={styles.camera}
-        onPress={handleImagePicker}
-        accessibilityRole="button"
-        accessibilityLabel="Pick playlist cover"
-      >
-        {!image && (
-          <SolidIcons.CameraIcon color={theme.colors.white[50]} size={30} />
-        )}
+      <Pressable style={styles.camera} onPress={handleImagePicker}>
+        {!image && <SolidIcons.CameraIcon color={theme.colors.white[50]} size={30} />}
         {image && (
           <Image
-            source={{ uri: image }}
-            className="h-full w-full rounded-[15px]"
+            source={{
+              uri: image,
+            }}
+            style={{ width: "100%", height: "100%", borderRadius: 15 }}
           />
         )}
       </Pressable>
-      <View className="gap-6">
+      <View style={{ gap: theme.sizes.spacing.lg }}>
         <FormInput
           label="Name"
           control={control}
@@ -71,41 +69,73 @@ const CreatePlaylistForm = () => {
           label="Description"
           control={control}
           name="title"
+          // multiline
           placeholder="Uplift, inspire and share the word"
         />
 
-        <View className="mt-6 gap-4">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center gap-2">
-              <View className="rounded-full bg-neutral-700 p-4">
-                <SolidIcons.UsersIcon
-                  color={theme.colors.grey[200]}
-                  size={20}
-                />
+        <View
+          style={{
+            gap: theme.sizes.spacing.md,
+            marginTop: theme.sizes.spacing.lg,
+          }}
+        >
+          <View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: theme.sizes.spacing.sm,
+                }}
+              >
+                <View style={styles.iconBackground}>
+                  <SolidIcons.UsersIcon
+                    color={theme.colors.grey[200]}
+                    size={20}
+                  />
+                </View>
+                <View style={{ gap: theme.sizes.spacing.xs }}>
+                  <Text color={theme.colors.grey[200]} size="base">
+                    Collaborative
+                  </Text>
+                  <Text size="xs" color={theme.colors.grey[500]}>
+                    All others to add tracks
+                  </Text>
+                </View>
               </View>
-              <View className="gap-0.5">
-                <Text className="text-neutral-200" size="base">
-                  Collaborative
-                </Text>
-                <Text size="xs" className="text-neutral-500">
-                  All others to add tracks
-                </Text>
-              </View>
+              <FormSwitch control={control} name="collaborative" />
             </View>
-            <FormSwitch control={control} name="collaborative" />
           </View>
 
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center gap-2">
-              <View className="rounded-full bg-neutral-700 p-4">
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: theme.sizes.spacing.sm,
+              }}
+            >
+              <View style={styles.iconBackground}>
                 <IncognitoIcon
                   color={theme.colors.grey[200]}
                   height={20}
                   width={20}
                 />
               </View>
-              <View className="gap-0.5">
-                <Text className="text-neutral-200" size="base">
+              <View style={{ gap: theme.sizes.spacing.xs }}>
+                <Text color={theme.colors.grey[200]} size="base">
                   Private
                 </Text>
               </View>
@@ -115,7 +145,10 @@ const CreatePlaylistForm = () => {
         </View>
         <Button
           label="Create playlist"
-          className="mt-8 w-full"
+          containerStyle={{
+            marginTop: theme.sizes.spacing.xl,
+            width: "100%",
+          }}
         />
       </View>
     </View>
@@ -124,7 +157,6 @@ const CreatePlaylistForm = () => {
 
 export default CreatePlaylistForm;
 
-// Allowed exception: runtime dimensions (screen width) and shadow for camera button.
 const styles = StyleSheet.create({
   camera: {
     borderRadius: 15,
@@ -138,5 +170,13 @@ const styles = StyleSheet.create({
     elevation: 5,
     shadowColor: theme.colors.grey[500],
     marginTop: theme.sizes.spacing.md,
+  },
+  iconBackground: {
+    backgroundColor: theme.colors.grey[700],
+    padding: theme.sizes.spacing.base,
+    borderRadius: 100,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.sizes.spacing.sm,
   },
 });

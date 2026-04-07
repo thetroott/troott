@@ -1,5 +1,5 @@
+import { StyleSheet, View } from "react-native";
 import React from "react";
-import { HStack, VStack } from "@/components/shared";
 import FormInput from "@/components/ui/forminput";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,7 @@ import TermsAndConditions from "@/components/containers/auth/TermsConditions";
 
 const SignUpform = () => {
   const { setEmail } = useRegisterStore();
+
   const form = useForm<SignupSchemaType>({
     defaultValues: {
       first_name: "",
@@ -22,15 +23,15 @@ const SignUpform = () => {
     },
     resolver: zodResolver(SignupSchema),
   });
-
   function handleSubmit(data: SignupSchemaType) {
     setEmail(data.email);
-    router.push("/verify-email");
+    console.log(data);
+    router.push("/auth/verify-email");
   }
 
   return (
-    <VStack className="w-full">
-      <HStack justify="between" gap="3" align="stretch" className="w-full">
+    <View style={styles.container}>
+      <View style={styles.nameContainer}>
         <FormInput
           name="first_name"
           control={form.control}
@@ -45,7 +46,7 @@ const SignUpform = () => {
           leftIcon={<User color={theme.colors.grey[400]} size={20} />}
           containerStyle={{ width: theme.sizes.screen.width * 0.45 }}
         />
-      </HStack>
+      </View>
       <FormInput
         name="email"
         control={form.control}
@@ -59,14 +60,28 @@ const SignUpform = () => {
         placeholder="*********"
         leftIcon={<Lock color={theme.colors.grey[400]} size={20} />}
       />
+
       <TermsAndConditions />
+
       <Button
         onPress={form.handleSubmit(handleSubmit)}
         disabled={!form.formState.isValid}
         label="Continue"
-      />
-    </VStack>
+      ></Button>
+    </View>
   );
 };
 
 export default SignUpform;
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 20,
+  },
+  nameContainer: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+});

@@ -1,0 +1,31 @@
+---
+description: Use @rntp/player with Expo (engine patterns, setup, foreground listeners)
+alwaysApply: false
+---
+# @rntp/player + Expo (dev client)
+
+## Registration and setup
+
+- **No `registerPlaybackService`**: `@rntp/player` v5 drives lock screen / remotes natively. Foreground listeners (active track sync, custom **Previous** threshold, errors) live in `engine/player/background.ts` as `attachEnginePlaybackListeners()`.
+- **Wire listeners once after bootstrap**: In `app/_layout.tsx`, after `startPlayerService()` + `Initialize()` succeed, set `trackPlayerBootstrapped` and run `useEffect(() => attachEnginePlaybackListeners(), [trackPlayerBootstrapped])`. Do **not** attach before setup completes (especially on Android deferred init).
+- **Player setup**: Call `startPlayerService()` from `@/engine/player/setup` in `app/_layout.tsx`. Optionally run `Initialize()` from `engine/helpers/initialization.ts` after setup to restore queue/repeat from store. Keep the Android foreground retry when setup throws background errors.
+- **Do not** call legacy `TrackPlayer.updateOptions` / rating APIs. Use `useUpdateOptions` from `@/engine/player/useUpdateOptions` (wraps `setCommands` via `applyTrackPlayerNotificationOptions`). Remote commands are defined in `engine/constants/capabilities.ts` (`PlayerCommand` + hybrid `Previous: 'js'` for threshold parity).
+
+## Engine usage
+
+- **Setup**: `engine/player/setup.ts` (iOS/Android options, Cast receiver id, progress sync), `engine/player/applyTrackPlayerOptions.ts`, `engine/player/background.ts` (MediaItemTransition -> `handleActiveTrackChanged`, RemotePrevious threshold, PlaybackError).
+- **Queue and state**: `engine/core/queue.ts` (`loadQueue` uses `setMediaItems`, `insertMediaItems`, `addMediaItems`); `engine/queries/current-track.ts` and `@/stores/player/queue`. Sync on `MediaItemTransition` / `handleActiveTrackChanged`.
+- **Shuffle / skip**: `engine/core/shuffle.ts`, `engine/core/skip-previous.ts` (threshold from `engine/constants/engine.ts`).
+- **Controls**: `engine/hooks/useControl.ts`. Progress: `engine/queries/playback-queries.ts` (`useProgress`, `usePlaybackState`, `UiPlaybackState`).
+- **Track type**: `SermonTrackDTO` extends `MediaItem`; `engine/utils/mappers.ts` maps `artist`/`minister`, `artworkUrl`, `mediaId`.
+- **Offline**: Pass `networkStatus` into `loadQueue`; `filterTracksOnNetworkStatus` + `getAudioCache()` from `engine/utils/offline.tsx`.
+- **Google Cast**: `useControl` and `playback-queries` branch on `PlayerEngine.GOOGLE_CAST` and `react-native-google-cast` remote client. Local queue still updates via `loadQueue`; verify Cast load/play after queue changes on device.
+
+## Expo-specific
+
+- **Background audio**: `app.json` iOS `UIBackgroundModes` must include `"audio"`.
+- **Native modules**: Use `expo-dev-client` for development builds; rebuild after native dependency changes.
+
+## Optional Android headless
+
+- `registerBackgroundEventHandler` from `@rntp/player` is only needed for analytics or dynamic queue work while headless—not required for basic playback.

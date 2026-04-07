@@ -1,24 +1,11 @@
-import { useLoadNewQueue } from "@/engine/hooks/useControl"
-import { useRecentlyPlayedTracks } from "@/engine/hooks/useRecentlyPlayedTracks"
-import { useNetworkStatus } from "@/stores/app/network"
-import { useCurrentTrack } from "@/stores/player/queue"
-import { useRouter } from "expo-router"
+import { View } from "react-native";
 
+/**
+ * Placeholder for a second trending playlist surface (WIP).
+ * Export a valid component so the module type-checks; wire data + UI when ready.
+ */
+const TrendingPlayListDuplicate = () => {
+	return <View />;
+};
 
-const TrendingPlayList = () => {
-
-
-    const [networkStatus] = useNetworkStatus()
-
-    const nowPlaying = useCurrentTrack()
-
-    const router = useRouter()
-
-    const loadNewQueue = useLoadNewQueue()
-
-	const tracksInfiniteQuery = useRecentlyPlayedTracks()
-
-
-}
-
-export default TrendingPlayList
+export default TrendingPlayListDuplicate;

@@ -21,7 +21,9 @@ export default function HorizontalCardList({
 			data={data}
 			renderItem={renderItem}
 			removeClippedSubviews
-			className="overflow-hidden"
+			style={{
+				overflow: 'hidden',
+			}}
 			{...props}
 		/>
 	)

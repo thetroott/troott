@@ -38,6 +38,34 @@ We’re answering key questions to improve user experience:
 - **AsyncStorage / MMKV**
 - **SVG animations**
 
+## Monorepo (troott workspace)
+
+This app lives under `apps/mobile` in the Troott monorepo. From the repo root, do **not** run Expo at the repository root without a project directory.
+
+### Native projects (Android / iOS)
+
+Generated native trees live **only** under this package: **`apps/mobile/android`** and **`apps/mobile/ios`**. Do **not** run bare `expo prebuild` with the monorepo root as the current working directory and no project path (that can recreate wrong root-level folders or resolve `./assets/...` from the wrong place).
+
+**No backward compatibility:** the monorepo does **not** support repository-root **`android/`** or **`ios/`** for this app. Do not reintroduce them, symlink them, or document workflows that expect native projects outside **`apps/mobile`**.
+
+- **Expo SDK 55** (React 19.2, React Native 0.83). The previous **`@expo/cli` pnpm patch** (simulator open-URL noise) has been **removed**; if the iOS Simulator logs **`LSApplicationWorkspaceErrorDomain` code `115`** after a dev-client deep link, it is usually **harmless**—bring the app to the foreground manually if needed.
+- From repo root: **`pnpm prebuild:mobile`** or **`pnpm prebuild:mobile:clean`** (runs `expo prebuild` with **`pnpm --dir apps/mobile`**, so the Expo project root and asset paths are this package).
+- From **`apps/mobile`**: **`pnpm prebuild`** / **`pnpm prebuild:clean`** (same output, `expo prebuild .`).
+
+Open **`apps/mobile/ios/*.xcworkspace`** in Xcode and the **`apps/mobile/android`** folder in Android Studio.
+
+**EAS:** `eas.json` lives in this package; run EAS commands with **`apps/mobile`** as the project directory (for example `cd apps/mobile` before `eas build`, or pass your CLI’s equivalent of `--project-dir apps/mobile` from the repo root).
+
+- **Metro (port 8177, matches `expo run:ios`):** `pnpm start:mobile` or `pnpm dev:mobile`, or `pnpm expo:mobile:start`. For ad-hoc Expo CLI subcommands use `pnpm expo:mobile -- <args>` (if you run `start` this way, pass `--port 8177`).
+- **iOS native build + install:** `pnpm ios` from the repo root (uses the same Metro port).
+- **Use your development build** (bundle id `com.dmlscript.troottclient`), not Expo Go, when the project depends on `expo-dev-client` and custom native modules.
+
+Metro is configured to resolve `react`, `react-native`, and `scheduler` from this package so the bundler does not pick duplicate copies from the hoisted workspace tree. Nested `react-native` pulled in under `react-native-is-edge-to-edge` is rewritten to the app’s canonical `react-native` install (fixes Android parse errors on newer nested sources).
+
+### react-native-track-player and native code
+
+If Metro logs warnings about missing Objective-C methods for sleep timer APIs (`getSleepTimerProgress`, `setSleepTimer`, etc.), the **JavaScript npm version** and the **native module inside your dev client** are out of sync. Fix by aligning the library version with your Expo/RN SDK, then rebuild the development client (`expo prebuild` / `expo run:ios` / EAS dev build) so native code matches the JS package.
+
 
 ## Getting Started
 

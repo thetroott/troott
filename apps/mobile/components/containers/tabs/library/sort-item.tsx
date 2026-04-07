@@ -1,4 +1,4 @@
-import { Pressable } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import React from "react";
 import Text from "@/components/ui/text";
 import { SolidIcons } from "@/assets/icons";
@@ -13,20 +13,19 @@ interface CategoryProp {
 const SortItem = ({ selected, onPress, name }: CategoryProp) => {
   return (
     <Pressable
-      className="flex-row items-center justify-between"
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
       onPress={onPress}
     >
-      <Text
-        size="base"
-        className={selected ? "text-neutral-100" : "text-neutral-500"}
-      >
-        {name}
-      </Text>
-      {selected && (
-        <SolidIcons.CheckCircleIcon color={theme.colors.white[50]} size={18} />
-      )}
+      <Text size="base" color={selected ? theme.colors.white[50] : theme.colors.grey[400]}>{name}</Text>
+      {selected && <SolidIcons.CheckCircleIcon color={theme.colors.white[50]} size={18} />}
     </Pressable>
   );
 };
 
 export default SortItem;
+
+const styles = StyleSheet.create({});

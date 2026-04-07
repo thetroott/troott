@@ -1,0 +1,46 @@
+# Confirms the monorepo installs cleanly from the repo root (frozen lockfile + postinstall).
+# Expo SDK is declared on root + apps/mobile; this workflow does not build native apps.
+
+name: Verify monorepo install & Expo health
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: verify-expo-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-and-expo-doctor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies (postinstall: patch-package)
+        run: pnpm install --frozen-lockfile
+
+      - name: Print Expo / React Native pins
+        run: |
+          echo "Root package.json — expo: $(node -e "console.log(require('./package.json').dependencies?.expo ?? 'n/a')")"
+          echo "Root package.json — react: $(node -e "console.log(require('./package.json').dependencies?.react ?? 'n/a')")"
+          echo "apps/mobile — expo: $(node -e "console.log(require('./apps/mobile/package.json').dependencies?.expo ?? 'n/a')")"
+          echo "apps/mobile — react-native: $(node -e "console.log(require('./apps/mobile/package.json').dependencies?.['react-native'] ?? 'n/a')")"
+
+      - name: Expo doctor (mobile)
+        run: pnpm dlx expo-doctor@latest
+        working-directory: apps/mobile

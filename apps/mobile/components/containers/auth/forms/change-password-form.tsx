@@ -1,37 +1,49 @@
+import { StyleSheet, View } from "react-native";
 import React from "react";
-import { VStack } from "@/components/shared";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import OTPFormInput from "@/components/ui/otp-forminput";
 import Button from "@/components/ui/button";
 import Text from "@/components/ui/text";
 import TermsAndConditions from "@/components/containers/auth/TermsConditions";
+import { theme } from "@/constants/theme";
 import { router } from "expo-router";
 import { OTPSchema, OTPType } from "@/validation/otp";
 
-const ChangePasswordForm = () => {
+
+const VerifyEmailForm = () => {
   const form = useForm<OTPType>({
-    defaultValues: { otp: "" },
+    defaultValues: {
+      otp: "",
+    },
     resolver: zodResolver(OTPSchema),
   });
-
+  const handleFormSubmit = () => {
+    router.push("/onboarding/select-ministers");
+  };
   return (
-    <VStack className="w-full">
+    <View style={styles.container}>
       <OTPFormInput name="otp" control={form.control} />
       <TermsAndConditions />
       <Button
         label="Continue"
         disabled={!form.formState.isValid}
-        onPress={() => router.push("/onboarding/select-ministers")}
+        onPress={handleFormSubmit}
       />
-      <Text className="text-neutral-500">
+      <Text color={theme.colors.grey[500]}>
         This code will expire in 5 minutes.{" "}
       </Text>
-      <Text weight="semiBold" className="text-teal-500" size="base">
+      <Text weight="semiBold" color={theme.colors.teal[500]} size="base">
         Resend Code
       </Text>
-    </VStack>
+    </View>
   );
 };
 
-export default ChangePasswordForm;
+export default VerifyEmailForm;
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 20,
+  },
+});

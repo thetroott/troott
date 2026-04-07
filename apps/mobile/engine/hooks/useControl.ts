@@ -1,25 +1,21 @@
 import { useMutation } from "@tanstack/react-query"
 import useHapticFeedback from "../../hooks/shared/use-haptic-feedback"
-import TrackPlayer, { RepeatMode, State } from "react-native-track-player"
-import usePlayerEngineStore, { PlayerEngine } from "@/stores/player/engine"
+import TrackPlayer, { RepeatMode } from "@rntp/player"
+import usePlayerEngineStore, { PlayerEngine } from "@/engine/state/player-engine-store"
 import { useRemoteMediaClient } from "react-native-google-cast"
 import { useCallback } from "react"
-import { usePlayerQueueStore } from "@/stores/player/queue"
-import { AddToQueueMutation, QueueMutationDTO, QueueOrderMutation } from "@/dtos/player.dto"
+import { usePlayerQueueStore } from "@/engine/state/player-queue-store"
+import type { AddToQueueMutation, QueueMutationDTO, QueueOrderMutation } from "@/types/player-mutations"
 import { loadQueue, playLaterInQueue, playNextInQueue } from "@/engine/core/queue"
+import { getAutoplayCatalogAsSermonItems } from "@/engine/core/autoplay-tail"
+import type { ISermonTrack } from "@/types/sermon"
 import { QueuingType } from "@/utils/enums.util"
 import Toast from "react-native-toast-message"
-import { SermonTrackDTO } from "@/dtos/sermon.dto"
-import { useNavigation } from "@react-navigation/native"
-import { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import type { SermonTrackDTO } from "@/types/sermon"
 import { previous, skip } from "@/engine/core/skip-previous"
 import { isUndefined } from "lodash"
 import { handleDeshuffle, handleShuffle } from "@/engine/core/shuffle"
-import { useUpdateOptions } from "../player/useUpdateOptions"
-import { useTrackStore } from "@/stores/player-store"
-
-
-
+import { removeUpcomingMediaItems } from "@/engine/core/rntp-queue-helpers"
 
 /**
  * A mutation to handle starting playback
@@ -29,8 +25,10 @@ export const usePlay = () => {
 	const trigger = useHapticFeedback()
 
 	return useMutation({
-		onMutate: () => trigger('impactLight'),
-		mutationFn: TrackPlayer.play,
+		onMutate: () => trigger("impactLight"),
+		mutationFn: async () => {
+			TrackPlayer.play()
+		},
 	})
 }
 
@@ -48,57 +46,37 @@ export const useTogglePlayback = () => {
 	const trigger = useHapticFeedback()
 
 	return useCallback(async () => {
-		trigger('impactMedium')
-		const { state } = await TrackPlayer.getPlaybackState()
+		trigger("impactMedium")
 
-		if (state === State.Playing) {
-			console.debug('Pausing playback')
-			// handlePlaybackStateChanged(State.Paused)
+		if (TrackPlayer.isPlaying()) {
+			console.debug("Pausing playback")
 			if (isCasting && remoteClient) {
 				remoteClient.pause()
 				return
-			} else {
-				TrackPlayer.pause()
-				return
 			}
+			TrackPlayer.pause()
+			return
 		}
 
-		const { duration, position } = await TrackPlayer.getProgress()
+		const { duration, position } = TrackPlayer.getProgress()
 		if (isCasting && remoteClient) {
 			const mediaStatus = await remoteClient.getMediaStatus()
 			const streamPosition = mediaStatus?.streamPosition
 			if (streamPosition && duration <= streamPosition) {
 				await remoteClient.seek({
 					position: 0,
-					resumeState: 'play',
+					resumeState: "play",
 				})
 			}
 			await remoteClient.play()
 			return
 		}
-		// if the track has ended, seek to start and play
 		if (duration <= position) {
-			await TrackPlayer.seekTo(0)
+			TrackPlayer.seekTo(0)
 		}
 
-		// handlePlaybackStateChanged(State.Playing)
-		return TrackPlayer.play()
+		TrackPlayer.play()
 	}, [isCasting, remoteClient, trigger])
-}
-
-/** Like {@link useTogglePlayback} but updates legacy {@link useTrackStore} play/pause for shells that still read it. */
-export const useLegacySyncedTogglePlayback = () => {
-	const toggle = useTogglePlayback()
-
-	return useCallback(async () => {
-		await toggle()
-		const { state } = await TrackPlayer.getPlaybackState()
-		if (state === State.Playing) {
-			useTrackStore.getState().play()
-		} else {
-			useTrackStore.getState().pause()
-		}
-	}, [toggle])
 }
 
 
@@ -109,44 +87,24 @@ export const useToggleRepeatMode = () => {
 	const trigger = useHapticFeedback()
 
 	return useCallback(async () => {
-		trigger('impactLight')
-		const currentMode = await TrackPlayer.getRepeatMode()
+		trigger("impactLight")
+		const currentMode = TrackPlayer.getRepeatMode()
 		let nextMode: RepeatMode
 
 		switch (currentMode) {
 			case RepeatMode.Off:
-				nextMode = RepeatMode.Queue
+				nextMode = RepeatMode.All
 				break
-			case RepeatMode.Queue:
-				nextMode = RepeatMode.Track
+			case RepeatMode.All:
+				nextMode = RepeatMode.One
 				break
 			default:
 				nextMode = RepeatMode.Off
 		}
 
-		await TrackPlayer.setRepeatMode(nextMode)
+		TrackPlayer.setRepeatMode(nextMode)
 		usePlayerQueueStore.getState().setRepeatMode(nextMode)
 	}, [trigger])
-}
-
-export type LegacyRepeatMode = 'off' | 'all' | 'one'
-
-/**
- * Maps legacy UI repeat ("off" | "all" | "one") to RNTP {@link RepeatMode} and queue store.
- */
-export const useApplyLegacyRepeatMode = () => {
-	const trigger = useHapticFeedback()
-
-	return useCallback(
-		async (mode: LegacyRepeatMode) => {
-			trigger('impactLight')
-			const rnMode =
-				mode === 'off' ? RepeatMode.Off : mode === 'one' ? RepeatMode.Track : RepeatMode.Queue
-			await TrackPlayer.setRepeatMode(rnMode)
-			usePlayerQueueStore.getState().setRepeatMode(rnMode)
-		},
-		[trigger],
-	)
 }
 
 
@@ -174,7 +132,7 @@ export const useSeekTo = () => {
 				})
 				return
 			}
-			await TrackPlayer.seekTo(position)
+			TrackPlayer.seekTo(position)
 		},
 		[isCasting, remoteClient, trigger],
 	)
@@ -191,7 +149,7 @@ export const useSeekBy = () => {
 		async (seekSeconds: number) => {
 			trigger('clockTick')
 
-			await TrackPlayer.seekBy(seekSeconds)
+			TrackPlayer.seekBy(seekSeconds)
 		},
 		[trigger],
 	)
@@ -231,7 +189,7 @@ export const useAddToQueue = () => {
 				type: 'error',
 			})
 		} finally {
-			const newQueue = await TrackPlayer.getQueue()
+			const newQueue = TrackPlayer.getQueue()
 
 			usePlayerQueueStore.getState().setQueue(newQueue as SermonTrackDTO[])
 		}
@@ -242,36 +200,42 @@ export const useLoadNewQueue = () => {
 	const isCasting =
 		usePlayerEngineStore((state) => state.playerEngineData) === PlayerEngine.GOOGLE_CAST
 	const remoteClient = useRemoteMediaClient()
-	const navigation = useNavigation()
-    //const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>()
 
 	const trigger = useHapticFeedback()
 
 	return useCallback(
 		async (data: QueueMutationDTO) => {
 			trigger('impactLight')
-			await TrackPlayer.pause()
-			const { finalStartIndex, tracks } = await loadQueue({ ...data })
-			await useUpdateOptions(false)
+			TrackPlayer.pause()
+			const catalogTail = data.autoplayCatalogTail ?? getAutoplayCatalogAsSermonItems()
+			const prefer =
+				data.autoplayPreferMinister ??
+				data.track.minister ??
+				(data.track as ISermonTrack).artist ??
+				null
+			const { finalStartIndex, tracks } = await loadQueue({
+				...data,
+				autoplayCatalogTail: catalogTail,
+				autoplayPreferMinister: prefer,
+			})
 
 			usePlayerQueueStore.getState().setCurrentIndex(finalStartIndex)
 
-			console.debug('Successfully loaded new queue')
+			console.debug("Successfully loaded new queue")
 			if (isCasting && remoteClient) {
-				await TrackPlayer.skip(finalStartIndex)
-				//navigation.navigate('PlayerRoot', { screen: 'PlayerScreen' })
+				TrackPlayer.skipToIndex(finalStartIndex)
 				return
 			}
 
-			await TrackPlayer.skip(finalStartIndex)
+			TrackPlayer.skipToIndex(finalStartIndex)
 
-			if (data.startPlayback) await TrackPlayer.play()
+			if (data.startPlayback) TrackPlayer.play()
 
 			usePlayerQueueStore.getState().setQueueRef(data.queue)
 			usePlayerQueueStore.getState().setQueue(tracks)
 			usePlayerQueueStore.getState().setCurrentTrack(tracks[finalStartIndex])
 		},
-		[isCasting, remoteClient, navigation, trigger, usePlayerQueueStore],
+		[isCasting, remoteClient, trigger],
 	)
 }
 
@@ -308,7 +272,9 @@ export const useRemoveFromQueue = () => {
 
 	return useMutation({
 		onMutate: () => trigger('impactMedium'),
-		mutationFn: async (index: number) => TrackPlayer.remove([index]),
+		mutationFn: async (index: number) => {
+			TrackPlayer.removeMediaItem(index)
+		},
 		onSuccess: async (data: void, index: number) => {
 			console.debug(`Removed track at index ${index}`)
 		},
@@ -316,7 +282,7 @@ export const useRemoveFromQueue = () => {
 			console.error(`Failed to remove track at index ${index}:`, error)
 		},
 		onSettled: async () => {
-			const newQueue = await TrackPlayer.getQueue()
+			const newQueue = TrackPlayer.getQueue()
 
 			usePlayerQueueStore.getState().setQueue(newQueue as SermonTrackDTO[])
 		},
@@ -327,14 +293,16 @@ export const useRemoveUpcomingTracks = () => {
 	const trigger = useHapticFeedback()
 
 	return useMutation({
-		mutationFn: TrackPlayer.removeUpcomingTracks,
+		mutationFn: async () => {
+			removeUpcomingMediaItems()
+		},
 		onSuccess: () => trigger('notificationSuccess'),
 		onError: async (error: Error) => {
 			trigger('notificationError')
 			console.error('Failed to remove upcoming tracks:', error)
 		},
 		onSettled: async () => {
-			const newQueue = await TrackPlayer.getQueue()
+			const newQueue = TrackPlayer.getQueue()
 
 			usePlayerQueueStore.getState().setQueue(newQueue as SermonTrackDTO[])
 		},
@@ -347,11 +315,11 @@ export const useReorderQueue = () => {
 	return useMutation({
 		mutationFn: async ({ from, to }: QueueOrderMutation) => {
 			console.debug(
-				`TrackPlayer.move(${from}, ${to}) - Queue before move:`,
-				(await TrackPlayer.getQueue()).length,
+				`TrackPlayer.moveMediaItem(${from}, ${to}) - Queue before move:`,
+				TrackPlayer.getQueue().length,
 			)
 
-			await TrackPlayer.move(from, to)
+			TrackPlayer.moveMediaItem(from, to)
 		},
 		onMutate: async ({ from, to }: { from: number; to: number }) => {
 			console.debug(`Reordering queue from ${from} to ${to}`)
@@ -364,7 +332,7 @@ export const useReorderQueue = () => {
 			console.error('Failed to reorder queue:', error)
 		},
 		onSettled: async () => {
-			const newQueue = await TrackPlayer.getQueue()
+			const newQueue = TrackPlayer.getQueue()
 
 			usePlayerQueueStore.getState().setQueue(newQueue as SermonTrackDTO[])
 		},
@@ -380,7 +348,7 @@ export const useResetQueue = () =>
 			usePlayerQueueStore.getState().setQueue([])
 			usePlayerQueueStore.getState().setCurrentTrack(undefined)
 			usePlayerQueueStore.getState().setCurrentIndex(undefined)
-			await TrackPlayer.reset()
+			TrackPlayer.clear()
 		},
 	})
 
@@ -399,7 +367,7 @@ export const useToggleShuffle = () => {
 			})
 		},
 		onSuccess: async (_, shuffled) => {
-			const newQueue = await TrackPlayer.getQueue()
+			const newQueue = TrackPlayer.getQueue()
 			usePlayerQueueStore.getState().setQueue(newQueue as SermonTrackDTO[])
 
 			usePlayerQueueStore.getState().setShuffled(!shuffled)

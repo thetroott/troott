@@ -1,12 +1,7 @@
 import React, { useMemo, useCallback, useEffect } from "react";
-import {
-  Image,
-  ImageSourcePropType,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
+import type { LastPlayedSummary } from "@/engine/state/player-queue-store";
+import { Image, ImageSourcePropType, Pressable, StyleSheet, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Text from "@/components/ui/text";
 import { theme } from "@/constants/theme";
 import {
@@ -20,120 +15,271 @@ import {
 import { SolidIcons } from "@/assets/icons";
 import Slider from "@react-native-community/slider";
 import { useTrackStore } from "@/stores/player-store";
-import Animated, { SlideInDown } from "react-native-reanimated";
+import Animated, {
+  runOnJS,
+  SlideInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "@/constants/colors";
 import { TrackDetailsHeader } from "@/components/containers/sermon";
-import { useProgress } from "@/engine/queries/playback-queries";
-import { PROGRESS_UPDATE_EVENT_INTERVAL } from "@/engine/constants/engine";
+import { RepeatMode } from "@rntp/player";
+import { UiPlaybackState } from "@/engine/constants/playback-ui";
+import { useLocalSearchParams } from "expo-router";
 import {
-  useLegacySyncedTogglePlayback,
+  useCurrentTrack,
+  useLastPlayed,
+  usePlayQueue,
+  useRepeatModeStoreValue,
+  useShuffle,
+} from "@/stores/player/queue";
+import type { ISermonTrack, SermonTrackDTO } from "@/dtos/sermon.dto";
+import { MINIPLAYER_UPDATE_INTERVAL } from "@/engine/constants/engine";
+import { useProgress, usePlaybackState } from "@/engine/queries/playback-queries";
+import {
+  usePrevious,
   useSeekTo,
   useSkip,
-  usePrevious,
-  useApplyLegacyRepeatMode,
+  useTogglePlayback,
+  useToggleRepeatMode,
   useToggleShuffle,
 } from "@/engine/hooks/useControl";
-import { useSermonsCatalogQuery } from "@/engine/hooks/useSermonsCatalogQuery";
-import { usePlayFromCatalog } from "@/engine/hooks/usePlayFromCatalog";
-import { tracks } from "@/_data/_mock/tracks";
-import { mockSermonRowToItem } from "@/engine/helpers/mockSermonRowToItem";
-import { useLocalSearchParams } from "expo-router";
+import { useSermonsCatalog } from "@/engine/hooks/useSermonsCatalog";
+import { usePlayFromCatalogList } from "@/hooks/player/use-play-from-catalog-list";
+import { useResumeLastPlayed } from "@/hooks/player/use-resume-last-played";
+import { useDismissFullPlayer } from "@/hooks/player/use-dismiss-full-player";
+import { useCanSkipNext } from "@/hooks/player/use-can-skip-next";
 
 const FALLBACK_IMAGE = require("@/assets/images/liked.png");
 
+function synthesizeTrackFromLastPlayed(
+  lp: LastPlayedSummary | undefined,
+): SermonTrackDTO | null {
+  if (!lp?.sermonId || !lp.streamUrl) return null;
+  return {
+    mediaId: lp.sermonId,
+    id: lp.sermonId,
+    url: lp.streamUrl,
+    title: lp.title,
+    artist: lp.artist,
+    duration: lp.durationSec ?? 0,
+    artworkUrl: lp.artworkUrl,
+    artwork: lp.artworkUrl,
+    item: {
+      id: lp.sermonId,
+      title: lp.title,
+      minister: lp.artist,
+      image: lp.artworkUrl ?? null,
+      url: lp.streamUrl,
+      duration: lp.durationSec,
+      sourceType: "stream",
+    },
+    sourceType: "stream",
+    sessionId: null,
+  } as SermonTrackDTO;
+}
+
 /** Resolve track image for display: supports both URI (string) and local require (number). Use with Image (not FastImage) so local assets work. */
-function getTrackImageSource(track: { image?: unknown; artwork?: unknown } | null): ImageSourcePropType {
-  const raw = track?.image ?? track?.artwork;
+function getTrackImageSource(track: SermonTrackDTO | { image?: unknown; artwork?: unknown } | null): ImageSourcePropType {
+  if (!track) return FALLBACK_IMAGE;
+  const fromDto = track as SermonTrackDTO;
+  const extra = track as { artworkUrl?: string | number | null };
+  const raw =
+    fromDto.artwork ??
+    extra.artworkUrl ??
+    fromDto.item?.image ??
+    (track as { image?: unknown }).image ??
+    (track as { artwork?: unknown }).artwork;
   if (raw == null) return FALLBACK_IMAGE;
   if (typeof raw === "number") return raw as ImageSourcePropType;
   if (typeof raw === "string" && raw.length > 0) return { uri: raw };
   return FALLBACK_IMAGE;
 }
 
-const FullPlayerTrackDetails = () => {
-  const { id: idParam } = useLocalSearchParams<{ id?: string | string[] }>();
-  const routeId = Array.isArray(idParam) ? idParam[0] : idParam;
-  const showFullPlayer = useTrackStore((state) => state.showFullPlayer);
-  const currentTrack = useTrackStore((state) => state.currentTrack);
-  const { data: sermons, isLoading } = useSermonsCatalogQuery();
-  const playFromCatalog = usePlayFromCatalog("Library");
-  const { top } = useSafeAreaInsets();
+const DISMISS_DRAG_THRESHOLD = 100;
+const DISMISS_VELOCITY = 700;
+const DISMISS_SLIDE_MS = 260;
 
-  const catalogTracklist = useMemo(() => {
-    if (sermons && sermons.length > 0) return sermons;
-    return tracks.map((row) =>
-      mockSermonRowToItem(row as Parameters<typeof mockSermonRowToItem>[0]),
-    );
-  }, [sermons]);
+export type FullPlayerTrackDetailsProps = {
+  /**
+   * When true, only render the in-tab overlay if the user opened the full player.
+   * Prevents persisted `lastPlayed` alone from covering the screen after login.
+   */
+  embedInTabsShell?: boolean;
+};
+
+const FullPlayerTrackDetails: React.FC<FullPlayerTrackDetailsProps> = ({
+  embedInTabsShell = false,
+}) => {
+  const { id } = useLocalSearchParams();
+  /** Expo Router params can be string | string[]; queue rows may use string or number ids. */
+  const routeSermonId = useMemo(() => {
+    const raw = Array.isArray(id) ? id[0] : id;
+    if (raw === undefined || raw === null) return "";
+    const s = String(raw).trim();
+    return s;
+  }, [id]);
+  const showFullPlayer = useTrackStore((state) => state.showFullPlayer);
+  const currentTrack = useCurrentTrack();
+  const lastPlayed = useLastPlayed();
+  const { data: sermons, isLoading } = useSermonsCatalog();
+  const playFromCatalog = usePlayFromCatalogList("Library");
+  const { top } = useSafeAreaInsets();
+  const dismiss = useDismissFullPlayer();
+  const screenH = theme.sizes.screen.height;
+
+  const translateY = useSharedValue(0);
+  const panStartTranslateY = useSharedValue(0);
+
+  const sheetAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  const dragToCloseGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .activeOffsetY(12)
+        .failOffsetX([-56, 56])
+        .onStart(() => {
+          panStartTranslateY.value = translateY.value;
+        })
+        .onUpdate((e) => {
+          const next = panStartTranslateY.value + e.translationY;
+          translateY.value = next > 0 ? next : 0;
+        })
+        .onEnd((e) => {
+          const shouldClose =
+            translateY.value > DISMISS_DRAG_THRESHOLD || e.velocityY > DISMISS_VELOCITY;
+          if (shouldClose) {
+            translateY.value = withTiming(
+              screenH,
+              { duration: DISMISS_SLIDE_MS },
+              (finished) => {
+                if (finished) runOnJS(dismiss)();
+              },
+            );
+          } else {
+            translateY.value = withSpring(0, { damping: 28, stiffness: 280 });
+          }
+        }),
+    [dismiss, panStartTranslateY, screenH, translateY],
+  );
 
   useEffect(() => {
-    if (!routeId || isLoading) return;
-    if (currentTrack?.id === routeId) return;
-    const trackToPlay = catalogTracklist.find((s) => s.id === routeId);
-    if (trackToPlay) {
-      void playFromCatalog(trackToPlay);
+    if (!showFullPlayer) {
+      translateY.value = 0;
     }
-  }, [routeId, isLoading, currentTrack?.id, catalogTracklist, playFromCatalog]);
+  }, [showFullPlayer, translateY]);
 
-  // Show full player either when showFullPlayer is true or when accessed via direct ID
-  // Also ensure we have either a current track or are loading data
-  if (!showFullPlayer && !routeId) return null;
-  
-  // If no current track and no ID provided, don't render
-  if (!currentTrack && !routeId && !isLoading) return null;
+  const uiTrack = useMemo(
+    () => currentTrack ?? synthesizeTrackFromLastPlayed(lastPlayed),
+    [currentTrack, lastPlayed],
+  );
 
+  const heroImageSource = useMemo((): ImageSourcePropType => {
+    const base = getTrackImageSource(uiTrack ?? null);
+    if (base !== FALLBACK_IMAGE) return base;
+    const sid =
+      uiTrack?.item?.id != null
+        ? String(uiTrack.item.id)
+        : routeSermonId;
+    const list = sermons as ISermonTrack[] | undefined;
+    if (!sid || !list?.length) return base;
+    const row = list.find((s) => String(s.id ?? "") === sid);
+    const img = row?.image;
+    if (img == null) return base;
+    if (typeof img === "number") return img;
+    if (typeof img === "string" && img.length > 0) return { uri: img };
+    return base;
+  }, [uiTrack, sermons, routeSermonId]);
+
+  useEffect(() => {
+    if (!routeSermonId || !sermons?.length || isLoading) return;
+    const currentId =
+      currentTrack?.item?.id != null ? String(currentTrack.item.id) : "";
+    if (currentId === routeSermonId) return;
+    const idx = sermons.findIndex((s) => String(s.id ?? "") === routeSermonId);
+    if (idx >= 0) void playFromCatalog(sermons, idx);
+  }, [
+    routeSermonId,
+    sermons,
+    isLoading,
+    currentTrack?.item?.id,
+    playFromCatalog,
+  ]);
+
+  if (embedInTabsShell) {
+    if (!showFullPlayer) return null;
+  } else if (!showFullPlayer && !routeSermonId && !lastPlayed?.sermonId) {
+    return null;
+  }
+
+  if (!uiTrack && !routeSermonId && !isLoading && !lastPlayed?.sermonId)
+    return null;
 
   return (
     <Animated.View
       style={[
         styles.container,
         { paddingTop: top },
+        sheetAnimatedStyle,
         !showFullPlayer && { position: "absolute" },
       ]}
       entering={SlideInDown.duration(500)}
     >
-      <TrackDetailsHeader />
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="gap-6">
+      <GestureDetector gesture={dragToCloseGesture}>
+        <View style={styles.dragAndHero} collapsable={false}>
+          <View style={styles.dragPill} accessibilityRole="adjustable" accessibilityLabel="Drag down to close player" />
+          <TrackDetailsHeader />
           <Image
-            source={getTrackImageSource(currentTrack)}
+            source={heroImageSource}
             style={styles.image}
             resizeMode="cover"
           />
-          <TrackActionsController track={currentTrack} />
-          <TrackProgress />
-          <SermonDetails />
         </View>
-      </ScrollView>
+      </GestureDetector>
+
+      <Animated.ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        bounces
+        keyboardShouldPersistTaps="handled"
+      >
+        <TrackActionsController track={uiTrack ?? null} />
+
+        <TrackProgress />
+
+        <SermonDetails track={uiTrack ?? null} />
+      </Animated.ScrollView>
     </Animated.View>
   );
 };
 
-function TrackActionsController({ track }: { track: any }) {
+function TrackActionsController({ track }: { track: SermonTrackDTO | null }) {
   const [liked, setLiked] = React.useState(false);
   const [shared, setShared] = React.useState(false);
   const [queued, setQueued] = React.useState(false);
 
+  if (!track) return null;
+
   return (
-    <View className="flex-row items-center justify-between">
-      <View className="w-1/2 gap-2">
+    <View style={styles.actionContainer}>
+      <View style={styles.trackInfo}>
         <Text
-          className="text-neutral-100"
+          color={colors.white[100]}
           size="md"
           weight="semiBold"
           numberOfLines={1}
         >
-          {track.title || "Track Title"}
+          {track.title || track.item?.title || "Track Title"}
         </Text>
-        <Text className="text-neutral-400">
-          {(track as { minister?: string; artist?: string }).minister ??
-            (track as { minister?: string; artist?: string }).artist ??
-            "Unknown minister"}
-        </Text>
+        <Text>{track.artist ?? "Unknown minister"}</Text>
       </View>
-      <View className="flex-row items-center gap-4">
+
+      <View style={styles.iconsContainer}>
         <Pressable
           onPress={() => setLiked((p) => !p)}
           accessibilityLabel="Like Track"
@@ -164,41 +310,48 @@ function TrackActionsController({ track }: { track: any }) {
 }
 
 function TrackProgress() {
-  const trackPlaying = useTrackStore((state) => state.trackPlaying);
-  const shuffle = useTrackStore((state) => state.shuffle);
-  const repeatMode = useTrackStore((state) => state.repeatMode);
-  const setShuffle = useTrackStore((state) => state.setShuffle);
-  const setRepeatMode = useTrackStore((state) => state.setRepeatMode);
-
-  const progress = useProgress(PROGRESS_UPDATE_EVENT_INTERVAL);
-  const togglePlayback = useLegacySyncedTogglePlayback();
+  const shuffle = useShuffle();
+  const repeatModeRn = useRepeatModeStoreValue();
+  const progress = useProgress(MINIPLAYER_UPDATE_INTERVAL);
+  const playbackState = usePlaybackState();
+  const togglePlayback = useTogglePlayback();
   const seekTo = useSeekTo();
-  const skipNext = useSkip();
-  const skipPrevious = usePrevious();
-  const applyLegacyRepeat = useApplyLegacyRepeatMode();
-  const { mutate: runShuffleToggle } = useToggleShuffle();
+  const skip = useSkip();
+  const previous = usePrevious();
+  const canSkipNext = useCanSkipNext();
+  const toggleRepeatMode = useToggleRepeatMode();
+  const toggleShuffleMut = useToggleShuffle();
+  const queue = usePlayQueue();
+  const lastPlayed = useLastPlayed();
+  const resumeLastPlayed = useResumeLastPlayed();
+
+  const trackPlaying = playbackState === UiPlaybackState.Playing;
+
+  const positionUi =
+    progress.duration > 0.5
+      ? progress.position
+      : (lastPlayed?.lastPositionSec ?? 0);
+  const durationUi =
+    progress.duration > 0.5
+      ? progress.duration
+      : Math.max(lastPlayed?.durationSec ?? 0, 1);
 
   const formattedPosition = useMemo(
-    () => formatTime(progress.position),
-    [progress.position]
+    () => formatTime(positionUi),
+    [positionUi]
   );
   const formattedDuration = useMemo(
-    () => formatTime(progress.duration),
-    [progress.duration]
+    () => formatTime(durationUi),
+    [durationUi]
   );
 
   const toggleRepeat = useCallback(() => {
-    const nextMode =
-      repeatMode === "off" ? "all" : repeatMode === "all" ? "one" : "off";
-    setRepeatMode(nextMode);
-    void applyLegacyRepeat(nextMode);
-  }, [repeatMode, setRepeatMode, applyLegacyRepeat]);
+    void toggleRepeatMode();
+  }, [toggleRepeatMode]);
 
   const toggleShuffle = useCallback(() => {
-    const next = !shuffle;
-    setShuffle(next);
-    runShuffleToggle(!next);
-  }, [shuffle, setShuffle, runShuffleToggle]);
+    void toggleShuffleMut.mutateAsync(shuffle);
+  }, [shuffle, toggleShuffleMut]);
 
   const onSeekComplete = useCallback(
     (val: number) => {
@@ -207,37 +360,49 @@ function TrackProgress() {
     [seekTo]
   );
 
-  
+  const repeatActive =
+    repeatModeRn !== RepeatMode.Off;
+
   return (
-    <View className="gap-2">
+    <View style={styles.progressContainer}>
       <Slider
         minimumValue={0}
-        maximumValue={progress.duration}
-        value={progress.position}
+        maximumValue={durationUi}
+        value={positionUi}
         minimumTrackTintColor={colors.teal[500]}
         maximumTrackTintColor={theme.colors.grey[400]}
         onSlidingComplete={onSeekComplete}
       />
-      <View className="flex-row justify-between">
-        <Text className="text-neutral-400">{formattedPosition}</Text>
-        <Text className="text-neutral-400">{formattedDuration}</Text>
+
+      <View style={styles.timeContainer}>
+        <Text>{formattedPosition}</Text>
+        <Text>{formattedDuration}</Text>
       </View>
-      <View className="flex-row items-center justify-between">
+
+      <View style={styles.controlsContainer}>
         <Pressable onPress={toggleShuffle} accessibilityLabel="Shuffle">
           <Shuffle
             color={shuffle ? colors.teal[500] : theme.colors.white[50]}
           />
         </Pressable>
-        <View className="flex-row items-center gap-6">
+
+        <View style={styles.playbackButtons}>
           <Pressable
-            onPress={() => void skipPrevious()}
+            onPress={() => void previous()}
             accessibilityLabel="Previous Track"
           >
             <Previous color={theme.colors.white[50]} variant="Bold" />
           </Pressable>
+
           <Pressable
-            className="rounded-full bg-neutral-100 p-4"
-            onPress={() => void togglePlayback()}
+            style={styles.playBtn}
+            onPress={() => {
+              if (queue.length === 0 && lastPlayed?.streamUrl) {
+                void resumeLastPlayed();
+                return;
+              }
+              void togglePlayback();
+            }}
             accessibilityLabel={trackPlaying ? "Pause" : "Play"}
           >
             {trackPlaying ? (
@@ -246,17 +411,23 @@ function TrackProgress() {
               <SolidIcons.PlayIcon color={theme.colors.black[50]} size={28} />
             )}
           </Pressable>
+
           <Pressable
-            onPress={() => void skipNext()}
+            onPress={() => {
+              if (canSkipNext) void skip(undefined);
+            }}
+            disabled={!canSkipNext}
+            style={!canSkipNext ? styles.controlDisabled : undefined}
             accessibilityLabel="Next Track"
           >
             <Next color={theme.colors.white[50]} variant="Bold" />
           </Pressable>
         </View>
+
         <Pressable onPress={toggleRepeat} accessibilityLabel="Repeat">
           <Repeat
             color={
-              repeatMode !== "off" ? colors.teal[500] : theme.colors.white[50]
+              repeatActive ? colors.teal[500] : theme.colors.white[50]
             }
           />
         </Pressable>
@@ -265,34 +436,33 @@ function TrackProgress() {
   );
 }
 
-function SermonDetails() {
-  const currentTrack = useTrackStore((state) => state.currentTrack);
+function SermonDetails({ track }: { track: SermonTrackDTO | null }) {
+  if (!track) return null;
 
-  if (!currentTrack) return null;
+  const title = track.title ?? track.item?.title ?? "Unknown Title";
+  const minister = track.artist ?? "Unknown minister";
 
   return (
-    <View className="mt-8 gap-4">
-      <Text size="md" className="text-neutral-100" weight="medium">
+    <View style={styles.sermonDetails}>
+      <Text size="md" color={colors.white[100]} weight="medium">
         Sermon Details
       </Text>
-      <View className="flex-row items-center gap-4">
+
+      <View style={styles.sermonContent}>
         <Image
-          source={getTrackImageSource(currentTrack)}
-          className="h-20 w-20 rounded"
+          source={getTrackImageSource(track)}
+          style={styles.sermonImage}
           resizeMode="cover"
         />
-        <View className="gap-0.5">
-          <Text weight="medium" className="text-neutral-100" size="base">
-            {currentTrack.title || "Unknown Title"}
+
+        <View style={styles.sermonText}>
+          <Text weight="medium" color={colors.white[100]} size="base">
+            {title}
           </Text>
-          <Text className="text-neutral-400">
-            {(currentTrack as { minister?: string; artist?: string }).minister ??
-              (currentTrack as { minister?: string; artist?: string }).artist ??
-              "Unknown minister"}
-          </Text>
-          <Text size="xs" className="text-neutral-500">
-            {currentTrack.totalPlays || "2340"} plays •{" "}
-            {currentTrack.duration || "0:00"}
+          <Text>{minister}</Text>
+          <Text size="xs">
+            {(track.item as { totalPlays?: number } | undefined)?.totalPlays ?? "2340"} plays •{" "}
+            {formatTime(typeof track.duration === "number" ? track.duration : 0)}
           </Text>
         </View>
       </View>
@@ -306,7 +476,6 @@ const formatTime = (seconds: number) => {
   return `${mins}:${secs}`;
 };
 
-// Allowed exceptions: container (position, paddingTop from insets), image (runtime height).
 const styles = StyleSheet.create({
   container: {
     position: "absolute",
@@ -318,11 +487,61 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.black[50],
     padding: theme.sizes.spacing.md,
   },
+  scrollContent: { gap: theme.sizes.spacing.xl, paddingBottom: theme.sizes.spacing["2xl"] },
+  dragAndHero: {
+    gap: theme.sizes.spacing.sm,
+    marginBottom: theme.sizes.spacing.md,
+  },
+  dragPill: {
+    alignSelf: "center",
+    width: 40,
+    height: 5,
+    borderRadius: theme.sizes.radius.full,
+    backgroundColor: theme.colors.grey[400],
+    marginBottom: theme.sizes.spacing.xs,
+  },
   image: {
     height: theme.sizes.screen.height * 0.4,
     borderRadius: theme.sizes.radius.md,
     width: "100%",
   },
+  actionContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  trackInfo: { gap: theme.sizes.spacing.sm, width: "50%" },
+  iconsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.sizes.spacing.md,
+  },
+  progressContainer: { gap: theme.sizes.spacing.sm },
+  timeContainer: { flexDirection: "row", justifyContent: "space-between" },
+  controlsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  playbackButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: theme.sizes.spacing.xl,
+  },
+  playBtn: {
+    backgroundColor: theme.colors.white[50],
+    padding: theme.sizes.spacing.md,
+    borderRadius: theme.sizes.radius.full,
+  },
+  sermonDetails: { gap: theme.sizes.spacing.md, marginTop: 30 },
+  sermonContent: {
+    flexDirection: "row",
+    gap: theme.sizes.spacing.md,
+    alignItems: "center",
+  },
+  sermonImage: { height: 80, width: 80, borderRadius: theme.sizes.radius.sm },
+  sermonText: { gap: theme.sizes.spacing.xs },
+  controlDisabled: { opacity: 0.35 },
 });
 
 export default FullPlayerTrackDetails;

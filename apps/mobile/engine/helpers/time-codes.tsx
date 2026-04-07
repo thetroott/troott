@@ -1,14 +1,13 @@
-import React from "react";
-import { Text } from "react-native";
-import { convertRunTimeTicksToSeconds } from "@/engine/utils/runtimeticks";
-import { cn } from "@/lib/utils";
+import React from 'react';
+import { Text, TextProps } from 'react-native';
+import { convertRunTimeTicksToSeconds } from '@/engine/utils/runtimeticks';
 
-type Alignment = "center" | "left" | "right";
+type Alignment = 'center' | 'left' | 'right';
 
 export function RunTimeSeconds({
   children,
-  color = "white",
-  alignment = "center",
+  color = 'white',
+  alignment = 'center',
   className,
 }: {
   children: number;
@@ -16,19 +15,10 @@ export function RunTimeSeconds({
   alignment?: Alignment;
   className?: string;
 }): JSX.Element {
-  const isStandardColor = color === "white" || color === "gray";
   return (
     <Text
-      className={cn(
-        "font-bold tabular-nums",
-        color === "white" && "text-neutral-100",
-        color === "gray" && "text-neutral-500",
-        alignment === "left" && "text-left",
-        alignment === "right" && "text-right",
-        alignment === "center" && "text-center",
-        className
-      )}
-      style={!isStandardColor ? { color } : undefined}
+      className={`font-bold tabular-nums ${className || ''}`}
+      style={{ color, textAlign: alignment }}
     >
       {calculateRunTimeFromSeconds(children)}
     </Text>
@@ -43,9 +33,11 @@ export function RunTimeTicks({
   className?: string;
 }): JSX.Element {
   if (!children) return <Text className={className}>0:00</Text>;
+
   const time = calculateRunTimeFromTicks(children);
+
   return (
-    <Text className={cn("tabular-nums text-neutral-500", className)}>
+    <Text className={`tabular-nums text-gray-400 ${className || ''}`}>
       {time}
     </Text>
   );

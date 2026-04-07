@@ -1,23 +1,14 @@
 import React, { createContext, useContext } from 'react'
-import { SharedValue } from 'react-native-reanimated'
+import type { SharedValue } from 'react-native-reanimated'
 
-type SwipeableRowContextValue = {
+export type SwipeableRowContextValue = {
 	tx: SharedValue<number>
 	menuOpenSV: SharedValue<boolean>
 	leftWidth: number
 	rightWidth: number
 }
 
-// Provide benign defaults so consuming hooks don't crash outside provider
-const defaultShared: SharedValue<number> = { value: 0 } as SharedValue<number>
-const defaultBool: SharedValue<boolean> = { value: false } as SharedValue<boolean>
-
-const SwipeableRowContext = createContext<SwipeableRowContextValue>({
-	tx: defaultShared,
-	menuOpenSV: defaultBool,
-	leftWidth: 0,
-	rightWidth: 0,
-})
+const SwipeableRowContext = createContext<SwipeableRowContextValue | null>(null)
 
 export function SwipeableRowProvider({
 	children,
@@ -29,6 +20,14 @@ export function SwipeableRowProvider({
 	return <SwipeableRowContext.Provider value={value}>{children}</SwipeableRowContext.Provider>
 }
 
+/**
+ * Prefer `children={(row) => ...}` on `SwipeableRow` and pass `row.tx` into `useAnimatedStyle`
+ * callers. React context can break Reanimated 4 Worklet closure sharing for `SharedValue` handles.
+ */
 export function useSwipeableRowContext(): SwipeableRowContextValue {
-	return useContext(SwipeableRowContext)
+	const ctx = useContext(SwipeableRowContext)
+	if (ctx == null) {
+		throw new Error('useSwipeableRowContext must be used within SwipeableRow')
+	}
+	return ctx
 }

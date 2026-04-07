@@ -1,8 +1,8 @@
 import { ISermonTrack } from "@/dtos/sermon.dto";
-import { AudioMetadataReceivedEvent } from "react-native-track-player/lib/src/interfaces/events/AudioMetadataReceivedEvent";
+import type { MetadataReceivedEvent } from "@rntp/player"
 
 type Track = Partial<ISermonTrack>;
-export type Chapter = AudioMetadataReceivedEvent;
+export type Chapter = MetadataReceivedEvent;
 export type TimedMeta = { value: string; time: number };
 
 export interface IPlayerState {
@@ -13,6 +13,9 @@ export interface IPlayerState {
   /** UI states */
   showFullPlayer: boolean;
   setShowFullPlayer: (show: boolean) => void;
+  /** Where to return when closing full player (captured when opening from mini, e.g. `/(tabs)/library`). */
+  fullPlayerReturnPath: string | null;
+  setFullPlayerReturnPath: (path: string | null) => void;
   showMiniPlayer: boolean;
   setShowMiniPlayer: (show: boolean) => void;
 

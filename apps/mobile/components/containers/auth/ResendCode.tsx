@@ -1,23 +1,22 @@
-import { View } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import Text from "@/components/ui/text";
+import customStyles from "@/assets/styles/custom";
+import componentStyles from "@/assets/styles/components";
 
 const ResendCode = () => {
   return (
     <View>
-      <View className="mt-2.5" />
-      <Text className="text-neutral-400">
+      <View style={customStyles.mt10} />
+
+      <Text style={componentStyles.rSubText}>
         This code will expire in 15 minutes.
       </Text>
-      <View className="mt-2.5" />
-      <Text
-        className="text-teal-500 underline"
-        onPress={() => console.log("Resend code Clicked")}
-        accessibilityRole="button"
-        accessibilityLabel="Resend code"
-      >
-        Resend code
-      </Text>
+
+      <View style={customStyles.mt10} />
+
+      <TouchableOpacity onPress={() => console.log("Resend code Clicked")}>
+        <Text style={componentStyles.rlink}>Resend code </Text>
+      </TouchableOpacity>
     </View>
   );
 };

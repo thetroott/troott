@@ -10,6 +10,8 @@ export const useTrackStore = create<IPlayerState>((set, get) => ({
   /** UI states */
   showFullPlayer: false,
   setShowFullPlayer: (show) => set({ showFullPlayer: show }),
+  fullPlayerReturnPath: null,
+  setFullPlayerReturnPath: (path) => set({ fullPlayerReturnPath: path }),
   showMiniPlayer: true,
   setShowMiniPlayer: (show) => set({ showMiniPlayer: show }),
 

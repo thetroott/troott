@@ -8,7 +8,7 @@ export default function UserScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (
     <ScreenView>
-      <View className="flex-1 items-center justify-center">
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>User {id ?? "—"}</Text>
       </View>
     </ScreenView>

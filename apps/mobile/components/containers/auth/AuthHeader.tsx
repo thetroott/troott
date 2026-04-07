@@ -1,40 +1,36 @@
-import { View } from "react-native";
-import React from "react";
-import Text from "@/components/ui/text";
+import { View, Text, TouchableOpacity } from "react-native";
+import React from "react";;
+import componentStyles from "@/assets/styles/components";
+
 
 const AuthHeader = () => {
   return (
     <View>
-      <Text className="text-neutral-400">
+      
+      {/* <View style={customStyles.mt30}></View>
+      <Text style={componentStyles.title}>Log In or Create an Account</Text> */}
+      {/* <View style={customStyles.mt10}></View> */}
+      <Text style={componentStyles.subText}>
         By continuing, you agree to the updated{" "}
-        <Text
-          className="text-teal-500 underline"
-          onPress={() => console.log("Terms of Sale Clicked")}
-          accessibilityRole="link"
-          accessibilityLabel="Terms of Sale"
-        >
-          Terms of Sale
-        </Text>
+        
+        <TouchableOpacity onPress={() => console.log("Terms of Sale Clicked")}>
+        <Text style={componentStyles.link}>Terms of Sale</Text>
+        </TouchableOpacity>
+
         ,{" "}
-        <Text
-          className="text-teal-500 underline"
-          onPress={() => console.log("Terms of Service Clicked")}
-          accessibilityRole="link"
-          accessibilityLabel="Terms of Service"
-        >
-          Terms of Service
-        </Text>
+
+        <TouchableOpacity onPress={() => console.log("Terms of Service Clicked")}>
+        <Text style={componentStyles.link}>Terms of Service </Text>
+        </TouchableOpacity>
+
         {" "}and{" "}
-        <Text
-          className="text-teal-500 underline"
-          onPress={() => console.log("Privacy Policy Clicked")}
-          accessibilityRole="link"
-          accessibilityLabel="Privacy Policy"
-        >
-          Privacy Policy
-        </Text>
+
+        <TouchableOpacity onPress={() => console.log("Privacy Policy Clicked")}>
+        <Text style={componentStyles.link}>Privacy Policy</Text>
+        </TouchableOpacity>
         .
       </Text>
+
     </View>
   );
 };

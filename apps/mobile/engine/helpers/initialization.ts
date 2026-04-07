@@ -1,10 +1,11 @@
-import { isUndefined } from 'lodash'
-import { getActiveIndex, getCurrentTrack, getPlayQueue } from '../queries/current-track'
-import TrackPlayer, { RepeatMode } from 'react-native-track-player'
-import { usePlayerQueueStore } from '@/stores/player/queue'
-import { queryClient } from '../../services/query-client'
-import { REPEAT_MODE_QUERY_KEY } from '@/engine/queries/query-keys'
-
+import { isUndefined } from "lodash"
+import { getActiveIndex, getCurrentTrack, getPlayQueue } from "../queries/current-track"
+import TrackPlayer, { RepeatMode } from "@rntp/player"
+import { handleActiveTrackChanged } from "@/engine/queries/current-track"
+import { usePlayerQueueStore } from "@/engine/state/player-queue-store"
+import { resolvePlaybackUrisForTrackPlayer } from "@/engine/utils/resolve-playback-uris"
+import { queryClient } from "../../services/query-client"
+import { REPEAT_MODE_QUERY_KEY } from "@/engine/queries/query-keys"
 
 export default async function Initialize() {
 	const {
@@ -18,8 +19,9 @@ export default async function Initialize() {
 	const storedIndex = persistedIndex ?? getActiveIndex()
 	const storedTrack = persistedTrack ?? getCurrentTrack()
 
+	const trackDebugId = storedTrack?.item?.id ?? storedTrack?.mediaId ?? "none"
 	console.debug(
-		`StoredIndex: ${storedIndex}, storedPlayQueue: ${storedPlayQueue?.map((track, index) => index)}, track: ${storedTrack?.item.id}`,
+		`StoredIndex: ${storedIndex}, storedPlayQueue: ${storedPlayQueue?.map((_, index) => index)}, track: ${trackDebugId}`,
 	)
 
 	if (
@@ -28,20 +30,23 @@ export default async function Initialize() {
 		!isUndefined(storedIndex) &&
 		storedIndex !== null
 	) {
-		console.debug('Initializing play queue from storage')
+		console.debug("Initializing play queue from storage")
 
-		await TrackPlayer.reset()
-		await TrackPlayer.add(storedPlayQueue)
-		await TrackPlayer.skip(storedIndex)
+		const restoredQueue = await resolvePlaybackUrisForTrackPlayer(storedPlayQueue)
 
-		usePlayerQueueStore.getState().setQueue(storedPlayQueue)
+		TrackPlayer.clear()
+		TrackPlayer.setMediaItems(restoredQueue, storedIndex)
+
+		usePlayerQueueStore.getState().setQueue(restoredQueue)
 		usePlayerQueueStore.getState().setCurrentIndex(storedIndex)
-		usePlayerQueueStore.getState().setCurrentTrack(storedPlayQueue[storedIndex] ?? undefined)
+		usePlayerQueueStore.getState().setCurrentTrack(restoredQueue[storedIndex] ?? undefined)
 
-		console.debug('Initialized play queue from storage')
+		console.debug("Initialized play queue from storage")
 	}
 
+	await handleActiveTrackChanged()
+
 	const restoredRepeatMode = repeatMode ?? RepeatMode.Off
-	await TrackPlayer.setRepeatMode(restoredRepeatMode)
+	TrackPlayer.setRepeatMode(restoredRepeatMode)
 	queryClient.setQueryData(REPEAT_MODE_QUERY_KEY, restoredRepeatMode)
 }

@@ -1,35 +1,32 @@
 import { View } from "react-native";
 import React from "react";
+import customStyles from "../../../assets/styles/custom";
+import componentStyles from "@/assets/styles/components";
 import Text from "@/components/ui/text";
 
 const TermsAndConditions = () => {
   return (
     <View>
-      <Text className="text-neutral-400">
+      <View ></View>
+      <Text style={componentStyles.termsSubText}>
         By continuing, you agree to the updated{" "}
         <Text
-          className="text-teal-500 underline"
+          style={componentStyles.link}
           onPress={() => console.log("Terms of Sale Clicked")}
-          accessibilityRole="link"
-          accessibilityLabel="Terms of Sale"
         >
           Terms of Sale
         </Text>
         ,{" "}
         <Text
-          className="text-teal-500 underline"
+          style={componentStyles.link}
           onPress={() => console.log("Terms of Service Clicked")}
-          accessibilityRole="link"
-          accessibilityLabel="Terms of Service"
         >
           Terms of Service
         </Text>{" "}
         and{" "}
         <Text
-          className="text-teal-500 underline"
+          style={componentStyles.link}
           onPress={() => console.log("Privacy Policy Clicked")}
-          accessibilityRole="link"
-          accessibilityLabel="Privacy Policy"
         >
           Privacy Policy
         </Text>

@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React, { useEffect } from "react";
 import Animated, {
   interpolate,
@@ -11,7 +11,7 @@ import { theme } from "@/constants/theme";
 
 const Loader = () => {
   return (
-    <View className="self-center flex-row gap-1 justify-center items-center">
+    <View style={styles.container}>
       {[...Array(3).keys()].map((_, index) => {
         const loaderProgress = useSharedValue(0);
         const loaderStyle = useAnimatedStyle(() => ({
@@ -20,11 +20,9 @@ const Loader = () => {
           height: theme.sizes.spacing.sm,
           borderRadius: theme.sizes.radius.full,
           backgroundColor: theme.colors.grey[300],
-          transform: [
-            {
-              scale: interpolate(loaderProgress.value, [0, 1], [0.7, 1]),
-            },
-          ],
+          transform:[{
+              scale:interpolate(loaderProgress.value,[0,1],[.7,1])
+          }]
         }));
         useEffect(() => {
           loaderProgress.value = withRepeat(
@@ -40,3 +38,13 @@ const Loader = () => {
 };
 
 export default Loader;
+
+const styles = StyleSheet.create({
+  container: {
+    alignSelf: "center",
+    flexDirection: "row",
+    gap: 5,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

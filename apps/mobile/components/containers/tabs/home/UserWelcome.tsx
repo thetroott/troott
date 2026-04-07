@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
-import Text from "@/components/ui/text";
+import { View, Text, StyleSheet } from "react-native";
 
 interface UserWelcomeProps {
   firstName: string;
@@ -10,19 +9,38 @@ const UserWelcome: React.FC<UserWelcomeProps> = ({ firstName }) => {
   const [greeting, setGreeting] = useState("");
 
   useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting("Good morning");
-    else if (hour < 18) setGreeting("Good afternoon");
-    else setGreeting("Good evening");
+    const updateGreeting = () => {
+      const hour = new Date().getHours();
+      if (hour < 12) {
+        setGreeting("Good morning");
+      } else if (hour < 18) {
+        setGreeting("Good afternoon");
+      } else {
+        setGreeting("Good evening");
+      }
+    };
+
+    updateGreeting();
   }, []);
 
   return (
-    <View className="py-2.5">
-      <Text size="lg" weight="semiBold" className="text-neutral-100">
-        {greeting}, {firstName}!
+    <View style={styles.container}>
+      <Text style={styles.greeting}>
+        {greeting}, {firstName}! 👋
       </Text>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 10,
+  },
+  greeting: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+});
 
 export default UserWelcome;

@@ -1,23 +1,38 @@
-import { View } from "react-native";
-import React from "react";
-import ScreenModalAndroidView from "@/components/ui/screen-modal-android";
-import Header from "@/components/containers/shared/headers";
-import { ScrollView } from "react-native-gesture-handler";
-import CreatePlaylistForm from "@/components/containers/playlist/create-playlist-form";
+import { StyleSheet,  View } from 'react-native'
+import React from 'react'
+import ScreenModalAndroidView from '@/components/ui/screen-modal-android'
+import { theme } from '@/constants/theme'
+import Header from '@/components/containers/shared/headers'
+import { ScrollView } from 'react-native-gesture-handler'
+import CreatePlaylistForm from '@/components/containers/playlist/create-playlist-form'
+
 
 const CreatePlayListScreen = () => {
   return (
     <ScreenModalAndroidView>
-      <View className="flex-1 gap-4 rounded-t-2xl bg-neutral-900 py-4">
-        <Header variant="playlist" title="Create Playlist" />
-        <ScrollView className="flex-1" nestedScrollEnabled>
-          <View className="gap-4 px-4">
-            <CreatePlaylistForm />
-          </View>
-        </ScrollView>
-      </View>
+     <View style={styles.container}>
+      <Header variant='playlist' title='Create Playlist'/>
+      <ScrollView contentContainerStyle={styles.scrollView} nestedScrollEnabled>
+      <CreatePlaylistForm/>
+      </ScrollView>
+     </View>
     </ScreenModalAndroidView>
-  );
-};
+  )
+}
 
-export default CreatePlayListScreen;
+export default CreatePlayListScreen
+
+const styles = StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.grey[900],
+      paddingVertical: 16,
+      gap: theme.sizes.spacing.md,
+      borderTopRightRadius: theme.sizes.radius.base,
+      borderTopLeftRadius: theme.sizes.radius.base,
+      flex: 1,
+    },
+    scrollView: {
+      paddingHorizontal: theme.sizes.spacing.md,
+      gap: theme.sizes.spacing.md,
+    },
+})

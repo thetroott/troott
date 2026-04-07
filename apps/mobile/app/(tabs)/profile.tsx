@@ -1,13 +1,15 @@
-import React from "react";
-import { Text } from "react-native";
-import ScreenView from "@/components/layouts/screenview";
+import { StyleSheet, Text, View } from 'react-native'
+import React from 'react'
+import ScreenView from '@/components/layouts/screenview'
 
 const Profile = () => {
   return (
     <ScreenView>
-      <Text className="text-neutral-100">Profile</Text>
+      <Text>Profile</Text>
     </ScreenView>
-  );
-};
+  )
+}
 
-export default Profile;
+export default Profile
+
+const styles = StyleSheet.create({})

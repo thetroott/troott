@@ -1,26 +1,31 @@
-import { Image, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import React from "react";
 import cover1 from "@/assets/images/cover3.jpg";
 import cover2 from "@/assets/images/cover4.jpg";
+import { Image } from "react-native";
+import { theme } from "@/constants/theme";
 import Text from "@/components/ui/text";
+import { Heart, Star, Star1 } from "iconsax-react-nativejs";
 import { SolidIcons } from "@/assets/icons";
-import { sizes } from "@/constants/sizes";
 
+interface SavedTracksProps {
+  albumCovers: string[];
+}
 const SavedTracks = () => {
   return (
-    <Pressable className="gap-2.5" accessibilityRole="button" accessibilityLabel="Saved by you">
+    <Pressable style={{gap:10}}>
       <View style={styles.container}>
         <Image source={cover1} style={styles.image} />
         <Image source={cover2} style={styles.image} />
       </View>
-      <View className="gap-1.5">
-        <View className="flex-row items-center gap-1.5">
-          <SolidIcons.StarIcon color="#FCD53F" />
-          <Text className="text-neutral-100" weight="medium" size="base">
+      <View style={{gap:5}}>
+        <View style={styles.textContainer}>
+          <SolidIcons.StarIcon color="#FCD53F"/>
+          <Text color={theme.colors.white[50]} weight="medium" size="base">
             Saved by you
           </Text>
         </View>
-        <Text className="text-neutral-400">Saved to your library</Text>
+        <Text>Saved to your library</Text>
       </View>
     </Pressable>
   );
@@ -28,17 +33,21 @@ const SavedTracks = () => {
 
 export default SavedTracks;
 
-// Allowed exception: runtime dimensions (screen width) for grid.
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    width: sizes.screen.width * 0.44,
+    width: theme.sizes.screen.width * 0.44,
     flexWrap: "wrap",
     borderRadius: 10,
     overflow: "hidden",
   },
   image: {
-    height: sizes.screen.width * 0.44,
-    width: sizes.screen.width * 0.22,
+    height: theme.sizes.screen.width * 0.44,
+    width: theme.sizes.screen.width * 0.22,
+  },
+  textContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
 });

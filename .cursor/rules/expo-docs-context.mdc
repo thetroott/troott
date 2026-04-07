@@ -1,0 +1,22 @@
+---
+description: Use Expo documentation as primary reference for this project
+alwaysApply: true
+---
+
+# Expo documentation context
+
+This project is an **Expo** app. Use the official Expo docs as the primary reference when answering questions about Expo, React Native, or project setup.
+
+**Documentation:** https://docs.expo.dev/
+
+## Quick reference
+
+- **Quick start:** `npx create-expo-app@latest`
+- **Environment:** [Set up your environment](https://docs.expo.dev/get-started/set-up-your-environment)
+- **Tutorial:** [Universal Android, iOS, and web app](https://docs.expo.dev/tutorial/introduction)
+- **Expo Router (file-based routing):** [Introduction](https://docs.expo.dev/router/introduction)
+- **EAS (build/deploy):** [EAS Tutorial](https://docs.expo.dev/tutorial/eas/introduction)
+- **Deploy:** TestFlight `npx testflight`, Web `npx eas-cli deploy`
+- **APIs/SDK:** [Expo SDK reference](https://docs.expo.dev/versions/latest)
+
+When suggesting Expo APIs, config changes, or patterns, prefer the current Expo docs over generic React Native or third-party sources.

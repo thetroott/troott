@@ -1,7 +1,5 @@
-// StyleSheet allowed: dynamic OTP box size (theme.sizes.screen.width) and conditional border color per migration plan.
 import { Keyboard, Pressable, StyleSheet, TextInput, View } from "react-native";
 import React, { useEffect } from "react";
-import { semanticColors } from "@/constants/tailwind-bridge";
 import { theme } from "@/constants/theme";
 import Text from "./text";
 import Animated, {
@@ -82,7 +80,7 @@ function Indicator() {
     transform: [{ scale: interpolate(flashProgress.value, [0, 1], [0.7, 1]) }],
     height: "50%",
     width: 2,
-    backgroundColor: semanticColors.primary,
+    backgroundColor: "#007AFF",
     borderRadius: theme.sizes.radius.full,
   }));
   return <Animated.View style={animatedStyles} />;
@@ -104,7 +102,7 @@ const dynamicstyles = (isCursor?:boolean)=>StyleSheet.create({
     height: theme.sizes.screen.width * 0.15 - 10,
     borderWidth: 1,
     borderColor: isCursor?theme.colors.grey[200]:theme.colors.grey[500],
-    borderRadius: 4,
+    borderRadius: 5,
     alignItems: "center",
     justifyContent: "center",
   },

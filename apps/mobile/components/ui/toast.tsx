@@ -5,7 +5,6 @@ import { create } from "zustand";
 import { useEffect } from "react";
 import React from 'react';
 
-import { semanticColors } from "@/constants/tailwind-bridge";
 import { Root, Title, Description } from "@rn-primitives/toast";
 
 // --- Store + API (Sonner-like) ---
@@ -95,7 +94,15 @@ export function Toaster() {
   const toasts = useToastStore((s) => s.toasts);
 
   return (
-    <View className="absolute bottom-8 w-full px-4 z-[9999]">
+    <View
+      style={{
+        position: "absolute",
+        bottom: 32,
+        width: "100%",
+        paddingHorizontal: 16,
+        zIndex: 9999,
+      }}
+    >
       {toasts.map((t) => {
         useEffect(() => {
           const timer = setTimeout(() => {
@@ -106,21 +113,21 @@ export function Toaster() {
 
         const backgroundColor =
           t.type === "success"
-            ? semanticColors.success
+            ? "#16a34a"
             : t.type === "error"
-              ? semanticColors.destructive
-              : t.type === "info"
-                ? semanticColors.primary
-                : t.type === "loading"
-                  ? semanticColors.warning
-                  : semanticColors.muted;
+            ? "#dc2626"
+            : t.type === "info"
+            ? "#2563eb"
+            : t.type === "loading"
+            ? "#ca8a04" // New color for loading state
+            : "#27272a";
 
         return (
           <Animated.View
             key={t.id}
             entering={FadeInDown}
             exiting={FadeOutUp}
-            className="mb-2"
+            style={{ marginBottom: 8 }}
           >
             <Root
               open={true}
@@ -132,7 +139,7 @@ export function Toaster() {
               style={{
                 borderRadius: 16,
                 padding: 16,
-                shadowColor: semanticColors.background,
+                shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.25,
                 shadowRadius: 4,
@@ -140,34 +147,23 @@ export function Toaster() {
                 backgroundColor,
               }}
             >
+              {/* Conditionally render JSX or default content */}
               {t.jsx ? (
                 t.jsx
               ) : (
                 <>
-                  <Title className="text-white font-bold">{t.title}</Title>
+                  <Title style={{ color: "#fff", fontWeight: "bold" }}>{t.title}</Title>
                   {t.description && (
-                    <Description className="text-white/80">
-                      {t.description}
-                    </Description>
+                    <Description style={{ color: "#ffffffcc" }}>{t.description}</Description>
                   )}
+                  {/* Conditionally render action button */}
                   {t.action && (
-                    <Pressable
-                      onPress={t.action.onPress}
-                      className="mt-2"
-                      accessibilityRole="button"
-                      accessibilityLabel={t.action.label}
-                    >
-                      <Text className="text-white font-bold">
-                        {t.action.label}
-                      </Text>
+                    <Pressable onPress={t.action.onPress} style={{ marginTop: 8 }}>
+                      <Text style={{ color: "#fff", fontWeight: "bold" }}>{t.action.label}</Text>
                     </Pressable>
                   )}
-                  <Pressable
-                    onPress={() => useToastStore.getState().dismiss(t.id)}
-                    accessibilityRole="button"
-                    accessibilityLabel="Dismiss"
-                  >
-                    <Text className="text-white mt-2">Dismiss</Text>
+                  <Pressable onPress={() => useToastStore.getState().dismiss(t.id)}>
+                    <Text style={{ color: "#fff", marginTop: 8 }}>Dismiss</Text>
                   </Pressable>
                 </>
               )}

@@ -21,51 +21,48 @@ const PlayListCard = ({
   title,
   description,
   onPress,
+  id,
   icon,
   variant = "small",
   cardStyle,
 }: PlayListCardItemProps) => {
-  const IconComponent = icon;
+  const Icon = icon;
   if (variant === "large") {
     return (
-      <View style={cardStyle} className="gap-4">
-        {image && (
-          <Image
-            source={{ uri: image || "https://picsum.photos/200/300" }}
-            style={styles.imageLarge}
-          />
-        )}
-        {IconComponent && (
-          <View
-            style={[
-              styles.imageLarge,
-              {
-                alignItems: "center",
-                justifyContent: "center",
+      <View style={[{ gap: theme.sizes.spacing.md }, cardStyle]}>
+        <React.Fragment>
+          {image && (
+            <Image
+              source={{ uri: image || "https://picsum.photos/200/300" }}
+              style={styles.imageLarge}
+            />
+          )}
+          {Icon && (
+            <View
+              style={{
                 padding: theme.sizes.spacing.xs,
                 backgroundColor: "#02332C",
-              },
-            ]}
-          >
-            <IconComponent color="#08FFDB" size={48} />
-          </View>
-        )}
-        <View className="gap-2">
-          <Text size="base" className="text-neutral-100" weight="medium">
+                ...styles.imageLarge,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Icon color="#08FFDB" size={48} />
+            </View>
+          )}
+        </React.Fragment>
+        <View style={styles.textContainer}>
+          <Text size="base" color={theme.colors.white[50]} weight="medium">
             {title}
           </Text>
-          <Text size="xs" className="text-neutral-400">{description}</Text>
+          <Text size="xs">{description}</Text>
         </View>
       </View>
     );
   }
   return (
-    <Pressable
-      onPress={onPress}
-      style={cardStyle}
-      className="mb-2 flex-row items-center justify-between border-b border-neutral-600 pb-4"
-    >
-      <View className="flex-row items-start gap-4">
+    <Pressable onPress={onPress} style={[styles.container, cardStyle]}>
+      <View style={styles.imageContainer}>
         {image && (
           <Image
             source={{ uri: image || "https://picsum.photos/200/300" }}
@@ -73,21 +70,25 @@ const PlayListCard = ({
           />
         )}
         {icon && (
-          <View className="rounded bg-teal-950 p-1">
-            {IconComponent && (
-              <IconComponent color="#08FFDB" size={18} />
-            )}
+          <View
+            style={{
+              padding: theme.sizes.spacing.xs,
+              backgroundColor: "#02332C",
+              borderRadius: theme.sizes.radius.xs,
+            }}
+          >
+            {Icon && <Icon color="#08FFDB" size={18} />}
           </View>
         )}
-        <View className="gap-2">
-          <Text size="base" className="text-neutral-100" weight="medium">
+        <View style={styles.textContainer}>
+          <Text size="base" color={theme.colors.white[50]} weight="medium">
             {title}
           </Text>
-          <Text size="xs" className="text-neutral-400">{description}</Text>
+          <Text size="xs">{description}</Text>
         </View>
       </View>
       <Pressable>
-        <SolidIcons.ChevronRightIcon color="#BDBDBD" size={16} />
+        <SolidIcons.ChevronRightIcon color={"#BDBDBD"} size={16} />
       </Pressable>
     </Pressable>
   );
@@ -95,12 +96,29 @@ const PlayListCard = ({
 
 export default PlayListCard;
 
-// Allowed exception: runtime dimensions for image (screen width/height).
 const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 10,
+    justifyContent: "space-between",
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.grey[600],
+    paddingBottom: theme.sizes.spacing.md,
+  },
   image: {
     width: theme.sizes.screen.width * 0.1,
     height: theme.sizes.screen.width * 0.1,
     borderRadius: theme.sizes.radius.sm,
+  },
+  textContainer: {
+    gap: theme.sizes.spacing.sm,
+  },
+  imageContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: theme.sizes.spacing.md,
   },
   imageLarge: {
     width: "100%",

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
 	Easing,
+	runOnJS,
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
@@ -16,8 +17,18 @@ import {
 	registerSwipeableRow,
 	unregisterSwipeableRow,
 } from './swipeable-row-registry'
-import { runOnJS } from 'react-native-reanimated'
+import type { SwipeableRowContextValue } from './swipeable-row-context'
 import { SwipeableRowProvider } from './swipeable-row-context'
+
+function renderSwipeableRowChildren(
+	children: React.ReactNode | ((ctx: SwipeableRowContextValue) => React.ReactNode),
+	ctx: SwipeableRowContextValue,
+): React.ReactNode {
+	if (typeof children === 'function') {
+		return children(ctx)
+	}
+	return <SwipeableRowProvider value={ctx}>{children}</SwipeableRowProvider>
+}
 import { Pressable } from 'react-native'
 import useHapticFeedback from '@/hooks/shared/use-haptic-feedback'
 import { View } from 'react-native'
@@ -37,7 +48,7 @@ export type QuickAction = {
 }
 
 type Props = {
-	children: React.ReactNode
+	children: React.ReactNode | ((ctx: SwipeableRowContextValue) => React.ReactNode)
 	onPress?: () => void | null
 	onLongPress?: () => void | null
 	leftAction?: SwipeAction | null // immediate action on right swipe
@@ -63,7 +74,6 @@ export default function SwipeableRow({
 }: Props) {
 	const triggerHaptic = useHapticFeedback()
 	const tx = useSharedValue(0)
-	const dragging = useSharedValue(false)
 	const idRef = useRef<string | undefined>(undefined)
 	// React state for menu open (avoids pointerEvents bug from treating SharedValue object as truthy)
 	const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -141,7 +151,7 @@ export default function SwipeableRow({
 			.hitSlop({ right: -64 })
 			.maxDistance(2)
 			.onBegin(() => {
-				fgOpacity.set(0.5)
+				fgOpacity.value = 0.5
 			})
 			.onEnd((e, success) => {
 				// If a quick-action menu is open, row-level tap should NOT trigger onPress.
@@ -151,7 +161,7 @@ export default function SwipeableRow({
 				}
 			})
 			.onFinalize(() => {
-				fgOpacity.set(1.0)
+				fgOpacity.value = 1.0
 			})
 	}, [onPress, isMenuOpen])
 
@@ -159,17 +169,17 @@ export default function SwipeableRow({
 		return Gesture.LongPress()
 			.runOnJS(true)
 			.onBegin(() => {
-				fgOpacity.set(0.5)
+				fgOpacity.value = 0.5
 			})
 			.onStart(() => {
 				if (onLongPress) {
 					triggerHaptic('effectDoubleClick')
 					onLongPress()
 				}
-				fgOpacity.set(1.0)
+				fgOpacity.value = 1.0
 			})
 			.onTouchesCancelled(() => {
-				fgOpacity.set(1.0)
+				fgOpacity.value = 1.0
 			})
 	}, [onLongPress])
 
@@ -193,8 +203,7 @@ export default function SwipeableRow({
 			.failOffsetY([-8, 8])
 			.onBegin(() => {
 				if (disabled) return
-				dragging.set(true)
-				fgOpacity.set(1.0)
+				fgOpacity.value = 1.0
 			})
 			.onUpdate((e) => {
 				if (disabled) return
@@ -328,7 +337,6 @@ export default function SwipeableRow({
 			})
 			.onFinalize(() => {
 				if (disabled) return
-				dragging.set(false)
 			})
 	}, [
 		disabled,
@@ -349,7 +357,9 @@ export default function SwipeableRow({
 				translateX: tx.value,
 			},
 		],
-		opacity: withTiming(fgOpacity.value, { easing: Easing.bounce }),
+		// Do not call withTiming (or other animators) inside useAnimatedStyle; it re-runs every
+		// evaluation and can trigger Worklets "modify value" / addListener UI-thread errors.
+		opacity: fgOpacity.value,
 		zIndex: 20,
 	}))
 	// Keep the tap-to-close overlay anchored to the foreground so quick actions stay interactive
@@ -360,31 +370,46 @@ export default function SwipeableRow({
 			},
 		],
 	}))
+	// Primitives only inside worklets — avoid capturing leftActions/rightActions arrays
+	// (Worklets may freeze whole objects; see RN Worklets troubleshooting).
+	const leftUnderlayZIndex = (leftActions?.length ?? 0) > 0 ? 5 : 10
+	const rightUnderlayZIndex = (rightActions?.length ?? 0) > 0 ? 5 : 10
+	const leftMaxForWorklet = maxLeft === 0 ? 1 : maxLeft
+	const rightMaxForWorklet = maxRight === 0 ? -1 : maxRight
+	const absRightMaxForWorklet = Math.abs(rightMaxForWorklet)
+	const leftDenomForWorklet = Math.max(1, Math.min(threshold, leftMaxForWorklet))
+	const rightDenomForWorklet = Math.max(1, Math.min(threshold, absRightMaxForWorklet))
+
 	const leftUnderlayStyle = useAnimatedStyle(() => {
-		// Normalize progress to [0,1]
-		const leftMax = maxLeft === 0 ? 1 : maxLeft
-		const denom = Math.max(1, Math.min(threshold, leftMax))
-		const progress = Math.min(1, Math.max(0, tx.value / denom))
+		const progress = Math.min(1, Math.max(0, tx.value / leftDenomForWorklet))
 		const opacity = progress < 1 ? progress * 0.9 : 1
 		return {
 			opacity,
-			// Quick-action buttons should sit visually beneath content
-			zIndex: leftActions && leftActions.length > 0 ? 5 : 10,
+			zIndex: leftUnderlayZIndex,
 		}
 	})
 	const rightUnderlayStyle = useAnimatedStyle(() => {
-		const rightMax = maxRight === 0 ? -1 : maxRight
-		const absMax = Math.abs(rightMax)
-		const denom = Math.max(1, Math.min(threshold, absMax))
-		const progress = Math.min(1, Math.max(0, -tx.value / denom))
+		const progress = Math.min(1, Math.max(0, -tx.value / rightDenomForWorklet))
 		const opacity = progress < 1 ? progress * 0.9 : 1
 		return {
 			opacity,
-			zIndex: rightActions && rightActions.length > 0 ? 5 : 10,
+			zIndex: rightUnderlayZIndex,
 		}
 	})
 
-	if (disabled) return <>{children}</>
+	const swipeRowCtx = useMemo(
+		() => ({
+			tx,
+			menuOpenSV,
+			leftWidth: measuredLeftWidth,
+			rightWidth: Math.abs(measuredRightWidth),
+		}),
+		[tx, menuOpenSV, measuredLeftWidth, measuredRightWidth],
+	)
+
+	if (disabled) {
+		return renderSwipeableRowChildren(children, swipeRowCtx)
+	}
 
 	const combinedGesture = Gesture.Race(panGesture, longPressGesture, tapGesture)
 
@@ -415,25 +440,16 @@ export default function SwipeableRow({
 			  </Animated.View>
 			)}
 	
-			<SwipeableRowProvider
-			  value={{
-				tx,
-				menuOpenSV,
-				leftWidth: measuredLeftWidth,
-				rightWidth: Math.abs(measuredRightWidth),
-			  }}
-			>
-			  <Animated.View style={fgStyle} pointerEvents={isMenuOpen ? 'none' : 'auto'}>
-				{children}
-			  </Animated.View>
-			</SwipeableRowProvider>
+			<Animated.View style={fgStyle} pointerEvents={isMenuOpen ? 'none' : 'auto'}>
+				{renderSwipeableRowChildren(children, swipeRowCtx)}
+			</Animated.View>
 	
 			{/* Tap-capture overlay */}
 			<Animated.View
 			  style={[{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 30 }, overlayStyle]}
 			  pointerEvents={isMenuOpen ? 'auto' : 'none'}
 			>
-			  <Pressable className="flex-1" onPress={close} />
+			  <Pressable style={{ flex: 1 }} onPress={close} />
 			</Animated.View>
 		  </View>
 		</GestureDetector>

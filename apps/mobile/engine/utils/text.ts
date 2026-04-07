@@ -1,5 +1,5 @@
-import { Models } from '@/dtos/model.dto'
-import { SermonItemDTO } from '@/dtos/sermon.dto'
+import { Models } from "@/types/models"
+import type { SermonItemDTO } from "@/types/sermon"
 
 
 export function getItemName(item: SermonItemDTO): string {

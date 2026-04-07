@@ -1,5 +1,5 @@
+import { StyleSheet, View } from "react-native";
 import React from "react";
-import { VStack } from "@/components/shared";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Button from "@/components/ui/button";
@@ -13,19 +13,21 @@ import { Sms } from "iconsax-react-nativejs";
 
 const ForgotPasswordForm = () => {
   const { setEmail, setUserEmail } = useRegisterStore();
+
   const form = useForm<EmailSchemaType>({
-    defaultValues: { email: "" },
+    defaultValues: {
+      email: "",
+    },
     resolver: zodResolver(EmailSchema),
   });
-
+  
   const handleFormSubmit = (data: EmailSchemaType) => {
-    setEmail(data.email);
-    setUserEmail(true);
-    router.push("/request-password-otp");
+    setEmail(data.email)
+    setUserEmail(true)
+    router.push("/auth/verify-otp");
   };
-
   return (
-    <VStack className="w-full">
+    <View style={styles.container}>
       <FormInput
         name="email"
         control={form.control}
@@ -36,11 +38,18 @@ const ForgotPasswordForm = () => {
       <TermsAndConditions />
       <Button
         label="Continue"
+        
         disabled={!form.formState.isValid}
         onPress={form.handleSubmit(handleFormSubmit)}
       />
-    </VStack>
+    </View>
   );
 };
 
 export default ForgotPasswordForm;
+
+const styles = StyleSheet.create({
+  container: {
+    gap: 20,
+  },
+});

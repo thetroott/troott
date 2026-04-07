@@ -1,43 +1,74 @@
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, Pressable, Image } from 'react-native';
+import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StyleSheet, View, Text, TouchableOpacity, Image } from "react-native";
+import { theme } from "@/constants/theme";
 
 type NotFoundProps = {
-    message?: string;
-    onRetry?: () => void;
+  message?: string;
+  onRetry?: () => void;
 };
 
-const NotFound = ({ message = 'Page not found', onRetry }: NotFoundProps) => {
-    return (
-        <SafeAreaView className="flex-1 bg-neutral-950">
-            <View className="flex-1 justify-center items-center px-6">
-                <Image
-                    source={require('../assets/images/tt/troott-logo.png')}
-                    className="w-[200px] h-[200px] mb-6"
-                    resizeMode="contain"
-                />
-                <Text className="text-2xl font-bold text-neutral-100 mb-2">
-                    Oops!
-                </Text>
-                <Text className="text-base text-neutral-400 text-center mb-6">
-                    {message}
-                </Text>
+const NotFound = ({ message = "Page not found", onRetry }: NotFoundProps) => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Image
+          source={require("../assets/images/tt/troott-logo.png")} // Replace with your own illustration
+          style={styles.image}
+          resizeMode="contain"
+        />
+        <Text style={styles.title}>Oops!</Text>
+        <Text style={styles.message}>{message}</Text>
 
-                {onRetry && (
-                    <Pressable
-                        onPress={onRetry}
-                        className="bg-neutral-700 px-6 py-3 rounded-lg"
-                        accessibilityRole="button"
-                        accessibilityLabel="Go back"
-                    >
-                        <Text className="text-neutral-100 text-base font-semibold">
-                            Go Back
-                        </Text>
-                    </Pressable>
-                )}
-            </View>
-        </SafeAreaView>
-    );
+        {onRetry && (
+          <TouchableOpacity style={styles.button} onPress={onRetry}>
+            <Text style={styles.buttonText}>Go Back</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </SafeAreaView>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.white[50],
+  },
+  content: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  message: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  button: {
+    backgroundColor: "#007bff",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: theme.colors.white[50],
+    fontSize: 16,
+    fontWeight: "600",
+  },
+});
 
 export default NotFound;

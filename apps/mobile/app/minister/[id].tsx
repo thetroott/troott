@@ -8,7 +8,7 @@ export default function MinisterScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   return (
     <ScreenView>
-      <View className="flex-1 items-center justify-center">
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Minister {id ?? "—"}</Text>
       </View>
     </ScreenView>

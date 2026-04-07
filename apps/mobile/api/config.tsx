@@ -29,7 +29,7 @@
 //   navigationRef = ref;
 // };
 
-// const BaseURL: string = Constants.expoConfig?.extra?.TROOTT_API_URL as string;
+// const BaseURL: string = process.env.EXPO_PUBLIC_TROOTT_API_URL;
 // const appVersion: string = Constants.expoConfig?.version as string;
 
 // export const axiosPublic = axios.create({

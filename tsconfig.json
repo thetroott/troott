@@ -2,7 +2,8 @@
   "extends": "./configs/typescript/base.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {}
+    "paths": {},
+    "types": ["node"]
   },
   "include": ["scripts/**/*.ts"],
   "exclude": ["node_modules", "apps", "packages", "configs"]
