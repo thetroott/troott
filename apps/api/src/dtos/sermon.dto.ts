@@ -1,4 +1,6 @@
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
+
+type ObjectId = Types.ObjectId;
 import { ContentState, ContentStatus } from "../utils/enums.util";
 import { IAudioMetadata } from "../utils/interfaces.util";
 
@@ -83,6 +85,7 @@ export interface SermonDTO {
 }
 
 export interface SermonUploadDTO {
+  id: string;
   file: string;
   uploadedBy: ObjectId;
   uploadRef: string;

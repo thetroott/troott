@@ -10,6 +10,8 @@ export declare const URL_LOGOUT = "/auth/logout";
 export declare const URL_LOGGEDIN_USER = "/auth/user";
 export declare const URL_USERS = "/users";
 export declare const URL_CHANGE_PASSWORD = "/users/update-password";
+export declare const URL_MINISTER = "/talents";
+/** Alias for talent API paths (careers, fields, etc.). */
 export declare const URL_TALENT = "/talents";
 export declare const URL_BUSINESSES = "/businesses";
 export declare const URL_BUSINESS = "/business";

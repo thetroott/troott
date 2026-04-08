@@ -8,7 +8,7 @@ class AxiosService {
 
     constructor(baseUrl: string) {
         if (!baseUrl) {
-            throw new Error('Pacepard API base url is required');
+            throw new Error('Troott API base url is required');
         }
         this.baseUrl = baseUrl;
     }

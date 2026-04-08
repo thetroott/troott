@@ -1,9 +1,5 @@
 interface Entry {
-    createdAt: Date;
-    updatedAt: Date;
-    _version: number;
-    _id: any;
-    id: any;
+    [key: string]: unknown;
 }
 export default Entry;
 //# sourceMappingURL=entry.dto.d.ts.map

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import asyncHandler from "../middlewares/async.mdw";
 import { preferencesRepository } from "../repositories/preference.repository";
 import ErrorResponse from "../utils/error.util";
+import { pathParam } from "../utils/route-params.util";
 
 /**
  * @name createPreferences
@@ -40,7 +41,10 @@ export const createPreferences = asyncHandler(
  */
 export const getUserPreferences = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
+    const userId = pathParam(req.params.userId);
+    if (!userId) {
+      return next(new ErrorResponse("userId is required", 400, []));
+    }
 
     const result = await preferencesRepository.findByUser(userId);
 
@@ -66,7 +70,10 @@ export const getUserPreferences = asyncHandler(
  */
 export const updatePreferences = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
+    const userId = pathParam(req.params.userId);
+    if (!userId) {
+      return next(new ErrorResponse("userId is required", 400, []));
+    }
     const updates = req.body;
 
     const result = await preferencesRepository.updatePreferences(
@@ -96,7 +103,10 @@ export const updatePreferences = asyncHandler(
  */
 export const deletePreferences = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
+    const userId = pathParam(req.params.userId);
+    if (!userId) {
+      return next(new ErrorResponse("userId is required", 400, []));
+    }
 
     const result = await preferencesRepository.deletePreferences(userId);
 

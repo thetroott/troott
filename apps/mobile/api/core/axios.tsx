@@ -32,11 +32,15 @@ class AxiosService {
 
         let urlpath = `${this.baseUrl}${path}`;
 
+        const headerConfig = isAuth
+            ? await storage.getConfigWithBearer()
+            : storage.getConfig();
+
         await Axios({
             method: method,
             url: urlpath,
             data: payload,
-            headers: isAuth ? storage.getConfigWithBearer().headers : storage.getConfig().headers
+            headers: headerConfig.headers,
         }).then((resp) => {
             result = resp.data;
         }).catch((err) => {

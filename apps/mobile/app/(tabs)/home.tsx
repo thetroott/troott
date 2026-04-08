@@ -120,7 +120,6 @@ const Home = () => {
           snapToInterval={theme.sizes.screen.width * 0.8}
           showsHorizontalScrollIndicator={false}
           decelerationRate={-1}
-          estimatedItemSize={290}
           renderItem={({ item: group }) => (
             <View style={{ gap: 10, marginRight: 10, borderWidth: 1, borderColor: '#ff00ff' }}>
               {group.map((trackItem) => {

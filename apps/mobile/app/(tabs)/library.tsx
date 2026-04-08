@@ -22,7 +22,7 @@ import { Grid1, Heart } from "iconsax-react-nativejs";
 //import { Tracks } from "@/_mock";
 import Animated from "react-native-reanimated";
 import { router } from "expo-router";
-import { CategoryItem, LibraryHeader, PlayListView, SortItem } from "@/components/containers/tabs/library";
+import { CategoryItem, LibraryHeader, SortItem } from "@/components/containers/tabs/library";
 import { PlayListCardItem, TrackCard } from "@/components/containers/player-old";
 import { loadSermons as Tracks } from "@/_data/loader";
 import { tracks } from "@/_data/_mock/tracks";
@@ -103,13 +103,41 @@ const Library = () => {
         },
       },
     ],
+    Sermon: [
+      {
+        name: "Recent Activities",
+        selected: sortValue === "Recent Activities",
+        onPress: () => setSortValue("Recent Activities"),
+      },
+      {
+        name: "Alphabetical",
+        selected: sortValue === "Alphabetical",
+        onPress: () => setSortValue("Alphabetical"),
+      },
+    ],
+    Series: [
+      {
+        name: "Recent Activities",
+        selected: sortValue === "Recent Activities",
+        onPress: () => setSortValue("Recent Activities"),
+      },
+      {
+        name: "Alphabetical",
+        selected: sortValue === "Alphabetical",
+        onPress: () => setSortValue("Alphabetical"),
+      },
+    ],
+    Preacher: [
+      {
+        name: "Alphabetical",
+        selected: sortValue === "Alphabetical",
+        onPress: () => setSortValue("Alphabetical"),
+      },
+    ],
   };
   function handleFloatingButtonPress (){
     router.push('/playlist/create-playlist')
   }
-  const categoriesComponentMap: Record<categoryKey, React.JSX.Element> = {
-    Playlist: <PlayListView isGrid={displayStyle == "grid"} />,
-  };
   return (
     <ScreenView>
       <LibraryHeader />
@@ -123,7 +151,6 @@ const Library = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           data={categories}
-          estimatedItemSize={100}
           renderItem={({ item }) => (
             <CategoryItem
               name={item.name}
@@ -318,7 +345,6 @@ function ListeningHistory({ displayStyle = "list" }: ListeningHistoryProps) {
       snapToInterval={theme.sizes.screen.width * 0.8}
       showsHorizontalScrollIndicator={false}
       decelerationRate={-1}
-      estimatedItemSize={290}
       renderItem={({ item, index }) => {
         const track = tracks[index % 3];
         return (

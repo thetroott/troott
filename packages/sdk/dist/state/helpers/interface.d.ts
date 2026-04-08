@@ -13,7 +13,7 @@ import Task from "@/dtos/task.dto";
 import Team from "@/dtos/team.dto";
 import Transaction from "@/dtos/transaction.dto";
 import User from "@/dtos/user.dto";
-import Workspace from "@/dtos/workspace.dto";
+import Workspace from "@/dtos/sermon.dto";
 import { IAPIReport, IPagination, ISetLoading, ISidebarProps, IToastState, IUnsetLoading } from "@/utils/interfaces";
 import { RefineType } from "@/utils/types";
 export interface IClearResource {

@@ -1,7 +1,6 @@
-import Business from "@/dtos/business.dto";
-import Plan, { IPlanTrial } from "@/dtos/plan.dto";
-import Talent from "@/dtos/talent.dto";
-import Transaction from "@/dtos/transaction.dto";
+import Plan, { IPlanTrial } from '@/dtos/plan.dto';
+import Transaction from '@/dtos/transaction.dto';
+import Sermon from './sermon.dto';
 interface Subscription {
     code: string;
     status: string;
@@ -10,8 +9,7 @@ interface Subscription {
     slug: string;
     currency: string;
     trial: IPlanTrial;
-    talent: Talent | any;
-    business: Business | any;
+    sermon: Sermon | any;
     plan: Plan | any;
     transactions: Array<Transaction | any>;
     createdAt: string;

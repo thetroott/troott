@@ -1,5 +1,6 @@
 import { IAppMetrics, IPagination, ISidebarProps, IToast } from "@/utils/interfaces";
-import { ICollection, ICoreResource, IHackDomain, IProjectDomain } from "./interface";
+import { ICoreResource, IHackDomain, IProjectDomain } from "./interface";
+import { ICollection } from "./interface";
 import { IAPIResponse } from "@/api/types";
 declare const pagination: IPagination;
 declare const collection: ICollection;

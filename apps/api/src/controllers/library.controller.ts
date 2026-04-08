@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "../middlewares/async.mdw";
 import ErrorResponse from "../utils/error.util";
+import { pathParam } from "../utils/route-params.util";
 import libraryRepository from "../repositories/library.repository";
 
 /**
@@ -38,7 +39,10 @@ export const createLibrary = asyncHandler(
  */
 export const getLibraryByUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
+    const userId = pathParam(req.params.userId);
+    if (!userId) {
+      return next(new ErrorResponse("userId is required", 400, []));
+    }
 
     const library = await libraryRepository.findByUser(userId);
 
@@ -64,7 +68,11 @@ export const getLibraryByUser = asyncHandler(
  */
 export const getLibraryById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId, libraryId } = req.params;
+    const userId = pathParam(req.params.userId);
+    const libraryId = pathParam(req.params.libraryId);
+    if (!userId || !libraryId) {
+      return next(new ErrorResponse("userId and libraryId are required", 400, []));
+    }
 
     if (userId !== (req as any).user.id) {
       return next(new ErrorResponse("You are not authorized to access this resource", 403, []));
@@ -134,7 +142,10 @@ export const getAllLibraries = asyncHandler(
  */
 export const updateLibrary = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
+    const userId = pathParam(req.params.userId);
+    if (!userId) {
+      return next(new ErrorResponse("userId is required", 400, []));
+    }
     const updates = req.body;
 
     const library = await libraryRepository.updateLibrary(userId, updates);
@@ -161,7 +172,10 @@ export const updateLibrary = asyncHandler(
  */
 export const deleteLibrary = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
+    const userId = pathParam(req.params.userId);
+    if (!userId) {
+      return next(new ErrorResponse("userId is required", 400, []));
+    }
 
     const deleted = await libraryRepository.deleteLibrary(userId);
     if (deleted.error) {

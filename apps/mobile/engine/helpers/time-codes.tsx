@@ -14,7 +14,7 @@ export function RunTimeSeconds({
   color?: string;
   alignment?: Alignment;
   className?: string;
-}): JSX.Element {
+}): React.ReactElement {
   return (
     <Text
       className={`font-bold tabular-nums ${className || ''}`}
@@ -31,7 +31,7 @@ export function RunTimeTicks({
 }: {
   children?: number | null;
   className?: string;
-}): JSX.Element {
+}): React.ReactElement {
   if (!children) return <Text className={className}>0:00</Text>;
 
   const time = calculateRunTimeFromTicks(children);

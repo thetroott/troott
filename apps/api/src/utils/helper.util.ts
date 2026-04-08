@@ -138,8 +138,9 @@ export const genFileName = (
   const baseName = name?.trim() && name.length > 0 ? name : "troott-file";
 
   const now = new Date();
-  const day = now.toISOString().split("T")[0]; // YYYY-MM-DD
-  const time = now.toTimeString().split(" ")[0].replace(/:/g, "-"); // HH-MM-SS
+  const day = now.toISOString().split("T")[0] ?? "unknown-date"; // YYYY-MM-DD
+  const timeRaw = now.toTimeString().split(" ")[0] ?? "00-00-00";
+  const time = timeRaw.replace(/:/g, "-"); // HH-MM-SS
 
   return `${baseName}-${fileType.toLowerCase()}-${day}-${time}`;
 };
@@ -222,7 +223,7 @@ export const formatDate = (arg: string) => {
 };
 
 export const formatTime = (arg: string) => {
-  const timeExtract = arg.split("T")[1];
+  const timeExtract = arg.split("T")[1] ?? "";
   return timeExtract.substring(0, 5);
 };
 

@@ -4,8 +4,6 @@ import {
   ViewStyle,
   StyleSheet,
   Pressable,
-  NativeSyntheticEvent,
-  TextInputFocusEventData,
 } from "react-native";
 import React from "react";
 import { theme } from "@/constants/theme";
@@ -58,15 +56,15 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
       ),
     }));
 
-    function handleBlur(e: NativeSyntheticEvent<TextInputFocusEventData>) {
+    const handleBlur: NonNullable<TextInputProps["onBlur"]> = (e) => {
       focusProgress.value = withTiming(0);
       onBlur?.(e);
-    }
+    };
 
-    function handleFocus(e: NativeSyntheticEvent<TextInputFocusEventData>) {
+    const handleFocus: NonNullable<TextInputProps["onFocus"]> = (e) => {
       focusProgress.value = withTiming(1);
       onFocus?.(e);
-    }
+    };
 
     const [secureText, setSecureText] = React.useState(false);
     React.useEffect(() => {

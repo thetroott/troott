@@ -1,14 +1,5 @@
 declare class IdempotentService {
-    constructor();
-    /**
-     * @name getRequestKey
-     * @returns
-     */
     getRequestKey(): string;
-    /**
-     * @name setRequestKey
-     * @returns
-     */
     setRequestKey(): string;
 }
 declare const _default: IdempotentService;

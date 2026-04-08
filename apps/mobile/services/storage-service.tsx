@@ -22,22 +22,20 @@ const getConfig = () => {
     return config;
 };
 
-const getConfigWithBearer = () => {
-
-    const token = getToken();
-
+const getConfigWithBearer = async () => {
+    const token = await getToken();
+    const idemKey = await idempotent.getRequestKey();
 
     const config: any = {
-
         headers: {
             ContentType: 'application/json',
             Authorization: `Bearer ${token}`,
             lg: 'en',
-            ch: 'web'
-        }
-    }
+            ch: 'web',
+        },
+    };
 
-    config.headers[HeaderType.IDEMPOTENT] = idempotent.getRequestKey();
+    config.headers[HeaderType.IDEMPOTENT] = idemKey;
 
     return config;
 };
@@ -93,17 +91,25 @@ const setUserEmail = (userEmail: string): Promise<void> =>
     mmkvstorage.setData({ key: "userEmail", payload: userEmail });
 
 // Getters
-const getUserType = (): Promise<string> =>
-    mmkvstorage.getData({ key: "userType", parse: false });
+const getUserType = async (): Promise<string> => {
+    const v = await mmkvstorage.getData({ key: "userType", parse: false });
+    return typeof v === "string" ? v : "";
+};
 
-const getToken = (): Promise<string> =>
-    mmkvstorage.getData({ key: "token", parse: false });
+const getToken = async (): Promise<string> => {
+    const v = await mmkvstorage.getData({ key: "token", parse: false });
+    return typeof v === "string" ? v : "";
+};
 
-const getUserId = (): Promise<string> =>
-    mmkvstorage.getData({ key: "userId", parse: false });
+const getUserId = async (): Promise<string> => {
+    const v = await mmkvstorage.getData({ key: "userId", parse: false });
+    return typeof v === "string" ? v : "";
+};
 
-const getUserEmail = (): Promise<string> =>
-    mmkvstorage.getData({ key: "userEmail", parse: false });
+const getUserEmail = async (): Promise<string> => {
+    const v = await mmkvstorage.getData({ key: "userEmail", parse: false });
+    return typeof v === "string" ? v : "";
+};
 
 // Checkers
 const checkToken = (): Promise<boolean> =>
@@ -119,7 +125,7 @@ const checkUserType = (): Promise<boolean> =>
     (mmkvstorage.checkData("userType")) ?? false;
 
 // Export storage
-export const storage = {
+const storage = {
     getConfig,
     getConfigWithBearer,
     storeAuth,
@@ -137,3 +143,6 @@ export const storage = {
     checkUserId,
     checkUserType,
 };
+
+export { storage };
+export default storage;

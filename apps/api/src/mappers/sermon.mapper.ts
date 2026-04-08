@@ -12,7 +12,8 @@ class SermonMapper {
    * @description Converts a sermon document into a DTO for API responses.
    */
   public async mapUploadSermon(sermon: ISermonDoc): Promise<SermonUploadDTO> {
-    const result: SermonUploadDTO = {         
+    const result: SermonUploadDTO = {
+          id: (sermon as any).id?.toString?.() ?? (sermon as any)._id?.toString?.(),
           uploadRef: sermon.uploadSummary.uploadId,
           uploadedBy: sermon.uploadSummary.uploadedBy,
           file: sermon.uploadSummary.fileName,    

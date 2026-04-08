@@ -2,7 +2,7 @@ export { default as cookieService } from './services/cookies';
 export { default as storage } from './storage/local-storage';
 export { default as idempotentService } from './services/idempotent';
 export { QueryProvider } from './services/query';
-export { default as Pacepard, pacepardAPIClient } from './api/clients/pacepard';
+export { default as Troott, troottAPIClient } from './api/clients/troott';
 export * from './types/types';
 export * from './utils/enums';
 export * from './utils/interfaces';

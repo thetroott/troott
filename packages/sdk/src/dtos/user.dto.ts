@@ -54,7 +54,7 @@ interface User {
     roles: Array<any>;
     //permissions: Array<IUserPermission>;
     verification: any;
-    notifications: Array<any>
+    notifications: Array<any>;
     creadedBy: any;
 
     // time stamps

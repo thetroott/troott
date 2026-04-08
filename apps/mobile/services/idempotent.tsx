@@ -7,11 +7,11 @@ class IdempotentService {
   private key = 'XHIT';
 
   async getRequestKey(): Promise<string> {
-    let key = await mmkvstorage.getData({ key: this.key, parse: false });
-    if (!key) {
-      key = await this.setRequestKey();
+    const raw = await mmkvstorage.getData({ key: this.key, parse: false });
+    if (typeof raw === "string" && raw.length > 0) {
+      return raw;
     }
-    return key;
+    return this.setRequestKey();
   }
 
   async setRequestKey(): Promise<string> {

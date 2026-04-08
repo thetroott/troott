@@ -14,6 +14,8 @@ export const URL_USERS = '/users'
 export const URL_CHANGE_PASSWORD = `${URL_USERS}/update-password`
 
 export const URL_MINISTER = '/talents'
+/** Alias for talent API paths (careers, fields, etc.). */
+export const URL_TALENT = URL_MINISTER
 export const URL_BUSINESSES = '/businesses'
 export const URL_BUSINESS = '/business'
 export const URL_TEAMS = '/teams'

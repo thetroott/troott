@@ -1,5 +1,5 @@
 {
-    "extends": "../configs/typescript/react-library.json",
+    "extends": "../../configs/typescript/react-library.json",
     "compilerOptions": {
         "baseUrl": ".",
         "composite": true,
@@ -12,7 +12,8 @@
         "rootDir": "src",
         "paths": {
           "@/*": ["./src/*"]
-        }
+        },
+        "types": ["node"]
       },
       "include": ["src"],
       "exclude": ["node_modules", "dist"]

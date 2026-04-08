@@ -37,9 +37,6 @@ export interface IRouteItem {
     content: {
         backButton?: boolean;
         collapsed?: boolean;
-        description?: string;
-        maxWidth?: string;
-        onboardingType?: string;
     };
     params?: Array<IRouteParam>;
 }
@@ -269,10 +266,8 @@ export interface IStorage {
     getConfigWithBearer(): any;
     clearAuth(): void;
     keep(key: string, data: any): boolean;
-    keepLegacy(key: string, data: any): boolean;
     fetch(key: string): any;
-    fetchLegacy(key: string): any;
-    deleteItem(key: string, legacy?: boolean): boolean;
+    deleteItem(key: string): boolean;
     trimSpace(str: string): string;
     copyCode(code: string): boolean;
     debugAuth(): any;

@@ -6,26 +6,27 @@
     "postinstall": "patch-package",
     "dev": "TURBO_UI=tui turbo dev",
     "dev:api": "turbo dev --filter=\"{./apps/api}...\"",
-    "dev:app": "turbo dev --filter=\"{./apps/app}...\"",
+    "dev:web": "turbo dev --filter=\"{./apps/web}...\"",
     "dev:mobile": "turbo dev --filter=\"{./apps/mobile}...\"",
     "expo:mobile": "pnpm --filter @troott/mobile exec expo",
     "expo:mobile:start": "pnpm --filter @troott/mobile run start",
     "dev:website": "turbo dev --filter=\"{./apps/website}...\"",
-    "dev:fe": "turbo dev --ui=tui --filter=\"{./apps/website}...\" --filter=\"{./apps/app}...\"",
+    "dev:fe": "turbo dev --ui=tui --filter=\"{./apps/website}...\" --filter=\"{./apps/web}...\"",
     "lint": "turbo lint",
     "test": "turbo test",
     "build": "turbo build",
     "build:api": "turbo build --filter=\"...{./apps/api}\"",
-    "build:app": "turbo build --filter=\"...{./apps/app}\"",
+    "build:web": "turbo build --filter=\"...{./apps/web}\"",
     "build:mobile": "turbo build --filter=\"...{./apps/mobile}\"",
     "build:website": "turbo build --filter=\"...{./apps/website}\"",
-    "build:fe": "turbo build --filter=\"...{./apps/website}\" --filter=\"...{./apps/app}\"",
+    "build:fe": "turbo build --filter=\"...{./apps/website}\" --filter=\"...{./apps/web}\"",
     "android": "pnpm --filter @troott/mobile run android",
     "ios": "pnpm --filter @troott/mobile run ios",
     "prebuild:mobile": "pnpm --dir apps/mobile exec expo prebuild --pnpm",
     "prebuild:mobile:clean": "pnpm --dir apps/mobile exec expo prebuild --clean --pnpm",
     "start:mobile": "pnpm --filter @troott/mobile run start",
-    "start:mobile:clear": "pnpm --filter @troott/mobile run start:clear"
+    "start:mobile:clear": "pnpm --filter @troott/mobile run start:clear",
+    "typecheck:workspace": "tsc -b tsconfig.workspace.json"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",
@@ -43,7 +44,9 @@
     "dedupePeerDependents": true,
     "overrides": {
       "react": "19.2.0",
-      "react-dom": "19.2.0"
+      "react-dom": "19.2.0",
+      "@types/react": "19.1.0",
+      "@types/react-dom": "19.1.0"
     },
     "patchedDependencies": {
       "@rntp/player@5.0.0-beta.4": "patches/@rntp__player@5.0.0-beta.4.patch",

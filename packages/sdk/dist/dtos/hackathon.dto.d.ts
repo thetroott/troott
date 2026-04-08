@@ -1,9 +1,5 @@
 interface Hackathon {
-    createdAt: Date;
-    updatedAt: Date;
-    _version: number;
-    _id: any;
-    id: any;
+    [key: string]: unknown;
 }
 export default Hackathon;
 //# sourceMappingURL=hackathon.dto.d.ts.map

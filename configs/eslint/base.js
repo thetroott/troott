@@ -17,7 +17,7 @@ export const config = [
     parserOptions: {
       ecmaVersion: 2024,
       sourceType: "module",
-      project: "./tsconfig.json",
+      project: true,
     },
     plugins: {
       "@typescript-eslint": tsPlugin,

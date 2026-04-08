@@ -116,9 +116,10 @@ class AuthService {
     const split = phone.substring(0, 3).split("");
 
     if (
+      split.length >= 3 &&
       split[0] === "0" &&
-      arrayIncludes(digits, split[1]) &&
-      arrayIncludes(digits, split[2])
+      arrayIncludes(digits, split[1]!) &&
+      arrayIncludes(digits, split[2]!)
     ) {
       result = true;
     }

@@ -18,7 +18,7 @@ const INDEX_FILE = path_1.default.join(UI_PACKAGE_DIR, "src/index.ts");
 // ----------------------------
 const component = process.argv[2];
 if (!component) {
-    console.error("Please specify a component, e.g. pnpm tsx scripts/add-shadcn.ts accordion OR pnpm tsx scripts/add-shadcn.ts @tailark/mist-sign-up-1 apps/app");
+    console.error("Please specify a component, e.g. pnpm tsx scripts/add-shadcn.ts accordion OR pnpm tsx scripts/add-shadcn.ts @tailark/mist-sign-up-1 apps/web");
     process.exit(1);
 }
 // ----------------------------

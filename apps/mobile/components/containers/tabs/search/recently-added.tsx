@@ -17,7 +17,6 @@ const RecentlyAdded = () => {
         horizontal
         snapToInterval={theme.sizes.screen.width * 0.8}
         showsHorizontalScrollIndicator={false}
-        estimatedItemSize={290}
         decelerationRate={-1}
         renderItem={({ item, index }) => (
           <View style={{ gap: 10, marginRight: 10 }}>

@@ -1,19 +1,17 @@
 
-<img src="apps/web/public//blocks/pacepard.svg" alt="Pacepard Logo" width="400">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js Version](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org/)
-[![Package Manager](https://img.shields.io/badge/package%20manager-pnpm-F69220)](https://pnpm.io/)
-[![Turborepo](https://img.shields.io/badge/build%20system-turborepo-EF4444)](https://turbo.build/)
+[License: MIT](https://opensource.org/licenses/MIT)
+[Node.js Version](https://nodejs.org/)
+[Package Manager](https://pnpm.io/)
+[Turborepo](https://turbo.build/)
 
-## Pacepard
+## Troott
 
 ### Helping African talents unlock their superhuman potential.
 
-> Pacepard is a reward and engagement software for talents and product teams. We support the development of Open Source Software that solves problems faced daily by Africans, and we are creating points of entry into machine learning research.
+> Troott is a reward and engagement software for talents and product teams. We support the development of Open Source Software that solves problems faced daily by Africans, and we are creating points of entry into machine learning research.
 
-By using Pacepard, African talents, organisations, and EdTech providers can collaborate, track talent skill mastery progress, and host competitions while leveraging our AI-powered engagement analytics.
-
+By using Troott, African talents, organisations, and EdTech providers can collaborate, track talent skill mastery progress, and host competitions while leveraging AI-powered engagement analytics.
 
 ## Table of Contents
 
@@ -23,10 +21,9 @@ By using Pacepard, African talents, organisations, and EdTech providers can coll
 - [Development](#development)
 - [Adding Dependencies](#adding-dependencies)
 - [Building](#building)
-- [Docker Deployment](#docker-deployment)
+- [Deployment](#deployment)
 - [Scripts Reference](#scripts-reference)
 - [Contributing](#contributing)
-
 
 ## Prerequisites
 
@@ -51,8 +48,8 @@ docker --version  # Optional, for Docker deployments
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/pacepard/pacepard.git
-cd pacepard
+git clone https://github.com/thetroott/troott.git
+cd troott
 ```
 
 ### Install Dependencies
@@ -65,31 +62,25 @@ pnpm install
 
 This will install dependencies for all apps and packages in the workspace.
 
-
 ## Project Structure
 
 This is a **monorepo** managed by [Turborepo](https://turbo.build/) and [pnpm workspaces](https://pnpm.io/workspaces). The project is organized as follows:
 
 ```
-pacepard/
+troott/
 ├── apps/              # Applications
-│   ├── web/          # Next.js web application (@pacepard/web)
-│   │   └── Dockerfile
-│   ├── api/          # Express API server (@pacepard/api)
-│   │   └── Dockerfile
-│   ├── app/          # Main application (@pacepard/app)
-│   ├── service/      # Service application (@pacepard/service)
-│   │   └── Dockerfile
-│   ├── docs/         # Documentation site (@pacepard/docs)
-│   └── main/         # Main app entry point
-│       └── Dockerfile
+│   ├── website/      # Next.js site (@troott/website)
+│   ├── web/          # Vite/React SPA (@troott/web)
+│   ├── api/          # API server (@troott/api)
+│   └── mobile/       # Expo app (@troott/mobile)
 ├── packages/          # Shared packages
-│   ├── ui/           # UI component library (@pacepard/ui)
-│   ├── core/         # Core package (@pacepard/core)
-│   └── sdk/          # SDK package (@pacepard/sdk)
+│   ├── ui/           # Web UI primitives (@troott/ui)
+│   ├── sdk/          # Shared SDK (@troott/sdk)
+│   ├── tokens/       # Design tokens (@troott/tokens)
+│   └── native-ui/    # Native UI (@troott/native-ui)
 ├── configs/          # Shared configurations
-│   ├── eslint/       # ESLint configuration (@pacepard/configs/eslint)
-│   └── typescript/   # TypeScript configuration (@pacepard/configs/typescript)
+│   ├── eslint/       # @troott/configs/eslint
+│   └── typescript/   # @troott/configs-typescript
 ├── scripts/          # Utility scripts
 ├── docs/             # Documentation
 │   ├── docker-setup.md
@@ -104,24 +95,21 @@ pacepard/
 
 ### Workspace Packages
 
-All packages use the `@pacepard/*` namespace:
+Workspace apps and packages use the `@troott/*` namespace (examples):
 
 - **Apps:**
-  - `@pacepard/web` - Next.js web application (runs on port 3020)
-  - `@pacepard/api` - Express API server
-  - `@pacepard/app` - Main application
-  - `@pacepard/service` - Service application
-  - `@pacepard/docs` - Documentation site
-  - `@pacepard/api-docs` - API documentation
-
+  - `@troott/website` - Next.js site (marketing/docs)
+  - `@troott/web` - Vite/React SPA
+  - `@troott/api` - API server
+  - `@troott/mobile` - Expo (React Native)
 - **Packages:**
-  - `@pacepard/ui` - Shared UI component library (shadcn/ui based)
-  - `@pacepard/core` - Core functionality
-  - `@pacepard/sdk` - SDK utilities and shared logic
-
+  - `@troott/ui` - Web UI / shadcn-style components
+  - `@troott/sdk` - Shared client utilities and hooks
+  - `@troott/tokens` - Design tokens
+  - `@troott/native-ui` - React Native UI primitives
 - **Configs:**
-  - `@pacepard/configs/eslint` - Shared ESLint configuration
-  - `@pacepard/configs/typescript` - Shared TypeScript configuration
+  - `@troott/configs/eslint` - Shared ESLint configuration
+  - `@troott/configs-typescript` - Shared TypeScript configuration
 
 ---
 
@@ -139,38 +127,31 @@ pnpm dev
 
 OR 
 
-For a visual interface with Turbo UI to monitor builds and tasks (best option):
-
-```bash
-pnpm dev:ui
-```
+The default `pnpm dev` script enables Turbo UI (`TURBO_UI=tui`).
 
 ### Running Specific Applications
 
 You can run specific applications or groups:
 
 ```bash
-# Frontend applications (web + app)
+# Frontend (Next.js marketing site + Vite app)
 pnpm dev:fe
 
-# Backend applications (api + api-docs)
-pnpm dev:be
-
-# Individual applications
-pnpm dev:web      # Next.js web app
-pnpm dev:api      # Express API server
-pnpm dev:app      # Main application
-pnpm dev:service  # Service application
-pnpm dev:docs     # API documentation
+# One app at a time
+pnpm dev:website  # Next.js (`apps/website`)
+pnpm dev:web      # Vite SPA (`apps/web`)
+pnpm dev:api      # API (`apps/api`)
+pnpm dev:mobile   # Expo (`apps/mobile`)
 ```
 
 ### Development URLs
 
-- **Main App**: http://localhost:5176
-- **Website App**: http://localhost:3020
-- **Services App**: http://localhost:3015
-- **API**: http://localhost:5015
-- **API Docs**: http://localhost:3010
+Ports depend on each app’s config. Typical local defaults:
+
+- **Vite web** (`apps/web`): see Vite dev server output (often port **5176**).
+- **Website** (`apps/website`): often **3020** when using `next dev` defaults.
+- **API** (`apps/api`): see `PORT` / server logs (often **5015** in this repo).
+- **Mobile** (`apps/mobile`): Expo dev server (see terminal after `pnpm dev:mobile`).
 
 ---
 
@@ -181,17 +162,18 @@ pnpm dev:docs     # API documentation
 To add a dependency to a specific workspace package:
 
 ```bash
-# Add to a specific app/package
-pnpm add <package-name> --filter @pacepard/web
-pnpm add <package-name> --filter @pacepard/api
-pnpm add <package-name> --filter @pacepard/ui
-pnpm add <package-name> --filter @pacepard/sdk
+pnpm add <package-name> --filter @troott/web
+pnpm add <package-name> --filter @troott/website
+pnpm add <package-name> --filter @troott/api
+pnpm add <package-name> --filter @troott/mobile
+pnpm add <package-name> --filter @troott/ui
+pnpm add <package-name> --filter @troott/sdk
 ```
 
 ### Adding a Dev Dependency
 
 ```bash
-pnpm add -D <package-name> --filter @pacepard/web
+pnpm add -D <package-name> --filter @troott/web
 ```
 
 ### Adding a Root Dependency
@@ -207,7 +189,7 @@ pnpm add <package-name> -w
 You can add to multiple packages at once:
 
 ```bash
-pnpm add <package-name> --filter @pacepard/web --filter @pacepard/app
+pnpm add <package-name> --filter @troott/website --filter @troott/web
 ```
 
 ### Using Workspace Packages
@@ -217,8 +199,8 @@ To use a workspace package in another package, reference it in `package.json`:
 ```json
 {
   "dependencies": {
-    "@pacepard/ui": "workspace:*",
-    "@pacepard/sdk": "workspace:*"
+    "@troott/ui": "workspace:*",
+    "@troott/sdk": "workspace:*"
   }
 }
 ```
@@ -240,6 +222,7 @@ pnpm build
 ```
 
 This command uses Turborepo to build all packages in the correct order based on dependencies. Turborepo automatically:
+
 - Resolves workspace dependencies (packages must build before apps that depend on them)
 - Caches build outputs for faster subsequent builds
 - Runs builds in parallel where possible
@@ -267,6 +250,7 @@ pnpm install
 ```
 
 This installs dependencies for:
+
 - Root workspace dependencies
 - All apps (`apps/*`)
 - All packages (`packages/*`)
@@ -278,20 +262,16 @@ This installs dependencies for:
 
 Turborepo automatically handles build order based on the `dependsOn: ["^build"]` configuration in `turbo.json`. This ensures:
 
-1. **Config packages** build first (no dependencies):
-   - `@pacepard/configs/typescript` - TypeScript configurations
-   - `@pacepard/configs/eslint` - ESLint configurations
-
-2. **Shared packages** build next (depend on configs):
-   - `@pacepard/core` - Core functionality (no build script, TypeScript source only)
-   - `@pacepard/ui` - UI component library (no build script, TypeScript source only)
-   - `@pacepard/sdk` - SDK utilities (no build script, TypeScript source only)
-
+1. **Config packages** build first when they define build scripts:
+  - `@troott/configs-typescript` – shared TS configs (consumed via `extends`, usually no build)
+  - `@troott/configs/eslint` – shared ESLint config (no build)
+2. **Shared libraries** (examples):
+  - `@troott/ui`, `@troott/sdk`, `@troott/tokens`, `@troott/native-ui` – build only if their `package.json` defines `build`
 3. **Applications** build last (depend on packages):
-   - `@pacepard/web` - Next.js web application
-   - `@pacepard/api` - Express API server
-   - `@pacepard/app` - Vite/React SPA (main app)
-   - `@pacepard/service` - Next.js service application
+  - `@troott/website` - Next.js site
+  - `@troott/web` - Vite/React SPA
+  - `@troott/api` - API server
+  - `@troott/mobile` - Expo app
 
 #### Step 4: Build Workspace Packages (Optional)
 
@@ -308,24 +288,24 @@ pnpm build --filter './configs/*'
 pnpm build --filter './packages/*' --filter './configs/*'
 ```
 
-**Note**: Most packages (`@pacepard/ui`, `@pacepard/sdk`, `@pacepard/core`) don't have build scripts as they're TypeScript source files consumed directly. However, if you need to verify TypeScript compilation, you can type-check them.
+**Note**: Many workspace packages ship TypeScript source only; whether they run a `build` script depends on the individual package.
 
 #### Step 5: Build Specific Application
 
 Build a specific application and its dependencies:
 
 ```bash
-# Build web application (Next.js)
-pnpm build --filter @pacepard/web
+# Build Next.js website
+pnpm build --filter @troott/website
 
-# Build API server (Express)
-pnpm build --filter @pacepard/api
+# Build Vite/React SPA
+pnpm build --filter @troott/web
 
-# Build main app (Vite/React)
-pnpm build --filter @pacepard/app
+# Build API server
+pnpm build --filter @troott/api
 
-# Build service application (Next.js)
-pnpm build --filter @pacepard/service
+# Build Expo app
+pnpm build --filter @troott/mobile
 ```
 
 **Note**: Using `--filter` automatically builds all dependencies first, so you don't need to manually build packages.
@@ -339,6 +319,7 @@ pnpm build
 ```
 
 This command:
+
 - Builds all packages and configs that have build scripts
 - Builds all applications
 - Uses Turborepo caching for faster rebuilds
@@ -350,22 +331,24 @@ Each package and application has specific build configurations. Here's what happ
 
 #### Applications
 
-##### @pacepard/web (Next.js Application)
-- **Package**: `apps/web/package.json`
+##### @troott/website (Next.js Application)
+
+- **Package**: `apps/website/package.json`
 - **Build Script**: `next build`
 - **Output**: `.next/` directory (Next.js production build)
-- **Dependencies**: `@pacepard/ui`, `@pacepard/core`
+- **Dependencies**: (see app `package.json`)
 - **Build Details**:
   - Compiles Next.js application
   - Generates optimized production bundle
   - Outputs static pages where applicable
   - Creates server-side rendering artifacts
 
-##### @pacepard/api (Express API Server)
+##### @troott/api (API Server)
+
 - **Package**: `apps/api/package.json`
 - **Build Script**: `tsc --noEmit false && tsc-alias && copyfiles -u 1 src/_data/**/* dist/ && copyfiles -u 1 src/views/**/* dist/`
 - **Output**: `dist/` directory (compiled JavaScript)
-- **Dependencies**: `@pacepard/configs/typescript`
+- **Dependencies**: see `apps/api/package.json` (often `@troott/configs-typescript` as a dev tool)
 - **Build Details**:
   1. Compiles TypeScript to JavaScript (`tsc`)
   2. Resolves TypeScript path aliases (`tsc-alias`)
@@ -373,76 +356,46 @@ Each package and application has specific build configurations. Here's what happ
   4. Copies template files from `src/views/` to `dist/`
   - Environment variable `PORT` affects build (configured in `turbo.json`)
 
-##### @pacepard/app (Vite/React SPA)
-- **Package**: `apps/main/package.json`
+##### @troott/web (Vite/React SPA)
+
+- **Package**: `apps/web/package.json`
 - **Build Script**: `tsc -b && vite build`
 - **Output**: `dist/` directory (optimized production build)
-- **Dependencies**: `@pacepard/ui`, `@pacepard/sdk`, `@pacepard/core`, `@pacepard/configs/typescript`
+- **Dependencies**: (see `apps/web/package.json`)
 - **Build Details**:
   1. Type-checks and compiles TypeScript (`tsc -b`)
   2. Builds production bundle with Vite
   3. Generates optimized static assets
   - Uses Vite for fast builds and code splitting
 
-##### @pacepard/service (Next.js Service)
-- **Package**: `apps/service/package.json`
-- **Build Script**: `next build`
-- **Output**: `.next/` directory (Next.js production build)
-- **Dependencies**: `@pacepard/ui`, `@pacepard/configs/eslint`, `@pacepard/configs/typescript`
-- **Build Details**:
-  - Compiles Next.js application
-  - Generates optimized production bundle
-  - Similar to `@pacepard/web` build process
+#### Shared packages
 
-#### Packages (No Build Scripts)
+Workspace libraries live under `packages/*`. Each has its own `package.json`; use `pnpm build --filter <name>` when a package defines a `build` script.
 
-These packages don't have build scripts as they're TypeScript source files consumed directly:
+Examples:
 
-##### @pacepard/ui
-- **Package**: `apps/packages/ui/package.json`
-- **Build Script**: None (TypeScript source consumed directly)
-- **Entry Point**: `./src/index.ts`
-- **Usage**: Imported as `workspace:*` dependency in applications
-- **Note**: TypeScript compiles these files during application builds
+- `@troott/ui` — `packages/ui`
+- `@troott/sdk` — `packages/sdk`
+- `@troott/tokens` — `packages/tokens`
+- `@troott/native-ui` — `packages/native-ui`
 
-##### @pacepard/sdk
-- **Package**: `apps/packages/sdk/package.json`
-- **Build Script**: None (TypeScript source consumed directly)
-- **Entry Point**: `./src/index.ts`
-- **Usage**: Imported as `workspace:*` dependency in applications
+#### Config packages
 
-##### @pacepard/core
-- **Package**: `apps/packages/core/package.json`
-- **Build Script**: None (TypeScript source consumed directly)
-- **Entry Point**: `src/index.ts`
-- **Usage**: Imported as `workspace:*` dependency in applications
-
-##### @pacepard/configs/typescript
-- **Package**: `configs/typescript/package.json`
-- **Build Script**: None (JSON configuration files)
-- **Usage**: Extended via `extends` in `tsconfig.json` files
-
-##### @pacepard/configs/eslint
-- **Package**: `configs/eslint/package.json`
-- **Build Script**: None (JavaScript configuration files)
-- **Usage**: Imported in ESLint config files
+- `@troott/configs-typescript` — `configs/typescript` (JSON TS configs; consumed via `extends`)
+- `@troott/configs/eslint` — `configs/eslint` (ESLint flat config entrypoints)
 
 ### Build Output Locations
 
 After building, outputs are located in:
 
 ```
-pacepard/
+troott/
 ├── apps/
-│   ├── web/
-│   │   └── .next/           # Next.js build output
-│   ├── api/
-│   │   └── dist/            # Compiled JavaScript
-│   ├── main/
-│   │   └── dist/            # Vite build output
-│   └── service/
-│       └── .next/           # Next.js build output
-└── packages/                # No build outputs (source TypeScript)
+│   ├── website/.next/       # Next.js (when built)
+│   ├── web/dist/            # Vite production build
+│   ├── api/dist/            # API compile output
+│   └── mobile/              # Expo; outputs depend on build profile
+└── packages/                # Per-package outputs only if `build` is defined
 ```
 
 ### Turborepo Build Configuration
@@ -459,43 +412,35 @@ The build process is configured in `turbo.json`:
 }
 ```
 
-- **`dependsOn: ["^build"]`**: Ensures workspace dependencies build first
-- **`inputs`**: Files that trigger rebuilds (includes `.env*` files)
-- **`outputs`**: Build output directories to cache
+- `**dependsOn: ["^build"]**`: Ensures workspace dependencies build first
+- `**inputs**`: Files that trigger rebuilds (includes `.env*` files)
+- `**outputs**`: Build output directories to cache
 
 ### Build Verification
 
 After building, verify the builds:
 
 ```bash
-# Check if build outputs exist
-ls apps/web/.next          # Should exist for web
-ls apps/api/dist           # Should exist for API
-ls apps/main/dist          # Should exist for main app
-ls apps/service/.next      # Should exist for service
-
-# Run production builds locally (if supported)
-cd apps/web && pnpm start
-cd apps/api && pnpm start
+ls apps/website/.next
+ls apps/web/dist
+ls apps/api/dist
 ```
 
 ### Troubleshooting Build Issues
 
-#### Issue: "Cannot find module '@pacepard/ui'"
+#### Issue: "Cannot find module '@troott/ui'"
+
 **Solution**: Ensure packages are built or are available as workspace dependencies:
+
 ```bash
 pnpm install  # Reinstall dependencies
 pnpm build --filter './packages/*'  # Build packages explicitly
 ```
 
-#### Issue: TypeScript errors during build
-**Solution**: Type-check before building:
-```bash
-pnpm check-types
-```
-
 #### Issue: Build cache issues
+
 **Solution**: Clear Turborepo cache:
+
 ```bash
 pnpm build --force
 # Or
@@ -503,7 +448,9 @@ turbo run build --force
 ```
 
 #### Issue: Environment variables not found
+
 **Solution**: Ensure `.env` files are present:
+
 ```bash
 # Check for .env files in application directories
 ls apps/api/.env*
@@ -511,19 +458,23 @@ ls apps/web/.env*
 ```
 
 #### Issue: API build fails with "tsc-alias: command not found"
+
 **Solution**: The command is available via pnpm workspace hoisting. If issues persist:
+
 ```bash
 # Ensure root has the dependency
 pnpm add -D tsc-alias copyfiles -w
 ```
 
 #### Issue: Workspace dependencies not resolving
+
 **Solution**: Verify workspace protocol in `package.json`:
+
 ```json
 {
   "dependencies": {
-    "@pacepard/ui": "workspace:*",
-    "@pacepard/sdk": "workspace:*"
+    "@troott/ui": "workspace:*",
+    "@troott/sdk": "workspace:*"
   }
 }
 ```
@@ -531,187 +482,21 @@ pnpm add -D tsc-alias copyfiles -w
 ### Build Scripts Reference
 
 #### Root Scripts
+
 - `pnpm build` - Build all packages and applications
 - `pnpm build --filter <package>` - Build specific package/app and dependencies
 - `pnpm build --filter './packages/*'` - Build all packages
-- `pnpm check-types` - Type-check all packages (doesn't emit files)
 
 #### Application-Specific Builds
-- `pnpm build --filter @pacepard/web` - Build web application
-- `pnpm build --filter @pacepard/api` - Build API server
-- `pnpm build --filter @pacepard/app` - Build main application
-- `pnpm build --filter @pacepard/service` - Build service application
 
-### Build Documentation
+- `pnpm build --filter @troott/website` - Build Next.js website
+- `pnpm build --filter @troott/web` - Build Vite/React SPA
+- `pnpm build --filter @troott/api` - Build API server
+- `pnpm build --filter @troott/mobile` - Build Expo app
 
-Build documentation site:
+## Deployment
 
-```bash
-pnpm build:docs
-```
-
----
-
-## Docker Deployment
-
-The monorepo includes Dockerfiles for each application, optimized for production deployment.
-
-### Overview
-
-Each application has its own Dockerfile:
-- **API** (`apps/api/Dockerfile`) - Express server
-- **Web** (`apps/web/Dockerfile`) - Next.js application
-- **App** (`apps/main/Dockerfile`) - Vite/React SPA (served with nginx)
-- **Service** (`apps/service/Dockerfile`) - Next.js application
-
-All Dockerfiles use multi-stage builds for optimized production images.
-
-### Prerequisites
-
-- **Docker** installed and running ([Docker Desktop](https://www.docker.com/products/docker-desktop) or Docker Engine)
-- Build context must be the **monorepo root directory**
-
-### Building Docker Images
-
-From the monorepo root, build images for each application:
-
-```bash
-# API
-docker build -f apps/api/Dockerfile -t pacepard-api:latest .
-
-# Web
-docker build -f apps/web/Dockerfile -t pacepard-web:latest .
-
-# App (Main)
-docker build -f apps/main/Dockerfile -t pacepard-app:latest .
-
-# Service
-docker build -f apps/service/Dockerfile -t pacepard-service:latest .
-```
-
-### Running Docker Containers
-
-```bash
-# API (default port 3000)
-docker run -p 3000:3000 --env-file .env.production pacepard-api:latest
-
-# Web (default port 3000)
-docker run -p 3000:3000 --env-file .env.production pacepard-web:latest
-
-# App (nginx on port 80)
-docker run -p 8080:80 pacepard-app:latest
-
-# Service (default port 3000)
-docker run -p 3000:3000 --env-file .env.production pacepard-service:latest
-```
-
-### Port Configuration
-
-Default ports (configurable via `PORT` environment variable):
-- **API**: 3000
-- **Web**: 3000
-- **App**: 80 (nginx)
-- **Service**: 3000
-
-### Monorepo Considerations
-
-The Dockerfiles handle the monorepo structure by:
-
-1. **Building from root context**: All Dockerfiles expect the build context to be the monorepo root
-2. **Handling workspace dependencies**: Builds workspace packages (`@pacepard/ui`, `@pacepard/sdk`, etc.) before applications
-3. **Multi-stage builds**: Optimizes final image size by separating build and runtime dependencies
-
-Build order:
-```bash
-# 1. Install all dependencies
-pnpm install --frozen-lockfile
-
-# 2. Build workspace packages first
-pnpm build --filter './packages/*' --filter './configs/*'
-
-# 3. Build the application
-pnpm build --filter @pacepard/api  # (or web, app, service)
-```
-
-### Coolify Deployment
-
-For [Coolify](https://coolify.io) deployments:
-
-1. **Application Type**: Select "Dockerfile"
-2. **Build Context**: Set to monorepo root (`.`)
-3. **Dockerfile Path**: 
-   - API: `apps/api/Dockerfile`
-   - Web: `apps/web/Dockerfile`
-   - App: `apps/main/Dockerfile`
-   - Service: `apps/service/Dockerfile`
-4. **Root Directory**: 
-   - API: `apps/api`
-   - Web: `apps/web`
-   - App: `apps/main`
-   - Service: `apps/service`
-
-### Environment Variables
-
-Each application requires specific environment variables. Set these in your Docker deployment:
-
-#### API
-```bash
-PORT=3000
-NODE_ENV=production
-DATABASE_URL=<your-database-url>
-REDIS_URL=<your-redis-url>
-# ... other API-specific variables
-```
-
-#### Web & Service (Next.js)
-```bash
-PORT=3000
-NODE_ENV=production
-# Next.js specific environment variables
-```
-
-#### App
-No Node.js environment variables needed (static files served via nginx).
-
-### Troubleshooting
-
-#### Build fails: "Cannot find module"
-- Ensure build context is the monorepo root
-- Verify workspace dependencies are built before the app
-- Check that `pnpm-workspace.yaml` is correct
-
-#### API build fails: "tsc-alias: command not found"
-- These tools are available via pnpm workspace hoisting
-- If issues persist, ensure they're installed at root: `pnpm add -D tsc-alias copyfiles -w`
-
-#### Workspace dependencies not found
-- Ensure packages are built: `pnpm build --filter './packages/*'`
-- Verify workspace protocol in package.json: `"@pacepard/ui": "workspace:*"`
-
-### File Structure
-
-```
-pacepard/
-├── .dockerignore          # Files excluded from Docker builds
-├── apps/
-│   ├── api/
-│   │   └── Dockerfile     # API Dockerfile
-│   ├── web/
-│   │   └── Dockerfile     # Web Dockerfile
-│   ├── main/
-│   │   └── Dockerfile     # App Dockerfile
-│   └── service/
-│       └── Dockerfile     # Service Dockerfile
-└── docs/
-    └── docker-setup.md    # Detailed Docker documentation
-```
-
-### Additional Resources
-
-For detailed Docker setup and advanced configuration, see:
-- [Docker Setup Guide](./docs/docker-setup.md) - Comprehensive Docker documentation
-- [Coolify Monorepo Setup](./docs/coolify-monorepo-setup.md) - Coolify-specific deployment guide
-- [GitHub Actions Implementation](./docs/github-actions-implementation.md) - CI/CD with Docker
+This monorepo does not ship a single container layout under `apps/*`. Deploy each application with the workflow that matches it (hosting provider, EAS for Expo, your API runtime, etc.). Optional notes may exist under [`docs/`](docs/).
 
 ---
 
@@ -719,26 +504,24 @@ For detailed Docker setup and advanced configuration, see:
 
 ### Root Scripts
 
+
 | Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start all applications in development mode |
-| `pnpm dev:fe` | Start frontend applications (web + app) |
-| `pnpm dev:be` | Start backend applications (api + api-docs) |
-| `pnpm dev:web` | Start web application only |
-| `pnpm dev:api` | Start API server only |
-| `pnpm dev:app` | Start main app only |
-| `pnpm dev:service` | Start service app only |
-| `pnpm dev:docs` | Start docs app only |
-| `pnpm dev:ui` | Start with Turborepo UI |
-| `pnpm build` | Build all packages |
-| `pnpm build:docs` | Build documentation |
-| `pnpm test` | Run tests across all packages |
-| `pnpm lint` | Lint all packages |
-| `pnpm format` | Format code with Prettier |
-| `pnpm check-types` | Type-check all packages |
-| `pnpm clean` | Clean build artifacts |
-| `pnpm clean:modules` | Remove all node_modules |
-| `pnpm clean:all` | Remove node_modules and pnpm-lock.yaml |
+| ------ | ----------- |
+| `pnpm dev` | All workspace `dev` tasks (Turbo UI) |
+| `pnpm dev:fe` | `apps/website` + `apps/web` |
+| `pnpm dev:website` | Next.js site |
+| `pnpm dev:web` | Vite app |
+| `pnpm dev:api` | API |
+| `pnpm dev:mobile` | Expo |
+| `pnpm build` | All workspace `build` tasks |
+| `pnpm build:fe` | Website + Vite app builds |
+| `pnpm build:website` / `build:web` / `build:api` / `build:mobile` | Single app |
+| `pnpm lint` | Lint |
+| `pnpm test` | Tests |
+| `pnpm expo:mobile` / `expo:mobile:start` | Expo CLI via workspace |
+| `pnpm android` / `ios` / `start:mobile` | Mobile shortcuts |
+| `pnpm prebuild:mobile` / `prebuild:mobile:clean` | Expo prebuild |
+
 
 ### Package-Specific Scripts
 
@@ -753,9 +536,8 @@ We welcome contributions! Here's how you can help:
 ### 1. Fork and Clone
 
 ```bash
-# Fork the repository on GitHub (https://github.com/pacepard/pacepard), then:
-git clone https://github.com/your-username/pacepard.git
-cd pacepard
+git clone https://github.com/thetroott/troott.git
+cd troott
 ```
 
 ### 2. Create a Branch
@@ -783,29 +565,15 @@ pnpm install
 
 ### 5. Run Checks
 
-Before committing, ensure everything passes:
+Before committing, run whatever your change touches (for example):
 
 ```bash
-# Type checking
-pnpm check-types
-
-# Linting
 pnpm lint
-
-# Format code
-pnpm format
-
-# Build (optional, but recommended)
+pnpm test
 pnpm build
 ```
 
 ### 6. Commit Your Changes
-
-We use [Changesets](https://github.com/changesets/changesets) for version management. For significant changes, create a changeset:
-
-```bash
-pnpm changeset
-```
 
 Follow conventional commit messages:
 
@@ -823,18 +591,20 @@ chore: maintenance tasks
 
 Most teams follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `chore` | Maintenance, configs, dependencies |
+
+| Type       | Description                                        |
+| ---------- | -------------------------------------------------- |
+| `feat`     | New feature                                        |
+| `fix`      | Bug fix                                            |
+| `chore`    | Maintenance, configs, dependencies                 |
 | `refactor` | Code change that does not add features or fix bugs |
-| `docs` | Documentation only |
-| `test` | Tests only |
-| `style` | Formatting, no logic change |
-| `perf` | Performance improvement |
-| `ci` | CI or pipeline changes |
-| `build` | Build system or dependencies |
+| `docs`     | Documentation only                                 |
+| `test`     | Tests only                                         |
+| `style`    | Formatting, no logic change                        |
+| `perf`     | Performance improvement                            |
+| `ci`       | CI or pipeline changes                             |
+| `build`    | Build system or dependencies                       |
+
 
 ### 7. Keep Your Branch Up to Date
 
@@ -906,13 +676,13 @@ If you discover a bug or have a suggestion, raise an issue via the GitHub Issues
 - **TypeScript**: All code should be properly typed
 - **Testing**: Add tests for new features when possible
 - **Documentation**: Update README and code comments as needed
-- **Workspace Packages**: Use workspace protocol (`workspace:*`) for internal dependencies
+- **Workspace Packages**: Use workspace protocol (`workspace:`*) for internal dependencies
 
 ### Project-Specific Guidelines
 
-- **UI Components**: Add new components to `@pacepard/ui` package
-- **Shared Logic**: Put shared utilities in `@pacepard/sdk`
-- **API Changes**: Update API documentation in `apps/docs`
+- **UI Components**: Prefer `@troott/ui` (web) or `@troott/native-ui` (mobile)
+- **Shared Logic**: Prefer `@troott/sdk` for cross-app client utilities
+- **API Changes**: Document in `apps/api` or your API docs as appropriate
 - **Environment Variables**: Use `.env` files (they're gitignored)
 
 ### Pull Request Guidelines
@@ -927,18 +697,16 @@ If you discover a bug or have a suggestion, raise an issue via the GitHub Issues
 ## Additional Resources
 
 ### Documentation
-- [Docker Setup Guide](./docs/docker-setup.md) - Comprehensive Docker deployment guide
-- [Coolify Monorepo Setup](./docs/coolify-monorepo-setup.md) - Coolify deployment instructions
-- [GitHub Actions Implementation](./docs/github-actions-implementation.md) - CI/CD pipeline documentation
-- [Workflow Documentation](./docs/workflow.md) - Development workflow and best practices
+
+Further notes may live under [`docs/`](docs/) (Docker, Coolify, CI, workflow, etc.).
 
 ### External Resources
+
 - [Turborepo Documentation](https://turbo.build/repo/docs)
 - [pnpm Workspaces](https://pnpm.io/workspaces)
-- [Changesets Documentation](https://github.com/changesets/changesets)
 - [Next.js Documentation](https://nextjs.org/docs)
+- [Expo Documentation](https://docs.expo.dev/)
 - [TypeScript Documentation](https://www.typescriptlang.org/docs/)
-- [Docker Documentation](https://docs.docker.com/)
 
 ---
 

@@ -11,7 +11,7 @@ import redisHandler from "../middlewares/redis.mdw";
 export const getCacheData = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     
-    const cacheKey = req.originalUrl.split("?")[0];
+    const cacheKey = req.originalUrl.split("?")[0] ?? "";
     const cached = await redisHandler.fetchData(cacheKey);
 
     if (cached) {

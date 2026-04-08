@@ -1,4 +1,5 @@
 
+import mmkvstorage from "@/services/mmkv-storage";
 import storage from "@/services/storage-service";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -6,7 +7,6 @@ import { persist } from "zustand/middleware";
 
 const collection = {}; 
 const STORAGE_KEY = "isFirstTime";
-const isFirstTime = !storage.checkData(STORAGE_KEY)
 
 
 interface AuthState {
@@ -39,6 +39,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       loading: false,
       token: null,
+      isFirstTimeUser: true,
 
       setUser: (user) =>
         set({
@@ -46,10 +47,11 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: !!user,
         }),
       setUserType: (userType) => set({ userType }),
-      isFirstTimeUser: isFirstTime,
       setFirstTimeUser: (value) => {
         set({ isFirstTimeUser: value });
-        if (!value) storage.keep(STORAGE_KEY, "true");
+        if (!value) {
+          void mmkvstorage.setData({ key: STORAGE_KEY, payload: "true" });
+        }
       },
 
       setToken: (token) => set({ token }),

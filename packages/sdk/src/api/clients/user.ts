@@ -130,6 +130,21 @@ class UserAPI {
             payload,
         });
     }
+
+    /** @deprecated Use getMinisters */
+    getTalents(payload: IListQuery): Promise<IAPIResponse> {
+        return this.getMinisters(payload);
+    }
+
+    /** @deprecated Use getMinister */
+    getTalent(userId: string): Promise<IAPIResponse> {
+        return this.getMinister(userId);
+    }
+
+    /** @deprecated Use inviteMinister */
+    inviteTalent(payload: IInviteMinister): Promise<IAPIResponse> {
+        return this.inviteMinister(payload);
+    }
 }
 
 export default UserAPI;

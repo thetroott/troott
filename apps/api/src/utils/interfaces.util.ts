@@ -1,4 +1,7 @@
-import { Model, Document, ObjectId } from "mongoose";
+import { Model, Document, Types } from "mongoose";
+
+/** Use `Types.ObjectId` so `extends Document` and explicit `_id`/`id` stay compatible. */
+type ObjectId = Types.ObjectId;
 import {
   AccountManagerRole,
   APIKeyEnvironment,

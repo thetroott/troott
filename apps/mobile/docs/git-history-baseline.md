@@ -25,7 +25,7 @@ SSH or network errors (e.g. `Permission denied (publickey)`) mean you cannot com
 1. **Another checkout on your machine** – If Metro reported port **8081** in use by another Troott app (e.g. `ProjectStudy/troott-mobile-app`), diff that tree against this repo’s `apps/mobile`:
 
    ```bash
-   diff -ru /path/to/other/troott/apps/mobile /path/to/ProjectPacepard/troott/apps/mobile | less
+   diff -ru /path/to/repo-a/apps/mobile /path/to/repo-b/apps/mobile | less
    ```
 
 2. **Remote after fetch works**

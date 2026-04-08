@@ -1,1 +1,1 @@
-{"version":3,"file":"submission.dto.d.ts","sourceRoot":"","sources":["../../src/dtos/submission.dto.ts"],"names":[],"mappings":"AAAA,UAAU,UAAU;IAGhB,SAAS,EAAE,IAAI,CAAC;IAChB,SAAS,EAAE,IAAI,CAAC;IAChB,QAAQ,EAAE,MAAM,CAAC;IACjB,GAAG,EAAE,GAAG,CAAC;IACT,EAAE,EAAE,GAAG,CAAC;CAEX;AAED,eAAe,UAAU,CAAC"}
+{"version":3,"file":"submission.dto.d.ts","sourceRoot":"","sources":["../../src/dtos/submission.dto.ts"],"names":[],"mappings":"AAAA,UAAU,UAAU;IAChB,CAAC,GAAG,EAAE,MAAM,GAAG,OAAO,CAAC;CAC1B;AAED,eAAe,UAAU,CAAC"}

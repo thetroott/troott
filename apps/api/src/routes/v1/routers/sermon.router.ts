@@ -31,7 +31,7 @@ const sermonRouter = Router({ mergeParams: true });
 // Upload and Publish routes
 sermonRouter.post("/start-upload", uploadHandler, uploadSermon);
 sermonRouter.post("/image-upload", uploadHandler, uploadSermonCover);
-sermonRouter.post("/publish", publishSermon);
+sermonRouter.post("/publish/:id", publishSermon);
 
 // Update and Delete routes
 sermonRouter.put("/update/:id", updateSermon);

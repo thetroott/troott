@@ -405,7 +405,9 @@ class SermonService {
   ): Promise<void> {
     const baseUrl = appUrl || (process.env.CLIENT_APP_URL as string);
 
-    const sermonExist = await sermonRepository.findBySermonId(sermon._id);
+    const sermonExist = await sermonRepository.findBySermonId(
+      String(sermon._id),
+    );
     if (!sermonExist) {
       throw new Error("Sermon not found");
     }

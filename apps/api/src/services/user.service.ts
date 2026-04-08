@@ -142,7 +142,8 @@ class UserService {
   ): Promise<void> {
     if (data && data.length > 0) {
       for (let i = 0; i < data.length; i++) {
-        let bulk: IBulkUser = data[i];
+        const bulk = data[i];
+        if (!bulk) continue;
         let password: string = UIID(1).toString();
         let exist = await User.findOne({ email: bulk.email });
 
@@ -283,6 +284,9 @@ class UserService {
     if (!user) {
       
       // 2. Check if user exists via email (Attempt to link account)
+      if (!email) {
+        throw new Error("OAuth profile did not include an email");
+      }
       const userResult = await userRepository.findUser(email);
 
       if (!userResult.data) {
@@ -298,8 +302,8 @@ class UserService {
       } else {
         // 3. User not found - CREATE A NEW SOCIAL USER
         user = await this.createSocialUser({
-          firstName: profile.name?.givenName,
-          lastName: profile.name?.familyName,
+          firstName: profile.name?.givenName ?? "",
+          lastName: profile.name?.familyName ?? "",
           email: email,
           userType: UserType.LISTENER, 
           [idField]: socialId, // Add the specific social ID

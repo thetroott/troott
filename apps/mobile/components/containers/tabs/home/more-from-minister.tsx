@@ -79,7 +79,6 @@ const MoreFromMinister = () => {
         snapToInterval={theme.sizes.screen.width * 0.6}
         showsHorizontalScrollIndicator={false}
         decelerationRate={-1}
-        estimatedItemSize={290}
         renderItem={({ item }) => {
           const sermon = item as any; // Handle both ISermonTrack and mock track types
           return (

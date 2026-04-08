@@ -185,15 +185,14 @@ You can extend these configurations in your project:
 
 This package includes TypeScript version `~5.8.3` as a peer dependency.
 
-## 🤝 Contributing
+## Contributing
 
 When modifying TypeScript configurations:
 
-1. Ensure backward compatibility
-2. Test with all consuming applications and packages
-3. Document breaking changes
-4. Consider impact on build performance
-5. Update example usage as needed
+1. Test with all consuming applications and packages
+2. Document breaking changes clearly
+3. Consider impact on build performance
+4. Update example usage as needed
 
 ### Testing Configuration Changes
 
@@ -207,4 +206,4 @@ pnpm build
 
 ---
 
-Part of the [Pacepard <Monorepo Vite + Next.js + Tailwind CSS + shadcn/ui>](../../README.md) Monorepo app.
+Part of the [Troott monorepo](../../README.md).

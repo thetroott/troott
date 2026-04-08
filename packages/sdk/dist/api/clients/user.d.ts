@@ -6,7 +6,7 @@ interface ISendUsersUpdate {
     content: string;
     users: Array<string>;
 }
-interface IInviteTalent {
+interface IInviteMinister {
     title: string;
     content: string;
     email: string;
@@ -33,19 +33,19 @@ declare class UserAPI {
      */
     getUser(userId?: string): Promise<IAPIResponse>;
     /**
-     * @name getTalents
-     * @description Fetches a list of talents from the API.
-     * @param {IListQuery} payload The query parameters for fetching talents.
-     * @returns {Promise<IAPIResponse>} Server response with talents list.
+     * @name getMinisters
+     * @description Fetches a list of Ministers from the API.
+     * @param {IListQuery} payload The query parameters for fetching Ministers.
+     * @returns {Promise<IAPIResponse>} Server response with Ministers list.
      */
-    getTalents(payload: IListQuery): Promise<IAPIResponse>;
+    getMinisters(payload: IListQuery): Promise<IAPIResponse>;
     /**
-     * @name getTalent
-     * @description Fetches a specific talent by ID.
-     * @param {string} userId The talent/user ID.
-     * @returns {Promise<IAPIResponse>} Server response with talent data.
+     * @name getMinister
+     * @description Fetches a specific Minister by ID.
+     * @param {string} userId The Minister/user ID.
+     * @returns {Promise<IAPIResponse>} Server response with Minister data.
      */
-    getTalent(userId: string): Promise<IAPIResponse>;
+    getMinister(userId: string): Promise<IAPIResponse>;
     /**
      * @name sendUsersUpdate
      * @description Sends an update notification to multiple users.
@@ -54,90 +54,18 @@ declare class UserAPI {
      */
     sendUsersUpdate(payload: ISendUsersUpdate): Promise<IAPIResponse>;
     /**
-     * @name inviteTalent
-     * @description Invites a new talent user.
-     * @param {IInviteTalent} payload The data for inviting a talent.
+     * @name inviteMinister
+     * @description Invites a new Minister user.
+     * @param {IInviteMinister} payload The data for inviting a Minister.
      * @returns {Promise<IAPIResponse>} Server response.
      */
-    inviteTalent(payload: IInviteTalent): Promise<IAPIResponse>;
-    /**
-     * @name setUserType
-     * @description Set user type (TALENT or BUSINESS)
-     * @param {Object} payload The data for setting user type.
-     * @param {string} payload.userType The user type (TALENT or BUSINESS)
-     * @returns {Promise<IAPIResponse>} Server response.
-     */
-    setUserType(payload: {
-        userType: string;
-    }): Promise<IAPIResponse>;
-    /**
-     * @name setBasicInfo
-     * @description Set basic user information
-     * @param {Object} payload The data for setting basic info.
-     * @returns {Promise<IAPIResponse>} Server response.
-     */
-    setBasicInfo(payload: {
-        firstName: string;
-        lastName: string;
-        phoneCode?: string;
-        phoneNumber?: string;
-        location: {
-            address?: string;
-            city?: string;
-            state?: string;
-            country: string;
-            postalCode?: string;
-        };
-        timeZone: string;
-    }): Promise<IAPIResponse>;
-    /**
-     * @name setUserInfo
-     * @description Set user information (specialty, role, discovery) - works for all user types
-     * @param {Object} payload The data for setting user info.
-     * @returns {Promise<IAPIResponse>} Server response.
-     */
-    setUserInfo(payload: {
-        specialty: string;
-        role: string;
-        discovery: string;
-    }): Promise<IAPIResponse>;
-    /**
-     * @name setTalentInfo
-     * @description Set talent-specific information
-     * @param {Object} payload The data for setting talent info.
-     * @returns {Promise<IAPIResponse>} Server response.
-     */
-    setTalentInfo(payload: {
-        specialty: string;
-        gender: string;
-        dateOfBirth: string;
-        occupationType: string;
-        interests: Array<string>;
-    }): Promise<IAPIResponse>;
-    /**
-     * @name setBusinessInfo
-     * @description Set business-specific information
-     * @param {Object} payload The data for setting business info.
-     * @returns {Promise<IAPIResponse>} Server response.
-     */
-    setBusinessInfo(payload: {
-        businessName: string;
-        businessType: string;
-        industry: string;
-        tags?: Array<string>;
-    }): Promise<IAPIResponse>;
-    /**
-     * @name completeOnboarding
-     * @description Complete onboarding process
-     * @returns {Promise<IAPIResponse>} Server response.
-     */
-    completeOnboarding(): Promise<IAPIResponse>;
-    /**
-     * @name getOnboardingStatus
-     * @description Get current onboarding status and progress
-     * @returns {Promise<IAPIResponse>} Server response.
-     */
-    getOnboardingStatus(): Promise<IAPIResponse>;
+    inviteMinister(payload: IInviteMinister): Promise<IAPIResponse>;
+    /** @deprecated Use getMinisters */
+    getTalents(payload: IListQuery): Promise<IAPIResponse>;
+    /** @deprecated Use getMinister */
+    getTalent(userId: string): Promise<IAPIResponse>;
+    /** @deprecated Use inviteMinister */
+    inviteTalent(payload: IInviteMinister): Promise<IAPIResponse>;
 }
 export default UserAPI;
 //# sourceMappingURL=user.d.ts.map

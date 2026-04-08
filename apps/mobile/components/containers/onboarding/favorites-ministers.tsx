@@ -80,7 +80,6 @@ const FavoriteMinisters = () => {
         />
 
         <FlashList
-          estimatedItemSize={200}
           data={data}
           extraData={{ selectedPastors, data }}
           keyExtractor={(item) => item.id}

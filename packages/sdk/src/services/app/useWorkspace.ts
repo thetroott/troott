@@ -7,9 +7,12 @@ import {
 import useContextType from '@/state/useContextType';
 import { IListQuery } from '@/utils/interfaces';
 import { ICollection } from '@/state/helpers/interface';
-import { CreateWorkspaceDTO, UpdateWorkspaceDTO } from '@/dtos/sermon.dto';
+import type {
+    CreateWorkspaceDTO,
+    UpdateWorkspaceDTO,
+} from '@/dtos/sermon.dto';
 import { useCallback } from 'react';
-import { pacepardAPIClient } from '@/api/clients/troott';
+import { troottAPIClient } from '@/api/clients/troott';
 
 const useWorkspace = () => {
     const { appContext } = useContextType();
@@ -36,7 +39,7 @@ const useWorkspace = () => {
             setLoading({ option: 'resource', type: GET_WORKSPACES });
 
             const response =
-                await pacepardAPIClient().workspace.getWorkspaces(data);
+                await troottAPIClient().workspace.getWorkspaces(data);
 
             if (response.error === false) {
                 if (response.status === 200) {
@@ -66,7 +69,7 @@ const useWorkspace = () => {
                 });
 
                 if (response.status === 401) {
-                    pacepardAPIClient().auth.logout();
+                    troottAPIClient().auth.logout();
                 } else if (
                     response.message &&
                     response.message === 'Error: Network Error'
@@ -92,7 +95,7 @@ const useWorkspace = () => {
         async (id: string) => {
             setLoading({ option: 'default' });
 
-            const response = await pacepardAPIClient().workspace.getWorkspace({
+            const response = await troottAPIClient().workspace.getWorkspace({
                 id,
             });
 
@@ -116,7 +119,7 @@ const useWorkspace = () => {
                 });
 
                 if (response.status === 401) {
-                    pacepardAPIClient().auth.logout();
+                    troottAPIClient().auth.logout();
                 } else if (
                     response.message &&
                     response.message === 'Error: Network Error'
@@ -147,7 +150,7 @@ const useWorkspace = () => {
             setLoading({ option: 'default' });
 
             const response =
-                await pacepardAPIClient().workspace.createWorkspace(data);
+                await troottAPIClient().workspace.createWorkspace(data);
 
             if (response.error === false) {
                 if (response.status === 200 || response.status === 201) {
@@ -169,7 +172,7 @@ const useWorkspace = () => {
                 });
 
                 if (response.status === 401) {
-                    pacepardAPIClient().auth.logout();
+                    troottAPIClient().auth.logout();
                 } else if (
                     response.message &&
                     response.message === 'Error: Network Error'
@@ -200,7 +203,7 @@ const useWorkspace = () => {
             setLoading({ option: 'default' });
 
             const response =
-                await pacepardAPIClient().workspace.updateWorkspace(data);
+                await troottAPIClient().workspace.updateWorkspace(data);
 
             if (response.error === false) {
                 if (response.status === 200) {
@@ -222,7 +225,7 @@ const useWorkspace = () => {
                 });
 
                 if (response.status === 401) {
-                    pacepardAPIClient().auth.logout();
+                    troottAPIClient().auth.logout();
                 } else if (
                     response.message &&
                     response.message === 'Error: Network Error'

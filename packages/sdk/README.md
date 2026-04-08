@@ -1,10 +1,10 @@
 # @troott/sdk
 
-Shared tooling utilities and services for Pacepard applications.
+Shared tooling utilities and services for Troott applications.
 
 ## Installation
 
-This package is part of the Pacepard monorepo and is automatically available to all workspace packages.
+This package is part of the Troott monorepo and is automatically available to all workspace packages.
 
 ## Usage
 

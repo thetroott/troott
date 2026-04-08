@@ -32,10 +32,9 @@ const cursorResults =
 
     const results = await query;
 
+    const last = results.length > 0 ? results.at(-1) : undefined;
     const nextCursor =
-      results.length > 0
-        ? results[results.length - 1].createdAt.toISOString()
-        : null;
+      last?.createdAt != null ? last.createdAt.toISOString() : null;
         
     res.customResults = {
       success: true,

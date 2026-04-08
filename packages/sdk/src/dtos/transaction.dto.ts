@@ -21,7 +21,7 @@ interface Transaction {
     reason: string,
     message: string,
     providerData: any,
-    metadata: Array<any>
+    metadata: Array<any>;
     channel: string,
     slug: string,
     card: IDebitCard,

@@ -4,6 +4,7 @@
     "strict": true,
     "types": [],
     "baseUrl": ".",
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": [
         "./*"
@@ -33,5 +34,17 @@
     "metro.config.js",
     "nativewind-env.d.ts"
   ],
-  "moduleResolution": "nodenext"
+  "exclude": [
+    "node_modules",
+    "components/containers/engine/player/favorite-context-menu-row.tsx",
+    "components/containers/engine/player/favorite-icon.tsx",
+    "components/containers/engine/player/horizontal-list.tsx",
+    "components/containers/engine/player/instant-mix-button.tsx",
+    "screens/Auth",
+    "screens/Preview.tsx",
+    "hooks/use-theme-color.ts",
+    "hooks/use-user-profile.tsx",
+    "stores/app/device-profile.ts",
+    "utils/errorBoundary.util.tsx"
+  ]
 }

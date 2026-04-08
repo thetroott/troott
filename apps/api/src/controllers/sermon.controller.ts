@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import asyncHandler from "../middlewares/async.mdw";
 import ErrorResponse from "../utils/error.util";
+import { pathParam } from "../utils/route-params.util";
 import sermonRepository from "../repositories/sermon.repository";
 import {
   DeleteSermonDTO,
@@ -99,7 +100,10 @@ export const uploadSermonCover = asyncHandler(
 export const publishSermon = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
     const sermonExist = await sermonRepository.findBySermonId(id);
     if (sermonExist.error) {
       return next(
@@ -191,7 +195,10 @@ export const publishSermon = asyncHandler(
 export const updateSermon = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
     const sermonExist = await sermonRepository.findBySermonId(id);
     if (sermonExist.error) {
       return next(
@@ -281,7 +288,10 @@ export const updateSermon = asyncHandler(
 export const moveSermonToBin = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
     const { state, status, publishedBy }: Partial<DeleteSermonDTO> = req.body;
 
     const sermonExist = await sermonRepository.findBySermonId(id);
@@ -322,7 +332,10 @@ export const moveSermonToBin = asyncHandler(
 export const deleteSermon = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
     const sermonExist = await sermonRepository.findBySermonId(id);
     if (sermonExist.error) {
       return next(
@@ -354,7 +367,10 @@ export const deleteSermon = asyncHandler(
 export const getSermonById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
 
     const sermon = await sermonRepository.findBySermonId(id);
     if (sermon.error)
@@ -380,7 +396,10 @@ export const getSermonById = asyncHandler(
 export const getSermonsByTopic = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const { topic } = req.params;
+    const topic = pathParam(req.params.topic);
+    if (!topic) {
+      return next(new ErrorResponse("topic is required", 400, []));
+    }
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 25;
     const skip = (page - 1) * limit;
@@ -456,7 +475,10 @@ export const getAllSermons = asyncHandler(
 export const getSermonsByminister = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
 
-    const { ministerId } = req.params;
+    const ministerId = pathParam(req.params.ministerId);
+    if (!ministerId) {
+      return next(new ErrorResponse("ministerId is required", 400, []));
+    }
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 25;
     const skip = (page - 1) * limit;
@@ -499,7 +521,10 @@ const getSermonsByMinisterSorted = (
 ) =>
   asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     
-    const { ministerId } = req.params;
+    const ministerId = pathParam(req.params.ministerId);
+    if (!ministerId) {
+      return next(new ErrorResponse("ministerId is required", 400, []));
+    }
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 25;
     const skip = (page - 1) * limit;
@@ -692,7 +717,7 @@ export const getRecentlyAddedSermons = asyncHandler(
 export const getUserRecentlyPlayedSermons = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     
-    const userId = req.params.userId;
+    const userId = pathParam(req.params.userId);
     
     if (!userId) return next(new ErrorResponse("Unauthorized", 401, []));
 
@@ -757,11 +782,11 @@ export const getPopularSermonsRecentlyPlayed = asyncHandler(
 export const getFavoriteMinisterSermons = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     
-    const favoriteMinisterIds = req.params.id || [];
-    if (
-      !Array.isArray(favoriteMinisterIds) ||
-      favoriteMinisterIds.length === 0
-    ) {
+    const rawIds = pathParam(req.params.id);
+    const favoriteMinisterIds = rawIds
+      ? rawIds.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+    if (favoriteMinisterIds.length === 0) {
       return next(new ErrorResponse("No favorite ministers found", 400, []));
     }
 
@@ -796,8 +821,11 @@ export const getFavoriteMinisterSermons = asyncHandler(
  */
 export const getSermonsByUserInterests = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const interests = req.params.interests || [];
-    if (!Array.isArray(interests) || interests.length === 0) {
+    const rawInterests = pathParam(req.params.interests);
+    const interests = rawInterests
+      ? rawInterests.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+    if (interests.length === 0) {
       return next(new ErrorResponse("No interests provided", 400, []));
     }
 

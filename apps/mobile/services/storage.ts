@@ -39,7 +39,7 @@ function getMMKV(): MMKV | null {
 export const storage = new Proxy({} as MMKV, {
   get(_, prop) {
     const inst = getMMKV()
-    if (inst) return (inst as Record<string, unknown>)[prop as string]
+    if (inst) return (inst as unknown as Record<string, unknown>)[prop as string]
     return undefined
   },
 })

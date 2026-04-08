@@ -131,7 +131,7 @@ function verify() {
 const args = process.argv.slice(2);
 const command = args[0];
 
-console.log("🔧 Git Sync Script for pacepard");
+console.log("Git Sync Script for troott");
 console.log("================================");
 
 if (command === "--status" || command === "-s") {

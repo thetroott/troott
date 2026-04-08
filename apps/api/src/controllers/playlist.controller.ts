@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import playlistRepository from "../repositories/playlist.repository";
 import asyncHandler from "../middlewares/async.mdw";
 import ErrorResponse from "../utils/error.util";
+import { pathParam } from "../utils/route-params.util";
 
 /**
  * @name createPlaylist
@@ -33,7 +34,10 @@ export const createPlaylist = asyncHandler(
  */
 export const getPlaylistById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
 
     const result = await playlistRepository.findById(id);
     if (result.error)
@@ -56,7 +60,10 @@ export const getPlaylistById = asyncHandler(
  */
 export const getPlaylistsByUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { userId } = req.params;
+    const userId = pathParam(req.params.userId);
+    if (!userId) {
+      return next(new ErrorResponse("userId is required", 400, []));
+    }
 
     const result = await playlistRepository.findByUser(userId);
     if (result.error)
@@ -109,7 +116,10 @@ export const getAllPlaylists = asyncHandler(
  */
 export const updatePlaylist = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
     const updates = req.body;
 
     const result = await playlistRepository.updatePlaylist(id, updates);
@@ -133,7 +143,10 @@ export const updatePlaylist = asyncHandler(
  */
 export const deletePlaylist = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.params;
+    const id = pathParam(req.params.id);
+    if (!id) {
+      return next(new ErrorResponse("id is required", 400, []));
+    }
 
     const result = await playlistRepository.deletePlaylist(id);
     if (result.error)
@@ -156,7 +169,10 @@ export const deletePlaylist = asyncHandler(
  */
 export const addItemToPlaylist = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { playlistId } = req.params;
+    const playlistId = pathParam(req.params.playlistId);
+    if (!playlistId) {
+      return next(new ErrorResponse("playlistId is required", 400, []));
+    }
     const { itemId, type } = req.body;
 
     const result = await playlistRepository.addItemToPlaylist(playlistId, {
@@ -184,7 +200,10 @@ export const addItemToPlaylist = asyncHandler(
  */
 export const removeItemFromPlaylist = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { playlistId } = req.params;
+    const playlistId = pathParam(req.params.playlistId);
+    if (!playlistId) {
+      return next(new ErrorResponse("playlistId is required", 400, []));
+    }
     const { itemId } = req.body;
 
     const result = await playlistRepository.removeItemFromPlaylist(
