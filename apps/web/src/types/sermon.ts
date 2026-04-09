@@ -9,3 +9,4 @@ export interface Sermon {
   likes: string;
   avatar?: string;
 }
+

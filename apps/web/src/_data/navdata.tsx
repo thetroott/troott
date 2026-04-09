@@ -64,7 +64,7 @@ export const navItems = {
         },
         {
           title: "Drafts",
-          url: "/user-draft",
+          url: "/user-drafts",
           icon: FolderEdit,
           isActive: false,
         },

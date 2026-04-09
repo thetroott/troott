@@ -5,7 +5,7 @@ import {
     S3Client,
   } from "@aws-sdk/client-s3";
   import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-  import { s3, AWS_BUCKET_NAME } from "../config/aws.config"; // use the shared config
+  import { s3, AWS_BUCKET_NAME } from "../configs/aws.config"; // use the shared config
   import { IFile, IResult } from "../utils/interfaces.util";
   
   import { Upload } from "@aws-sdk/lib-storage";

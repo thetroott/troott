@@ -1,7 +1,7 @@
 import { RedisClientType } from "redis";
 import { IData, IRedisOptions } from "../utils/interfaces.util";
 import { createClient } from "redis";
-import { REDIS_CONFIG } from "../config/redis.config";
+import { REDIS_CONFIG } from "../configs/redis.config";
 import colors from "colors"
 import { ENVType } from "../utils/enums.util";
 

@@ -7,26 +7,24 @@ import type {
 
 
 export interface IStorage {
-  storeAuth(token: string, id: string, userType: string, email: string): void;
+  storeAuth(token: string, id: string): void;
   checkToken(): boolean;
   getToken(): string | null;
   checkUserID(): boolean;
   getUserID(): string;
-  checkUserType(): boolean;
-  getUserType(): string | null;
   checkUserEmail(): boolean;
   getUserEmail(): string | null;
   getConfig(): any;
   getConfigWithBearer(): any;
   clearAuth(): void;
   keep(key: string, data: any): boolean;
+  keepLegacy(key: string, data: any): boolean;
   fetch(key: string): any;
-  deleteItem(key: string): boolean;
-  trimSpace(str: string): string;
-  copyCode(code: string): boolean;
-  debugAuth(): any;
+  fetchLegacy(key: string): any;
+  deleteItem(key: string, legacy?: boolean): void;
+  trimSpace(str: string): void;
+  copyCode(code: string): void;
 }
-
 
 export type RouteType = {
   path: string;
@@ -314,12 +312,15 @@ export interface ISermonUpload {
   thumbnail?: File | null;
   thumbnailPreview?: string | null;
   category: string;
-  /** Set after a successful `start-upload` response (sermon document id). */
-  sermonId?: string;
-  uploadRef?: string;
-  slug?: string;
-  isPublic?: boolean;
+  isPublic: boolean | undefined;
   scheduledDate?: Date | null;
+  // Add these fields for dynamic link generation
+  sermonId?: string;
+  slug?: string;
+  preacherId?: string;
+  seriesId?: string;
+  // Draft tracking
+  draftId?: string;
 }
 
 export interface IUploadFormErrors {
@@ -329,6 +330,7 @@ export interface IUploadFormErrors {
   tags?: string;
   thumbnail?: string;
   category?: string;
+  seriesId?: string;
 }
 
 export interface IUploadContext {
@@ -338,7 +340,8 @@ export interface IUploadContext {
   isLoading: boolean;
   progress: number;
   uploadComplete: boolean;
-  activeOption: string;
+  activeOption?: string;
+  backgroundUploadId?: string | null;
 }
 
 export interface IFileUploadZone {

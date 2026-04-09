@@ -225,10 +225,10 @@ const ThumbnailUpload: React.FC = () => {
         </Button>
         
         <Button
-          onClick={() => dispatch(uploadActions.setStep('review'))}
+          onClick={() => dispatch(uploadActions.setStep('publish'))}
           disabled={!uploadData.thumbnailPreview}
         >
-          Continue to Review
+          Continue to Publish
         </Button>
       </div>
     </div>

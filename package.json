@@ -12,6 +12,8 @@
     "expo:mobile:start": "pnpm --filter @troott/mobile run start",
     "dev:website": "turbo dev --filter=\"{./apps/website}...\"",
     "dev:fe": "turbo dev --ui=tui --filter=\"{./apps/website}...\" --filter=\"{./apps/web}...\"",
+    "clean:cache": "(turbo daemon stop || true) && rm -rf .turbo",
+    "clean:cache:fe": "(turbo daemon stop || true) && rm -rf .turbo apps/web/node_modules/.vite apps/website/.next",
     "lint": "turbo lint",
     "test": "turbo test",
     "build": "turbo build",

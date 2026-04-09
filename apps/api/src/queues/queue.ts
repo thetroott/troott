@@ -2,7 +2,7 @@ import Bull, { QueueOptions, Queue, Job, DoneCallback } from 'bull';
 import logger from '../utils/logger.util';
 import ENV from '../utils/env.util';
 import { AddJobsDTO, CreateQueueDTO, CreateWorkerDTO, JobDataDTO } from '../dtos/queue.dto';
-import { REDIS_CONFIG } from '../config/redis.config';
+import { REDIS_CONFIG } from '../configs/redis.config';
 
 
 

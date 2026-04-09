@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosHeaders } from "axios";
 import storage from "../utils/storage.util";
 import Auth from "./auth";
 import Bite from "./bite";
@@ -18,10 +18,22 @@ import User from "./user";
 import logger from "@/utils/logger.util";
 
 
-const BaseURL = import.meta.env.VITE_APP_API_URL as string;
+/**
+ * All web API paths are written as `/auth/...`, `/sermon/...`, etc., which assume
+ * the server mount point includes `/v1` (see apps/api `app.use("/v1", v1Routes)`).
+ * Accept env values with or without the suffix to avoid failed requests / CORS noise.
+ */
+function normalizeApiBaseUrl(url: string): string {
+  const trimmed = url.trim().replace(/\/+$/, "");
+  if (!trimmed) return url;
+  if (/\/v1$/i.test(trimmed)) return trimmed;
+  return `${trimmed}/v1`;
+}
+
+const BaseURL = normalizeApiBaseUrl(import.meta.env.VITE_APP_API_URL as string);
 
 logger.log({ data: BaseURL, label: "The BaseURL is: ", type: "info" });
-if (!BaseURL) throw new Error("API base url not defined");
+if (!import.meta.env.VITE_APP_API_URL) throw new Error("API base url not defined");
 
 /**
  * Axios instance for public API requests that do not require authentication.
@@ -50,16 +62,25 @@ export const axiosPrivate = axios.create({
  */
 axiosPrivate.interceptors.request.use(
   async function (config) {
-    // Merge existing config headers with storage headers
     const bearerConfig = storage.getConfigWithBearer();
-    config.headers = {
-      ...config.headers,
-      ...bearerConfig.headers,
-    };
+    const isFormData = config.data instanceof FormData;
 
-    if (config.data instanceof FormData) {
-      delete (config.headers as Record<string, unknown>)["Content-Type"];
+    const merged = AxiosHeaders.from(config.headers ?? {});
+    merged.set("lg", bearerConfig.headers.lg ?? "en");
+    merged.set("ch", bearerConfig.headers.ch ?? "web");
+    if (bearerConfig.headers.Authorization) {
+      merged.set("Authorization", bearerConfig.headers.Authorization);
     }
+    if (!isFormData) {
+      merged.set(
+        "Content-Type",
+        (bearerConfig.headers["Content-Type"] as string) ?? "application/json"
+      );
+    } else {
+      merged.delete("Content-Type");
+      merged.delete("content-type");
+    }
+    config.headers = merged;
 
     return config;
   },

@@ -1,9 +1,9 @@
-import app from "./config/app.config";
+import app from "./configs/app.config";
 import colors from "colors";
-import connectDB from "./config/db.config";
-import seedData from "./config/seeds/seeder.seed";
+import connectDB from "./configs/db.config";
+import seedData from "./configs/seeds/seeder.seed";
 import redisHandler from "./middlewares/redis.mdw";
-import { REDIS_CONFIG } from "./config/redis.config";
+import { REDIS_CONFIG } from "./configs/redis.config";
 import startWorkers from "./tasks/workers/worker";
 
 

@@ -9,147 +9,84 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUpload, uploadActions } from '@/context/upload/upload.context';
-import { Users, Globe, Volume2 } from 'lucide-react';
 
 const ListenerSettings: React.FC = () => {
   const { state, dispatch } = useUpload();
   const { uploadData } = state;
-
-  const [visibility, setVisibility] = useState<string>(() =>
-    uploadData.isPublic === true
-      ? 'public'
-      : uploadData.isPublic === false
-        ? 'private'
-        : ''
+  
+  // Local state for interaction settings
+  const [allowComments, setAllowComments] = useState(false);
+  const [showViewerLikes, setShowViewerLikes] = useState(false);
+  
+  // Visibility options: public, unlisted, private
+  const [visibility, setVisibility] = useState<string>(
+    uploadData.isPublic === true ? 'public' : 
+    uploadData.isPublic === false ? 'private' : 
+    'public'
   );
-
-  const handleInputChange = (field: string, value: any) => {
-    dispatch(uploadActions.setUploadData({ [field]: value }));
-  };
 
   const handleVisibilityChange = (value: string) => {
     setVisibility(value);
     if (value === 'public') {
       dispatch(uploadActions.setUploadData({ isPublic: true }));
-    } else if (value === 'private' || value === 'unlisted') {
+    } else if (value === 'private') {
+      dispatch(uploadActions.setUploadData({ isPublic: false }));
+    } else if (value === 'unlisted') {
+      // Unlisted means not searchable but accessible via link
       dispatch(uploadActions.setUploadData({ isPublic: false }));
     }
   };
 
+  const handleCommentsChange = (checked: boolean) => {
+    setAllowComments(checked);
+    // You can dispatch this to upload context if needed
+    // dispatch(uploadActions.setUploadData({ allowComments: checked }));
+  };
+
+  const handleViewerLikesChange = (checked: boolean) => {
+    setShowViewerLikes(checked);
+    // You can dispatch this to upload context if needed
+    // dispatch(uploadActions.setUploadData({ showViewerLikes: checked }));
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center space-x-2">
-          <Users className="h-6 w-6 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Listener Settings</h2>
-        </div>
-        <p className="text-muted-foreground">
-          Configure how listeners can interact with your sermon
+    <div className="space-y-4 w-full">
+      {/* Access Section */}
+      <div className="space-y-2">
+        <h3 className="text-base font-semibold text-foreground">Access</h3>
+        <p className="text-sm text-muted-foreground">
+          Choose when to publish and who can listen to your sermon.
         </p>
+        <Select value={visibility} onValueChange={handleVisibilityChange}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Make your sermon public, or private." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="public">Public</SelectItem>
+            <SelectItem value="unlisted">Unlisted</SelectItem>
+            <SelectItem value="private">Private</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* Privacy Settings */}
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground flex items-center space-x-2">
-            <Globe className="h-5 w-5" />
-            <span>Privacy & Visibility</span>
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="space-y-2 p-4 border border-border/50 rounded-lg">
-              <Label className="text-base font-medium">Visibility</Label>
-              <p className="text-sm text-muted-foreground">
-                Choose who can find and play this sermon.
-              </p>
-              <Select
-                value={visibility || undefined}
-                onValueChange={handleVisibilityChange}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose visibility" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="public">Public</SelectItem>
-                  <SelectItem value="unlisted">Unlisted</SelectItem>
-                  <SelectItem value="private">Private</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border border-border/50 rounded-lg">
-              <div className="space-y-1">
-                <Label className="text-base font-medium">Scheduled Publishing</Label>
-                <p className="text-sm text-muted-foreground">
-                  Set a specific date and time to publish this sermon
-                </p>
-              </div>
-              <Switch
-                checked={!!uploadData.scheduledDate}
-                onCheckedChange={(checked) => handleInputChange('scheduledDate', checked ? new Date() : null)}
-              />
-            </div>
-          </div>
+      {/* Interaction Settings */}
+      <div className="space-y-3">
+        {/* Allow Comments Toggle */}
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Allow people to comment</Label>
+          <Switch
+            checked={allowComments}
+            onCheckedChange={handleCommentsChange}
+          />
         </div>
 
-        {/* Audio Settings */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground flex items-center space-x-2">
-            <Volume2 className="h-5 w-5" />
-            <span>Audio Settings</span>
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="p-4 border border-border/50 rounded-lg">
-              <div className="space-y-2">
-                <Label className="text-base font-medium">Audio Quality</Label>
-                <p className="text-sm text-muted-foreground">
-                  Choose the audio quality for streaming
-                </p>
-                <Select
-                  value="high"
-                  onValueChange={(value) => console.log('Audio quality:', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select audio quality" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low (64 kbps)</SelectItem>
-                    <SelectItem value="medium">Medium (128 kbps)</SelectItem>
-                    <SelectItem value="high">High (320 kbps)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional Settings */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-foreground">Additional Settings</h3>
-          
-          <div className="space-y-4">
-            <div className="p-4 border border-border/50 rounded-lg">
-              <div className="space-y-2">
-                <Label className="text-base font-medium">Tags</Label>
-                <p className="text-sm text-muted-foreground">
-                  Current tags: {uploadData.tags.length > 0 ? uploadData.tags.join(', ') : 'No tags added'}
-                </p>
-              </div>
-            </div>
-
-            {uploadData.scheduledDate && (
-              <div className="p-4 border border-border/50 rounded-lg">
-                <div className="space-y-2">
-                  <Label className="text-base font-medium">Scheduled Date</Label>
-                  <p className="text-sm text-muted-foreground">
-                    This sermon will be published on: {uploadData.scheduledDate.toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+        {/* Show Viewer Likes Toggle */}
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">Show how many listeners like the content</Label>
+          <Switch
+            checked={showViewerLikes}
+            onCheckedChange={handleViewerLikesChange}
+          />
         </div>
       </div>
     </div>

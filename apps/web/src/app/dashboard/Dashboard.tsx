@@ -5,8 +5,6 @@ const Dashboard = () => {
  
     <b>Dashboard</b>
 
-    
-
       
     </>
   )

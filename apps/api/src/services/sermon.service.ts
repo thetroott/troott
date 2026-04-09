@@ -10,7 +10,7 @@ import { PublishSermonDTO } from "../dtos/sermon.dto";
 import { Upload } from "@aws-sdk/lib-storage";
 import sermonRepository from "../repositories/sermon.repository";
 import Sermon from "../models/Sermon.model";
-import { AWS_BUCKET_NAME, s3 } from "../config/aws.config";
+import { AWS_BUCKET_NAME, s3 } from "../configs/aws.config";
 import { IAudioMetadataJobDTO } from "../dtos/queue.dto";
 import { addJob } from "../tasks/jobs/job";
 import { JobChannel, QueueChannel } from "../queues/channel.queue";

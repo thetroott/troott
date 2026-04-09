@@ -1,45 +1,88 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Upload, Download, Scissors, BarChart3, Star } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useUpload, uploadActions } from "@/context/upload/upload.context";
+
+const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <img 
+    src="/images/assets/upload-icon.svg" 
+    alt="Upload"
+    className={className}
+  />
+);
+const ImportIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <img 
+    src="/images/assets/import-inactive.svg" 
+    alt="Import"
+    className={className}
+  />
+);
+const CreateIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <img 
+    src="/images/assets/create-inactive.svg" 
+    alt="Create"
+    className={className}
+  />
+);
+const InsightsIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <img 
+    src="/images/assets/insights-inactive.svg" 
+    alt="Insights"
+    className={className}
+  />
+);
+const CreatorIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <img 
+    src="/images/assets/creator-inactive.svg" 
+    alt="Creator"
+    className={className}
+  />
+);
 
 const UploadOptions: React.FC = () => {
   const { open: sidebarOpen, isMobile } = useSidebar();
   const { state, dispatch } = useUpload();
-  const activeOption = state.activeOption ?? "upload";
+  const { activeOption = 'upload' } = state;
+
+  const handleOptionClick = (optionId: string) => {
+    dispatch(uploadActions.setActiveOption(optionId));
+  };
 
   const options = [
     {
       id: "upload",
       title: "Upload from computer",
-      icon: Upload,
+      icon: UploadIcon,
     },
     {
       id: "import",
-      title: "Import from Drive and more",
-      icon: Download,
+      title: "Import frommm Drive and more",
+      icon: ImportIcon,
+      isActive: false,
     },
     {
       id: "create",
       title: "Start Creating from Scratch",
-      icon: Scissors,
+      icon: CreateIcon,
+      isActive: false,
     },
     {
       id: "performing",
       title: "View Top Performing Clip",
-      icon: BarChart3,
+      icon: InsightsIcon,
+      isActive: false,
     },
     {
       id: "tip",
       title: "Creator Tip of the Week",
-      icon: Star,
+      icon: CreatorIcon,
+      isActive: false,
     },
   ];
 
   return (
     <div
-      className="fixed top-[60px] w-full z-[1]"
+      className="fixed top-[60px] bg-[#171717] w-full z-[1]"
       style={{
         left: !isMobile ? (sidebarOpen ? "240px" : "48px") : "0px",
         width: !isMobile
@@ -49,41 +92,41 @@ const UploadOptions: React.FC = () => {
           : "100%",
       }}
     >
-      <div className={`border-b border-border/50 ml-4 mr-6 mt-4 rounded-t-lg ${
+      <div className={` border-b border-border/50 ml-4 mr-6 mt-4 rounded-t-lg ${
         !isMobile
           ? sidebarOpen
             ? "md:ml-13 md:mr-9"
             : "md:ml-9 md:mr-9"
           : ""
       }`}>
-        <div className="container mx-auto px-6 md:px-8 py-4 max-w-6xl">
+        <div className="container mx-auto px-6 md:px-8 py-4 max-w-4xl">
           <div className="min-h-[62px] flex items-center justify-center">
             {/* Desktop Layout */}
-            <div className="hidden md:flex items-center gap-3 h-full justify-center">
+            <div className="hidden md:flex items-center   gap-6 h-full justify-center">
               {options.map((option) => {
                 const IconComponent = option.icon;
                 const isActive = activeOption === option.id;
                 return (
-                  <Button
-                    key={option.id}
-                    variant={isActive ? "default" : "ghost"}
-                    onClick={() =>
-                      dispatch(uploadActions.setActiveOption(option.id))
-                    }
-                    className={`
-                flex items-center justify-center gap-2 h-10 px-3 rounded-lg transition-all duration-200
+                  <div key={option.id} className="relative flex flex-col">
+                    <Button
+                      onClick={() => handleOptionClick(option.id)}
+                      variant={isActive ? "upload" : "ghost"}
+                      className={`
+                flex items-center  min-w-[207px] min-h-[70px] border-1 cursor-pointer p-4 justify-center gap-2 h-auto rounded-lg transition-all duration-200
                 ${
                   isActive
-                    ? "bg-foreground text-background hover:bg-foreground/90 shadow-md"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    ? "bg-white text-black hover:bg-white/90"
+                    : "bg-[#1a1a1a] text-white "
                 }
               `}
-                  >
-                    <IconComponent className="h-3.5 w-3.5" />
-                    <span className="text-xs font-medium whitespace-nowrap">
-                      {option.title}
-                    </span>
-                  </Button>
+                    >
+                      <IconComponent className="h-[32px] w-[32px]" />
+                      <span className="text-xs font-medium whitespace-nowrap leading-[18px]">
+                        {option.title} 
+                      </span>
+                    </Button>
+                   
+                  </div>
                 );
               })}
             </div>
@@ -97,22 +140,20 @@ const UploadOptions: React.FC = () => {
                   return (
                     <Button
                       key={option.id}
+                      onClick={() => handleOptionClick(option.id)}
                       variant={isActive ? "default" : "ghost"}
                       size="sm"
-                      onClick={() =>
-                        dispatch(uploadActions.setActiveOption(option.id))
-                      }
                       className={`
                       flex items-center gap-2 h-10 px-3 rounded-lg transition-all duration-200
                       ${
                         isActive
-                          ? "bg-foreground text-background hover:bg-foreground/90 shadow-md"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          ? "bg-[#E0E0E0] text-[#1a1a1a] hover:bg-[#E0E0E0]/90"
+                          : "bg-[#333333] text-white hover:bg-[#404040]"
                       }
                     `}
                     >
-                      <IconComponent className="h-3 w-3" />
-                      <span className="text-xs font-medium">
+                      <IconComponent className="h-[32px] w-[32px]" />
+                      <span className="text-xs font-medium leading-[18px]">
                         {option.title}
                       </span>
                     </Button>

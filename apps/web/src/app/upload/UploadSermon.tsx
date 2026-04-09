@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import UploadLayout from '@/components/layouts/UploadLayout';
 import { UploadProvider, useUpload, uploadActions } from '@/context/upload/upload.context';
 import FileUploadZone from '@/components/shared/upload/FileUploadZone';
@@ -7,6 +8,17 @@ import UploadModal from '@/components/shared/upload/UploadModal';
 const UploadContent: React.FC = () => {
   const { state, dispatch } = useUpload();
   const { currentStep, uploadComplete, uploadData, activeOption = 'upload' } = state;
+  const location = useLocation();
+
+  // Load draft data if passed through navigation state
+  useEffect(() => {
+    const draftData = (location.state as any)?.draftData;
+    if (draftData) {
+      dispatch(uploadActions.loadFromDraft(draftData));
+      // Clear the location state
+      window.history.replaceState({}, document.title);
+    }
+  }, [dispatch, location]);
 
   // Modal is open when step is not 'file'
   const isModalOpen = currentStep !== 'file';

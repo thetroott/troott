@@ -17,7 +17,7 @@ import {
   ISermonDoc,
   IUserDoc,
 } from "../utils/interfaces.util";
-import { EMAIL_CONFIG } from "../config/email.config";
+import { EMAIL_CONFIG } from "../configs/email.config";
 import { addJob } from "../tasks/jobs/job";
 import { JobChannel, QueueChannel } from "../queues/channel.queue";
 

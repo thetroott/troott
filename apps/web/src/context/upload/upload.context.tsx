@@ -11,8 +11,10 @@ type UploadAction =
   | { type: 'SET_PROGRESS'; payload: number }
   | { type: 'SET_UPLOAD_COMPLETE'; payload: boolean }
   | { type: 'SET_ACTIVE_OPTION'; payload: string }
+  | { type: 'SET_BACKGROUND_UPLOAD_ID'; payload: string | null }
   | { type: 'RESET_UPLOAD' }
   | { type: 'LOAD_FROM_STORAGE'; payload: Partial<ISermonUpload> }
+  | { type: 'LOAD_FROM_DRAFT'; payload: Partial<ISermonUpload> }
   | { type: 'CLEAR_STORED_DATA' };
 
 // Initial state
@@ -24,7 +26,7 @@ const initialUploadData: ISermonUpload = {
   tags: [],
   thumbnail: null,
   thumbnailPreview: null,
-  isPublic: undefined,
+  isPublic: undefined, // Changed from true to undefined
 };
 
 const initialState: IUploadContext = {
@@ -35,6 +37,7 @@ const initialState: IUploadContext = {
   progress: 0,
   uploadComplete: false,
   activeOption: 'upload',
+  backgroundUploadId: null,
 };
 
 // Reducer
@@ -45,16 +48,12 @@ const uploadReducer = (state: IUploadContext, action: UploadAction): IUploadCont
     case 'SET_FILE':
       return {
         ...state,
-        uploadData: {
-          ...state.uploadData,
-          file: action.payload,
-          sermonId: undefined,
-          uploadRef: undefined,
-          slug: undefined,
-        },
+        uploadData: { ...state.uploadData, file: action.payload },
         errors: { ...state.errors, file: undefined },
+        // Reset upload progress when a new file is selected
         progress: action.payload ? 0 : state.progress,
         uploadComplete: action.payload ? false : state.uploadComplete,
+        backgroundUploadId: action.payload ? null : state.backgroundUploadId,
       };
     case 'SET_UPLOAD_DATA':
       return {
@@ -73,11 +72,21 @@ const uploadReducer = (state: IUploadContext, action: UploadAction): IUploadCont
       return { ...state, activeOption: action.payload };
     case 'RESET_UPLOAD':
       return { ...initialState };
+    case 'SET_BACKGROUND_UPLOAD_ID':
+      return { ...state, backgroundUploadId: action.payload };
     case 'LOAD_FROM_STORAGE':
       return {
         ...state,
         uploadData: { ...state.uploadData, ...action.payload },
         // Reset file-related state on load since File objects can't be persisted
+        progress: 0,
+        uploadComplete: false,
+      };
+    case 'LOAD_FROM_DRAFT':
+      return {
+        ...state,
+        uploadData: { ...state.uploadData, ...action.payload },
+        currentStep: 'details', // Jump to details step after loading draft
         progress: 0,
         uploadComplete: false,
       };
@@ -177,6 +186,9 @@ export const uploadActions = {
   setProgress: (progress: number) => ({ type: 'SET_PROGRESS' as const, payload: progress }),
   setUploadComplete: (complete: boolean) => ({ type: 'SET_UPLOAD_COMPLETE' as const, payload: complete }),
   setActiveOption: (option: string) => ({ type: 'SET_ACTIVE_OPTION' as const, payload: option }),
+  setBackgroundUploadId: (id: string | null) => ({ type: 'SET_BACKGROUND_UPLOAD_ID' as const, payload: id }),
   resetUpload: () => ({ type: 'RESET_UPLOAD' as const }),
+  loadFromStorage: (data: Partial<ISermonUpload>) => ({ type: 'LOAD_FROM_STORAGE' as const, payload: data }),
+  loadFromDraft: (data: Partial<ISermonUpload>) => ({ type: 'LOAD_FROM_DRAFT' as const, payload: data }),
   clearStoredData: () => ({ type: 'CLEAR_STORED_DATA' as const }),
 };
