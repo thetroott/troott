@@ -1,0 +1,14 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index c1158d3c87dc0d4fca2ddfef4ee5e3e5d92374fd..eabd813d44fdeb91dd7f8d6c7cc5b39f8a275564 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -8,7 +8,8 @@ buildscript {
+   }
+ 
+   dependencies {
+-    classpath "com.android.tools.build:gradle:7.2.1"
++    // AGP is provided by the app root (RN 0.76 / AGP 8.x). Pinning 7.2.1 here forces an
++    // ancient Kotlin toolchain and breaks compilation against modern kotlin-stdlib (e.g. @rntp/player v5).
+     // noinspection DifferentKotlinGradleVersion
+     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+     classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
