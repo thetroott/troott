@@ -23,17 +23,17 @@ import logger from "@/utils/logger.util";
  * the server mount point includes `/v1` (see apps/api `app.use("/v1", v1Routes)`).
  * Accept env values with or without the suffix to avoid failed requests / CORS noise.
  */
-function normalizeApiBaseUrl(url: string): string {
-  const trimmed = url.trim().replace(/\/+$/, "");
-  if (!trimmed) return url;
-  if (/\/v1$/i.test(trimmed)) return trimmed;
-  return `${trimmed}/v1`;
-}
+// function normalizeApiBaseUrl(url: string): string {
+//   const trimmed = url.trim().replace(/\/+$/, "");
+//   if (!trimmed) return url;
+//   if (/\/v1$/i.test(trimmed)) return trimmed;
+//   return `${trimmed}/v1`;
+// }
 
-const BaseURL = normalizeApiBaseUrl(import.meta.env.VITE_APP_API_URL as string);
+const BaseURL = import.meta.env.VITE_APP_API_URL as string;
 
 logger.log({ data: BaseURL, label: "The BaseURL is: ", type: "info" });
-if (!import.meta.env.VITE_APP_API_URL) throw new Error("API base url not defined");
+if (BaseURL) throw new Error("API base url not defined");
 
 /**
  * Axios instance for public API requests that do not require authentication.

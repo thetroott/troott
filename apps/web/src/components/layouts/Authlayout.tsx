@@ -12,7 +12,7 @@ export function AuthLayout(data: IAuthLayout) {
         showLogo = true,
         showCopyright = true,
         maxWidth = "xs",
-        backgroundImage = "/placeholder.svg",
+        backgroundImage = "/public/images/assets/troott-o.png",
         className = "",
         hideHeaderOnSuccess = false,
       } = data
@@ -57,12 +57,14 @@ export function AuthLayout(data: IAuthLayout) {
         )}
       </div>
 
-      <div className="relative hidden bg-muted lg:block">
-        <img
-          src={backgroundImage || "/placeholder.svg"}
-          alt="Authentication background"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-        />
+      <div className="relative hidden lg:sticky lg:top-0 lg:flex lg:h-svh flex-col items-start justify-center bg-gradient-to-b from-[#111111] to-[#000000] border-l border-white/10 p-12 overflow-hidden">
+        <div className="">
+           <img src={backgroundImage} alt="Preview" className="ml-[9%] mt-[25%] max-full-none rounded-lg self-end max-w-full shadow-2xl object-contain" />
+           <div className=" pb-25 pl-[9%]">
+             <h2 className="text-2xl font-bold text-white">Community-Oriented:</h2>
+             <p className="text-gray-400 mt-2">Empowering faith-driven creators & preachers to <br /> share the gospel worldwide</p>
+           </div>
+        </div>
       </div>
     </div>
   )

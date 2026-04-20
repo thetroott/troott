@@ -10,14 +10,21 @@ import Analytics from "@/app/dashboard/Analytics";
 import InnerLayout from "@/components/layouts/InnerLayout";
 import UploadSermon from "@/app/upload/UploadSermon";
 import UserAccount from "@/app/account/GetVerified";
-import UserProfile from "@/app/profile/UserProfile";
+// import UserProfile from "@/app/profile/UserProfile";
 import PersonalInfo from "@/app/account/VerifyUserInfo";
 import VerifyDocument from "@/app/account/VerifyDocument";
 import SelectDocumentType from "@/components/shared/get-started/SelectDocumentType";
 import VerifyDocumentForm from "@/components/shared/get-started/verify-document";
+import VerifyDocument1 from "@/components/shared/get-started/verify-document1";
 import UploadDocument from "@/components/shared/get-started/UploadDocument";
-import LoginForm from "@/components/shared/auth/login-form";
+import UploadDocumentWrapper from "@/components/shared/upload/UploadDocumentWrapper";
+import DocumentUploadWrapper from "@/components/shared/upload/DocumentUploadWrapper";
 import UserDraft from "@/app/dashboard/UserDraft";
+import path from "path";
+import HomeAddressForm from "@/components/shared/get-started/Home-address-form";
+import HomeProfile from "@/app/account/HomeProfile";
+import MinistryInput from "@/components/shared/get-started/MinistryInput";
+import MinistryInputPage from "@/app/account/MinistryInfo";
 
 export const privateRoutes = [
   {
@@ -50,20 +57,27 @@ export const privateRoutes = [
         children: [
           { path: "verify-account", element: <UserAccount /> },
           { path: "verify-account/personal-information", element: <PersonalInfo /> },
+          { path: "verify-account/home-address", element: <HomeProfile /> },
           {
             path: "verify-account/verify-document",
             element: <VerifyDocument />,
             children: [
               { index: true, path: "", element: <SelectDocumentType /> },
+              { path: "document1", element: <VerifyDocument1 /> },
               { path: "select", element: <VerifyDocumentForm /> },
-              { path: "upload", element: <UploadDocument /> },
-              { path: "start", element: <LoginForm /> },
+              { path: "upload", element: <UploadDocumentWrapper /> },
+             
             ],
           },
           {
             path: "complete-profile",
-            element: <UserProfile />,
+            element: <HomeProfile/>,
+            children: [
+              {path: "home-address", element: <HomeAddressForm />},
+              {path: "ministry-info", element: <MinistryInput />},
+            ],
           },
+          { path: "ministry-input", element: <MinistryInputPage /> },
         ],
       },
 

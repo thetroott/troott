@@ -16,16 +16,20 @@ const ProgressButtons = () => {
   
   const steps = stepGroup?.steps?.map((step) => step.action) || [];
   const currentIndex = steps.findIndex((path) =>
-    location.pathname.includes(path)
+    location.pathname === path
   );
 
   const handleBack = () => {
-    if (currentIndex > 0) navigate(steps[currentIndex - 1]);
+    if (currentIndex > 0) {
+      const previousStep = steps[currentIndex - 1];
+      if (previousStep) navigate(previousStep);
+    }
   };
 
   const handleContinue = () => {
     if (currentIndex < steps.length - 1) {
-      navigate(steps[currentIndex + 1]);
+      const nextStep = steps[currentIndex + 1];
+      if (nextStep) navigate(nextStep);
     } else {
       // Final step: navigate to completion or dashboard
       navigate("/get-started");

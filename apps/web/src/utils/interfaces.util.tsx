@@ -4,6 +4,7 @@ import type {
   RouteActionType,
   RouteParamType,
 } from "./types.util";
+import { emitWarning } from "node:process";
 
 
 export interface IStorage {
@@ -212,6 +213,7 @@ export interface ICountry {
   currencyImage: string;
   phoneCode: string;
   flag: string;
+  className?: string;
 }
 export interface IFileUpload {
   raw: any;
@@ -231,6 +233,7 @@ export interface IResult {
 }
 
 export interface IUserLocation {
+  id?: string;
   ip: string;
   city: string;
   region: string;
@@ -256,6 +259,9 @@ export interface IUserLocation {
   country_population: number;
   asn: string;
   org: string;
+  description?: string;
+  className?: string;
+  street: string;
 }
 
 export interface ILegalNameInput {
@@ -294,6 +300,8 @@ export interface IconRadioGroupProps {
 export interface ICountrySelect {
   value?: ICountry | null;
   onChange?: (country: ICountry) => void;
+  disabled?: boolean;
+  className?: string;
 }
 
 // Upload Interfaces
@@ -351,3 +359,87 @@ export interface IFileUploadZone {
   error?: string;
   isLoading?: boolean;
 }
+
+export interface IPostalCode {
+  postalCode: string;
+  className?: string;
+  description?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+}
+
+export interface IAddressInput {
+  id?: string;
+  street: string;
+  className?: string;
+  description?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  placeholder?: string;
+}
+
+export interface ICityInput {
+  city: string;
+  className?: string;
+  description?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+}
+
+export interface PhoneInputProps {
+  phoneNumber: string;
+  country: ICountry | undefined;
+  onPhoneChange: (value: string) => void;
+  onCountryChange: (country: ICountry) => void;
+  disabled?: boolean;
+  className?: string;
+}
+
+export interface IMinistryForm {
+  ministry: string;
+  className?: string;
+  description?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+export interface IMinistryWebsite {
+  website: string;
+  className?: string;
+  description?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+}
+
+export interface IMinistryLocation {
+  location: string;
+  className?: string;
+  description?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+}
+
+export interface IMinistryDescription {
+  description: string;
+  className?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  id?: string;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+}
+

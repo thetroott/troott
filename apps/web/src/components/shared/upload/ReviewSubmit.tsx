@@ -68,6 +68,50 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onModalClose, onSubmitRef, 
     }
   }, [uploadData, saveDraft, updateDraft, dispatch]);
 
+  const handleSaveDraft = useCallback(async () => {
+    dispatch(uploadActions.setLoading(true));
+    try {
+      // If draftId exists, update the draft; otherwise, create a new one
+      if (uploadData.draftId) {
+        await updateDraft(uploadData.draftId, {
+          title: uploadData.title,
+          description: uploadData.description,
+          tags: uploadData.tags,
+          category: uploadData.category,
+          isPublic: uploadData.isPublic,
+          scheduledDate: uploadData.scheduledDate,
+          seriesId: uploadData.seriesId,
+        });
+        toast.success('Draft updated', {
+          description: 'Your sermon draft has been saved.',
+        });
+      } else {
+        const newDraft = await saveDraft({
+          title: uploadData.title,
+          description: uploadData.description,
+          tags: uploadData.tags,
+          category: uploadData.category,
+          isPublic: uploadData.isPublic,
+          scheduledDate: uploadData.scheduledDate,
+          seriesId: uploadData.seriesId,
+        });
+        // Update the upload context with the new draft ID
+        dispatch(uploadActions.setUploadData({ draftId: newDraft.draftId }));
+        toast.success('Draft saved', {
+          description: 'You can continue editing and publish it later.',
+        });
+      }
+      dispatch(uploadActions.setLoading(false));
+      onModalClose?.();
+      navigate('/get-sermons');
+    } catch (error: any) {
+      dispatch(uploadActions.setLoading(false));
+      toast.error('Failed to save draft', {
+        description: error?.message || 'Please try again.',
+      });
+    }
+  }, [uploadData, saveDraft, updateDraft, dispatch, onModalClose, navigate]);
+
   const handleSubmit = useCallback(() => {
     // If upload is not complete, save as draft instead
     if (!uploadComplete) {
@@ -128,50 +172,6 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({ onModalClose, onSubmitRef, 
       handleAutoSaveDraft();
     }
   }, [uploadComplete, autoSaveDone, handleAutoSaveDraft]);
-
-  const handleSaveDraft = useCallback(async () => {
-    dispatch(uploadActions.setLoading(true));
-    try {
-      // If draftId exists, update the draft; otherwise, create a new one
-      if (uploadData.draftId) {
-        await updateDraft(uploadData.draftId, {
-          title: uploadData.title,
-          description: uploadData.description,
-          tags: uploadData.tags,
-          category: uploadData.category,
-          isPublic: uploadData.isPublic,
-          scheduledDate: uploadData.scheduledDate,
-          seriesId: uploadData.seriesId,
-        });
-        toast.success('Draft updated', {
-          description: 'Your sermon draft has been saved.',
-        });
-      } else {
-        const newDraft = await saveDraft({
-          title: uploadData.title,
-          description: uploadData.description,
-          tags: uploadData.tags,
-          category: uploadData.category,
-          isPublic: uploadData.isPublic,
-          scheduledDate: uploadData.scheduledDate,
-          seriesId: uploadData.seriesId,
-        });
-        // Update the upload context with the new draft ID
-        dispatch(uploadActions.setUploadData({ draftId: newDraft.draftId }));
-        toast.success('Draft saved', {
-          description: 'You can continue editing and publish it later.',
-        });
-      }
-      dispatch(uploadActions.setLoading(false));
-      onModalClose?.();
-      navigate('/get-sermons');
-    } catch (error: any) {
-      dispatch(uploadActions.setLoading(false));
-      toast.error('Failed to save draft', {
-        description: error?.message || 'Please try again.',
-      });
-    }
-  }, [uploadData, saveDraft, updateDraft, dispatch, onModalClose, navigate]);
 
   const generateSermonLink = () => {
     if (uploadComplete && uploadData.sermonId) {

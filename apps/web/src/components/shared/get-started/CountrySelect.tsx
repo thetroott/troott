@@ -18,7 +18,7 @@ import { getUserLocation } from "@/hooks/shared/useLocation";
 import type { ICountry, ICountrySelect } from "@/utils/interfaces.util";
 
 export default function CountryCombobox(data: ICountrySelect) {
-  const { value, onChange } = data;
+  const { value, onChange, disabled, className } = data;
 
   const allCountries: ICountry[] = readCountries();
   const [open, setOpen] = useState(false);
@@ -43,16 +43,17 @@ export default function CountryCombobox(data: ICountrySelect) {
   );
 
   return (
-    <div className="space-y-2">
+    <div className={`space-y-2 ${className || ""}`}>
       <Label>Residence</Label>
 
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open && !disabled} onOpenChange={disabled ? undefined : setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
             className=" w-full justify-between"
+            disabled={disabled}
           >
             {value ? (
               <span className="flex items-center gap-2">

@@ -16,7 +16,6 @@ const PersonalInfoForm = () => {
           lastName="Oladipo"
           label="Legal Name"
           description="As shown on your government-issued ID"
-          // description="This will be your legal name on your account"
           className="mt-8 "
         />
 

@@ -56,7 +56,7 @@ const UploadOptions: React.FC = () => {
     },
     {
       id: "import",
-      title: "Import frommm Drive and more",
+      title: "Import from Drive and more",
       icon: ImportIcon,
       isActive: false,
     },

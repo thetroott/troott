@@ -27,7 +27,8 @@ export const usePasswordUtils = () => {
   };
 
   const maskEmail = (email: string) => {
-    const [local, domain] = email.split("@");
+    const [local = "", domain = ""] = email.split("@");
+    if (!local || !domain) return email;
     if (local.length <= 2) return email;
     return `${local[0]}${"*".repeat(local.length - 2)}${
       local[local.length - 1]
@@ -49,8 +50,9 @@ export const usePasswordUtils = () => {
     if (/[^a-zA-Z0-9]/.test(password)) score++;
     else feedback.push("One special character");
 
-    const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
-    return { score, feedback, label: labels[Math.min(score, 4)] };
+    const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"] as const;
+    const label = labels[Math.min(score, 4)] ?? "Very Weak";
+    return { score, feedback, label };
   };
   
 

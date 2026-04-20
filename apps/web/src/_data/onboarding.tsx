@@ -26,13 +26,18 @@ const OnboardingItems = [
       },
       {
         id: "4",
-        title: "Upload your documents",
-        action: "/get-started/verify-account/verify-document/upload",
-      },
-      {
-        id: "5",
         title: "Document Verification",
-        action: "/get-started/verify-account/verify-document/start",
+        action: "/get-started/verify-account/verify-document/document1",
+      },
+      // {
+      //   id: "5",
+      //   title: "Upload your documents",
+      //   action: "/get-started/verify-account/verify-document/upload",
+      // },
+      {
+        id: "6",
+        title: "Document Verification",
+        action: "/get-started/verify-account/verify-document/document1",
       },
     ],
   },
@@ -43,6 +48,13 @@ const OnboardingItems = [
     text: "Fill out your ministry information and upload a profile photo to help your audience connect with you.",
     button: "Complete profile",
     action: "/get-started/complete-profile",
+    steps: [
+      {
+        id: "1",
+        title: "Minstry Input",
+        action: "/get-started/ministry-input",
+      },
+    ],
   },
   {
     id: "3",
