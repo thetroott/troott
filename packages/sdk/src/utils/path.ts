@@ -25,6 +25,9 @@ export const URL_MEMBER = '/member'
 export const URL_INVITES = '/invites'
 export const URL_INVITE = '/invite'
 
+export const URL_CATALOGS = '/catalogs'
+export const URL_CATALOG = '/catalog'
+
 
 
 export const URL_WORKSPACES = '/workspaces'

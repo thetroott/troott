@@ -17,7 +17,7 @@ import Project from '@/dtos/project.dto';
 import Task from '@/dtos/task.dto';
 import Team from '@/dtos/team.dto';
 import Squad from '@/dtos/squad.dto';
-import Submission from '@/dtos/submission.dto';
+import Submission from '@/api/payments/submission.dto';
 import Entry from '@/dtos/entry.dto';
 import Hackathon from '@/dtos/hackathon.dto';
 import Form, { IBlock, IQuestion, IResponse } from '@/dtos/form.dto';

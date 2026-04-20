@@ -2,7 +2,7 @@ import { IAppMetrics, IPagination, ISidebarProps, IToast } from "@/utils/interfa
 import { ICoreResource, IHackDomain, IProjectDomain } from "./interface";
 import { ICollection } from "./interface";
 import sidebarRoutes from "../../routes/sidebar.route";
-import { IAPIResponse } from "@/api/types";
+import { IAPIResponse } from "@/api/_base/types";
 
 const pagination: IPagination = {
     next: { page: 1, limit: 25 },
