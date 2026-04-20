@@ -1,0 +1,74 @@
+extends ../../base-email
+
+block content
+  tr
+    td(style="padding: 40px 40px 32px;")
+      // Illustration
+      table(cellpadding="0" cellspacing="0" style="margin: 0 0 32px; width: 100%;")
+        tr
+          td(align="center" style="padding-bottom: 32px;")
+            // Hackathon illustration
+            div(style="font-size: 80px; line-height: 1; color: #202124;") 🚀
+      
+      // Heading
+      h1(style="margin: 0 0 20px; font-size: 24px; font-weight: 400; line-height: 32px; color: #202124; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;") Hackathons Happening This Week
+      
+      // Main message
+      p(style="margin: 0 0 32px; font-size: 14px; line-height: 20px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+        | Exciting hackathons are starting this week! Don't miss out on these incredible opportunities to showcase your skills, collaborate with talented developers, and win amazing prizes.
+      
+      // Hackathons List Section
+      if hackathons && hackathons.length > 0
+        p(style="margin: 0 0 16px; font-size: 14px; font-weight: 500; color: #202124; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;") Featured Hackathons:
+        
+        each hackathon in hackathons
+          table(cellpadding="0" cellspacing="0" style="margin: 0 0 24px; width: 100%; border: 1px solid #E8EAED; border-radius: 8px; overflow: hidden; background-color: #F8F9FA;")
+            tr
+              td(style="padding: 20px;")
+                // Hackathon Name
+                h2(style="margin: 0 0 12px; font-size: 18px; font-weight: 500; color: #202124; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")= hackathon.name || 'Hackathon'
+                
+                // Hackathon Description
+                if hackathon.description
+                  p(style="margin: 0 0 16px; font-size: 14px; line-height: 20px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")= hackathon.description
+                
+                // Hackathon Details
+                table(cellpadding="0" cellspacing="0" style="margin: 0 0 16px; width: 100%;")
+                  if hackathon.settings && hackathon.settings.startDate
+                    tr
+                      td(style="padding: 4px 0; font-size: 13px; line-height: 18px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+                        span(style="font-weight: 500; color: #202124;") Start Date:&nbsp;
+                        = hackathon.settings.startDate
+                        if hackathon.settings.startTime
+                          | &nbsp;at&nbsp;
+                          = hackathon.settings.startTime
+                  if hackathon.type
+                    tr
+                      td(style="padding: 4px 0; font-size: 13px; line-height: 18px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+                        span(style="font-weight: 500; color: #202124;") Type:&nbsp;
+                        = hackathon.type
+                
+                // CTA Button
+                table(cellpadding="0" cellspacing="0" style="margin: 16px 0 0;")
+                  tr
+                    td
+                      a(href=(hackathonLink || "#") + "/" + (hackathon.slug || hackathon.code || hackathon.id) style="display: inline-block; padding: 10px 24px; background-color: #1A73E8; color: #FFFFFF; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;") View Hackathon
+      else
+        p(style="margin: 0 0 32px; font-size: 14px; line-height: 20px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+          | Check back soon for upcoming hackathons! We're always adding new opportunities for you to showcase your talents.
+      
+      // CTA Section
+      p(style="margin: 32px 0 24px; font-size: 14px; line-height: 20px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+        | Ready to participate? Browse all hackathons and find the perfect challenge for you.
+      
+      // CTA Button
+      table(cellpadding="0" cellspacing="0" style="margin: 24px 0 32px;")
+        tr
+          td
+            a(href=allHackathonsLink || "#" style="display: inline-block; padding: 10px 24px; background-color: #1A73E8; color: #FFFFFF; text-decoration: none; border-radius: 4px; font-size: 14px; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;") Browse All Hackathons
+      
+      // Closing
+      p(style="margin: 32px 0 0; font-size: 14px; line-height: 20px; color: #202124; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+        | Happy hacking!
+        br
+        span(style="font-weight: 500;") The Pacepard Team

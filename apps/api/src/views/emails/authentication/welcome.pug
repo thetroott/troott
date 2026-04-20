@@ -1,0 +1,71 @@
+extends ../../base-email
+
+block content
+  tr
+    td(style="padding: 40px 40px 32px;")
+      // Main Heading
+      h1(style="margin: 0 0 20px; font-size: 36px; font-weight: 600; line-height: 44px; color: #202124; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;") Organise memorable hackathons with Pacepard
+      
+      // Greeting and Intro
+      p(style="margin: 0 0 32px; font-size: 16px; line-height: 24px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+        | Hello 
+        span(style="font-weight: 500; color: #202124;")= name
+        | ! Welcome to the #1 platform for organising unforgettable hackathons and collaborative events.
+      
+      // Primary CTA Button
+      table(cellpadding="0" cellspacing="0" style="margin: 0 0 40px;")
+        tr
+          td
+            a(href=loginLink || "#" style="display: inline-block; padding: 14px 28px; background-color: #1A73E8; color: #FFFFFF; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: 500; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;") Get started
+      
+      // Illustrative Section Placeholder
+      table(cellpadding="0" cellspacing="0" style="margin: 0 0 48px; width: 100%; background-color: #F8F9FA; border-radius: 8px;")
+        tr
+          td(style="padding: 40px; text-align: center;")
+            div(style="font-size: 48px; line-height: 1; margin-bottom: 16px;") 🚀
+            p(style="margin: 0; font-size: 16px; line-height: 24px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+              | Plan, execute, and celebrate successful hackathons with our powerful collaboration platform
+      
+      // 3 Ways to Get Started Section
+      h2(style="margin: 0 0 24px; font-size: 22px; font-weight: 600; line-height: 28px; color: #202124; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;") 3 ways to get started
+      
+      table(cellpadding="0" cellspacing="0" style="margin: 0 0 40px; width: 100%;")
+        tr
+          td(style="padding: 0 0 32px; vertical-align: top;")
+            table(cellpadding="0" cellspacing="0" style="width: 100%;")
+              tr
+                td(style="width: 32px; vertical-align: top; padding-top: 4px;")
+                  div(style="width: 24px; height: 24px; background-color: #E8F0FE; border-radius: 6px; display: flex; align-items: center; justify-content: center;")
+                    span(style="font-size: 14px;") 📋
+                td(style="vertical-align: top; padding-left: 12px;")
+                  p(style="margin: 0; font-size: 16px; line-height: 24px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+                    a(href=templateLink || "#" style="color: #1A73E8; text-decoration: underline; font-weight: 500;") Use a template
+                    |  from our template library to get a jumpstart on your hackathon project.
+        tr
+          td(style="padding: 0 0 32px; vertical-align: top;")
+            table(cellpadding="0" cellspacing="0" style="width: 100%;")
+              tr
+                td(style="width: 32px; vertical-align: top; padding-top: 4px;")
+                  div(style="width: 24px; height: 24px; background-color: #E8F0FE; border-radius: 6px; display: flex; align-items: center; justify-content: center;")
+                    span(style="font-size: 14px;") 👥
+                td(style="vertical-align: top; padding-left: 12px;")
+                  p(style="margin: 0; font-size: 16px; line-height: 24px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+                    a(href=inviteLink || "#" style="color: #1A73E8; text-decoration: underline; font-weight: 500;") Invite your team members
+                    |  to get the most out of Pacepard and collaborate effectively.
+        tr
+          td(style="padding: 0; vertical-align: top;")
+            table(cellpadding="0" cellspacing="0" style="width: 100%;")
+              tr
+                td(style="width: 32px; vertical-align: top; padding-top: 4px;")
+                  div(style="width: 24px; height: 24px; background-color: #E8F0FE; border-radius: 6px; display: flex; align-items: center; justify-content: center;")
+                    span(style="font-size: 14px;") 🎓
+                td(style="vertical-align: top; padding-left: 12px;")
+                  p(style="margin: 0; font-size: 16px; line-height: 24px; color: #5F6368; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+                    a(href=guideLink || "#" style="color: #1A73E8; text-decoration: underline; font-weight: 500;") Discover best practices
+                    |  through our in-product guide and learn how to organise successful events.
+      
+      // Closing
+      p(style="margin: 40px 0 0; font-size: 16px; line-height: 24px; color: #202124; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;")
+        | Thanks,
+        br
+        span(style="font-weight: 500;") The Pacepard Team
