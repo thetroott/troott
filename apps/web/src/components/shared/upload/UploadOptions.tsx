@@ -1,41 +1,47 @@
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/ui/sidebar";
-import { useUpload, uploadActions } from "@/context/upload/upload.context";
+import React from 'react';
+import { useSidebar } from '@/components/ui/sidebar';
+import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { cn } from '@/lib/utils';
+import { UPLOAD_OPTIONS_BAR } from '@/components/shared/upload/upload-studio-ui';
 
 const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <img 
-    src="/images/assets/upload-icon.svg" 
-    alt="Upload"
+  <img
+    src="/images/assets/upload-icon.svg"
+    alt=""
     className={className}
+    aria-hidden
   />
 );
 const ImportIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <img 
-    src="/images/assets/import-inactive.svg" 
-    alt="Import"
+  <img
+    src="/images/assets/import-inactive.svg"
+    alt=""
     className={className}
+    aria-hidden
   />
 );
 const CreateIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <img 
-    src="/images/assets/create-inactive.svg" 
-    alt="Create"
+  <img
+    src="/images/assets/create-inactive.svg"
+    alt=""
     className={className}
+    aria-hidden
   />
 );
 const InsightsIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <img 
-    src="/images/assets/insights-inactive.svg" 
-    alt="Insights"
+  <img
+    src="/images/assets/insights-inactive.svg"
+    alt=""
     className={className}
+    aria-hidden
   />
 );
 const CreatorIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <img 
-    src="/images/assets/creator-inactive.svg" 
-    alt="Creator"
+  <img
+    src="/images/assets/creator-inactive.svg"
+    alt=""
     className={className}
+    aria-hidden
   />
 );
 
@@ -50,117 +56,83 @@ const UploadOptions: React.FC = () => {
 
   const options = [
     {
-      id: "upload",
-      title: "Upload from computer",
+      id: 'upload',
+      title: 'Upload from computer',
       icon: UploadIcon,
     },
     {
-      id: "import",
-      title: "Import frommm Drive and more",
+      id: 'import',
+      title: 'Import from Drive and more',
       icon: ImportIcon,
-      isActive: false,
     },
     {
-      id: "create",
-      title: "Start Creating from Scratch",
+      id: 'create',
+      title: 'Start Creating from Scratch',
       icon: CreateIcon,
-      isActive: false,
     },
     {
-      id: "performing",
-      title: "View Top Performing Clip",
+      id: 'performing',
+      title: 'View Top Performing Clip',
       icon: InsightsIcon,
-      isActive: false,
     },
     {
-      id: "tip",
-      title: "Creator Tip of the Week",
+      id: 'tip',
+      title: 'Creator Tip of the Week',
       icon: CreatorIcon,
-      isActive: false,
     },
   ];
 
   return (
     <div
-      className="fixed top-[60px] bg-[#171717] w-full z-[1]"
+      className={cn('fixed top-[60px] z-[1] w-full', UPLOAD_OPTIONS_BAR.railBg)}
       style={{
-        left: !isMobile ? (sidebarOpen ? "240px" : "48px") : "0px",
+        left: !isMobile ? (sidebarOpen ? '240px' : '48px') : '0px',
         width: !isMobile
           ? sidebarOpen
-            ? "calc(100% - 240px)"
-            : "calc(100% - 48px)"
-          : "100%",
+            ? 'calc(100% - 240px)'
+            : 'calc(100% - 48px)'
+          : '100%',
       }}
     >
-      <div className={` border-b border-border/50 ml-4 mr-6 mt-4 rounded-t-lg ${
-        !isMobile
-          ? sidebarOpen
-            ? "md:ml-13 md:mr-9"
-            : "md:ml-9 md:mr-9"
-          : ""
-      }`}>
-        <div className="container mx-auto px-6 md:px-8 py-4 max-w-4xl">
-          <div className="min-h-[62px] flex items-center justify-center">
-            {/* Desktop Layout */}
-            <div className="hidden md:flex items-center   gap-6 h-full justify-center">
-              {options.map((option) => {
-                const IconComponent = option.icon;
-                const isActive = activeOption === option.id;
-                return (
-                  <div key={option.id} className="relative flex flex-col">
-                    <Button
-                      onClick={() => handleOptionClick(option.id)}
-                      variant={isActive ? "upload" : "ghost"}
-                      className={`
-                flex items-center  min-w-[207px] min-h-[70px] border-1 cursor-pointer p-4 justify-center gap-2 h-auto rounded-lg transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-white text-black hover:bg-white/90"
-                    : "bg-[#1a1a1a] text-white "
-                }
-              `}
-                    >
-                      <IconComponent className="h-[32px] w-[32px]" />
-                      <span className="text-xs font-medium whitespace-nowrap leading-[18px]">
-                        {option.title} 
-                      </span>
-                    </Button>
-                   
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Mobile Layout */}
-            <div className="md:hidden">
-              <div className="flex flex-wrap gap-2 justify-center">
-                {options.map((option) => {
-                  const IconComponent = option.icon;
-                  const isActive = activeOption === option.id;
-                  return (
-                    <Button
-                      key={option.id}
-                      onClick={() => handleOptionClick(option.id)}
-                      variant={isActive ? "default" : "ghost"}
-                      size="sm"
-                      className={`
-                      flex items-center gap-2 h-10 px-3 rounded-lg transition-all duration-200
-                      ${
-                        isActive
-                          ? "bg-[#E0E0E0] text-[#1a1a1a] hover:bg-[#E0E0E0]/90"
-                          : "bg-[#333333] text-white hover:bg-[#404040]"
-                      }
-                    `}
-                    >
-                      <IconComponent className="h-[32px] w-[32px]" />
-                      <span className="text-xs font-medium leading-[18px]">
-                        {option.title}
-                      </span>
-                    </Button>
-                  );
-                })}
-              </div>
-            </div>
+      <div className={UPLOAD_OPTIONS_BAR.railDivider}>
+        <div className={UPLOAD_OPTIONS_BAR.inner}>
+          <div
+            className={UPLOAD_OPTIONS_BAR.chipRow}
+            role="tablist"
+            aria-label="Upload source"
+          >
+            {options.map((option) => {
+              const IconComponent = option.icon;
+              const isActive = activeOption === option.id;
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-pressed={isActive}
+                  onClick={() => handleOptionClick(option.id)}
+                  className={cn(
+                    UPLOAD_OPTIONS_BAR.chipBase,
+                    isActive
+                      ? UPLOAD_OPTIONS_BAR.chipActive
+                      : UPLOAD_OPTIONS_BAR.chipInactive,
+                  )}
+                >
+                  <IconComponent className={UPLOAD_OPTIONS_BAR.icon} />
+                  <span
+                    className={cn(
+                      UPLOAD_OPTIONS_BAR.label,
+                      isActive
+                        ? UPLOAD_OPTIONS_BAR.labelActive
+                        : UPLOAD_OPTIONS_BAR.labelInactive,
+                    )}
+                  >
+                    {option.title}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

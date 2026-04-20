@@ -1,24 +1,19 @@
-import React, {  useRef } from 'react';
+import React, { Fragment, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbPage,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { X, Upload, ArrowUp, CheckCircle2 } from 'lucide-react';
+import { Icon } from '@iconify/react';
+import { Loader2, X } from 'lucide-react';
 import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import {
+  UPLOAD_SHELL,
+  UPLOAD_STEP_TABS,
+} from '@/components/shared/upload/upload-studio-ui';
 import UploadProgressStep from './UploadProgressStep';
 import SermonDetailsForm from './SermonDetailsForm';
 import ListenerSettings from './ListenerSettings';
@@ -36,7 +31,29 @@ const UploadModal: React.FC<UploadModalProps> = ({ open, onOpenChange }) => {
   const saveDraftRef = useRef<(() => Promise<void>) | null>(null);
   
   // Check if upload is in progress - defined at component level for use throughout
-  const isUploading = uploadData.file && !uploadComplete && isLoading && progress > 0 && progress < 100;
+  const isUploading =
+    uploadData.file &&
+    !uploadComplete &&
+    isLoading &&
+    progress > 0 &&
+    progress < 100;
+  const uploadBusyOnServer =
+    Boolean(uploadData.file) && !uploadComplete && isLoading;
+  const showFinalizingUpload =
+    Boolean(uploadData.file) &&
+    !uploadComplete &&
+    isLoading &&
+    progress >= 100;
+  /**
+   * Figma [`4535:21468`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4535-21468) / [`4499:19755`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4499-19755).
+   * Glyphs [`4535:21568`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4535-21568), [`6147:67799`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=6147-67799) — show on **every** wizard step once a file exists (including **Uploads**), not only Details/Listener.
+   */
+  const showFooterUploadStatus =
+    Boolean(uploadData.file) &&
+    (currentStep === 'progress' ||
+      currentStep === 'details' ||
+      currentStep === 'settings' ||
+      currentStep === 'review');
 
   // Removed auto-switch to details after upload completes
   // Users can manually navigate to any tab they want after upload completes
@@ -104,8 +121,9 @@ const UploadModal: React.FC<UploadModalProps> = ({ open, onOpenChange }) => {
     }
     
     const nextStepIndex = currentStepIndex + 1;
-    if (nextStepIndex < updatedSteps.length) {
-      dispatch(uploadActions.setStep(updatedSteps[nextStepIndex].key));
+    const nextStep = updatedSteps[nextStepIndex];
+    if (nextStep) {
+      dispatch(uploadActions.setStep(nextStep.key));
     }
   };
 
@@ -176,358 +194,293 @@ const UploadModal: React.FC<UploadModalProps> = ({ open, onOpenChange }) => {
     }
   };
 
-  const isLastStep = currentStepIndex === updatedSteps.length - 1;
-
-  // Calculate estimated time remaining
-  const getEstimatedTimeRemaining = () => {
-    if (!uploadData.file || uploadComplete || progress === 0) return null;
-    
-    const fileSizeInMB = uploadData.file.size / (1024 * 1024);
-    const baseTimePerMB = 2; // seconds per MB (adjust based on your upload speed)
-    const totalEstimatedTime = fileSizeInMB * baseTimePerMB;
-    const timeElapsed = (progress / 100) * totalEstimatedTime;
-    const timeRemaining = totalEstimatedTime - timeElapsed;
-    
-    if (timeRemaining < 60) {
-      return `${Math.ceil(timeRemaining)}s left`;
-    } else {
-      const minutes = Math.floor(timeRemaining / 60);
-      const seconds = Math.ceil(timeRemaining % 60);
-      return `${minutes}m ${seconds}s left`;
-    }
-  };
-
-  // Helper function to get breadcrumb item styling
-  const getBreadcrumbItemStyle = (stepKey: string, stepIndex: number) => {
-    const step = updatedSteps[stepIndex];
-    const isActive = currentStep === stepKey;
-    const isCompleted = step.completed;
-    
-    // Progress step is ALWAYS accessible if file exists (even after upload completes)
-    const isProgressStepAccessible = stepKey === 'progress' && uploadData.file;
-    
-    // After upload completes, ALL tabs are always accessible
-    const isAccessibleAfterUpload = uploadComplete && uploadData.file;
-    
-    // During upload, all tabs are accessible
-    const isAccessibleDuringUpload = isUploading;
-    
-    // Also allow access if step is completed or if it's a previous/current step
-    const isAccessibleByNormalRules = stepIndex <= currentStepIndex || isCompleted;
-    
-    // Combine all accessibility conditions
-    const isAccessible = isProgressStepAccessible || isAccessibleAfterUpload || isAccessibleDuringUpload || isAccessibleByNormalRules;
-    
-    // Allow navigation to all tabs during upload and after completion - no blocking
-    let className = 'cursor-pointer transition-all duration-200 flex items-center gap-2 px-4 py-2.5 rounded-md ';
-    
-    if (isActive) {
-      className += 'text-primary  bg-primary/10 border border-primary/20 ';
-    } else if (isCompleted) {
-      // Completed steps use same styling as accessible steps, no green color
-      className += 'text-foreground hover:bg-muted/50';
-    } else if (isAccessible) {
-      className += 'text-foreground hover:bg-muted/50';
-    } else {
-      className += 'opacity-50 cursor-not-allowed text-muted-foreground';
-    }
-    
-    return className;
-  };
-
-  const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <img 
-      src="/images/assets/upload-progress.svg" 
-      alt="Upload Progress"
-      className={className}
-    />
-  );
-  const DetailsIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <img 
-      src="/images/assets/details.svg" 
-      alt="Details"
-      className={className}
-    />
-  );
-  const ReviewIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <img 
-      src="/images/assets/review.svg" 
-      alt="Review"
-      className={className}
-    />
-  );
-  const ListenerIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <img 
-      src="/images/assets/listener.svg" 
-      alt="Listener Settings"
-      className={className}
-    />
-  );
-
-  // Custom TooltipContent without arrow
-  const TooltipContentNoArrow = ({ className, children, ...props }: React.ComponentProps<typeof TooltipPrimitive.Content>) => (
-    <TooltipPrimitive.Portal>
-      <TooltipPrimitive.Content
-        className={cn(
-          "bg-[#2b2a2c] text-white border border-border/50 rounded-md z-50",
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
-  );
-  
-  const handleSaveDraft = () => {
-    // This will be called from the ReviewSubmit component
-    // For now, we'll expose this through ReviewSubmit's own handler
+  const tabAllowsNavigation = (stepKey: string, stepIndex: number) => {
+    if (stepKey === currentStep) return true;
+    if (stepKey === 'progress' && uploadData.file) return true;
+    if (uploadComplete && uploadData.file) return true;
+    if (isUploading) return true;
+    if (stepIndex <= currentStepIndex) return true;
+    if (stepIndex === currentStepIndex + 1 && canProceed()) return true;
+    return false;
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="w-[min(800px,85vw)] h-[min(500px,80vh)] !max-w-none overflow-hidden p-0 flex flex-col" 
+      <DialogContent
+        className={cn(
+          UPLOAD_SHELL.widthClass,
+          UPLOAD_SHELL.maxWidthClass,
+          UPLOAD_SHELL.minHeightClass,
+          'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl sm:max-w-[827px]',
+          UPLOAD_SHELL.outerRadius,
+          UPLOAD_SHELL.outerBorder,
+          UPLOAD_SHELL.outerBg,
+        )}
         showCloseButton={false}
       >
-        {/* Header with breadcrumbs and close button */}
-        <DialogHeader className="px-6 py-4 border-b bg-muted/30">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <DialogTitle className="flex items-center mb-3 gap-2">
-                <Upload className="h-5 w-5" />
-                {getStepTitle()}
-              </DialogTitle>
-              
-              {/* Enhanced Breadcrumb Navigation with Active States */}
-              <Breadcrumb>
-                <BreadcrumbList className="gap-0 items-center">
-                  <BreadcrumbItem>
-                    <div className="relative flex flex-col">
-                      <BreadcrumbLink 
-                        onClick={() => handleStepClick('progress')}
-                        className={getBreadcrumbItemStyle('progress', 0)}
-                      >
-                        <UploadIcon className="h-4 w-4" />
-                        Upload Progress
-                      </BreadcrumbLink>
-                      {currentStep === 'progress' && (
-                        <div className="h-0.5 bg-primary rounded-full mt-1" />
-                      )}
-                    </div>
-                  </BreadcrumbItem>
-                  <div className="h-4 w-[2px] bg-border/50 " />
-                  <BreadcrumbItem>
-                    <div className="relative flex flex-col">
-                      <BreadcrumbLink 
-                        onClick={() => handleStepClick('details')}
-                        className={getBreadcrumbItemStyle('details', 1)}
-                      >
-                        <DetailsIcon className="h-4 w-4" />
-                        Details
-                      </BreadcrumbLink>
-                      {currentStep === 'details' && (
-                        <div className="h-0.5 bg-primary rounded-full mt-1" />
-                      )}
-                    </div>
-                  </BreadcrumbItem>
-                  <div className="h-4 w-px bg-border/50 " />
-                  <BreadcrumbItem>
-                    <div className="relative flex flex-col">
-                      <BreadcrumbLink 
-                        onClick={() => handleStepClick('settings')}
-                        className={getBreadcrumbItemStyle('settings', 2)}
-                      >
-                        <ListenerIcon className="h-4 w-4" />
-                        Listener Settings
-                      </BreadcrumbLink>
-                      {currentStep === 'settings' && (
-                        <div className="h-0.5 bg-primary rounded-full mt-1" />
-                      )}
-                    </div>
-                  </BreadcrumbItem>
-                  <div className="h-4 w-px bg-border/50 " />
-                  <BreadcrumbItem>
-                    <div className="relative flex flex-col">
-                      {currentStep === 'review' ? (
-                        <>
-                          <BreadcrumbPage className={getBreadcrumbItemStyle('review', 3)}>
-                            <ReviewIcon className="h-4 w-4" />
-                            Review & Submit
-                          </BreadcrumbPage>
-                          <div className="h-0.5 bg-primary rounded-full mt-1" />
-                        </>
-                      ) : (
-                        <BreadcrumbLink 
-                          onClick={() => handleStepClick('review')}
-                          className={getBreadcrumbItemStyle('review', 3)}
-                        >
-                          <ReviewIcon className="h-4 w-4" />
-                          Review & Submit
-                        </BreadcrumbLink>
-                      )}
-                    </div>
-                  </BreadcrumbItem>
-                </BreadcrumbList>
-              </Breadcrumb>
+        <DialogTitle className="sr-only">
+          Upload sermons — {getStepTitle()}
+        </DialogTitle>
+
+        <DialogHeader className="space-y-0 border-0 bg-transparent p-0">
+          <div
+            className={cn(
+              'flex items-center justify-between gap-4 border-b border-[#545454]/50 px-4',
+              UPLOAD_SHELL.headerMinH,
+              UPLOAD_SHELL.outerBg,
+            )}
+          >
+            <div className="flex min-w-0 items-center gap-2">
+              <img
+                src="/images/assets/upload-file.svg"
+                alt=""
+                className="h-5 w-5 shrink-0 opacity-95"
+                width={20}
+                height={20}
+              />
+              <span className={cn(UPLOAD_SHELL.titleText, 'truncate')}>
+                Upload sermons
+              </span>
             </div>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClose}
-              className="h-8 w-8 p-0"
+            <button
+              type="button"
+              onClick={() => void handleClose()}
+              className="shrink-0 rounded-md p-1 text-[#eaeaea] opacity-90 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50"
+              aria-label="Close"
             >
-              <X className="h-4 w-4" />
-            </Button>
+              <X className="h-5 w-5" strokeWidth={2} />
+            </button>
+          </div>
+
+          <div
+            className={cn(
+              'flex flex-wrap items-center gap-x-1 gap-y-2 border-b border-[#545454]/50 px-3 py-2 md:px-4',
+              UPLOAD_SHELL.outerBg,
+            )}
+          >
+            {UPLOAD_STEP_TABS.flatMap((tab, idx) => {
+              const stepIndex = updatedSteps.findIndex((s) => s.key === tab.key);
+              const allowed = tabAllowsNavigation(tab.key, stepIndex);
+              const isActive = currentStep === tab.key;
+              const innerInactiveClass =
+                tab.inactiveInner === 'pill'
+                  ? UPLOAD_SHELL.tabInnerInactivePill
+                  : UPLOAD_SHELL.tabInnerInactiveGhost;
+              const btn = (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleStepClick(tab.key)}
+                  disabled={!allowed}
+                  className={cn(
+                    UPLOAD_SHELL.tabButtonBase,
+                    !isActive && UPLOAD_SHELL.tabButtonInactive,
+                    !allowed && 'pointer-events-none opacity-40',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      UPLOAD_SHELL.tabInnerRow,
+                      isActive
+                        ? UPLOAD_SHELL.tabInnerActive
+                        : innerInactiveClass,
+                      isActive ? 'text-[#eaeaea]' : 'text-[#bdbdbd]',
+                    )}
+                  >
+                    <img
+                      src={tab.iconSrc}
+                      alt=""
+                      aria-hidden
+                      className={cn(
+                        UPLOAD_SHELL.tabIcon,
+                        isActive
+                          ? UPLOAD_SHELL.tabIconActive
+                          : UPLOAD_SHELL.tabIconInactive,
+                      )}
+                    />
+                    <span className="min-w-0 truncate">{tab.label}</span>
+                  </span>
+                  <div className={UPLOAD_SHELL.tabFlexGrowBeforeLine} />
+                  <div
+                    className={
+                      isActive
+                        ? UPLOAD_SHELL.tabActiveLine
+                        : UPLOAD_SHELL.tabInactiveLine
+                    }
+                    aria-hidden
+                  />
+                </button>
+              );
+              if (idx === 0) return [btn];
+              return [
+                <div
+                  key={`sep-${tab.key}`}
+                  className={UPLOAD_SHELL.divider}
+                  aria-hidden
+                />,
+                btn,
+              ];
+            })}
           </div>
         </DialogHeader>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto scrollbar-none px-6 py-6 min-h-0">
-          <div className="w-full max-w-none">
-            {getStepContent()}
+        <div className="flex min-h-0 flex-1 flex-col px-3 pb-2 pt-3 md:px-4">
+          <div
+            className={cn(
+              UPLOAD_SHELL.contentCard,
+              'flex min-h-0 flex-1 flex-col overflow-hidden',
+            )}
+          >
+            <div className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto p-6 md:p-8">
+              {getStepContent()}
+            </div>
           </div>
         </div>
 
-        {/* Enhanced Footer with upload progress and buttons */}
-        <div className="px-6 py-4 border-t bg-muted/30">
-          <div className="flex items-center justify-between">
-            {/* Left: Upload Progress Info (show during upload regardless of current step) */}
-            {uploadData.file && !uploadComplete && isLoading && progress > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-3 text-sm cursor-pointer">
-                    <div className="flex items-center gap-2 text-blue-600">
-                      <ArrowUp className="h-4 w-4 animate-pulse" />
-                      <span className="font-semibold">{Math.round(progress)}%</span>
-                    </div>
-                    <div className="text-muted-foreground">
-                      Uploading {uploadData.file.name}
-                    </div>
-                    {getEstimatedTimeRemaining() && (
-                      <div className="text-muted-foreground">
-                        • {getEstimatedTimeRemaining()}
-                      </div>
-                    )}
+        <div
+          className={cn(
+            'flex w-full items-center border-t border-[#545454]/50 px-4 py-2',
+            UPLOAD_SHELL.footerMinH,
+            UPLOAD_SHELL.footerBg,
+            showFooterUploadStatus ? 'justify-between gap-4' : 'justify-end gap-3',
+          )}
+        >
+          {showFooterUploadStatus && uploadData.file ? (
+            <div className="flex min-w-0 flex-1 items-center gap-3">
+              {uploadComplete ? (
+                <>
+                  <Icon
+                    icon={UPLOAD_SHELL.iconifyFooterUploadGlyph}
+                    width={20}
+                    height={20}
+                    className="shrink-0 text-[#bdbdbd]"
+                    aria-hidden
+                  />
+                  <Icon
+                    icon={UPLOAD_SHELL.iconifyFooterUploadSuccessGlyph}
+                    width={20}
+                    height={20}
+                    className="shrink-0 text-[#08ffdb]"
+                    aria-hidden
+                  />
+                  <p className="shrink-0 font-matter text-[13px] leading-5 text-[#bdbdbd]">
+                    Upload complete
+                  </p>
+                </>
+              ) : showFinalizingUpload ? (
+                <>
+                  <Icon
+                    icon={UPLOAD_SHELL.iconifyFooterUploadGlyph}
+                    width={20}
+                    height={20}
+                    className="shrink-0 text-[#bdbdbd]"
+                    aria-hidden
+                  />
+                  <Loader2
+                    className="h-4 w-4 shrink-0 animate-spin text-[#bdbdbd]"
+                    aria-hidden
+                  />
+                  <p className={UPLOAD_SHELL.footerStatusText}>Finalizing upload…</p>
+                </>
+              ) : uploadBusyOnServer ? (
+                <>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <Icon
+                      icon={UPLOAD_SHELL.iconifyFooterUploadGlyph}
+                      width={20}
+                      height={20}
+                      className="shrink-0 text-[#bdbdbd]"
+                      aria-hidden
+                    />
+                    <Loader2
+                      className="h-4 w-4 shrink-0 animate-spin text-[#bdbdbd]"
+                      aria-hidden
+                    />
                   </div>
-                </TooltipTrigger>
-                <TooltipContentNoArrow 
-                  side="top" 
-                  className="p-4 min-w-[250px]"
-                >
-                  <div className="space-y-3">
-                    <div className="text-sm font-medium">Video uploading</div>
-                    <div className="text-sm">{Math.round(progress)}% uploaded</div>
-                    <Progress value={progress} className="h-2" />
-                    {getEstimatedTimeRemaining() && (
-                      <div className="text-xs text-muted-foreground">{getEstimatedTimeRemaining()}</div>
-                    )}
-                  </div>
-                </TooltipContentNoArrow>
-              </Tooltip>
-            )}
-            
-            {/* Show upload complete status */}
-            {uploadData.file && uploadComplete && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center gap-2 text-sm cursor-pointer">
-                    <div className="flex items-center gap-2 text-green-600">
-                      <ArrowUp className="h-4 w-4" />
-                      <CheckCircle2 className="h-4 w-4" />
-                    </div>
-                    <span className="font-medium text-foreground">Upload completed</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContentNoArrow 
-                  side="top" 
-                  className="p-4"
-                >
-                  <div className="text-sm font-medium">Video upload completed</div>
-                </TooltipContentNoArrow>
-              </Tooltip>
-            )}
-            
-            {/* Spacer when no progress info */}
-            {!(uploadData.file && ((!uploadComplete && isLoading && progress > 0) || uploadComplete)) && (
-              <div></div>
-            )}
-            
-            {/* Right: Action Buttons */}
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                onClick={handleClose}
-                className="min-w-[100px]"
-              >
-                Close
-              </Button>
-              
-              {/* Show Save Draft button on Review step */}
-              {currentStep === 'review' && (
-                <Button
-                  onClick={async () => {
-                    if (saveDraftRef.current) {
-                      await saveDraftRef.current();
-                    }
-                  }}
-                  disabled={isLoading || isUploading || !uploadData.title}
-                  variant="outline"
-                  className="min-w-[120px]"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-foreground mr-2"></div>
-                      Saving...
-                    </>
-                  ) : (
-                    'Save as Draft'
-                  )}
-                </Button>
-              )}
-              
-              {/* Show Publish button on Review step, Continue button on other steps */}
-              {currentStep === 'review' ? (
-                <Button
-                  onClick={() => {
-                    if (reviewSubmitRef.current) {
-                      reviewSubmitRef.current();
-                    }
-                  }}
-                  disabled={isLoading || isUploading || !uploadData.file || !uploadData.title}
-                  className="min-w-[120px] bg-primary hover:bg-primary/90"
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Publishing...
-                    </>
-                  ) : (
-                    'Publish'
-                  )}
-                </Button>
+                  <p className={UPLOAD_SHELL.footerStatusText}>
+                    Uploading {Math.round(Math.min(99, progress))}%
+                    <span className={UPLOAD_SHELL.footerStatusMuted}> … </span>
+                    <span className="text-[#bdbdbd]">Time left —</span>
+                  </p>
+                </>
               ) : (
-                <Button
-                  onClick={handleNext}
-                  disabled={!canProceed()}
-                  className={`min-w-[120px] transition-all ${
-                    isLastStep 
-                      ? 'bg-green-600 hover:bg-green-700 text-white' 
-                      : ''
-                  }`}
-                >
-                  {isLastStep ? (
-                    <>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Publish Sermon
-                    </>
-                  ) : (
-                    'Continue'
-                  )}
-                </Button>
+                <>
+                  <Icon
+                    icon={UPLOAD_SHELL.iconifyFooterUploadGlyph}
+                    width={20}
+                    height={20}
+                    className="shrink-0 text-[#bdbdbd]"
+                    aria-hidden
+                  />
+                  <p className={UPLOAD_SHELL.footerStatusText}>Ready when you are</p>
+                </>
               )}
             </div>
+          ) : null}
+
+          <div className="flex shrink-0 items-center gap-3">
+          <Button
+            type="button"
+            variant="ghost"
+            className={UPLOAD_SHELL.ghostCta}
+            onClick={() => void handleClose()}
+          >
+            Close
+          </Button>
+          {currentStep === 'review' ? (
+            <Fragment>
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={isLoading || isUploading || !uploadData.title}
+                className="h-[34px] min-h-[34px] rounded-md border border-[#707070] bg-transparent px-3 font-matter-medium text-[12px] leading-[18px] text-[#eaeaea] tracking-wide hover:bg-white/5"
+                onClick={async () => {
+                  if (saveDraftRef.current) await saveDraftRef.current();
+                }}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#eaeaea] border-t-transparent" />
+                    Saving…
+                  </>
+                ) : (
+                  'Save as Draft'
+                )}
+              </Button>
+              <Button
+                type="button"
+                disabled={
+                  isLoading ||
+                  isUploading ||
+                  !uploadData.file ||
+                  !uploadData.title
+                }
+                className={cn(UPLOAD_SHELL.primaryCta, 'min-w-[88px]')}
+                onClick={() => reviewSubmitRef.current?.()}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#292929] border-t-transparent" />
+                    Publishing…
+                  </>
+                ) : (
+                  'Publish'
+                )}
+              </Button>
+            </Fragment>
+          ) : (
+            <Button
+              type="button"
+              disabled={!canProceed()}
+              className={cn(
+                UPLOAD_SHELL.primaryCta,
+                'min-w-[88px] disabled:opacity-40',
+              )}
+              onClick={handleNext}
+            >
+              Continue
+            </Button>
+          )}
           </div>
         </div>
       </DialogContent>

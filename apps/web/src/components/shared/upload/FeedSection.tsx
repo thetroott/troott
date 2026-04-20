@@ -1,14 +1,27 @@
 import React from 'react';
 import { BarChart3, TrendingUp, Users, Eye } from 'lucide-react';
 
-const FeedSection: React.FC = () => {
+export interface FeedSectionProps {
+  hasSermons?: boolean;
+}
+
+const FeedSection: React.FC<FeedSectionProps> = ({ hasSermons = false }) => {
   return (
     <div className="space-y-6">
       {/* Your feeds section */}
       <div className="bg-card rounded-xl border border-border/50 p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">Your feeds</h3>
         
-        {/* Empty state */}
+        {hasSermons ? (
+          <div className="py-10 px-4 text-center border border-dashed border-border/40 rounded-xl bg-muted/10">
+            <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+              Activity from your published and in-progress sermons will show here
+              as the studio feed is connected. Use{' '}
+              <span className="text-foreground font-medium">Upload</span> above
+              to add another sermon.
+            </p>
+          </div>
+        ) : (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <img src="/images/assets/no-activity.svg" alt="Empty State" className="w-20 h-20" />
           
@@ -17,6 +30,7 @@ const FeedSection: React.FC = () => {
             Start by uploading your first message or teaching to get things moving.
           </p>
         </div>
+        )}
       </div>
 
       {/* Your content stats section */}

@@ -1,17 +1,40 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Upload } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import UploadEntryStepModal from '@/components/shared/upload/UploadEntryStepModal';
+import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
 
-const FileUploadZone: React.FC = () => {
+export interface FileUploadZoneProps {
+    /**
+     * When true (returning minister with existing sermons), the large drop zone is
+     * replaced by an Upload CTA that opens step-1 file selection in a modal.
+     */
+    useEntryModal?: boolean;
+    /**
+     * When true, open the entry modal immediately on mount.
+     */
+    autoOpenEntryModal?: boolean;
+}
+
+const FileUploadZone: React.FC<FileUploadZoneProps> = ({
+    useEntryModal = false,
+    autoOpenEntryModal = false,
+}) => {
     const { state, dispatch } = useUpload();
     const { uploadData, isLoading } = state;
 
     const [isDragActive, setIsDragActive] = useState(false);
     const [validationError, setValidationError] = useState<string>('');
+    const [entryModalOpen, setEntryModalOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (autoOpenEntryModal && !uploadData.file) {
+            setEntryModalOpen(true);
+        }
+    }, [autoOpenEntryModal, uploadData.file]);
 
     // Configuration - Audio formats only
     const acceptedTypes = [
@@ -91,10 +114,8 @@ const FileUploadZone: React.FC = () => {
         // Always set title when a new file is selected
         dispatch(uploadActions.setUploadData({ title: cleanTitle }));
 
-        // Automatically start upload process
-        setTimeout(() => {
-            dispatch(uploadActions.setStep('progress'));
-        }, 500); // Small delay for better UX
+        // Open upload modal on progress immediately so the upload request starts right away
+        dispatch(uploadActions.setStep('progress'));
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -135,14 +156,65 @@ const FileUploadZone: React.FC = () => {
 
     const hasError = validationError;
 
+    const showInlineDropZone = !uploadData.file && !useEntryModal;
+    const showEntryCta = !uploadData.file && useEntryModal;
+
     return (
         <div className="space-y-8">
-            {/* Upload Zone */}
-            {!uploadData.file && (
+            {useEntryModal ? (
+                <UploadEntryStepModal
+                    open={entryModalOpen}
+                    onOpenChange={setEntryModalOpen}
+                    isLoading={isLoading}
+                    onFileSelected={(file) => {
+                        handleFileSelect(file);
+                        setEntryModalOpen(false);
+                    }}
+                />
+            ) : null}
+
+            {/* Returning user: open step-1 modal from Upload CTA */}
+            {showEntryCta ? (
+                <div
+                    className={cn(
+                        'relative mx-auto flex max-w-xl flex-col items-center justify-center space-y-5 px-8 py-14 text-center',
+                        UPLOAD_SHELL.outerRadius,
+                        UPLOAD_SHELL.outerBorder,
+                        UPLOAD_SHELL.outerBg,
+                    )}
+                >
+                    <img
+                        src="/images/assets/upload-file.svg"
+                        alt=""
+                        className="h-10 w-10 opacity-90"
+                    />
+                    <div className="space-y-2">
+                        <h2 className={cn(UPLOAD_SHELL.titleText, 'text-lg')}>
+                            Add another sermon
+                        </h2>
+                        <p className="mx-auto max-w-sm font-matter text-sm leading-relaxed text-[#bdbdbd]">
+                            Upload a new audio file. You will move through
+                            upload progress, details, listener settings, and
+                            review before publishing.
+                        </p>
+                    </div>
+                    <Button
+                        type="button"
+                        onClick={() => setEntryModalOpen(true)}
+                        className={cn(UPLOAD_SHELL.primaryCta, 'h-[38px] px-8')}
+                        disabled={isLoading}
+                    >
+                        Upload
+                    </Button>
+                </div>
+            ) : null}
+
+            {/* First-time / empty studio: full inline drop zone */}
+            {showInlineDropZone ? (
                 <div className="relative">
                     <div
                         className={cn(
-                            'border-2 border-dashed border-border/50 bg-[#2b2a2c] rounded-2xl p-12 transition-all duration-200 cursor-pointer',
+                            'border-2 border-dashed border-border/50 bg-[#2b2a2c] rounded-2xl p-36 transition-all duration-200 cursor-pointer',
                             isDragActive && 'border-primary bg-primary/5',
                             isLoading && 'pointer-events-none opacity-50',
                         )}
@@ -170,31 +242,18 @@ const FileUploadZone: React.FC = () => {
                             {/* Select Files Button */}
                             <Button
                                 onClick={handleButtonClick}
-                                className="bg-cyan-500 cursor-pointer hover:bg-cyan-600 text-background px-6 py-2 rounded-md font-medium"
+                                className={cn(
+                                    UPLOAD_SHELL.primaryCta,
+                                    'h-[38px] min-w-[104px] px-6',
+                                )}
                                 disabled={isLoading}
                             >
-                                {isLoading ? 'Processing...' : 'Select file'}
+                                {isLoading ? 'Processing...' : 'Select files'}
                             </Button>
                         </div>
                     </div>
                 </div>
-            )}
-
-            {/* Continue to Upload Button */}
-            {uploadData.file && !hasError && (
-                <div className="flex justify-center pt-6">
-                    <Button
-                        onClick={() =>
-                            dispatch(uploadActions.setStep('progress'))
-                        }
-                        size="lg"
-                        className="px-12 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary"
-                    >
-                        Continue to Upload
-                        <Upload className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
-            )}
+            ) : null}
 
             {/* Error Display */}
             {hasError && (
