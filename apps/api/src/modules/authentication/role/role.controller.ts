@@ -3,15 +3,14 @@ import asyncHandler from '../../../middlewares/async.mdw';
 import ErrorResponse from '../../../utils/error.util';
 import roleService from './role.service';
 import roleRepository from './role.repository';
-import { CreateRoleDTO, UpdateRoleDTO, AttachRoleDTO, AssignWorkspaceRoleDTO, AssignProjectRoleDTO } from './role.dto';
+import {
+    CreateRoleDTO,
+    UpdateRoleDTO,
+    AttachRoleDTO,
+} from './role.dto';
 import redisWrapper from '../../../middlewares/redis.mdw';
 import userRepository from '../../users/user/user.repository';
 import { IUserDoc, UserType } from '../../users/user/user.interface';
-import { Types } from 'mongoose';
-import { WorkspaceMemberRole } from '../../core/workspace/workspace.interface';
-import { ProjectMemberRole } from '../../projects/project/project.interface';
-import workspaceRepository from '../../core/workspace/workspace.repository';
-import projectRepository from '../../projects/project/project.repository';
 
 /**
  * @name createRole
@@ -60,7 +59,7 @@ export const createRole: RequestHandler = asyncHandler(
  */
 export const getRole: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { id } = req.params;
+        const id = String(req.params.id || '');
         if (!id) return next(new ErrorResponse('Role ID is required', 400, []));
 
         const cacheKey = `role:${id}`;
@@ -139,7 +138,7 @@ export const getRoles: RequestHandler = asyncHandler(
             data: result.data,
             message: result.message || 'Roles retrieved successfully',
             status: 200,
-            pagination: result.pagination,
+            pagination: (result as { pagination?: unknown }).pagination,
         });
     },
 );
@@ -152,7 +151,7 @@ export const getRoles: RequestHandler = asyncHandler(
  */
 export const updateRole: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { id } = req.params;
+        const id = String(req.params.id || '');
         if (!id) return next(new ErrorResponse('Role ID is required', 400, []));
 
         const data: UpdateRoleDTO = {
@@ -186,7 +185,7 @@ export const updateRole: RequestHandler = asyncHandler(
  */
 export const deleteRole: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { id } = req.params;
+        const id = String(req.params.id || '');
         if (!id) return next(new ErrorResponse('Role ID is required', 400, []));
 
         const result = await roleRepository.deleteRole(id);
@@ -216,7 +215,7 @@ export const deleteRole: RequestHandler = asyncHandler(
  */
 export const getUserRoles: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { userId } = req.params;
+        const userId = String(req.params.userId || '');
         if (!userId)
             return next(new ErrorResponse('User ID is required', 400, []));
 
@@ -244,7 +243,7 @@ export const getUserRoles: RequestHandler = asyncHandler(
  */
 export const attachRoleToUser: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { userId } = req.params;
+        const userId = String(req.params.userId || '');
         if (!userId)
             return next(new ErrorResponse('User ID is required', 400, []));
 
@@ -284,7 +283,7 @@ export const attachRoleToUser: RequestHandler = asyncHandler(
  */
 export const detachRoleFromUser: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { userId } = req.params;
+        const userId = String(req.params.userId || '');
         if (!userId)
             return next(new ErrorResponse('User ID is required', 400, []));
 
@@ -311,222 +310,6 @@ export const detachRoleFromUser: RequestHandler = asyncHandler(
             errors: [],
             data: result.data,
             message: result.message || 'Role detached successfully',
-            status: 200,
-        });
-    },
-);
-
-/**
- * @name assignWorkspaceRole
- * @description Assigns a contextual role to a user in a workspace
- * @route POST /roles/workspace/:workspaceId/assign
- * @access Private
- */
-export const assignWorkspaceRole: RequestHandler = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const { workspaceId } = req.params;
-        if (!workspaceId)
-            return next(new ErrorResponse('Workspace ID is required', 400, []));
-
-        const data: AssignWorkspaceRoleDTO = req.body;
-        if (!data.userId)
-            return next(new ErrorResponse('User ID is required', 400, []));
-        if (!data.role)
-            return next(new ErrorResponse('Role is required', 400, []));
-
-        // Validate role enum
-        if (!Object.values(WorkspaceMemberRole).includes(data.role)) {
-            return next(new ErrorResponse('Invalid workspace member role', 400, []));
-        }
-
-        // Check if workspace exists
-        const workspaceResult = await workspaceRepository.findById(workspaceId);
-        if (workspaceResult.error || !workspaceResult.data) {
-            return next(
-                new ErrorResponse('Workspace not found', workspaceResult.code || 404, []),
-            );
-        }
-
-        const workspace = workspaceResult.data as any;
-        
-        // Check if user is already a member
-        const existingMember = workspace.members?.find(
-            (m: any) => String(m.user) === data.userId || String(m.user?._id) === data.userId,
-        );
-        if (existingMember) {
-            return next(
-                new ErrorResponse('User is already a member of this workspace', 400, []),
-            );
-        }
-
-        // Add member with role using $addToSet
-        const updateResult = await workspaceRepository.updateWorkspace(workspaceId, {
-            $addToSet: {
-                members: {
-                    user: new Types.ObjectId(data.userId),
-                    role: data.role,
-                    joinedAt: new Date(),
-                },
-            },
-        } as any);
-
-        if (updateResult.error) {
-            return next(new ErrorResponse(updateResult.message, updateResult.code, []));
-        }
-
-        // Invalidate cache
-        try {
-            await redisWrapper.deleteData(`workspace:${workspaceId}`);
-        } catch (cacheError) {
-            console.error('Cache invalidation failed:', cacheError);
-        }
-
-        res.status(200).json({
-            error: false,
-            errors: [],
-            data: updateResult.data,
-            message: 'Workspace role assigned successfully',
-            status: 200,
-        });
-    },
-);
-
-/**
- * @name removeWorkspaceRole
- * @description Removes a user's contextual role from a workspace
- * @route DELETE /roles/workspace/:workspaceId/user/:userId
- * @access Private
- */
-export const removeWorkspaceRole: RequestHandler = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const { workspaceId, userId } = req.params;
-        if (!workspaceId)
-            return next(new ErrorResponse('Workspace ID is required', 400, []));
-        if (!userId)
-            return next(new ErrorResponse('User ID is required', 400, []));
-
-        // Check if workspace exists
-        const workspaceResult = await workspaceRepository.findById(workspaceId);
-        if (workspaceResult.error || !workspaceResult.data) {
-            return next(
-                new ErrorResponse('Workspace not found', workspaceResult.code || 404, []),
-            );
-        }
-
-        // Remove member using $pull
-        const updateResult = await workspaceRepository.updateWorkspace(workspaceId, {
-            $pull: {
-                members: {
-                    user: new Types.ObjectId(userId),
-                },
-            },
-        } as any);
-
-        if (updateResult.error) {
-            return next(new ErrorResponse(updateResult.message, updateResult.code, []));
-        }
-
-        // Invalidate cache
-        try {
-            await redisWrapper.deleteData(`workspace:${workspaceId}`);
-        } catch (cacheError) {
-            console.error('Cache invalidation failed:', cacheError);
-        }
-
-        res.status(200).json({
-            error: false,
-            errors: [],
-            data: updateResult.data,
-            message: 'Workspace role removed successfully',
-            status: 200,
-        });
-    },
-);
-
-/**
- * @name assignProjectRole
- * @description Assigns a contextual role to a user in a project
- * @route POST /roles/project/:projectId/assign
- * @access Private
- */
-export const assignProjectRole: RequestHandler = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const { projectId } = req.params;
-        if (!projectId)
-            return next(new ErrorResponse('Project ID is required', 400, []));
-
-        const data: AssignProjectRoleDTO = req.body;
-        if (!data.userId)
-            return next(new ErrorResponse('User ID is required', 400, []));
-        if (!data.role)
-            return next(new ErrorResponse('Role is required', 400, []));
-
-        // Validate role enum
-        if (!Object.values(ProjectMemberRole).includes(data.role)) {
-            return next(new ErrorResponse('Invalid project member role', 400, []));
-        }
-
-        // Import project service dynamically to avoid circular dependency
-        const projectService = (await import('../../projects/project/project.service')).default;
-        
-        const result = await projectService.addMember(projectId, data.userId, data.role);
-
-        if (result.error) {
-            return next(new ErrorResponse(result.message, result.code, []));
-        }
-
-        // Invalidate cache
-        try {
-            await redisWrapper.deleteData(`project:${projectId}`);
-        } catch (cacheError) {
-            console.error('Cache invalidation failed:', cacheError);
-        }
-
-        res.status(200).json({
-            error: false,
-            errors: [],
-            data: result.data,
-            message: result.message || 'Project role assigned successfully',
-            status: 200,
-        });
-    },
-);
-
-/**
- * @name removeProjectRole
- * @description Removes a user's contextual role from a project
- * @route DELETE /roles/project/:projectId/user/:userId
- * @access Private
- */
-export const removeProjectRole: RequestHandler = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const { projectId, userId } = req.params;
-        if (!projectId)
-            return next(new ErrorResponse('Project ID is required', 400, []));
-        if (!userId)
-            return next(new ErrorResponse('User ID is required', 400, []));
-
-        // Import project service dynamically to avoid circular dependency
-        const projectService = (await import('../../projects/project/project.service')).default;
-        
-        const result = await projectService.removeMember(projectId, userId);
-
-        if (result.error) {
-            return next(new ErrorResponse(result.message, result.code, []));
-        }
-
-        // Invalidate cache
-        try {
-            await redisWrapper.deleteData(`project:${projectId}`);
-        } catch (cacheError) {
-            console.error('Cache invalidation failed:', cacheError);
-        }
-
-        res.status(200).json({
-            error: false,
-            errors: [],
-            data: result.data,
-            message: result.message || 'Project role removed successfully',
             status: 200,
         });
     },

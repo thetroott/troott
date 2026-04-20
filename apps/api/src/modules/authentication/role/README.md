@@ -25,6 +25,7 @@ The RBAC system provides fine-grained access control through:
 3. **Permissions**: Granular actions that can be performed (e.g., `workspace:create`, `project:read`, `task:update`)
 
 Users can have:
+
 - Multiple global roles
 - Different contextual roles in different resources
 - Explicit permissions (in addition to role-based permissions)
@@ -57,12 +58,14 @@ Users can have:
 ### Global vs Contextual Roles
 
 **Global Roles** (Role Module):
+
 - Stored in `user.roles` array
 - System-wide permissions
 - Examples: `SUPERADMIN`, `ADMIN`, `BUSINESS`, `TALENT`, `USER`
 - Managed via `/roles/*` endpoints
 
 **Contextual Roles** (Resource Modules):
+
 - Stored in resource's `members` array (e.g., `workspace.members`, `project.members`)
 - Resource-specific permissions
 - Examples: `WorkspaceMemberRole.OWNER`, `ProjectMemberRole.CONTRIBUTOR`
@@ -96,31 +99,35 @@ hackathon:manage      # Manage hackathons
 ### Available Roles
 
 1. **SUPERADMIN** (`super-admin`)
-   - Full system access including system restart
-   - Can manage all users, roles, and permissions
-   - Only one superadmin can exist at a time
+
+    - Full system access including system restart
+    - Can manage all users, roles, and permissions
+    - Only one superadmin can exist at a time
 
 2. **ADMIN** (`admin`)
-   - Platform administration (no system restart)
-   - Can manage users, projects, hackathons
-   - Full access to analytics and reporting
+
+    - Platform administration (no system restart)
+    - Can manage users, projects, hackathons
+    - Full access to analytics and reporting
 
 3. **BUSINESS** (`business`)
-   - Create and manage workspaces
-   - Create projects and hackathons
-   - Manage teams and tasks
-   - View analytics for own resources
+
+    - Create and manage workspaces
+    - Create projects and hackathons
+    - Manage teams and tasks
+    - View analytics for own resources
 
 4. **TALENT** (`talent`)
-   - Participate in hackathons
-   - Join projects and teams
-   - Manage own portfolio
-   - Create entries and submissions
+
+    - Participate in hackathons
+    - Join projects and teams
+    - Manage own portfolio
+    - Create entries and submissions
 
 5. **USER** (`user`)
-   - View public content
-   - Basic platform interaction
-   - Limited permissions
+    - View public content
+    - Basic platform interaction
+    - Limited permissions
 
 ### Role Permissions
 
@@ -134,12 +141,13 @@ Contextual roles provide resource-specific permissions beyond global roles.
 
 ```typescript
 enum WorkspaceMemberRole {
-  OWNER = 'OWNER',      // Full access (maps to BUSINESS userType)
-  MANAGER = 'MANAGER'   // Manage workspace and projects
+    OWNER = 'OWNER', // Full access (maps to BUSINESS userType)
+    MANAGER = 'MANAGER', // Manage workspace and projects
 }
 ```
 
 **Permission Mapping:**
+
 - `OWNER`: `['*:*']` - Full access
 - `MANAGER`: Can manage workspace, projects, teams, and hackathons
 
@@ -147,14 +155,15 @@ enum WorkspaceMemberRole {
 
 ```typescript
 enum ProjectMemberRole {
-  OWNER = 'OWNER',           // Full access
-  MAINTAINER = 'MAINTAINER', // Manage project and tasks
-  CONTRIBUTOR = 'CONTRIBUTOR', // Contribute to project
-  SUBSCRIBER = 'SUBSCRIBER'   // Read-only access
+    OWNER = 'OWNER', // Full access
+    MAINTAINER = 'MAINTAINER', // Manage project and tasks
+    CONTRIBUTOR = 'CONTRIBUTOR', // Contribute to project
+    SUBSCRIBER = 'SUBSCRIBER', // Read-only access
 }
 ```
 
 **Permission Mapping:**
+
 - `OWNER`: `['*:*']` - Full access
 - `MAINTAINER`: Can manage project, tasks, and members
 - `CONTRIBUTOR`: Can create/update tasks and update status
@@ -164,12 +173,13 @@ enum ProjectMemberRole {
 
 ```typescript
 enum HackathonMemberRole {
-  OWNER = 'OWNER',        // Full access (can delete)
-  ORGANIZER = 'ORGANIZER' // Manage hackathon operations
+    OWNER = 'OWNER', // Full access (can delete)
+    ORGANIZER = 'ORGANIZER', // Manage hackathon operations
 }
 ```
 
 **Functional Roles:**
+
 - `JUDGE`: Can evaluate submissions
 - `MENTOR`: Can view entries and submissions
 - `PARTICIPANT`: Can create entries and submissions
@@ -189,6 +199,7 @@ When checking if a user has permission, the system checks in this order:
 ### Permission Matching
 
 The system supports:
+
 - Exact match: `workspace:create` matches `workspace:create`
 - Wildcard entity: `workspace:*` matches `workspace:create`, `workspace:read`, etc.
 - Wildcard action: `*:read` matches `workspace:read`, `project:read`, etc.
@@ -200,15 +211,16 @@ User permissions are cached in Redis with key: `rbac:perms:user:{userId}`
 
 - Default TTL: 300 seconds (configurable via `RBAC_CACHE_TTL`)
 - Cache is cleared when:
-  - User roles are attached/detached
-  - User permissions are updated
-  - Role permissions are modified
+    - User roles are attached/detached
+    - User permissions are updated
+    - Role permissions are modified
 
 ## API Endpoints
 
 ### Global Role Management
 
 #### Create Role
+
 ```http
 POST /api/v1/roles
 Authorization: Bearer {token}
@@ -222,18 +234,21 @@ Content-Type: application/json
 ```
 
 #### Get Role
+
 ```http
 GET /api/v1/roles/:id
 Authorization: Bearer {token}
 ```
 
 #### List Roles
+
 ```http
 GET /api/v1/roles/list?page=1&limit=10&sort=-createdAt
 Authorization: Bearer {token}
 ```
 
 #### Update Role
+
 ```http
 PUT /api/v1/roles/:id
 Authorization: Bearer {token}
@@ -246,6 +261,7 @@ Content-Type: application/json
 ```
 
 #### Delete Role
+
 ```http
 DELETE /api/v1/roles/:id
 Authorization: Bearer {token}
@@ -254,12 +270,14 @@ Authorization: Bearer {token}
 ### User Role Management
 
 #### Get User Roles
+
 ```http
 GET /api/v1/roles/user/:userId
 Authorization: Bearer {token}
 ```
 
 #### Attach Role to User
+
 ```http
 POST /api/v1/roles/user/:userId/attach
 Authorization: Bearer {token}
@@ -271,6 +289,7 @@ Content-Type: application/json
 ```
 
 #### Detach Role from User
+
 ```http
 DELETE /api/v1/roles/user/:userId/detach
 Authorization: Bearer {token}
@@ -284,6 +303,7 @@ Content-Type: application/json
 ### Contextual Role Management
 
 #### Assign Workspace Role
+
 ```http
 POST /api/v1/roles/workspace/:workspaceId/assign
 Authorization: Bearer {token}
@@ -296,12 +316,14 @@ Content-Type: application/json
 ```
 
 #### Remove Workspace Role
+
 ```http
 DELETE /api/v1/roles/workspace/:workspaceId/user/:userId
 Authorization: Bearer {token}
 ```
 
 #### Assign Project Role
+
 ```http
 POST /api/v1/roles/project/:projectId/assign
 Authorization: Bearer {token}
@@ -314,6 +336,7 @@ Content-Type: application/json
 ```
 
 #### Remove Project Role
+
 ```http
 DELETE /api/v1/roles/project/:projectId/user/:userId
 Authorization: Bearer {token}
@@ -330,27 +353,30 @@ import checkPermission from '../../middlewares/checkPermission.mdw';
 import Protect from '../../middlewares/checkAuth.mdw';
 
 // Single permission
-router.post('/workspaces', 
-  Protect, 
-  checkPermission('workspace:create'),
-  createWorkspace
+router.post(
+    '/workspaces',
+    Protect,
+    checkPermission('workspace:create'),
+    createWorkspace,
 );
 
 // Multiple permissions (OR logic - any one passes)
-router.delete('/workspaces/:id',
-  Protect,
-  checkPermission(['workspace:delete', 'workspace:manage']),
-  deleteWorkspace
+router.delete(
+    '/workspaces/:id',
+    Protect,
+    checkPermission(['workspace:delete', 'workspace:manage']),
+    deleteWorkspace,
 );
 
 // With ownership check
-router.put('/workspaces/:id',
-  Protect,
-  checkPermission('workspace:update', {
-    ownerParam: 'id',  // Check if user owns the workspace
-    checkOwnership: true
-  }),
-  updateWorkspace
+router.put(
+    '/workspaces/:id',
+    Protect,
+    checkPermission('workspace:update', {
+        ownerParam: 'id', // Check if user owns the workspace
+        checkOwnership: true,
+    }),
+    updateWorkspace,
 );
 ```
 
@@ -361,6 +387,7 @@ checkPermission(permission, options?)
 ```
 
 **Options:**
+
 - `ownerParam`: Parameter name to extract resource owner ID from (params, body, or query)
 - `ownerResolver`: Custom async function to resolve resource owner ID
 - `checkOwnership`: Whether to allow access if user owns the resource (default: `true`)
@@ -370,21 +397,21 @@ checkPermission(permission, options?)
 ```typescript
 // Check ownership from route parameter
 checkPermission('workspace:update', {
-  ownerParam: 'workspaceId'
-})
+    ownerParam: 'workspaceId',
+});
 
 // Custom owner resolver
 checkPermission('project:delete', {
-  ownerResolver: async (req) => {
-    const project = await Project.findById(req.params.projectId);
-    return project?.createdBy?.toString() || null;
-  }
-})
+    ownerResolver: async (req) => {
+        const project = await Project.findById(req.params.projectId);
+        return project?.createdBy?.toString() || null;
+    },
+});
 
 // Disable ownership check
 checkPermission('user:read', {
-  checkOwnership: false
-})
+    checkOwnership: false,
+});
 ```
 
 ## Service Functions
@@ -398,28 +425,28 @@ import permissionService from '../permission/permission.service';
 
 // Check if user has permission
 const hasAccess = await permissionService.hasPermission(
-  user,  // IUserDoc or userId string
-  'workspace:create'
+    user, // IUserDoc or userId string
+    'workspace:create',
 );
 
 // Check with resource context
 const canUpdate = await permissionService.hasPermission(
-  user,
-  'project:update',
-  {
-    resource: projectDoc,
-    resourceType: 'project',
-    checkOwnership: true
-  }
+    user,
+    'project:update',
+    {
+        resource: projectDoc,
+        resourceType: 'project',
+        checkOwnership: true,
+    },
 );
 
 // Check with entity/action object
 const canDelete = await permissionService.hasPermission(
-  user,
-  { entity: 'task', action: 'delete' },
-  {
-    resourceOwnerId: task.createdBy.toString()
-  }
+    user,
+    { entity: 'task', action: 'delete' },
+    {
+        resourceOwnerId: task.createdBy.toString(),
+    },
 );
 ```
 
@@ -447,7 +474,7 @@ import roleService from './role.service';
 
 const result = await roleService.attachRole(user, 'admin');
 if (result.error) {
-  console.error(result.message);
+    console.error(result.message);
 }
 ```
 
@@ -468,17 +495,20 @@ const roles = result.data; // Array of role documents
 
 ```typescript
 import {
-  getWorkspaceMemberRole,
-  getProjectMemberRole,
-  getContextualPermissions,
-  matchPermission
+    getWorkspaceMemberRole,
+    getProjectMemberRole,
+    getContextualPermissions,
+    matchPermission,
 } from './role.util';
 
 // Get user's role in a workspace
 const memberRole = getWorkspaceMemberRole(user, workspace);
 
 // Get permissions for a contextual role
-const perms = getContextualPermissions('workspace', WorkspaceMemberRole.MANAGER);
+const perms = getContextualPermissions(
+    'workspace',
+    WorkspaceMemberRole.MANAGER,
+);
 
 // Check if permission matches (supports wildcards)
 const matches = matchPermission('workspace:create', ['workspace:*']); // true
@@ -493,19 +523,21 @@ const matches = matchPermission('workspace:create', ['workspace:*']); // true
 import checkPermission from '../../middlewares/checkPermission.mdw';
 import Protect from '../../middlewares/checkAuth.mdw';
 
-router.post('/',
-  Protect,
-  checkPermission('workspace:create'),
-  workspaceController.createWorkspace
+router.post(
+    '/',
+    Protect,
+    checkPermission('workspace:create'),
+    workspaceController.createWorkspace,
 );
 
-router.get('/:id',
-  Protect,
-  checkPermission('workspace:read', {
-    ownerParam: 'id',
-    checkOwnership: true
-  }),
-  workspaceController.getWorkspace
+router.get(
+    '/:id',
+    Protect,
+    checkPermission('workspace:read', {
+        ownerParam: 'id',
+        checkOwnership: true,
+    }),
+    workspaceController.getWorkspace,
 );
 ```
 
@@ -516,24 +548,24 @@ router.get('/:id',
 import permissionService from '../permission/permission.service';
 
 async function updateWorkspace(workspaceId: string, userId: string, data: any) {
-  const workspace = await Workspace.findById(workspaceId);
-  
-  // Check permission with resource context
-  const canUpdate = await permissionService.hasPermission(
-    userId,
-    'workspace:update',
-    {
-      resource: workspace,
-      resourceType: 'workspace',
-      checkOwnership: true
+    const workspace = await Workspace.findById(workspaceId);
+
+    // Check permission with resource context
+    const canUpdate = await permissionService.hasPermission(
+        userId,
+        'workspace:update',
+        {
+            resource: workspace,
+            resourceType: 'workspace',
+            checkOwnership: true,
+        },
+    );
+
+    if (!canUpdate) {
+        throw new Error('Insufficient permissions');
     }
-  );
 
-  if (!canUpdate) {
-    throw new Error('Insufficient permissions');
-  }
-
-  // Update workspace...
+    // Update workspace...
 }
 ```
 
@@ -542,27 +574,27 @@ async function updateWorkspace(workspaceId: string, userId: string, data: any) {
 ```typescript
 // In workspace controller
 async function addMember(req: Request, res: Response) {
-  const { workspaceId } = req.params;
-  const { userId, role } = req.body;
+    const { workspaceId } = req.params;
+    const { userId, role } = req.body;
 
-  // Check if requester can manage members
-  const canManage = await permissionService.hasPermission(
-    req.user,
-    'workspace:manage-members',
-    {
-      resource: await Workspace.findById(workspaceId),
-      resourceType: 'workspace'
+    // Check if requester can manage members
+    const canManage = await permissionService.hasPermission(
+        req.user,
+        'workspace:manage-members',
+        {
+            resource: await Workspace.findById(workspaceId),
+            resourceType: 'workspace',
+        },
+    );
+
+    if (!canManage) {
+        return res.status(403).json({ error: 'Forbidden' });
     }
-  );
 
-  if (!canManage) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
+    // Add member with role
+    await workspaceService.addMember(workspaceId, userId, role);
 
-  // Add member with role
-  await workspaceService.addMember(workspaceId, userId, role);
-  
-  res.json({ message: 'Member added successfully' });
+    res.json({ message: 'Member added successfully' });
 }
 ```
 
@@ -571,18 +603,18 @@ async function addMember(req: Request, res: Response) {
 ```typescript
 // Create a new role programmatically
 const roleData = {
-  name: 'project-manager',
-  description: 'Can manage projects and teams',
-  permissions: [
-    'project:create',
-    'project:read',
-    'project:update',
-    'project:manage-members',
-    'team:create',
-    'team:read',
-    'team:update',
-    'task:*'
-  ]
+    name: 'project-manager',
+    description: 'Can manage projects and teams',
+    permissions: [
+        'project:create',
+        'project:read',
+        'project:update',
+        'project:manage-members',
+        'team:create',
+        'team:read',
+        'team:update',
+        'task:*',
+    ],
 };
 
 const result = await roleRepository.createRole(roleData);
@@ -599,10 +631,11 @@ Always use `checkPermission` middleware for route-level protection:
 
 ```typescript
 // ✅ Good
-router.post('/workspaces', 
-  Protect, 
-  checkPermission('workspace:create'),
-  controller.create
+router.post(
+    '/workspaces',
+    Protect,
+    checkPermission('workspace:create'),
+    controller.create,
 );
 
 // ❌ Bad - checking in controller
@@ -617,13 +650,13 @@ When working with resources (workspaces, projects, etc.), always check contextua
 ```typescript
 // ✅ Good - checks contextual role
 const canUpdate = await permissionService.hasPermission(
-  user,
-  'project:update',
-  {
-    resource: project,
-    resourceType: 'project',
-    checkOwnership: true
-  }
+    user,
+    'project:update',
+    {
+        resource: project,
+        resourceType: 'project',
+        checkOwnership: true,
+    },
 );
 
 // ❌ Bad - only checks base role
@@ -643,6 +676,7 @@ await permissionService.clearUserCache(user._id.toString());
 ### 4. Use Wildcards Sparingly
 
 Wildcards (`*:*`, `workspace:*`) should be reserved for:
+
 - Superadmin role
 - Resource owners (contextual)
 - System-level operations
@@ -654,11 +688,11 @@ When assigning permissions to roles, validate they exist:
 ```typescript
 // ✅ Good - validate permissions exist
 const validPermissions = await Permission.find({
-  action: { $in: roleData.permissions }
+    action: { $in: roleData.permissions },
 });
 
 if (validPermissions.length !== roleData.permissions.length) {
-  throw new Error('Invalid permissions');
+    throw new Error('Invalid permissions');
 }
 ```
 
@@ -684,17 +718,18 @@ Return appropriate HTTP status codes:
 // 401 - Unauthorized (not authenticated)
 // 403 - Forbidden (authenticated but no permission)
 if (!user) {
-  return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized' });
 }
 
 if (!hasPermission) {
-  return res.status(403).json({ error: 'Forbidden' });
+    return res.status(403).json({ error: 'Forbidden' });
 }
 ```
 
 ### 8. Test Permission Scenarios
 
 Test various permission scenarios:
+
 - Base role permissions
 - Contextual role permissions
 - Resource ownership
@@ -706,29 +741,32 @@ Test various permission scenarios:
 ### Permission Not Working
 
 1. **Check cache**: Clear user permission cache
-   ```typescript
-   await permissionService.clearUserCache(userId);
-   ```
+
+    ```typescript
+    await permissionService.clearUserCache(userId);
+    ```
 
 2. **Verify role assignment**: Check if user has the role
-   ```typescript
-   const roles = await roleService.getUserRoles(userId);
-   ```
+
+    ```typescript
+    const roles = await roleService.getUserRoles(userId);
+    ```
 
 3. **Check permission format**: Ensure format is `entity:action` (lowercase)
-   ```typescript
-   // ✅ Correct
-   'workspace:create'
-   
-   // ❌ Wrong
-   'Workspace:Create'
-   'workspace_create'
-   ```
+
+    ```typescript
+    // ✅ Correct
+    'workspace:create';
+
+    // ❌ Wrong
+    'Workspace:Create';
+    'workspace_create';
+    ```
 
 4. **Verify contextual role**: Check if user is a member of the resource
-   ```typescript
-   const memberRole = getWorkspaceMemberRole(user, workspace);
-   ```
+    ```typescript
+    const memberRole = getWorkspaceMemberRole(user, workspace);
+    ```
 
 ### Cache Issues
 
