@@ -10,8 +10,8 @@ import type {
     VerifyOtpDTO,
 } from '../../dtos/auth.dto';
 
-import { IAPIResponse } from '../types';
-import type AxiosService from '../core/axios';
+import { IAPIResponse } from '../_base/types';
+import type AxiosService from '../_base/axios';
 import {
     URL_ACTIVATE,
     URL_CHANGE_PASSWORD,

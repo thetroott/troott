@@ -1,7 +1,8 @@
-import AxiosService from '../core/axios'
-import AuthAPI from './auth'
-import WorkspaceAPI from './sermon'
-import UserAPI from './user'
+import AxiosService from './axios'
+import AuthAPI from '../authentication/auth'
+import WorkspaceAPI from '../core/catalog/catalog'
+import UserAPI from '../users/guest/user'
+
 
 /**
  * Internal API client
