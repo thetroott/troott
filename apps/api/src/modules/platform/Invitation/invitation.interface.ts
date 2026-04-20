@@ -4,7 +4,7 @@ import { Document, Types } from 'mongoose';
 export type ObjectId = Types.ObjectId;
 
 export interface IInvitationDoc extends Document {
-    inviteType: InvitationType; // as a mentor/team
+    inviteType: InvitationType;
     invitedBy: ObjectId;
     resourceId: ObjectId;
 
@@ -33,16 +33,10 @@ export interface IInvitationDoc extends Document {
 //ENUMS
 
 export enum InvitationType {
-    TEAM = 'teamInvite',
-    GUEST = 'guestInvite',
     ADMIN = 'adminInvite',
-    TALENT = 'talentInvite',
-    BUSINESS = 'businessInvite',
-    PROJECT = 'projectInvite',
-    WORKSPACE = 'workspaceInvite',
-    SQUAD = 'squadInvite',
-    HACKATHON = 'hackathonInvite',
-    ENTRY = 'entryInvite',
+    LISTENER = 'listenerInvite',
+    MINISTER = 'ministerInvite',
+    CREATOR = 'creatorInvite',
 }
 
 export enum InvitationStatus {

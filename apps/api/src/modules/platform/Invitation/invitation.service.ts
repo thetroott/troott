@@ -8,7 +8,7 @@ import {
 import invitationRepository from './invitation.repository';
 import Invites from './invitation.model';
 import { dateToday, IDateToday, Random } from '@btffamily/pacitude';
-import systemService from '../../../services/system.service';
+import systemService from '../../internals/system/system.service';
 import mongoose from 'mongoose';
 
 /**

@@ -1,5 +1,5 @@
 import Invites from './invitation.model';
-import { IResult } from '../../../utils/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces/interfaces.util';
 import { IInvitationDoc } from './invitation.interface';
 import { CreateInvitationDTO } from './invitation.dto';
 
