@@ -13,7 +13,7 @@ import {
 import { InvitationType } from '../../platform/Invitation/invitation.interface';
 import { InviteTokenDTO } from '../../platform/Invitation/invitation.dto';
 import invitationService from '../../platform/Invitation/invitation.service';
-import emailService from '../../../services/email.service';
+import emailService from '../../notifications/email/email.service';
 import { EMAIL_CONFIG } from '../../../configs/email.config';
 import userRepository from '../user/user.repository';
 import userService from '../user/user.service';
@@ -31,6 +31,7 @@ import roleService from '../../authentication/role/role.service';
 import PermissionService from '../../authentication/permission/permission.service';
 import { AdminDepartmentEnum, CompanyRoleEnum } from './admin.interface';
 import { Types } from 'mongoose';
+import { UserType as UserTypeCode } from '../user/user.interface';
 
 /**
  * @name inviteAdmin
@@ -60,7 +61,7 @@ export const inviteAdmin: RequestHandler = asyncHandler(
             invitedBy: userId,
             inviteeEmail: email.trim().toLowerCase(),
             inviteType: InvitationType.ADMIN,
-            resourceId: userId, // Use userId as default resourceId if not provided
+            resourceId: resourceId || userId,
         } as any);
 
         if (invitationResult.error) {
@@ -156,9 +157,7 @@ export const createAdmin: RequestHandler = asyncHandler(
         const result = await adminService.createAdmin(data);
 
         if (result.error) {
-            return next(
-                new ErrorResponse(result.message, result.code, []),
-            );
+            return next(new ErrorResponse(result.message, result.code, []));
         }
 
         res.status(201).json({
@@ -179,7 +178,8 @@ export const createAdmin: RequestHandler = asyncHandler(
  */
 export const getAdmin: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { id } = req.params;
+        const { id: idParam } = req.params;
+        const id = String(Array.isArray(idParam) ? idParam[0] : idParam);
         if (!id)
             return next(new ErrorResponse('Admin ID is required', 400, []));
 
@@ -279,10 +279,7 @@ export const getAdmins: RequestHandler = asyncHandler(
         }
 
         // Get admins from service
-        const result = await adminService.getAdmins(
-            filters as any,
-            options,
-        );
+        const result = await adminService.getAdmins(filters as any, options);
 
         if (result.error) {
             return next(
@@ -290,15 +287,16 @@ export const getAdmins: RequestHandler = asyncHandler(
             );
         }
 
-        // Prepare response data
+        const pag = (result as { pagination?: { count: number; total: number } })
+            .pagination;
+
         const responseData = {
             data: result.data,
-            pagination: result.pagination,
-            count: result.pagination?.count,
-            total: result.pagination?.total,
+            pagination: pag,
+            count: pag?.count,
+            total: pag?.total,
         };
 
-        // Cache the result
         await redisWrapper.keepData(
             { key: cacheKey, value: responseData },
             cacheTTL,
@@ -308,9 +306,9 @@ export const getAdmins: RequestHandler = asyncHandler(
             error: false,
             errors: [],
             data: result.data,
-            pagination: result.pagination,
-            count: result.pagination?.count,
-            total: result.pagination?.total,
+            pagination: pag,
+            count: pag?.count,
+            total: pag?.total,
             message: result.message,
             status: 200,
         });
@@ -373,6 +371,51 @@ export const getAdminProfile: RequestHandler = asyncHandler(
 );
 
 /**
+ * @name updateCurrentAdmin
+ * @description Updates the authenticated admin’s own profile
+ * @route PUT /admin
+ * @access Private
+ */
+export const updateCurrentAdmin: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+
+        const data: UpdateAdminDTO = req.body;
+        const result = await adminService.updateAdminByUser(
+            String(userId),
+            data,
+        );
+
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 500, []),
+            );
+        }
+
+        try {
+            await redisWrapper.deleteData(`admin:profile:${userId}`);
+            const admin = result.data as { _id?: { toString: () => string } };
+            if (admin?._id) {
+                await redisWrapper.deleteData(
+                    `admin:${String(admin._id)}`,
+                );
+            }
+        } catch (cacheError) {
+            console.error('Cache invalidation failed:', cacheError);
+        }
+
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+/**
  * @name updateAdmin
  * @description Updates admin profile information
  * @route PUT /admin/:id
@@ -383,7 +426,8 @@ export const updateAdmin: RequestHandler = asyncHandler(
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const { id } = req.params;
+        const { id: idParam } = req.params;
+        const id = String(Array.isArray(idParam) ? idParam[0] : idParam);
         if (!id)
             return next(new ErrorResponse('Admin ID is required', 400, []));
 
@@ -426,7 +470,8 @@ export const deleteAdmin: RequestHandler = asyncHandler(
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const { id } = req.params;
+        const { id: idParam } = req.params;
+        const id = String(Array.isArray(idParam) ? idParam[0] : idParam);
         if (!id)
             return next(new ErrorResponse('Admin ID is required', 400, []));
 
@@ -463,11 +508,7 @@ export const deleteAdmin: RequestHandler = asyncHandler(
  */
 export const acceptAdminInvitation: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const {
-            token,
-            email,
-            password,
-        }: AcceptAdminInvitationDTO = req.body;
+        const { token, email, password }: AcceptAdminInvitationDTO = req.body;
 
         // Validate input
         if (!token || !email || !password) {
@@ -546,24 +587,23 @@ export const acceptAdminInvitation: RequestHandler = asyncHandler(
             const createUserResult = await userRepository.createUser(payload);
             if (createUserResult.error) {
                 return next(
-                    new ErrorResponse(
-                        createUserResult.message,
-                        500,
-                        [],
-                    ),
+                    new ErrorResponse(createUserResult.message, 500, []),
                 );
             }
 
             user = createUserResult.data as IUserDoc;
 
-            // Update user type to ADMIN
-            await authService.updateUserType(user, UserType.ADMIN);
+            // Update user type to ADMIN (auth service uses @/utils UserType)
+            await authService.updateUserType(user, UserTypeCode.ADMIN);
 
             // Encrypt password
             await authService.encryptUserPassword(user, password);
 
             // Attach ADMIN role
-            const attachRole = await roleService.attachRole(user, UserType.ADMIN);
+            const attachRole = await roleService.attachRole(
+                user,
+                UserType.ADMIN,
+            );
             if (!attachRole.error && attachRole.data) {
                 let updatedUser = attachRole.data as IUserDoc;
 
@@ -627,9 +667,7 @@ export const setAdminPassword: RequestHandler = asyncHandler(
         const { password }: SetAdminPasswordDTO = req.body;
 
         if (!password) {
-            return next(
-                new ErrorResponse('Password is required', 400, []),
-            );
+            return next(new ErrorResponse('Password is required', 400, []));
         }
 
         // Validate password
@@ -655,7 +693,11 @@ export const setAdminPassword: RequestHandler = asyncHandler(
         // Check if user is an admin
         if (user.userType !== UserType.ADMIN) {
             return next(
-                new ErrorResponse('This endpoint is only for admin users', 403, []),
+                new ErrorResponse(
+                    'This endpoint is only for admin users',
+                    403,
+                    [],
+                ),
             );
         }
 
@@ -702,11 +744,7 @@ export const revokeAdminInvitation: RequestHandler = asyncHandler(
 
         if (revokeResult.error) {
             return next(
-                new ErrorResponse(
-                    revokeResult.message,
-                    revokeResult.code,
-                    [],
-                ),
+                new ErrorResponse(revokeResult.message, revokeResult.code, []),
             );
         }
 

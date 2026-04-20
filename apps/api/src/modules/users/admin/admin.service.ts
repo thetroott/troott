@@ -8,12 +8,13 @@ import {
 } from './admin.interface';
 import { CreateAdminDTO, UpdateAdminDTO } from './admin.dto';
 import adminRepository from './admin.repository';
-import { IResult } from '../../../utils/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces/interfaces.util';
 import { IUserDoc, UserType } from '../user/user.interface';
-import { genSlug } from '../../../utils/helpers.util';
 import { genUserCode } from '../../../utils/code.util';
 import roleService from '../../authentication/role/role.service';
 import PermissionService from '../../authentication/permission/permission.service';
+import { generateRandomChars, genSlug } from '@/utils/helpers.util';
+import SystemService from '../../internals/system/system.service';
 
 type ObjectId = Types.ObjectId;
 
@@ -63,7 +64,14 @@ class AdminService {
             return result;
         }
 
-        if (!firstName || !lastName || !email || !adminType || !department || !position) {
+        if (
+            !firstName ||
+            !lastName ||
+            !email ||
+            !adminType ||
+            !department ||
+            !position
+        ) {
             result.error = true;
             result.code = 400;
             result.message =
@@ -75,7 +83,7 @@ class AdminService {
         const adminExits = await adminRepository.findAdminByUser(
             String(user._id || user.id),
         );
-        if (adminExits.error === false && adminExits.data) {
+        if (!adminExits.error && adminExits.data) {
             result.error = true;
             result.code = 400;
             result.message = 'Admin profile already exists for this user';
@@ -156,8 +164,7 @@ class AdminService {
         if (createResult.error || !createResult.data) {
             result.error = true;
             result.code = 500;
-            result.message =
-                createResult.message;
+            result.message = createResult.message;
             return result;
         }
 
@@ -260,10 +267,15 @@ class AdminService {
             return result;
         }
 
-        result.data = adminsResult.data;
-        result.pagination = adminsResult.pagination;
-        result.pagination!.count = adminsResult.pagination?.count || 0;
-        result.pagination!.total = adminsResult.pagination?.total || 0;
+        const r = adminsResult as any;
+        result.data = r.data;
+        if (r.pagination) {
+            (result as any).pagination = {
+                ...r.pagination,
+                count: r.pagination?.count ?? 0,
+                total: r.pagination?.total ?? 0,
+            };
+        }
         result.message = 'Admins retrieved successfully';
         return result;
     }
@@ -296,6 +308,28 @@ class AdminService {
         result.data = adminResult.data;
         result.message = 'Admin profile retrieved successfully';
         return result;
+    }
+
+    /**
+     * @name updateAdminByUser
+     * @description Updates the admin profile for the given user (current session).
+     */
+    public async updateAdminByUser(
+        userId: string,
+        data: UpdateAdminDTO,
+    ): Promise<IResult> {
+        const byUser = await adminRepository.findAdminByUser(userId);
+        if (byUser.error || !byUser.data) {
+            return {
+                error: true,
+                code: 404,
+                message: 'Admin profile not found',
+                data: {},
+            };
+        }
+        const admin = byUser.data as IAdminDoc;
+        const id = String(admin._id);
+        return this.updateAdmin(id, data);
     }
 
     /**
@@ -399,6 +433,190 @@ class AdminService {
         result.message = 'Admin profile deleted successfully';
         result.data = deleteResult.data;
         return result;
+    }
+
+    // [MIGRATION-REVIEW] Methods merged from flat services/admin.service.ts
+
+    public async updateAdminProfile(
+        id: string,
+        data: Partial<IAdminDoc>,
+    ): Promise<IAdminDoc> {
+        const updatedAdmin = await adminRepository.updateAdmin(id, data);
+        if (updatedAdmin.error || !updatedAdmin.data) {
+            throw new Error('Admin profile not found');
+        }
+        return updatedAdmin.data as IAdminDoc;
+    }
+
+    public async generateAPIKey(adminId: string): Promise<string> {
+        const findResult = await adminRepository.findAdmin(adminId);
+        if (findResult.error || !findResult.data) {
+            throw new Error('admin not found');
+        }
+        const apiKey = generateRandomChars(52);
+        await adminRepository.updateAdmin(adminId, {
+            $push: {
+                apiKeys: {
+                    key: apiKey,
+                    createdAt: new Date(),
+                    lastUsed: new Date(),
+                },
+            },
+        } as any);
+        return apiKey;
+    }
+
+    public async revokeAPIKey(adminId: string, keyId: string): Promise<void> {
+        const findResult = await adminRepository.findAdmin(adminId);
+        if (findResult.error || !findResult.data) {
+            throw new Error('admin not found');
+        }
+        await adminRepository.updateAdmin(adminId, {
+            $pull: { apiKeys: { key: keyId } },
+        } as any);
+    }
+
+    public async encryptApiKeys(
+        admin: IAdminDoc,
+        apikey: string,
+    ): Promise<boolean> {
+        try {
+            const encrypted = await SystemService.encryptData({
+                payload: apikey,
+                password: admin.email,
+                separator: '-',
+            });
+            if (encrypted) {
+                if (!admin.apiKeys) {
+                    admin.apiKeys = [];
+                }
+                admin.apiKeys.push({
+                    key: encrypted,
+                    createdAt: new Date(),
+                    lastUsed: new Date(),
+                });
+                await (admin as any).save();
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.error('Error encrypting API key:', error);
+            return false;
+        }
+    }
+
+    public async decryptApiKeys(
+        admin: IAdminDoc,
+        keyIndex?: number,
+    ): Promise<string | null> {
+        try {
+            if (!admin.apiKeys || admin.apiKeys.length === 0) {
+                return null;
+            }
+            const targetKey =
+                typeof keyIndex === 'number'
+                    ? admin.apiKeys[keyIndex]
+                    : admin.apiKeys[admin.apiKeys.length - 1];
+            if (!targetKey) {
+                return null;
+            }
+            const decrypted = await SystemService.decryptData({
+                password: admin.email,
+                payload: targetKey.key,
+                separator: '-',
+            });
+            return decrypted.data?.toString() || null;
+        } catch (error) {
+            console.error('Error decrypting API key:', error);
+            return null;
+        }
+    }
+
+    public async manageIPWhitelist(
+        adminId: string,
+        ips: string[],
+    ): Promise<void> {
+        const findResult = await adminRepository.findAdmin(adminId);
+        if (findResult.error || !findResult.data) {
+            throw new Error('Admin not found');
+        }
+        await adminRepository.updateAdmin(adminId, {
+            $set: { ipWhitelist: ips },
+        } as any);
+    }
+
+    public async recordAction(
+        adminId: string,
+        action: string,
+        targetId: string,
+    ): Promise<void> {
+        const findResult = await adminRepository.findAdmin(adminId);
+        if (findResult.error || !findResult.data) {
+            throw new Error('admin not found');
+        }
+        await adminRepository.updateAdmin(adminId, {
+            $push: {
+                actionsTaken: { action, targetId, timestamp: new Date() },
+            },
+        } as any);
+    }
+
+    public async moderateContent(
+        adminId: string,
+        contentId: string,
+    ): Promise<void> {
+        const findResult = await adminRepository.findAdmin(adminId);
+        if (findResult.error || !findResult.data) {
+            throw new Error('Admin not found');
+        }
+        await adminRepository.updateAdmin(adminId, {
+            $push: { moderatedContent: contentId },
+        } as any);
+        await this.recordAction(
+            adminId,
+            'content_moderation',
+            contentId.toString(),
+        );
+    }
+
+    public async updatePermissions(
+        adminId: string,
+        permissions: Array<string>,
+    ): Promise<void> {
+        const findResult = await adminRepository.findAdmin(adminId);
+        if (findResult.error || !findResult.data) {
+            throw new Error('Admin not found');
+        }
+        await adminRepository.updateAdmin(adminId, {
+            $set: { permissions },
+        } as any);
+        await this.recordAction(
+            adminId,
+            'permissions_updated',
+            `Updated permissions: ${permissions.join(', ')}`,
+        );
+    }
+
+    public async updateAccessLevel(
+        adminId: string,
+        level: number,
+    ): Promise<void> {
+        const findResult = await adminRepository.findAdmin(adminId);
+        if (findResult.error || !findResult.data) {
+            throw new Error('Admin not found');
+        }
+        await adminRepository.updateAdmin(adminId, {
+            $set: { accessLevel: level },
+        } as any);
+        await this.recordAction(
+            adminId,
+            'access_level_updated',
+            `Updated access level to: ${level}`,
+        );
+    }
+
+    public async getAdminProfile(userId: string): Promise<IResult> {
+        return this.getAdminByUser(userId);
     }
 }
 

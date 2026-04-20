@@ -1,5 +1,10 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { IAdminDoc, AdminDepartmentEnum, AdminTypeEnum, CompanyRoleEnum } from './admin.interface';
+import {
+    IAdminDoc,
+    AdminDepartmentEnum,
+    AdminTypeEnum,
+    CompanyRoleEnum,
+} from './admin.interface';
 import { DbModels } from '../../../utils/enums.util';
 
 /**
