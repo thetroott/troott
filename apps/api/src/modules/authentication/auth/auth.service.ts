@@ -1,28 +1,26 @@
 import { Request } from 'express';
-import { IResult } from '../../../utils/interfaces.util';
+import { UAParser } from 'ua-parser-js';
+import { ILogin, IResult } from '../../../utils/interfaces.util';
+import { LoginMethod, type IUserDoc } from '../../users/user/user.interface';
 import {
     Random,
     arrayIncludes,
     dateToday,
     strIncludesEs6,
 } from '@btffamily/pacitude';
-import SystemService from '../../../services/system.service';
-
+import SystemService from '../../internals/system/system.service';
+import userRepository from '../../users/user/user.repository';
+import { OtpType, UserType } from '../../users/user/user.interface';
 import {
     LoginDTO,
     MatchEncryptedPasswordDTO,
     RegisterUserDTO,
-    VerifyOtpDTO,
+    verifyOtpDTO,
 } from './auth.dto';
 import User from '../../users/user/user.model';
-import userRepository from '../../users/user/user.repository';
+import Role from '../role/role.model';
+import { detectPlatform } from '../../../utils/helpers.util';
 import ErrorResponse from '../../../utils/error.util';
-import {
-    IUserDoc,
-    LoginMethod,
-    OtpType,
-    UserType,
-} from '../../users/user/user.interface';
 
 class AuthService {
     public result: IResult;
@@ -39,24 +37,40 @@ class AuthService {
      * @param {RegisterUserDTO} data - The user registration data transfer object containing the form input.
      * @returns {Promise<IResult>} A result object indicating success or failure with an appropriate message.
      */
-
     public async validateRegister(data: RegisterUserDTO): Promise<IResult> {
+        const allowedUsers = [
+            UserType.LISTENER,
+            UserType.CREATOR,
+            UserType.MINISTER,
+        ];
+
         let result: IResult = {
             error: false,
             message: '',
             code: 200,
             data: {},
         };
-       
 
         if (!data.email) {
             result.error = true;
             result.message = 'Email is required';
-            result.code = 400;
+        } else if (!data.firstName) {
+            result.error = true;
+            result.message = 'First name is required';
+        } else if (!data.lastName) {
+            result.error = true;
+            result.message = 'Last name is required';
         } else if (!data.password) {
             result.error = true;
             result.message = 'Password is required';
-            result.code = 400;
+        } else if (
+            !data.userType ||
+            !arrayIncludes(allowedUsers, data.userType)
+        ) {
+            result.error = true;
+            result.message = `Invalid user type value. choose from ${allowedUsers.join(
+                ',',
+            )}`;
         } else {
             result.error = false;
             result.message = '';
@@ -75,18 +89,17 @@ class AuthService {
             error: false,
             message: '',
             code: 200,
-            data: {},
+            data: null,
         };
+
         const { email, password } = data;
 
         if (!email) {
             result.error = true;
             result.message = 'email is required';
-            result.code = 400;
         } else if (!password) {
             result.error = true;
             result.message = 'password is required';
-            result.code = 400;
         } else {
             const mailCheck = await this.checkEmail(email);
 
@@ -108,19 +121,18 @@ class AuthService {
      * @returns
      */
     public validatePhoneNumber(data: { phone: string }): boolean {
-        let result: boolean = false;
         const digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        let result: boolean = false;
 
         const { phone } = data;
 
         const split = phone.substring(0, 3).split('');
 
         if (
+            split.length >= 3 &&
             split[0] === '0' &&
-            split[1] &&
-            split[2] &&
-            arrayIncludes(digits, split[1]) &&
-            arrayIncludes(digits, split[2])
+            arrayIncludes(digits, split[1]!) &&
+            arrayIncludes(digits, split[2]!)
         ) {
             result = true;
         }
@@ -131,7 +143,7 @@ class AuthService {
     /**
      * @name checkEmail
      * @description validates against invalid email
-     * @param email - The email to check with .africa bypassed
+     * @param email - The email to check
      *
      * @returns {boolean} true/false to determine the state of the email
      */
@@ -167,18 +179,42 @@ class AuthService {
     }
 
     /**
+     * @name validateLoginCredentials
+     * @param data
+     */
+    public async validateLoginCredentials(data: ILogin): Promise<IResult> {
+        if (!data) {
+            this.result.error = true;
+            this.result.message = 'login credentials are required';
+        } else {
+            if (!data.email) {
+                this.result.error = true;
+                this.result.message = 'email is required';
+            } else if (!data.password) {
+                this.result.error = true;
+                this.result.message = 'password is required';
+            } else {
+                this.result.error = false;
+                this.result.message = '';
+            }
+        }
+
+        return this.result;
+    }
+
+    /**
      * @name validatUserType
      * @param type
      * @returns
      */
     public async validatUserType(type: string): Promise<boolean> {
         let flag = false;
-
         const list = [
             UserType.USER,
+            UserType.LISTENER,
+            UserType.CREATOR,
+            UserType.MINISTER,
             UserType.ADMIN,
-            UserType.BUSINESS,
-            UserType.TALENT,
         ];
 
         if (arrayIncludes(list, type)) {
@@ -258,7 +294,7 @@ class AuthService {
     }
 
     /**
-     * @name updateUserType
+     * @name updatUserType
      * @param user
      * @param userType
      */
@@ -266,20 +302,7 @@ class AuthService {
         user: IUserDoc,
         userType: UserType,
     ): Promise<void> {
-        user.isAdmin = false;
-        user.isBusiness = false;
-        user.isTalent = false;
-
-        if (userType === UserType.ADMIN) {
-            user.isAdmin = true;
-        } else if (userType === UserType.BUSINESS) {
-            user.isBusiness = true;
-        } else if (userType === UserType.TALENT) {
-            user.isTalent = true;
-        }
-
         user.userType = userType;
-
         await user.save();
     }
 
@@ -290,9 +313,11 @@ class AuthService {
      */
     public async updateLastLogin(user: IUserDoc): Promise<void> {
         const today = dateToday(new Date());
-        user.login.last = today.ISO;
-        user.login.method = LoginMethod.EMAIL;
-
+        user.login = {
+            ...user.login,
+            last: today.ISO,
+            method: user.login?.method ?? LoginMethod.EMAIL,
+        };
         await user.save();
     }
 
@@ -321,42 +346,25 @@ class AuthService {
     }
 
     /**
-     * @name suspendAccount
-     * @param user
+     * Check if user account is locked
+     * @param user - User document
+     * @returns boolean
      */
-    public async suspendAccount(user: IUserDoc): Promise<void> {
-        user.isActive = false;
-        user.isActivated = false;
-        user.isLocked = true;
-        user.isSuspended = true;
-        await user.save();
-    }
-
-    /**
-     * @name resetLoginLimit
-     * @param user
-     */
-    public async resetLoginLimit(user: IUserDoc): Promise<void> {
-        user.loginLimit = 0;
-        await user.save();
-    }
-
-    /**
-     * @name checkLockedStatus
-     * @param user
-     * @returns
-     */
-    public async checkLockedStatus(user: IUserDoc): Promise<boolean> {
+    async checkLockedStatus(user: IUserDoc): Promise<boolean> {
         if (!user.isLocked || !user.lockedUntil) {
             return false;
         }
 
-        const now = new Date();
-        if (user.lockedUntil && user.lockedUntil > now) {
-            return true;
+        // If lock duration has passed, unlock the account
+        if (new Date() > user.lockedUntil) {
+            user.isLocked = false;
+            user.lockedUntil = null;
+            user.loginLimit = 0;
+            await user.save();
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -379,23 +387,39 @@ class AuthService {
     }
 
     /**
+     * Update user login information
+     * @param user - User document
+     * @param req - Express Request object
+     */
+    async updateLoginInfo(user: IUserDoc, req: Request): Promise<void> {
+        const userAgent = req.headers['user-agent'];
+        const parser = new UAParser(userAgent);
+        const device = parser.getDevice();
+        const os = parser.getOS();
+        const browser = parser.getBrowser();
+
+        user.login = {
+            ...user.login,
+            last: new Date().toISOString(),
+            method: user.login?.method ?? LoginMethod.EMAIL,
+        };
+        await user.save();
+    }
+
+    /**
      * @name generateOTPCode
-     * @param user User (plain object or doc) with at least _id
-     * @returns OTP code string
+     * @param user
+     * @returns
      */
     public async generateOTPCode(
         user: IUserDoc,
         type: OtpType,
     ): Promise<string> {
-        const userDoc = await User.findById(user._id ?? user.id);
-        if (!userDoc) {
-            throw new Error('User not found');
-        }
         const gencode = Random.randomNum(6);
-        userDoc.Otp = gencode.toString();
-        userDoc.OtpExpiry = Date.now() + 15 * 60 * 1000;
-        userDoc.otpType = type;
-        await userDoc.save();
+        user.Otp = gencode.toString();
+        user.OtpExpiry = Date.now() + 15 * 60 * 1000;
+        user.otpType = type;
+        await user.save();
 
         return gencode.toString();
     }
@@ -422,7 +446,7 @@ class AuthService {
      * @param code
      * @returns
      */
-    public async verifyOTP(data: VerifyOtpDTO): Promise<IResult> {
+    public async verifyOTP(data: verifyOtpDTO): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -482,14 +506,19 @@ class AuthService {
     ): Promise<boolean> {
         let result: boolean = false;
 
+        console.log('Encrypting password for:', user.email);
+
         const encrypted = await SystemService.encryptData({
             payload: password,
             password: user.email,
             separator: '-',
         });
 
+        console.log('Encrypted Password:', encrypted);
+
         if (encrypted) {
             user.password = encrypted;
+            //await user.save();
 
             result = true;
         }
@@ -504,11 +533,16 @@ class AuthService {
     public async decryptUserPassword(user: IUserDoc): Promise<string | null> {
         let result: string | null = null;
 
+        console.log('Decrypting password for:', user.email);
+        console.log('Stored Encrypted Password:', user.password);
+
         const decrypted = await SystemService.decryptData({
             password: user.email,
             payload: user.password,
             separator: '-',
         });
+
+        console.log('Decrypted Password:', decrypted.data.toString());
 
         result = decrypted.data.toString();
 
@@ -524,7 +558,6 @@ class AuthService {
         data: MatchEncryptedPasswordDTO,
     ): Promise<boolean> {
         let result: boolean = false;
-
         const { hash, user } = data;
 
         const hashDecrypt = await SystemService.encryptData({
@@ -557,17 +590,20 @@ class AuthService {
         };
         const { req, isAdmin } = data;
 
-        const user = await userRepository.findById((req as any).user._id, true);
+        const userRes = await userRepository.findById(
+            (req as any).user._id,
+            true,
+        );
+        const user = userRes?.data as IUserDoc | undefined;
 
         if (!user) {
             result.error = true;
             result.message = `authorized  - user details not found`;
             result.code = 401;
         } else if (
-            user &&
             isAdmin === false &&
-            ((user as any).userType === UserType.ADMIN ||
-                (user as any).userType === UserType.SUPERADMIN)
+            (user.userType === UserType.ADMIN ||
+                user.userType === UserType.SUPERADMIN)
         ) {
             result.error = true;
             result.message = `user is not authorized to access this route`;
@@ -582,6 +618,26 @@ class AuthService {
         return result;
     }
 
+    /**
+     * @name attachRole
+     * @param user
+     * @param role
+     */
+    public async attachRole(user: IUserDoc, role: string): Promise<void> {
+        const userRole = await Role.findOne({ name: role });
+
+        if (userRole) {
+            const roles = user.roles ?? [];
+            roles.push(userRole);
+            user.roles = roles;
+            userRole.users = [...(userRole.users || []), user._id];
+            await user.save();
+            await userRole.save();
+            return;
+        }
+
+        throw new ErrorResponse(`Role ${role} does not exist.`, 400, []);
+    }
 }
 
 export default new AuthService();
