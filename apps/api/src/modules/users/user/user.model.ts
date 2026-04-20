@@ -7,8 +7,8 @@ import {
     PasswordType,
     UserType,
 } from './user.interface';
-import { DbModels } from '../../../utils/enums.util';
-import authService from '../../authentication/auth/auth.service';
+import { DbModels } from '@/utils/enums.util';
+import authService from '@/modules/authentication/auth/auth.service';
 
 const UserSchema = new Schema<IUserDoc>(
     {
@@ -87,8 +87,6 @@ const UserSchema = new Schema<IUserDoc>(
         // Role Flags
         isSuper: { type: Boolean, default: false },
         isAdmin: { type: Boolean, default: false },
-        isBusiness: { type: Boolean, default: false },
-        isTalent: { type: Boolean, default: false },
         isUser: { type: Boolean, default: true },
 
         // Status Flags

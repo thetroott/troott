@@ -1,9 +1,10 @@
 import { FilterQuery } from 'mongoose';
 import User from './user.model';
 import { IUserDoc } from './user.interface';
-import RepositoryService from '../../../services/repository.service';
+import RepositoryService from '../../internals/repository/repository.service';
 import { IResult } from '../../../utils/interfaces.util';
-import tokenService from '../../../services/token.service';
+import tokenService from '../../internals/token/token.service';
+import { OAuthProvider } from '../../authentication/auth/oauth.enums';
 
 /**
  * User Repository
@@ -111,6 +112,21 @@ class UserRepository extends RepositoryService<IUserDoc> {
         }
 
         return result;
+    }
+
+    // [MIGRATION-REVIEW] Methods merged from flat repositories/user.repository.ts
+
+    public async findByEmail(email: string): Promise<IResult> {
+        return this.findOne({ email });
+    }
+
+    public async findUserBySocialId(
+        provider: OAuthProvider,
+        socialId: string,
+    ): Promise<IUserDoc | null> {
+        const idField = `${provider}Id`;
+        const query = { [idField]: socialId };
+        return await this.model.findOne(query);
     }
 }
 

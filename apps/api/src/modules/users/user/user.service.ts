@@ -10,33 +10,26 @@ import { IResult } from '../../../utils/interfaces.util';
 import {
     createUserDTO,
     createUserProfileDTO,
+    createSocialUserDTO,
     IBulkUser,
     EditUserDTO,
+    IPassportProfileDTO,
 } from './user.dto';
 import User from './user.model';
 import userRepository from './user.repository';
-import talentService from '../talent/talent.service';
-import talentRepository from '../talent/talent.repository';
-import businessRepository from '../business/business.repository';
-import { GenderType } from '../talent/talent.interface';
-import { BusinessType, VerificationType } from '../business/business.interface';
-import {
-    OnboardUserTypeDTO,
-    OnboardBasicInfoDTO,
-    OnboardTalentInfoDTO,
-    OnboardBusinessInfoDTO,
-    OnboardUserInfoDTO,
-} from '../../authentication/auth/auth.dto';
 
 import authService from '../../authentication/auth/auth.service';
 import PermissionService from '../../authentication/permission/permission.service';
 import { genSlug } from '../../../utils/helpers.util';
+import { generateRandomChars } from '../../../utils/helpers.util';
+import { OAuthProvider } from '../../authentication/auth/oauth.enums';
+import { SocialIdKey } from '../../../utils/types.util';
 import { genUserCode } from '../../../utils/code.util';
 import storageService from '../../platform/storage/storage.service';
 import { IFile } from '../../../utils/interfaces.util';
 import roleService from '@/modules/authentication/role/role.service';
-import tokenService from '../../../services/token.service';
-import emailService from '../../../services/email.service';
+import emailService from '../../notifications/email/email.service';
+import preferenceService from '../../core/preference/preference.service';
 
 type ObjectId = Types.ObjectId;
 
@@ -67,7 +60,7 @@ class UserService {
         let finalPasswordType = passwordType;
         let creatorId = createdBy;
 
-        // TALENT or BUSINESS: Created by self
+        // Self-created listener-style accounts use USER type
         if (userType === UserType.USER) {
             finalPasswordType = PasswordType.USERGENERATED;
         }
@@ -118,7 +111,7 @@ class UserService {
             user = updateResult.data as IUserDoc;
         }
 
-        await authService.updateUserType(user, userType as UserType);
+        await authService.updateUserType(user, userType);
 
         await authService.encryptUserPassword(user, password);
 
@@ -139,11 +132,10 @@ class UserService {
         }
 
         await user.save();
-        
+
         return user;
     }
 
- 
     /**
      * @name createBulkUsers
      * @param data - Array of IBulkUser objects
@@ -199,22 +191,30 @@ class UserService {
                                         user,
                                         bulk.userType,
                                     );
-                                if (!roleAttachResult.error && roleAttachResult.data) {
-                                    let updatedUser = roleAttachResult.data as IUserDoc;
-                                    const permResult = await PermissionService.initiatePermissionData(
-                                        updatedUser,
-                                    );
+                                if (
+                                    !roleAttachResult.error &&
+                                    roleAttachResult.data
+                                ) {
+                                    let updatedUser =
+                                        roleAttachResult.data as IUserDoc;
+                                    const permResult =
+                                        await PermissionService.initiatePermissionData(
+                                            updatedUser,
+                                        );
                                     if (!permResult.error && permResult.data) {
-                                        updatedUser = permResult.data as IUserDoc;
+                                        updatedUser =
+                                            permResult.data as IUserDoc;
                                     }
-                                    
+
                                     // Update user reference
                                     user = updatedUser;
-                                    
+
                                     // Clear permission cache
                                     const userId = updatedUser?._id || user._id;
                                     if (userId) {
-                                        await PermissionService.clearUserCache(String(userId));
+                                        await PermissionService.clearUserCache(
+                                            String(userId),
+                                        );
                                     }
                                 }
                             } catch (error) {
@@ -282,7 +282,13 @@ class UserService {
         }
 
         // Handle location fields
-        if (data.country || data.address || data.city || data.state || data.postalCode) {
+        if (
+            data.country ||
+            data.address ||
+            data.city ||
+            data.state ||
+            data.postalCode
+        ) {
             updateData.location = {
                 ...user.location,
                 address: data.address || user.location?.address || '',
@@ -426,654 +432,154 @@ class UserService {
         return result;
     }
 
-    // onboarding flow
-    /**
-     * @description Set user type
-     * @param userId - The user ID
-     * @param data - OnboardUserTypeDTO containing userType
-     */
-    async setUserType(
-        userId: string | ObjectId,
-        data: OnboardUserTypeDTO,
-    ): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
+    // [MIGRATION-REVIEW] Methods merged from flat services/user.service.ts
 
-        const userDoc = await User.findById(String(userId));
-        if (!userDoc) {
-            result.error = true;
-            result.message = 'User not found';
-            result.code = 404;
-            return result;
-        }
-        let user = userDoc as IUserDoc;
+    public async createSocialUser(
+        data: createSocialUserDTO,
+    ): Promise<IUserDoc> {
+        const {
+            firstName,
+            lastName,
+            email,
+            userType,
+            googleId,
+            githubId,
+            appleId,
+        } = data;
 
-        // Validate user type
-        if (![UserType.TALENT, UserType.BUSINESS, UserType.USER].includes(data.userType)) {
-            result.error = true;
-            result.message = 'Invalid user type';
-            result.code = 400;
-            return result;
-        }
-
-        // Update user type and onboarding step
-        user.userType = data.userType;
-        user.onboard.step = 1;
-        user.onboard.status = OnboardStatus.IN_PROGRESS;
-
-        // Set user type flags
-        if (data.userType === UserType.TALENT) {
-            user.isTalent = true;
-            user.isBusiness = false;
-            user.isUser = false;
-        } else if (data.userType === UserType.BUSINESS) {
-            user.isBusiness = true;
-            user.isTalent = false;
-            user.isUser = false;
-        } else if (data.userType === UserType.USER) {
-            user.isUser = true;
-            user.isTalent = false;
-            user.isBusiness = false;
-        }
-
-        // Attach role based on user type
-        const roleAttachResult = await roleService.attachRole(
-            user,
-            data.userType,
-        );
-        if (roleAttachResult.error) {
-            result.error = true;
-            result.message = roleAttachResult.message;
-            result.code = roleAttachResult.code || 500;
-            return result;
-        }
-        if (!roleAttachResult.data) {
-            result.error = true;
-            result.message = 'Failed to attach role: no user data returned';
-            result.code = 500;
-            return result;
-        }
-        let updatedUser = roleAttachResult.data as IUserDoc;
-
-        // Initialize permissions for the user
-        const permResult = await PermissionService.initiatePermissionData(updatedUser);
-        if (permResult.error) {
-            result.error = true;
-            result.message = permResult.message;
-            result.code = permResult.code || 500;
-            return result;
-        }
-        if (!permResult.data) {
-            result.error = true;
-            result.message = 'Failed to initialize permissions: no user data returned';
-            result.code = 500;
-            return result;
-        }
-        user = permResult.data as IUserDoc;
-
-        await user.save();
-
-        result.error = false;
-        result.code = 200;
-        result.message = 'User type set successfully';
-        result.data = {
-            userType: user.userType,
-            step: user.onboard.step,
-            status: user.onboard.status,
-        };
-
-        return result;
-    }
-
-    /**
-     * @description Set basic user information
-     * @param userId - The user ID
-     * @param data - OnboardBasicInfoDTO containing firstName, lastName, location, timeZone
-     */
-    async setBasicInfo(
-        userId: string | Types.ObjectId,
-        data: OnboardBasicInfoDTO,
-    ): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        const userDoc = await User.findById(String(userId));
-        if (!userDoc) {
-            result.error = true;
-            result.message = 'User not found';
-            result.code = 404;
-            return result;
-        }
-        let user = userDoc as IUserDoc;
-
-        // Validate step progression
-        if (user.onboard.step < 1) {
-            result.error = true;
-            result.message = 'Please complete step 1 first';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate required fields
-        if (
-            !data.firstName ||
-            !data.lastName ||
-            !data.location.country ||
-            !data.timeZone
-        ) {
-            result.error = true;
-            result.message = 'Missing required fields';
-            result.code = 400;
-            return result;
-        }
-
-        // Update user basic information
-        user.firstName = data.firstName;
-        user.lastName = data.lastName;
-        user.phoneCode = data.phoneCode || '';
-        user.phoneNumber = data.phoneNumber || '';
-        user.location = {
-            address: data.location.address || '',
-            city: data.location.city || '',
-            state: data.location.state || '',
-            country: data.location.country,
-            postalCode: data.location.postalCode || '',
-        };
-        user.timeZone = data.timeZone;
-        user.onboard.step = 2;
-
-        await user.save();
-
-        result.error = false;
-        result.code = 200;
-        result.message = 'Basic information saved successfully';
-        result.data = {
-            step: user.onboard.step,
-            status: user.onboard.status,
-        };
-
-        return result;
-    }
-
-    /**
-     * @description Set talent-specific information
-     * @param userId - The user ID
-     * @param data - OnboardTalentInfoDTO containing specialty, gender, dateOfBirth
-     */
-    async setTalentInfo(
-        userId: string | Types.ObjectId,
-        data: OnboardTalentInfoDTO,
-    ): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        const userDoc = await User.findById(String(userId));
-        if (!userDoc) {
-            result.error = true;
-            result.message = 'User not found';
-            result.code = 404;
-            return result;
-        }
-        const user = userDoc as IUserDoc;
-
-        // Validate user type
-        if (user.userType !== UserType.TALENT) {
-            result.error = true;
-            result.message = 'User is not a talent';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate step progression
-        if (user.onboard.step < 2) {
-            result.error = true;
-            result.message = 'Please complete previous steps first';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate required fields
-        if (!data.specialty || !data.gender || !data.dateOfBirth) {
-            result.error = true;
-            result.message = 'Missing required fields';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate gender enum
-        if (!Object.values(GenderType).includes(data.gender)) {
-            result.error = true;
-            result.message = 'Invalid gender value';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate date of birth (must be valid date and user must be at least 13 years old)
-        const birthDate = new Date(data.dateOfBirth);
-        if (isNaN(birthDate.getTime())) {
-            result.error = true;
-            result.message = 'Invalid date of birth';
-            result.code = 400;
-            return result;
-        }
-
-        const age = new Date().getFullYear() - birthDate.getFullYear();
-        if (age < 13) {
-            result.error = true;
-            result.message = 'User must be at least 13 years old';
-            result.code = 400;
-            return result;
-        }
-
-        // Check if talent document already exists
-        const talentResult = await talentRepository.findOne({ user: userId });
-        let talent: any = null;
-
-        if (talentResult.error === false && talentResult.data) {
-            talent = talentResult.data;
-            // Update existing talent
-            talent.firstName = user.firstName;
-            talent.lastName = user.lastName;
-            talent.email = user.email;
-            talent.specialties = [data.specialty]; // Initialize with single specialty
-            talent.gender = data.gender;
-            talent.dateOfBirth = data.dateOfBirth;
-        } else {
-            // Create new talent document
-            const talentcreateUser = await talentService.createTalent({
-                code: genUserCode(UserType.TALENT),
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                user: user,
-                createdBy: String(user._id || user.id),
-            });
-
-            if (talentcreateUser.error) {
-                result.error = true;
-                result.code = talentcreateUser.code;
-                result.message = talentcreateUser.message;
-                return result;
-            }
-
-            talent = talentcreateUser.data.talent;
-        }
-
-        // Update existing talent if needed
-        if (talent && talentResult.error === false && talentResult.data) {
-            const talentId = String((talent as any)._id || (talent as any).id);
-            await talentRepository.updateTalent(talentId, {
-                specialties: [data.specialty],
-                gender: data.gender,
-                dateOfBirth: data.dateOfBirth,
-            } as any);
-        }
-
-        // Update user onboarding step
-        user.onboard.step = 3;
-        await user.save();
-
-        result.error = false;
-        result.code = 200;
-        result.message = 'Talent information saved successfully';
-        result.data = {
-            talent: {
-                id: talent.id,
-                code: talent.code,
-                specialties: talent.specialties || [data.specialty],
-            },
-            step: user.onboard.step,
-            status: user.onboard.status,
-        };
-
-        return result;
-    }
-
-    /**
-     * @description Set business-specific information
-     * @param userId - The user ID
-     * @param data - OnboardBusinessInfoDTO containing businessName, businessType, industry, tags
-     */
-    async setBusinessInfo(
-        userId: string | Types.ObjectId,
-        data: OnboardBusinessInfoDTO,
-    ): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        const userDoc = await User.findById(String(userId));
-        if (!userDoc) {
-            result.error = true;
-            result.message = 'User not found';
-            result.code = 404;
-            return result;
-        }
-        const user = userDoc as IUserDoc;
-
-        // Validate user type
-        if (user.userType !== UserType.BUSINESS) {
-            result.error = true;
-            result.message = 'User is not a BUSINESS';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate step progression
-        if (user.onboard.step < 2) {
-            result.error = true;
-            result.message = 'Please complete previous steps first';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate required fields
-        if (!data.businessName || !data.businessType || !data.industry) {
-            result.error = true;
-            result.message = 'Missing required fields';
-            result.code = 400;
-            return result;
-        }
-
-        // Validate business type enum
-        // if (!Object.values(BusinessType).includes(data.businessType)) {
-        //     result.error = true;
-        //     result.message = 'Invalid business type';
-        //     result.code = 400;
-        //     return result;
-        // }
-
-        // Check if business document already exists
-        const businessResult = await businessRepository.findOne({
-            user: userId,
+        const existResult = await userRepository.findOne({
+            email: email.toLowerCase(),
         });
-        let business: any = null;
-
-        if (businessResult.error === false && businessResult.data) {
-            business = businessResult.data;
-            // Update existing business
-            business.firstName = user.firstName;
-            business.lastName = user.lastName;
-            business.email = user.email;
-            business.businessName = data.businessName;
-            business.businessType = data.businessType;
-            business.industry = data.industry;
-            business.tags = data.tags || [];
-        } else {
-            // Create new business document
-            const createBusinessResult =
-                await businessRepository.createBusiness({
-                    code: genUserCode(UserType.BUSINESS),
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    slug: genSlug(data.businessName),
-                    email: user.email,
-                    businessName: data.businessName,
-                    businessType: data.businessType,
-                    industry: data.industry,
-                    tags: data.tags || [],
-                    description: '', // Can be updated later
-                    size: '', // Can be updated later
-                    website: '', // Can be updated later
-                    socials: [],
-                    verification: {
-                        status: VerificationType.UNVERIFIED,
-                        verifiedBy: null,
-                        verifiedAt: new Date(),
-                        reason: '',
-                    },
-                    isPublic: false, // Set to true after verification
-                    user: userId,
-                    createdBy: userId,
-                });
-
-            if (createBusinessResult.error) {
-                result.error = true;
-                result.message = createBusinessResult.message;
-                result.code = 400;
-                return result;
-            }
-            business = createBusinessResult.data;
+        if (!existResult.error && existResult.data) {
+            throw new Error('User already exists');
         }
 
-        // Update user onboarding step
-        user.onboard.step = 3;
-        await user.save();
+        let user: IUserDoc = await User.create({
+            firstName,
+            lastName,
+            email: email.toLowerCase(),
+            password: generateRandomChars(24),
+            passwordType: PasswordType.OAUTH,
+            userType,
+            googleId,
+            githubId,
+            appleId,
+            isActive: true,
+            isActivated: true,
+        });
 
-        result.error = false;
-        result.code = 200;
-        result.message = 'Business information saved successfully';
-        result.data = {
-            business: {
-                id: business._id,
-                code: business.code,
-                businessName: business.businessName,
-                businessType: business.businessType,
-            },
-            step: user.onboard.step,
-            status: user.onboard.status,
-        };
-
-        return result;
-    }
-
-    /**
-     * @description Complete onboarding
-     * @param userId - The user ID
-     */
-    async completeOnboarding(
-        userId: string | Types.ObjectId,
-    ): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        const userDoc = await User.findById(String(userId));
-        if (!userDoc) {
-            result.error = true;
-            result.message = 'User not found';
-            result.code = 404;
-            return result;
+        await authService.updateUserType(user, userType);
+        const roleAttach = await roleService.attachRole(user, userType);
+        if (!roleAttach.error && roleAttach.data) {
+            user = roleAttach.data as IUserDoc;
         }
-        let user = userDoc as IUserDoc;
-
-        // Validate step progression
-        if (user.onboard.step < 3) {
-            result.error = true;
-            result.message = 'Please complete all previous steps first';
-            result.code = 400;
-            return result;
-        }
-
-        // Verify that type-specific profile exists (USER type doesn't need a separate profile)
-        if (user.userType === UserType.TALENT) {
-            const talentResult = await talentRepository.findOne({
-                user: userId,
-            });
-            if (talentResult.error || !talentResult.data) {
-                result.error = true;
-                result.message =
-                    'Talent profile not found. Please complete step 3.';
-                result.code = 400;
-                return result;
-            }
-        } else if (user.userType === UserType.BUSINESS) {
-            const businessResult = await businessRepository.findOne({
-                user: userId,
-            });
-            if (businessResult.error || !businessResult.data) {
-                result.error = true;
-                result.message =
-                    'Business profile not found. Please complete step 3.';
-                result.code = 400;
-                return result;
-            }
-        }
-        // USER type doesn't require a separate profile, so no check needed
-
-        // Ensure roles and permissions are set before completing onboarding
-        if (!user.roles || user.roles.length === 0) {
-            const roleAttachResult = await roleService.attachRole(
-                user,
-                user.userType,
-            );
-            if (roleAttachResult.error) {
-                result.error = true;
-                result.message = roleAttachResult.message;
-                result.code = roleAttachResult.code || 500;
-                return result;
-            }
-            if (!roleAttachResult.data) {
-                result.error = true;
-                result.message = 'Failed to attach role: no user data returned';
-                result.code = 500;
-                return result;
-            }
-            user = roleAttachResult.data as IUserDoc;
-        }
-
-        if (!user.permissions || user.permissions.length === 0) {
-            const permResult =
-                await PermissionService.initiatePermissionData(user);
-            if (permResult.error) {
-                result.error = true;
-                result.message = permResult.message;
-                result.code = permResult.code || 500;
-                return result;
-            }
-            if (!permResult.data) {
-                result.error = true;
-                result.message = 'Failed to initialize permissions: no user data returned';
-                result.code = 500;
-                return result;
-            }
+        const permResult = await PermissionService.initiatePermissionData(user);
+        if (!permResult.error && permResult.data) {
             user = permResult.data as IUserDoc;
         }
 
-        // Mark onboarding as completed
-        user.onboard.step = 4;
-        user.onboard.status = OnboardStatus.COMPLETED;
-        user.isActive = true; // Activate user account
-
         await user.save();
 
-        // Generate authentication token (moved from activateUserAccount)
-        const tokenResult = await tokenService.attachToken(user);
-        if (tokenResult.error) {
-            result.error = true;
-            result.message = tokenResult.message;
-            result.code = tokenResult.code || 500;
-            return result;
-        }
-
-        // Send welcome email (at onboarding completion)
-        const welcomeEmailResult = await emailService.sendUserWelcomeEmail(user);
-        if (welcomeEmailResult.error) {
-            // Log error but don't fail the request
+        const welcomeEmail = await emailService.sendUserWelcomeEmail(user);
+        if (welcomeEmail.error) {
             console.error(
                 'Failed to send welcome email:',
-                welcomeEmailResult.message,
+                welcomeEmail.message,
             );
         }
 
-        // Determine redirect URL based on user type
-        let redirectUrl = '/dashboard';
-        if (user.userType === UserType.TALENT) {
-            redirectUrl = '/dashboard/talent';
-        } else if (user.userType === UserType.BUSINESS) {
-            redirectUrl = '/dashboard/business';
-        } else if (user.userType === UserType.USER) {
-            redirectUrl = '/dashboard';
-        }
-
-        result.error = false;
-        result.code = 200;
-        result.message = 'Onboarding completed successfully';
-        result.data = {
-            step: user.onboard.step,
-            status: user.onboard.status,
-            redirectUrl,
-            userType: user.userType,
-            token: tokenResult.data?.token,
-        };
-
-        return result;
+        return user;
     }
 
-    /**
-     * @description Get current onboarding status
-     * @param userId - The user ID
-     */
-    async getOnboardingStatus(
-        userId: string | Types.ObjectId,
-    ): Promise<IResult> {
+    public async findOrCreateSocialUser(
+        profile: IPassportProfileDTO,
+        provider: OAuthProvider,
+        req: any,
+    ): Promise<IUserDoc | null> {
+        const email = profile.emails?.[0]?.value.toLowerCase();
+        const socialId = profile.id;
+        let user: IUserDoc | null = null;
+
+        const idField = `${provider}Id`;
+
+        const socialQuery = { [idField]: socialId };
+        const socialResult = await userRepository.findOne(socialQuery);
+        if (!socialResult.error && socialResult.data) {
+            user = socialResult.data as IUserDoc;
+        }
+
+        if (!user) {
+            if (!email) {
+                throw new Error('OAuth profile did not include an email');
+            }
+            const userResult = await userRepository.findByEmail(email);
+            if (!userResult.error && userResult.data) {
+                user = userResult.data as IUserDoc;
+                user = await this.linkSocialAccount(user, idField, socialId);
+            } else {
+                user = await this.createSocialUser({
+                    firstName: profile.name?.givenName ?? '',
+                    lastName: profile.name?.familyName ?? '',
+                    email: email,
+                    userType: UserType.USER,
+                    [idField]: socialId,
+                } as createSocialUserDTO);
+            }
+        }
+
+        if (user) {
+            await authService.activateAccount(user);
+            await authService.updateLastLogin(user);
+            await user.save();
+            return user;
+        }
+
+        return null;
+    }
+
+    private async linkSocialAccount(
+        user: IUserDoc,
+        idField: string,
+        socialId: string,
+    ): Promise<IUserDoc> {
+        const key = idField as SocialIdKey;
+        (user as any)[key] = socialId;
+        user.passwordType = PasswordType.OAUTH;
+        await user.save();
+        return user;
+    }
+
+    public async findRole(userId: string): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
             code: 200,
             data: {},
         };
-
         const userResult = await userRepository.findById(String(userId));
         if (userResult.error || !userResult.data) {
             result.error = true;
-            result.message = 'User not found';
-            result.code = 404;
+            result.code = 400;
+            result.message = 'user not found';
             return result;
         }
         const user = userResult.data as IUserDoc;
-
-        const currentStep = user.onboard.step || 1;
-        const status = user.onboard.status || OnboardStatus.NOT_STARTED;
-        const totalSteps = 4;
-
-        const progress = {
-            completedSteps: currentStep - 1,
-            totalSteps,
-            percentage: Math.round(((currentStep - 1) / totalSteps) * 100),
-        };
-
-        result.error = false;
-        result.code = 200;
-        result.message = 'Onboarding status retrieved successfully';
-        result.data = {
-            step: currentStep,
-            status,
-            progress,
-            canProceed:
-                status !== OnboardStatus.COMPLETED && currentStep < totalSteps,
-            userType: user.userType,
-        };
-
+        if ((user as any).isAdmin) {
+            result.data = true;
+            result.message = 'user is an admin';
+        } else if ((user as any).isCreator) {
+            result.data = true;
+            result.message = 'user is a creator';
+        } else {
+            result.data = false;
+            result.message = 'user is neither an admin nor a creator';
+        }
         return result;
     }
 
-    /**
-     * @description Set user information (specialty, role, discovery) - works for all user types
-     * @param userId - The user ID
-     * @param data - OnboardUserInfoDTO containing specialty, role, discovery
-     */
-    async setUserInfo(
-        userId: string | Types.ObjectId,
-        data: OnboardUserInfoDTO,
+    public async updateUserPreferences(
+        user: IUserDoc,
+        preferences: Partial<Pick<any, 'topics' | 'minister'>>,
     ): Promise<IResult> {
         let result: IResult = {
             error: false,
@@ -1081,55 +587,76 @@ class UserService {
             code: 200,
             data: {},
         };
-
-        const userDoc = await User.findById(String(userId));
-        if (!userDoc) {
+        if (!preferences.topics && !preferences.minister) {
             result.error = true;
-            result.message = 'User not found';
-            result.code = 404;
-            return result;
-        }
-        const user = userDoc as IUserDoc;
-
-        // Validate step progression
-        if (user.onboard.step < 2) {
-            result.error = true;
-            result.message = 'Please complete previous steps first';
             result.code = 400;
+            result.message =
+                'Invalid preferences: must provide topics or minister';
             return result;
         }
-
-        // Validate required fields
-        if (!data.specialty || !data.role || !data.discovery) {
-            result.error = true;
-            result.message = 'Missing required fields';
-            result.code = 400;
-            return result;
-        }
-
-        // Store user info in a metadata field or extend user model
-        // For now, we'll store it in user metadata if available, or extend the user model
-        // Since we don't have a metadata field, we'll update onboarding step and store in user preferences or extend model
-        // For simplicity, we'll just update the onboarding step to 3
-        // In a production system, you might want to add fields to the user model for specialty, role, discovery
-
-        user.onboard.step = 3;
-        await user.save();
-
-        result.error = false;
-        result.code = 200;
-        result.message = 'User information saved successfully';
-        result.data = {
-            specialty: data.specialty,
-            role: data.role,
-            discovery: data.discovery,
-            step: user.onboard.step,
-            status: user.onboard.status,
-        };
-
-        return result;
+        const ministerIds = preferences.minister?.map((m: unknown) =>
+            typeof m === 'string'
+                ? m
+                : m && typeof (m as { toString?: () => string }).toString === 'function'
+                  ? (m as { toString: () => string }).toString()
+                  : '',
+        );
+        return preferenceService.patchByUser(
+            String(user._id),
+            String(user._id),
+            {
+                topics: preferences.topics,
+                minister: ministerIds?.filter(Boolean),
+            },
+        );
     }
 
+    public async getNotificationPreferences(userId: string): Promise<{
+        email: boolean;
+        push: boolean;
+        sms: boolean;
+    }> {
+        const prefs = await preferenceService.getByUser(userId, userId);
+        if (prefs.error || !prefs.data) {
+            throw new Error(prefs.message || 'User not found');
+        }
+        const data = prefs.data as {
+            notifications: { email: boolean; push: boolean; sms: boolean };
+        };
+        return data.notifications;
+    }
+
+    public async updateNotificationPreferences(
+        user: IUserDoc,
+        notificationPreferences: Partial<{
+            email: boolean;
+            push: boolean;
+            sms: boolean;
+        }>,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+        const hasAnyPreference =
+            notificationPreferences.email !== undefined ||
+            notificationPreferences.push !== undefined ||
+            notificationPreferences.sms !== undefined;
+        if (!hasAnyPreference) {
+            result.error = true;
+            result.code = 400;
+            result.message =
+                'Invalid notification preferences: must provide at least one setting';
+            return result;
+        }
+        return preferenceService.patchByUser(
+            String(user._id),
+            String(user._id),
+            { notifications: notificationPreferences },
+        );
+    }
 
     //   /**
     //    * @name createSocialUser
