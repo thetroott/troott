@@ -4,7 +4,6 @@ Controller ✅ (optional) – endpoint to get signed URLs / stream audio
 Service ✅ – streaming logic, CDN integration, access checks
 Model ❌ – usually no persistent DB (maybe a minimal table for file metadata / location), but audio lives in storage/CDN
 
-
 The main job of streaming is delivering audio bytes.
 Often, the client talks directly to a CDN or object storage (like S3, GCP Storage, or a streaming server).
 The backend only generates signed URLs or checks access permissions.
