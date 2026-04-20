@@ -1,18 +1,24 @@
 {
-  "extends": "../../configs/typescript/base.node.json",
-  "compilerOptions": {
-    "declaration": false,
-    "declarationMap": false,
-    "rootDir": "src",
-    "outDir": "dist",
-    "noEmit": false,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": ["src", "src/**/*", "src/_data/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+    "extends": "../../configs/typescript/base.node.json",
+    "compilerOptions": {
+        "declaration": false,
+        "declarationMap": false,
+        "rootDir": "src",
+        "outDir": "dist",
+        "noEmit": false,
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["src", "src/**/*", "src/_data/**/*"],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "test",
+        "src/scripts",
+        "src/scripts/**/*"
+    ]
 }
