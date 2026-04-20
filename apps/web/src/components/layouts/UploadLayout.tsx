@@ -5,9 +5,14 @@ import { useUpload } from '@/context/upload/upload.context';
 
 interface UploadLayoutProps {
     children: React.ReactNode;
+    /** When the minister already has sermons, feed copy reflects a non-empty studio. */
+    feedHasSermons?: boolean;
 }
 
-const UploadLayout: React.FC<UploadLayoutProps> = ({ children }) => {
+const UploadLayout: React.FC<UploadLayoutProps> = ({
+    children,
+    feedHasSermons = false,
+}) => {
     const { state } = useUpload();
     const { activeOption = 'upload' } = state;
 
@@ -17,7 +22,8 @@ const UploadLayout: React.FC<UploadLayoutProps> = ({ children }) => {
             <UploadOptions />
 
             {/* Main Content - Responsive layout with scrolling */}
-            <div className="pt-[140px]">
+            {/* Clear fixed `UploadOptions` rail (~nav 60 + divider + py-3 + 70px chip min). */}
+            <div className="pt-[136px]">
                 <div className="container px-4 md:px-6 pb-5 max-w-7xl mx-auto">
                     <div className="flex flex-col items-center space-y-8">
                         {/* Upload Section - Top Half */}
@@ -30,7 +36,7 @@ const UploadLayout: React.FC<UploadLayoutProps> = ({ children }) => {
                         {/* Feed Section - Bottom Half - Only show for upload tab */}
                         {activeOption === 'upload' && (
                             <div className="w-full max-w-6xl mx-auto">
-                                <FeedSection />
+                                <FeedSection hasSermons={feedHasSermons} />
                             </div>
                         )}
                     </div>

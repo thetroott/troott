@@ -1,14 +1,46 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import UploadLayout from '@/components/layouts/UploadLayout';
 import { UploadProvider, useUpload, uploadActions } from '@/context/upload/upload.context';
 import FileUploadZone from '@/components/shared/upload/FileUploadZone';
 import UploadModal from '@/components/shared/upload/UploadModal';
+import apiCall from '@/api/config';
+import { useUserStore } from '@/store/user-store';
+import { resolveMinisterId } from '@/utils/minister-id.util';
+import { sermonQueryKeys } from '@/constants/sermon-query-keys';
 
 const UploadContent: React.FC = () => {
   const { state, dispatch } = useUpload();
   const { currentStep, uploadComplete, uploadData, activeOption = 'upload' } = state;
   const location = useLocation();
+  const user = useUserStore((s) => s.user) as Record<string, unknown> | null;
+  const ministerId = useMemo(() => resolveMinisterId(user), [user]);
+
+  const { data: ministerSermonsRaw } = useQuery({
+    queryKey: sermonQueryKeys.minister(ministerId || 'unknown'),
+    enabled: Boolean(ministerId),
+    queryFn: async () => {
+      const res = await apiCall.sermon.getSermonsByMinister(ministerId, {
+        page: 1,
+        limit: 50,
+      });
+      const body = res.data as { data?: unknown };
+      const raw = body?.data;
+      if (Array.isArray(raw)) return raw;
+      if (raw && typeof raw === 'object' && Array.isArray((raw as { sermons?: unknown }).sermons)) {
+        return (raw as { sermons: unknown[] }).sermons;
+      }
+      return [];
+    },
+  });
+
+  const hasSermonsOnRecord = Array.isArray(ministerSermonsRaw) && ministerSermonsRaw.length > 0;
+  const shouldOpenEntryModal =
+    Boolean(
+      (location.state as { openEntryModal?: boolean } | null)?.openEntryModal,
+    );
+  const useEntryModal = (Boolean(ministerId) && hasSermonsOnRecord) || shouldOpenEntryModal;
 
   // Load draft data if passed through navigation state
   useEffect(() => {
@@ -36,10 +68,13 @@ const UploadContent: React.FC = () => {
   };
 
   return (
-    <UploadLayout>
+    <UploadLayout feedHasSermons={useEntryModal}>
       {activeOption === 'upload' ? (
         <>
-          <FileUploadZone />
+          <FileUploadZone
+            useEntryModal={useEntryModal}
+            autoOpenEntryModal={shouldOpenEntryModal}
+          />
           <UploadModal 
             open={isModalOpen} 
             onOpenChange={handleModalOpenChange}
