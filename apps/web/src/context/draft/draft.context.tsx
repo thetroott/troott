@@ -2,6 +2,11 @@ import React, { createContext, useContext, useReducer, useCallback } from 'react
 import type { ISermonUpload } from '@/utils/interfaces.util';
 import Sermon from '@/api/sermon';
 import api from '@/api/config';
+import {
+  readDevUploadDrafts,
+  removeDevUploadDraft,
+  isDevLocalUploadDraftId,
+} from '@/utils/dev-upload-drafts.util';
 
 // Draft interface extending ISermonUpload
 export interface IDraft extends ISermonUpload {
@@ -100,16 +105,41 @@ export const DraftProvider: React.FC<{ children: React.ReactNode; sermonApi?: Se
     return api.sermon;
   }, []);
 
-  // Fetch all drafts from API
+  // Fetch all drafts from API (Vite dev: merge local “upload complete” rows)
   const fetchDrafts = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
+    const devDrafts = import.meta.env.DEV
+      ? (readDevUploadDrafts() as unknown as IDraft[])
+      : [];
+
     try {
-      const api = getSermonsApi();
-      const response = await api.getDrafts();
-      const drafts = response?.data?.data || [];
-      dispatch({ type: 'SET_DRAFTS', payload: drafts });
+      const sermonApi = getSermonsApi() as unknown as {
+        getDrafts?: () => Promise<{ data?: { data?: IDraft[] } }>;
+      };
+
+      if (typeof sermonApi.getDrafts !== 'function') {
+        dispatch({ type: 'SET_DRAFTS', payload: devDrafts });
+        dispatch({ type: 'CLEAR_ERROR' });
+        return;
+      }
+
+      const response = await sermonApi.getDrafts();
+      const apiDrafts = response?.data?.data || [];
+      const merged =
+        import.meta.env.DEV && devDrafts.length
+          ? [...devDrafts, ...apiDrafts]
+          : apiDrafts;
+      dispatch({ type: 'SET_DRAFTS', payload: merged });
       dispatch({ type: 'CLEAR_ERROR' });
     } catch (error: any) {
+      if (import.meta.env.DEV) {
+        dispatch({ type: 'SET_DRAFTS', payload: devDrafts });
+        dispatch({ type: 'CLEAR_ERROR' });
+        if (devDrafts.length) {
+          console.warn('Drafts API unavailable; showing dev upload drafts only.', error);
+        }
+        return;
+      }
       const errorMessage = error?.response?.data?.message || 'Failed to fetch drafts';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       console.error('Error fetching drafts:', error);
@@ -121,7 +151,14 @@ export const DraftProvider: React.FC<{ children: React.ReactNode; sermonApi?: Se
     async (draft: Partial<IDraft>): Promise<IDraft> => {
       dispatch({ type: 'SET_LOADING', payload: true });
       try {
-        const api = getSermonsApi();
+        const sermonApi = getSermonsApi() as unknown as {
+          saveDraft?: (body: Record<string, unknown>) => Promise<{
+            data?: { data?: IDraft; id?: string };
+          }>;
+        };
+        if (typeof sermonApi.saveDraft !== 'function') {
+          throw new Error('saveDraft is not implemented on sermon API');
+        }
         const payload = {
           title: draft.title,
           description: draft.description,
@@ -131,8 +168,9 @@ export const DraftProvider: React.FC<{ children: React.ReactNode; sermonApi?: Se
           scheduledDate: draft.scheduledDate,
           seriesId: draft.seriesId,
         };
-        const response = await api.saveDraft(payload);
-        const savedDraft = response?.data?.data || { ...draft, id: response?.data?.id };
+        const response = await sermonApi.saveDraft(payload);
+        const savedDraft = (response?.data?.data ||
+          ({ ...draft, id: response?.data?.id } as IDraft)) as IDraft;
         dispatch({ type: 'ADD_DRAFT', payload: savedDraft });
         dispatch({ type: 'CLEAR_ERROR' });
         return savedDraft;
@@ -150,7 +188,15 @@ export const DraftProvider: React.FC<{ children: React.ReactNode; sermonApi?: Se
     async (draftId: string, draft: Partial<IDraft>): Promise<IDraft> => {
       dispatch({ type: 'SET_LOADING', payload: true });
       try {
-        const api = getSermonsApi();
+        const sermonApi = getSermonsApi() as unknown as {
+          updateDraft?: (
+            id: string,
+            body: Record<string, unknown>,
+          ) => Promise<{ data?: { data?: IDraft } }>;
+        };
+        if (typeof sermonApi.updateDraft !== 'function') {
+          throw new Error('updateDraft is not implemented on sermon API');
+        }
         const payload = {
           title: draft.title,
           description: draft.description,
@@ -160,8 +206,9 @@ export const DraftProvider: React.FC<{ children: React.ReactNode; sermonApi?: Se
           scheduledDate: draft.scheduledDate,
           seriesId: draft.seriesId,
         };
-        const response = await api.updateDraft(draftId, payload);
-        const updatedDraft = response?.data?.data || { ...draft, id: draftId };
+        const response = await sermonApi.updateDraft(draftId, payload);
+        const updatedDraft = (response?.data?.data ||
+          ({ ...draft, id: draftId } as IDraft)) as IDraft;
         dispatch({ type: 'UPDATE_DRAFT', payload: updatedDraft });
         dispatch({ type: 'CLEAR_ERROR' });
         return updatedDraft;
@@ -179,8 +226,19 @@ export const DraftProvider: React.FC<{ children: React.ReactNode; sermonApi?: Se
     async (draftId: string) => {
       dispatch({ type: 'SET_LOADING', payload: true });
       try {
-        const api = getSermonsApi();
-        await api.deleteDraft(draftId);
+        if (import.meta.env.DEV && isDevLocalUploadDraftId(draftId)) {
+          removeDevUploadDraft(draftId);
+          dispatch({ type: 'DELETE_DRAFT', payload: draftId });
+          dispatch({ type: 'CLEAR_ERROR' });
+          return;
+        }
+        const sermonApi = getSermonsApi() as unknown as {
+          deleteDraft?: (id: string) => Promise<unknown>;
+        };
+        if (typeof sermonApi.deleteDraft !== 'function') {
+          throw new Error('deleteDraft is not implemented on sermon API');
+        }
+        await sermonApi.deleteDraft(draftId);
         dispatch({ type: 'DELETE_DRAFT', payload: draftId });
         dispatch({ type: 'CLEAR_ERROR' });
       } catch (error: any) {

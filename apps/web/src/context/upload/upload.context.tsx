@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import type { IUploadContext, ISermonUpload, IUploadFormErrors } from '@/utils/interfaces.util';
 
 // Action types
-type UploadAction =
+export type UploadAction =
   | { type: 'SET_STEP'; payload: string }
   | { type: 'SET_FILE'; payload: File | null }
   | { type: 'SET_UPLOAD_DATA'; payload: Partial<ISermonUpload> }
@@ -16,6 +16,8 @@ type UploadAction =
   | { type: 'LOAD_FROM_STORAGE'; payload: Partial<ISermonUpload> }
   | { type: 'LOAD_FROM_DRAFT'; payload: Partial<ISermonUpload> }
   | { type: 'CLEAR_STORED_DATA' };
+
+export type UploadDispatch = React.Dispatch<UploadAction>;
 
 // Initial state
 const initialUploadData: ISermonUpload = {

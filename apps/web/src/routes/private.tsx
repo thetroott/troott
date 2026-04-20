@@ -1,7 +1,6 @@
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import Home from "@/app/home/Home";
 import Dashboard from "@/app/dashboard/Dashboard";
-import Drafts from "@/app/dashboard/Drafts";
 import Series from "@/app/dashboard/Series";
 import Trash from "@/app/dashboard/Trash";
 import GetStarted from "@/app/dashboard/GetStarted";
@@ -17,7 +16,7 @@ import SelectDocumentType from "@/components/shared/get-started/SelectDocumentTy
 import VerifyDocumentForm from "@/components/shared/get-started/verify-document";
 import UploadDocument from "@/components/shared/get-started/UploadDocument";
 import LoginForm from "@/components/shared/auth/login-form";
-import UserDraft from "@/app/dashboard/UserDraft";
+import { Navigate } from "react-router-dom";
 
 export const privateRoutes = [
   {
@@ -81,6 +80,11 @@ export const privateRoutes = [
         roles: ["admin", "staff", "preacher"],
       },
       {
+        path: "upload",
+        element: <Navigate to="/upload-sermon" replace />,
+        roles: ["admin", "staff", "preacher"],
+      },
+      {
         path: "get-sermons",
         element: <Sermons />,
         roles: ["admin", "staff", "preacher"],
@@ -97,7 +101,7 @@ export const privateRoutes = [
       },
       {
         path: "my-drafts",
-        element: <Drafts />,
+        element: <Navigate to="/get-sermons" replace />,
         roles: ["admin", "staff", "preacher"],
       },
       {
@@ -112,12 +116,12 @@ export const privateRoutes = [
       },
       {
         path: "user-draft",
-        element: <UserDraft />,
+        element: <Navigate to="/get-sermons" replace />,
         roles: ["admin", "staff", "preacher"],
       },
       {
         path: "user-drafts",
-        element: <UserDraft />,
+        element: <Navigate to="/get-sermons" replace />,
         roles: ["admin", "staff", "preacher"],
       },
     ],

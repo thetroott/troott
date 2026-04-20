@@ -137,6 +137,12 @@ const useAuth = () => {
           // Store authentication tokens if available
           storage.storeAuth(token, user.id, user.userType, user.email);
 
+          const ministerId =
+            user.ministerId ??
+            user.minister?._id ??
+            user.minister?.id ??
+            user.minister;
+
           // Create user object from response data
           const userData = {
             id: user.id,
@@ -153,6 +159,10 @@ const useAuth = () => {
             roles: user.roles,
             status: user.status,
             onboard: user.onboard,
+            ministerId:
+              typeof ministerId === 'string' || typeof ministerId === 'number'
+                ? String(ministerId)
+                : undefined,
           };
 
           // Set user data in both stores
@@ -249,6 +259,12 @@ const useAuth = () => {
           // Store authentication tokens if available
           storage.storeAuth(token, user.id, user.userType, user.email);
 
+          const ministerId =
+            user.ministerId ??
+            user.minister?._id ??
+            user.minister?.id ??
+            user.minister;
+
           // Create user object from response data
           const userData = {
             id: user.id,
@@ -265,6 +281,10 @@ const useAuth = () => {
             roles: user.roles,
             status: user.status,
             onboard: user.onboard,
+            ministerId:
+              typeof ministerId === 'string' || typeof ministerId === 'number'
+                ? String(ministerId)
+                : undefined,
           };
 
           // Set user data in both stores
