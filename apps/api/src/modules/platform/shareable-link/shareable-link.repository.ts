@@ -1,11 +1,15 @@
 import ShareableLink from './shareable-link.model';
-import { IResult } from '../../../utils/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces/interfaces.util';
 import { IShareableLinkDoc } from './shareable-link.interface';
 import { CreateShareableLinkDTO } from './shareable-link.dto';
 
 class ShareableLinkRepository {
     public async createShareableLink(
-        linkData: CreateShareableLinkDTO & { token: string; expiresAt: Date },
+        linkData: CreateShareableLinkDTO & {
+            token: string;
+            expiresAt: Date;
+            tokenLookupHash?: string;
+        },
     ): Promise<IResult> {
         let result: IResult = {
             error: false,
@@ -40,6 +44,12 @@ class ShareableLinkRepository {
     ): Promise<IShareableLinkDoc | null> {
         const link = await ShareableLink.findOne({ token });
         return link;
+    }
+
+    public async findByTokenLookupHash(
+        hash: string,
+    ): Promise<IShareableLinkDoc | null> {
+        return ShareableLink.findOne({ tokenLookupHash: hash });
     }
 
     public async findShareableLinksByResource(
@@ -161,7 +171,9 @@ class ShareableLinkRepository {
         );
     }
 
-    public async deleteExpiredLinks(olderThanDays: number = 30): Promise<IResult> {
+    public async deleteExpiredLinks(
+        olderThanDays: number = 30,
+    ): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',

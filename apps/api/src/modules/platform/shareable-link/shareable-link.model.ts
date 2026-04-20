@@ -34,6 +34,13 @@ const ShareableLinkSchema = new Schema<IShareableLinkDoc>(
             index: true,
         },
 
+        tokenLookupHash: {
+            type: String,
+            required: false,
+            sparse: true,
+            index: true,
+        },
+
         linkName: {
             type: String,
             trim: true,
@@ -107,19 +114,18 @@ ShareableLinkSchema.index(
     },
 );
 
-ShareableLinkSchema.index(
-    {
-        resourceId: 1,
-        linkType: 1,
-    },
-);
+ShareableLinkSchema.index({
+    resourceId: 1,
+    linkType: 1,
+});
 
 // TTL index for automatic cleanup of expired links (optional, can be handled manually)
 // ShareableLinkSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-const ShareableLink: Model<IShareableLinkDoc> = mongoose.model<IShareableLinkDoc>(
-    DbModels.SHAREABLE_LINK,
-    ShareableLinkSchema,
-);
+const ShareableLink: Model<IShareableLinkDoc> =
+    mongoose.model<IShareableLinkDoc>(
+        DbModels.SHAREABLE_LINK,
+        ShareableLinkSchema,
+    );
 
 export default ShareableLink;
