@@ -8,19 +8,22 @@ export interface Sermon {
   likes: number;
   dislikes: number;
   type: "audio" | "video" | "short";
+  /** My Sermons list — Figma status pill (`10154:35090`). */
+  publicationStatus?: "published" | "draft";
 }
 
 export const dummySermons: Sermon[] = [
   {
     id: "1",
-    name: "RecordingHopefilled",
+    name: "Hope filled",
     duration: "34:01",
     dateCreated: "Yesterday",
-    plays: 5,
-    comments: 12,
-    likes: 5,
-    dislikes: 3,
+    plays: 7,
+    comments: 15,
+    likes: 7,
+    dislikes: 0,
     type: "audio",
+    publicationStatus: "published",
   },
   {
     id: "2",
@@ -32,6 +35,7 @@ export const dummySermons: Sermon[] = [
     likes: 15,
     dislikes: 1,
     type: "video",
+    publicationStatus: "published",
   },
   {
     id: "3",
@@ -43,6 +47,7 @@ export const dummySermons: Sermon[] = [
     likes: 32,
     dislikes: 2,
     type: "audio",
+    publicationStatus: "draft",
   },
   {
     id: "4",
@@ -54,5 +59,6 @@ export const dummySermons: Sermon[] = [
     likes: 28,
     dislikes: 1,
     type: "short",
+    publicationStatus: "published",
   },
 ];

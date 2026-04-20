@@ -1,7 +1,6 @@
 import {
   BarChart3Icon,
   CloudUploadIcon,
-  FolderEdit,
   Home,
   Inbox,
   LogOut,
@@ -60,12 +59,6 @@ export const navItems = {
           title: "Series",
           url: "/my-series",
           icon: PlaySquare,
-          isActive: false,
-        },
-        {
-          title: "Drafts",
-          url: "/user-drafts",
-          icon: FolderEdit,
           isActive: false,
         },
         {

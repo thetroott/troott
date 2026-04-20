@@ -12,6 +12,13 @@ class Sermon {
     return this.client.get("/sermons", payload);
   }
 
+  getSermonsByMinister(
+    ministerId: string,
+    params?: { page?: number; limit?: number; sort?: string }
+  ) {
+    return this.client.get(`/sermon/minister/${ministerId}`, { params });
+  }
+
   startUpload(
     formData: FormData,
     onProgress?: (percent: number) => void,
