@@ -26,6 +26,7 @@ import Initialize from "@/engine/helpers/initialization";
 import { useUpdateOptions } from "@/engine/player/useUpdateOptions";
 import { attachEnginePlaybackListeners } from "@/engine/player/background";
 import { mergeLastPlayedPosition } from "@/engine/state/last-played-sync";
+import { usePendingDeepLinkBootstrap } from "@/lib/deep-link/use-pending-deeplink-bootstrap";
 import MiniPlayer from "@/components/engine/mini-player";
 import TrackPlayer from "@rntp/player";
 
@@ -37,6 +38,7 @@ SplashScreen.preventAutoHideAsync();
 
 
 const RootLayout = () => {
+  usePendingDeepLinkBootstrap();
 
   const [fontsLoaded, fontError] = useFonts(matterFonts);
   const [playerIsReady, setPlayerIsReady] = useState<boolean>(false)

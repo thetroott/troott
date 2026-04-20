@@ -8,8 +8,8 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import { router } from "expo-router";
 import { SolidIcons } from "@/assets/icons";
+import { replaceWithPendingTargetOrHome } from "@/lib/deep-link/replace-with-pending-or-home";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import Text from "@/components/ui/text";
@@ -39,13 +39,19 @@ const Interests = () => {
           containerStyle={styles.buttonStyle}
           // disabled={selectedPastors.length < 5}
           onPress={() => {
-            router.push("/(tabs)/home");
+            void replaceWithPendingTargetOrHome();
           }}
         >
           <SolidIcons.PlayIcon />
           <Text color={theme.colors.grey[900]}>Start Playing</Text>
         </Button>
-        <Button label="Skip" variant="ghost" />
+        <Button
+          label="Skip"
+          variant="ghost"
+          onPress={() => {
+            void replaceWithPendingTargetOrHome();
+          }}
+        />
       </View>
     </View>
   );

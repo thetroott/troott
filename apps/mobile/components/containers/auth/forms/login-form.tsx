@@ -10,6 +10,7 @@ import Button from "@/components/ui/button";
 import { router } from "expo-router";
 import { LoginSchema, LoginSchemaType } from "@/validation/login";
 import { useTrackStore } from "@/stores/player-store";
+import { replaceWithPendingTargetOrHome } from "@/lib/deep-link/replace-with-pending-or-home";
 
 const LoginForm = () => {
   const setShowFullPlayer = useTrackStore((s) => s.setShowFullPlayer);
@@ -22,10 +23,10 @@ const LoginForm = () => {
     },
     resolver: zodResolver(LoginSchema),
   });
-  function handleSubmit(_data: LoginSchemaType) {
+  async function handleSubmit(_data: LoginSchemaType) {
     setShowFullPlayer(false);
     setFullPlayerReturnPath(null);
-    router.replace("/home");
+    await replaceWithPendingTargetOrHome();
   }
   const handleFormSubmit = () => {
     router.push("/onboarding/select-ministers");
