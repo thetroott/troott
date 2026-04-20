@@ -1,9 +1,11 @@
-import { Request, Response, NextFunction, RequestHandler } from "express";
+import { Request, Response, NextFunction, RequestHandler } from 'express';
 
-type AsyncMiddleware = (req: Request, res: Response, next: NextFunction) => Promise<any>;
+type AsyncMiddleware = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => Promise<any>;
 type AsyncFunction = (...args: any[]) => Promise<any>;
-
-
 
 /**
  * @description Higher-order function that wraps async operations.
@@ -15,26 +17,32 @@ type AsyncFunction = (...args: any[]) => Promise<any>;
  *
  */
 const asyncHandler = <T extends AsyncMiddleware | AsyncFunction>(fn: T) => {
-  return function (...args: any[]) {
-    const isExpressMiddleware =
-      args.length === 3 &&
-      args[0]?.constructor?.name === "IncomingMessage" &&
-      args[1]?.constructor?.name === "ServerResponse";
+    return function (...args: any[]) {
+        const isExpressMiddleware =
+            args.length === 3 &&
+            args[0]?.constructor?.name === 'IncomingMessage' &&
+            args[1]?.constructor?.name === 'ServerResponse';
 
-    if (isExpressMiddleware) {
-      const [req, res, next] = args as [Request, Response, NextFunction];
-      return Promise.resolve((fn as AsyncMiddleware)(req, res, next)).catch((error: Error) => {
-        error.stack = error.stack || new Error().stack;
-        next(error);
-      });
-    }
+        if (isExpressMiddleware) {
+            const [req, res, next] = args as [Request, Response, NextFunction];
+            return Promise.resolve(
+                (fn as AsyncMiddleware)(req, res, next),
+            ).catch((error: Error) => {
+                error.stack = error.stack || new Error().stack;
+                next(error);
+            });
+        }
 
-    // Handle non-Express async functions
-    return Promise.resolve((fn as AsyncFunction)(...args)).catch((error) => {
-      error.stack = error.stack || new Error().stack;
-      throw error;
-    });
-  } as T extends AsyncMiddleware ? RequestHandler : (...args: any[]) => Promise<any>;
+        // Handle non-Express async functions
+        return Promise.resolve((fn as AsyncFunction)(...args)).catch(
+            (error) => {
+                error.stack = error.stack || new Error().stack;
+                throw error;
+            },
+        );
+    } as T extends AsyncMiddleware
+        ? RequestHandler
+        : (...args: any[]) => Promise<any>;
 };
 
 export default asyncHandler;
