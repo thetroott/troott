@@ -1,4 +1,4 @@
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Link2, Pencil } from 'lucide-react';
 import type { Sermon } from '@/_data/dummySermons';
 import SermonContextMenu from './SermonContextMenu';
 import { cn } from '@/lib/utils';
@@ -131,24 +131,75 @@ const SermonsListView = ({
                                         onChange={() =>
                                             onSermonSelect(sermon.id)
                                         }
-                                        className={MY_SERMONS_LIST.checkbox}
+                                        className={cn(
+                                            MY_SERMONS_LIST.checkbox,
+                                            'transition-colors group-hover/sermon-row:border-[#eaeaea]',
+                                        )}
                                         aria-label={`Select ${sermon.name}`}
                                     />
                                 </div>
                             </td>
                             <td className={MY_SERMONS_LIST.tdCell}>
                                 <div className="flex min-w-0 items-center gap-3">
-                                    <SermonListAudioGlyph />
-                                    <div className="min-w-0 flex-1">
+                                    <SermonListAudioGlyph size="sm" />
+                                    <div className="flex min-h-[38px] min-w-0 flex-1 flex-col justify-center gap-0.5">
+                                        <div className="flex min-w-0 max-w-full items-center gap-1.5">
+                                            <p
+                                                className={cn(
+                                                    MY_SERMONS_LIST.title,
+                                                    'min-w-0 max-w-[min(22rem,calc(100%-3.5rem))] truncate',
+                                                )}
+                                            >
+                                                {sermon.name}
+                                            </p>
+                                            <div
+                                                className={cn(
+                                                    MY_SERMONS_LIST.rowQuickActionsWrap,
+                                                    'shrink-0',
+                                                )}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        MY_SERMONS_LIST.rowQuickActionBtn
+                                                    }
+                                                    aria-label={`Edit ${sermon.name}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onEdit(sermon.id);
+                                                    }}
+                                                >
+                                                    <Pencil
+                                                        className="h-4 w-4"
+                                                        strokeWidth={2}
+                                                        aria-hidden
+                                                    />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        MY_SERMONS_LIST.rowQuickActionBtn
+                                                    }
+                                                    aria-label={`Share link for ${sermon.name}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onShare(sermon.id);
+                                                    }}
+                                                >
+                                                    <Link2
+                                                        className="h-4 w-4"
+                                                        strokeWidth={2}
+                                                        aria-hidden
+                                                    />
+                                                </button>
+                                            </div>
+                                        </div>
                                         <p
                                             className={cn(
-                                                MY_SERMONS_LIST.title,
-                                                'truncate',
+                                                MY_SERMONS_LIST.duration,
+                                                'transition-colors group-hover/sermon-row:text-[#bdbdbd]',
                                             )}
                                         >
-                                            {sermon.name}
-                                        </p>
-                                        <p className={MY_SERMONS_LIST.duration}>
                                             {sermon.duration}
                                         </p>
                                     </div>

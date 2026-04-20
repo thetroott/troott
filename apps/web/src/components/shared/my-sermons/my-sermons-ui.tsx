@@ -98,8 +98,16 @@ export const MY_SERMONS_LIST = {
     /** Date column sort badge — 20×20 circle `#8f3628` + arrow (Figma `Frame 1618868830`). */
     thSortBadge:
         'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8f3628] text-white',
+    /**
+     * Row default + hover — Figma [`10252:56164`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10252-56164) (`Property 1=Variant5`): fill `#545454` @ **50%** over list surface.
+     */
     tbodyRow:
-        'box-border h-[64px] bg-[#333234] transition-colors hover:bg-[#3a393c]',
+        'group/sermon-row box-border h-[64px] bg-[#333234] transition-[background-color] duration-150 hover:bg-[rgb(84_84_84/0.5)]',
+    /** Hover-only quick actions (edit / link) — `Frame 1618869380`, **24×24**, radius **3**, gap **4**. */
+    rowQuickActionsWrap:
+        'flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover/sermon-row:pointer-events-auto group-hover/sermon-row:opacity-100',
+    rowQuickActionBtn:
+        'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] border border-[#545454] bg-[#2b2a2c] text-[#eaeaea] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
     tdCell:
         'box-border h-[64px] border-b border-[#545454]/50 px-4 py-0 align-middle first:pl-4 last:pr-4',
     /** Native checkbox — **18×18**, radius **4**, stroke `#9d9d9d` (Component 89). */
@@ -246,14 +254,22 @@ const SERMON_LIST_AUDIO_WAVE_D =
 /**
  * Audio waveform — Figma [`4902:7878`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4902-7878), same path as Iconify (**34×34**).
  */
-export function SermonListAudioGlyph({ className }: { className?: string }) {
+export function SermonListAudioGlyph({
+    className,
+    size = 'md',
+}: {
+    className?: string;
+    /** `sm` — **16×16** list row (`Component 36` on [`10252:56164`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10252-56164)); `md` — **34×34** grid / legacy list. */
+    size?: 'sm' | 'md';
+}) {
+    const dim = size === 'sm' ? 'h-4 w-4' : 'h-[34px] w-[34px]';
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 56 56"
-            width={34}
-            height={34}
-            className={cn('h-[34px] w-[34px] shrink-0 text-[#bdbdbd]', className)}
+            width={size === 'sm' ? 16 : 34}
+            height={size === 'sm' ? 16 : 34}
+            className={cn('shrink-0 text-[#bdbdbd] transition-colors group-hover/sermon-row:text-[#eaeaea]', dim, className)}
             aria-hidden
         >
             <path fill="currentColor" d={SERMON_LIST_AUDIO_WAVE_D} />
