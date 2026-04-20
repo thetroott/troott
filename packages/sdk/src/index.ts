@@ -11,7 +11,7 @@ export { default as idempotentService } from './services/idempotent';
 export { QueryProvider } from './services/query';
 
 // SDK Main Class
-export { default as Troott, troottAPIClient } from './api/clients/troott';
+export { default as Troott, troottAPIClient } from './api/_base/troott';
 
 // Types
 export * from './types/types';

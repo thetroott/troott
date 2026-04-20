@@ -1,5 +1,5 @@
-import Plan, { IPlanTrial } from '@/dtos/plan.dto';
-import Transaction from '@/dtos/transaction.dto';
+import Plan, { IPlanTrial } from '@/api/payments/plan.dto';
+import Transaction from '@/api/payments/transaction.dto';
 import Sermon from './sermon.dto';
 
 interface Subscription {

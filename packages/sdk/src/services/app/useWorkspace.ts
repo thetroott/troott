@@ -12,7 +12,7 @@ import type {
     UpdateWorkspaceDTO,
 } from '@/dtos/sermon.dto';
 import { useCallback } from 'react';
-import { troottAPIClient } from '@/api/clients/troott';
+import { troottAPIClient } from '@/api/_base/troott';
 
 const useWorkspace = () => {
     const { appContext } = useContextType();

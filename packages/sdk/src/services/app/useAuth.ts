@@ -3,7 +3,7 @@ import useContextType from '@/state/useContextType';
 import storage from '@/storage/local-storage';
 import { useCallback, useEffect, useState } from 'react';
 import useGoTo from '../shared/useGoTo';
-import { troottAPIClient } from '@/api/clients/troott';
+import { troottAPIClient } from '@/api/_base/troott';
 
 import {
     ActivateDTO,

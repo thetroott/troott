@@ -13,7 +13,7 @@ import { IListQuery } from '@/utils/interfaces';
 import { ICollection } from '@/state/helpers/interface';
 import useNetwork from '../shared/useNetwork';
 import useAuth from './useAuth';
-import { troottAPIClient } from '@/api/clients/troott';
+import { troottAPIClient } from '@/api/_base/troott';
 
 interface ISendUsersUpdate {
     title: string;
