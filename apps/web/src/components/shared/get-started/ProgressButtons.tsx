@@ -23,6 +23,11 @@ const ProgressButtons = () => {
     if (currentIndex > 0) {
       const previousStep = steps[currentIndex - 1];
       if (previousStep) navigate(previousStep);
+    } else {
+      // Special case: navigate from MinistryInput to HomeAddressForm
+      if (location.pathname === "/get-started/ministry-input") {
+        navigate("/get-started/home-address");
+      }
     }
   };
 
@@ -31,8 +36,13 @@ const ProgressButtons = () => {
       const nextStep = steps[currentIndex + 1];
       if (nextStep) navigate(nextStep);
     } else {
-      // Final step: navigate to completion or dashboard
-      navigate("/get-started");
+      // Special case: navigate from HomeAddressForm to MinistryInput
+      if (location.pathname === "/get-started/home-address") {
+        navigate("/get-started/ministry-input");
+      } else {
+        // Final step: navigate to completion or dashboard
+        navigate("/get-started");
+      }
     }
   };
 

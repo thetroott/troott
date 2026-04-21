@@ -4,7 +4,7 @@ import type { IMinistryForm } from "@/utils/interfaces.util";
 
 const MinistryForm = (data: IMinistryForm) => {
   
-  const { id, ministry, firstName, lastName, description, label = "Ministry", className = "" } = data;
+  const { id, ministry, firstName, lastName, description, label = "Ministry", className = "", onChange } = data;
 
   const LegalName = `${firstName} ${lastName}`.trim();
 
@@ -15,6 +15,7 @@ const MinistryForm = (data: IMinistryForm) => {
         id={id}
         key="ministry"
         value={ministry}
+        onChange={(e) => onChange?.(e.target.value)}
         className="bg-background"
         placeholder="Full official name of your ministry"
       />

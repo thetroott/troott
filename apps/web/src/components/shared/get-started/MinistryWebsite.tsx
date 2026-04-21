@@ -4,7 +4,7 @@ import type { IMinistryWebsite } from "@/utils/interfaces.util";
 
 const MinistryWebsite = (data: IMinistryWebsite) => {
   
-  const { id, website, description, label = "Website", className = "" } = data;
+  const { id, website, description, label = "Website", className = "", onChange } = data;
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -13,6 +13,7 @@ const MinistryWebsite = (data: IMinistryWebsite) => {
         id={id || "website"}
         key="website"
         value={website}
+        onChange={(e) => onChange?.(e.target.value)}
         className="bg-background"
         required={false}
         placeholder="www.example.com"

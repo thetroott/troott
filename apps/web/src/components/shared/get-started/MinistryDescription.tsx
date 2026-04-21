@@ -4,7 +4,7 @@ import type { IMinistryDescription } from "@/utils/interfaces.util";
 
 const MinistryDescription = (data: IMinistryDescription) => {
   
-  const { id, description, label = "Description", className = "" } = data;
+  const { id, description, label = "Description", className = "", onChange } = data;
 
 
   return (
@@ -15,6 +15,7 @@ const MinistryDescription = (data: IMinistryDescription) => {
           id={id || "description"}
           key="description"
           value={description}
+          onChange={(e) => onChange?.(e.target.value)}
           className="bg-muted/50 resize-none"
           style={{ 
             boxShadow: 'none',
@@ -24,9 +25,6 @@ const MinistryDescription = (data: IMinistryDescription) => {
           rows={4}
         />
       </div>
-      {description && (
-        <p className="text-sm text-muted-foreground">{description}</p>
-      )}
     </div>
 
   );

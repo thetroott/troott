@@ -22,6 +22,7 @@ import DocumentUploadWrapper from "@/components/shared/upload/DocumentUploadWrap
 import UserDraft from "@/app/dashboard/UserDraft";
 import path from "path";
 import HomeAddressForm from "@/components/shared/get-started/Home-address-form";
+import HomeAddressPage from "@/app/account/HomeAddressInfo";
 import HomeProfile from "@/app/account/HomeProfile";
 import MinistryInput from "@/components/shared/get-started/MinistryInput";
 import MinistryInputPage from "@/app/account/MinistryInfo";
@@ -57,7 +58,6 @@ export const privateRoutes = [
         children: [
           { path: "verify-account", element: <UserAccount /> },
           { path: "verify-account/personal-information", element: <PersonalInfo /> },
-          { path: "verify-account/home-address", element: <HomeProfile /> },
           {
             path: "verify-account/verify-document",
             element: <VerifyDocument />,
@@ -72,11 +72,8 @@ export const privateRoutes = [
           {
             path: "complete-profile",
             element: <HomeProfile/>,
-            children: [
-              {path: "home-address", element: <HomeAddressForm />},
-              {path: "ministry-info", element: <MinistryInput />},
-            ],
           },
+          { path: "home-address", element: <HomeAddressPage /> },
           { path: "ministry-input", element: <MinistryInputPage /> },
         ],
       },
