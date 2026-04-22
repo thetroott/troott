@@ -15,7 +15,11 @@ import { theme } from '@/constants/theme';
 import { tracks } from '@/_data/_mock/tracks';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/types/sermon';
+
+type CatalogRow = Parameters<typeof catalogRowToSermonItem>[0] & {
+    artist?: string | null;
+};
 import Button from '@/components/ui/button';
 import { SolidIcons } from '@/assets/icons';
 import TopSermons from './top-sermons';
@@ -82,7 +86,7 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
     const catalogRows =
         sermons && sermons.length > 0
             ? sermons
-            : (tracks as Partial<ISermonTrack>[]);
+            : (tracks as CatalogRow[]);
 
     const sermonsData = useMemo(() => {
         const filtered = catalogRows.filter((row) => {
@@ -98,7 +102,7 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
                 catalogRowToSermonItem({
                     ...r,
                     id: r.id != null ? String(r.id) : `s4u-${i}`,
-                } as Partial<ISermonTrack> & { id: string | null }),
+                }),
             ),
         [sermonsData],
     );
@@ -223,8 +227,8 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
                    <PlaylistsFeaturedOn/>
 
                     <AboutSection
+                        ministerName={minister.name}
                         text="Apostle Joshua Selman is a Nigerian preacher, teacher, and founder of Eternity Network International (ENI), known for the Koinonia ministry. Born on June 25, 1980, he gained prominence for his deep teachings on intimacy with God.."
-                        ctaLabel="See more"
                         onPressCta={() =>
                             router.push(`/minister/${minister.id}/about`)
                         }
