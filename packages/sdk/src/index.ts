@@ -2,7 +2,15 @@
 export { default as cookieService } from './services/cookies';
 
 // Storage Service
-export { default as storage } from './storage/local-storage';
+export { default as storage } from './storage/web-storage';
+export {
+    AUTH_STORAGE_KEYS,
+    AsyncStorageAdapter,
+    LocalStorageAdapter,
+    STORAGE_KEYS,
+    type IAsyncKeyValueStore,
+    type IStorageAdapter,
+} from './storage/index';
 
 // Idempotent Service
 export { default as idempotentService } from './services/idempotent';

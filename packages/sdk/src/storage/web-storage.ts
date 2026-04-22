@@ -1,5 +1,5 @@
 import cookieService from '@/services/cookies';
-import type { IStorage } from '@/utils/interfaces';
+import type { IStorage } from './types';
 
 const storeAuth = (
     token: string,

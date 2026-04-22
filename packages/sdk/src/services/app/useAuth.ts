@@ -1,6 +1,6 @@
 import cookieService from '@/services/cookies';
 import useContextType from '@/state/useContextType';
-import storage from '@/storage/local-storage';
+import storage from '@/storage/web-storage';
 import { useCallback, useEffect, useState } from 'react';
 import useGoTo from '../shared/useGoTo';
 import { troottAPIClient } from '@/api/_base/troott';

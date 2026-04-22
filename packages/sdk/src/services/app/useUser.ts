@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import useContextType from '@/state/useContextType';
-import storage from '@/storage/local-storage';
+import storage from '@/storage/web-storage';
 import { 
     GET_LOGGEDIN_USER, 
     GET_TALENT,

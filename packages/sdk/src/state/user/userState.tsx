@@ -21,7 +21,7 @@ import {
     IUnsetLoading,
     IRouteItem,
 } from '@/utils/interfaces';
-import storage from '@/storage/local-storage';
+import storage from '@/storage/web-storage';
 import sidebarRoutes from '../../routes/sidebar.route';
 import { ICollection } from '../helpers/interface';
 

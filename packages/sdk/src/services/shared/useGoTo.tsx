@@ -1,7 +1,7 @@
 import routil from '@/routes/helper';
 import routes from '@/routes/routes';
 import useContextType from '@/state/useContextType';
-import storage from '@/storage/local-storage';
+import storage from '@/storage/web-storage';
 import { IInRoute, IRouteItem } from '@/utils/interfaces';
 import { RouteActionType } from '@/utils/types';
 import { useLocation, useNavigate } from 'react-router-dom'
