@@ -17,6 +17,35 @@ import sermonMapper from './sermon.mapper';
 import { canAccessSermonDocument } from './sermon-access.util';
 import { isSermonPublicTeaserEligible } from '../open/sermon-teaser.util';
 
+const MINISTER_LIST_SORT_WHITELIST = new Set([
+    '-updatedAt',
+    'updatedAt',
+    '-createdAt',
+    'createdAt',
+    '-releaseDate',
+    'releaseDate',
+    'title',
+    '-title',
+]);
+
+function normalizeMinisterListSort(raw: unknown): string {
+    const first = Array.isArray(raw) ? raw[0] : raw;
+    const s =
+        typeof first === 'string' && first.trim()
+            ? first.trim()
+            : '-updatedAt';
+    return MINISTER_LIST_SORT_WHITELIST.has(s) ? s : '-updatedAt';
+}
+
+function parsePublicationStatus(
+    raw: unknown,
+): 'draft' | 'published' | 'all' | undefined {
+    if (raw === 'draft' || raw === 'published' || raw === 'all') {
+        return raw;
+    }
+    return undefined;
+}
+
 /**
  * @name uploadSermom
  * @description A method to handle sermon file uploads.
@@ -496,11 +525,30 @@ export const getSermonsByminister = asyncHandler(
         const limit = Number(req.query.limit) || 25;
         const skip = (page - 1) * limit;
 
+        const sort = normalizeMinisterListSort(req.query.sort);
+        const publicationStatus = parsePublicationStatus(req.query.status);
+        const search =
+            typeof req.query.q === 'string' && req.query.q.trim()
+                ? req.query.q.trim()
+                : undefined;
+        const dateFrom =
+            typeof req.query.dateFrom === 'string' && req.query.dateFrom.trim()
+                ? req.query.dateFrom.trim()
+                : undefined;
+        const dateTo =
+            typeof req.query.dateTo === 'string' && req.query.dateTo.trim()
+                ? req.query.dateTo.trim()
+                : undefined;
+
         const options = {
             limit,
             skip,
-            sort: req.query.sort as string,
+            sort,
             populate: 'minister series topic',
+            publicationStatus,
+            search,
+            dateFrom,
+            dateTo,
         };
 
         const result = await sermonRepository.getSermonsByMinister(

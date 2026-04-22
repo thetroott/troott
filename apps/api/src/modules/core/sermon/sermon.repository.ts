@@ -4,6 +4,43 @@ import Sermon from './sermon.model';
 import { IQueryOptions, IResult } from '../../../utils/interfaces.util';
 import type { ISermonDoc } from './sermon.interface';
 import { PipelineStage } from 'mongoose';
+import { ContentState, ContentStatus } from '../../../utils/enums.util';
+
+/** Optional filters for GET /sermon/minister/:id (studio list). */
+export type MinisterSermonListFilters = {
+    search?: string;
+    publicationStatus?: 'draft' | 'published' | 'all';
+    dateFrom?: string;
+    dateTo?: string;
+};
+
+function escapeRegexToken(s: string): string {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Each whitespace-separated token must match title, description, topic, or any tag (case-insensitive substring). */
+function ministerListSearchClause(q: string): Record<string, unknown> | null {
+    const terms = q.trim().split(/\s+/).filter(Boolean);
+    if (!terms.length) return null;
+
+    const wordOrClause = (term: string) => {
+        const escaped = escapeRegexToken(term);
+        const re = new RegExp(escaped, 'i');
+        return {
+            $or: [
+                { title: re },
+                { description: re },
+                { topic: re },
+                { tags: re },
+            ],
+        };
+    };
+
+    if (terms.length === 1) {
+        return wordOrClause(terms[0]!);
+    }
+    return { $and: terms.map((t) => wordOrClause(t)) };
+}
 
 class SermonRepository {
     private model: Model<ISermonDoc>;
@@ -289,11 +326,11 @@ class SermonRepository {
     /**
      * @name getSermonsByminister
      * @param ministerId
-     * @returns {Promise<IResult>}
+     * @returns {Promise<IResult>} data: { sermons, total }
      */
     public async getSermonsByMinister(
         ministerId: string,
-        options: IQueryOptions = {},
+        options: IQueryOptions & MinisterSermonListFilters = {},
     ): Promise<IResult> {
         let result: IResult = {
             error: false,
@@ -302,22 +339,89 @@ class SermonRepository {
             data: {},
         };
 
-        const sermons = await this.model
-            .find({ minister: ministerId })
-            .sort(options.sort || '-createdAt')
-            .skip(options.skip || 0)
-            .limit(options.limit || 25)
-            .populate(options.populate || '');
+        const filter = this.buildMinisterSermonListFilter(
+            ministerId,
+            options,
+        );
+
+        const sort = options.sort || '-updatedAt';
+        const skip = options.skip || 0;
+        const limit = options.limit || 25;
+        const populate = options.populate || '';
+
+        const total = await this.model.countDocuments(filter);
+        const useTitleCollation = sort === 'title' || sort === '-title';
+
+        let listQuery = this.model
+            .find(filter)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit);
+
+        if (useTitleCollation) {
+            listQuery = listQuery.collation({ locale: 'en', strength: 2 });
+        }
+
+        const sermons = populate
+            ? await listQuery.populate(populate)
+            : await listQuery;
 
         if (!sermons) {
             result.error = true;
             result.code = 404;
             result.message = 'Sermon not found';
         } else {
-            result.data = sermons;
+            result.data = { sermons, total };
         }
 
         return result;
+    }
+
+    private buildMinisterSermonListFilter(
+        ministerId: string,
+        options: MinisterSermonListFilters,
+    ): Record<string, unknown> {
+        const and: Record<string, unknown>[] = [
+            { minister: ministerId },
+            {
+                state: {
+                    $nin: [ContentState.DELETED, ContentState.BROKEN],
+                },
+            },
+            { status: { $ne: ContentStatus.DELETED } },
+        ];
+
+        const ps = options.publicationStatus;
+        if (ps === 'draft') {
+            and.push({ status: ContentStatus.DRAFT });
+        } else if (ps === 'published') {
+            and.push({ status: ContentStatus.PUBLISHED });
+        }
+
+        const q = options.search?.trim();
+        if (q) {
+            const clause = ministerListSearchClause(q);
+            if (clause) {
+                and.push(clause);
+            }
+        }
+
+        if (options.dateFrom || options.dateTo) {
+            const range: { $gte?: Date; $lte?: Date } = {};
+            if (options.dateFrom) {
+                const d = new Date(options.dateFrom);
+                d.setHours(0, 0, 0, 0);
+                range.$gte = d;
+            }
+            if (options.dateTo) {
+                const d = new Date(options.dateTo);
+                d.setHours(23, 59, 59, 999);
+                range.$lte = d;
+            }
+            and.push({ createdAt: range });
+        }
+
+        return { $and: and };
     }
 
     /**

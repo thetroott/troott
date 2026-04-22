@@ -1,0 +1,3 @@
+# Not JSON (pseudo-schema); Prettier cannot parse.
+apps/mobile/_data/ministers.json
+apps/mobile/_data/series.json
