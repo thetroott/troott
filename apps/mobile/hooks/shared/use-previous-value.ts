@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
 
 export function usePreviousValue(value: boolean) {
-	const previousValue = useRef(value)
+    const previousValue = useRef(value);
 
-	useEffect(() => {
-		previousValue.current = value
-	}, [value])
+    useEffect(() => {
+        previousValue.current = value;
+    }, [value]);
 
-	return previousValue.current
+    return previousValue.current;
 }

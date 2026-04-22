@@ -1,16 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 // This code is the **analytics / reporting layer** of a music player.
 // It is responsible for telling your backend **what the user is doing with audio**.
 

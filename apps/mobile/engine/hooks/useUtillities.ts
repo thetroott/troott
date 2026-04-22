@@ -1,8 +1,3 @@
-
-
-
-
-
 // This function, `markItemPlayed`, is basically a **manual “mark as played” utility** for a music app that uses **Jellyfin** as its backend. Let me break it down in the context of a music player:
 
 // ---

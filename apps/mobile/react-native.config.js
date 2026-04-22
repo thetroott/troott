@@ -1,4 +1,4 @@
-const path = require("path");
+const path = require('path');
 
 /**
  * pnpm hoists @rntp/player to the monorepo root, and its package.json "exports"
@@ -9,9 +9,9 @@ const path = require("path");
  * Pointing the dependency root here forces codegen to read package.json from disk.
  */
 module.exports = {
-	dependencies: {
-		"@rntp/player": {
-			root: path.resolve(__dirname, "../../node_modules/@rntp/player"),
-		},
-	},
+    dependencies: {
+        '@rntp/player': {
+            root: path.resolve(__dirname, '../../node_modules/@rntp/player'),
+        },
+    },
 };

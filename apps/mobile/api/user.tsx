@@ -1,22 +1,21 @@
 class User {
     client;
-  
+
     constructor(client: any) {
-      this.client = client;
+        this.client = client;
     }
-  
+
     fetch() {
-      return this.client.get("/user");
+        return this.client.get('/user');
     }
-  
+
     update(payload: any) {
-      return this.client.put("/user", payload);
+        return this.client.put('/user', payload);
     }
-  
+
     getAllUsers(payload: any) {
-      return this.client.get("/user/allusers", payload);
+        return this.client.get('/user/allusers', payload);
     }
-  }
-  
-  export default User;
-  
+}
+
+export default User;

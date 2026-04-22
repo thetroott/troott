@@ -1,14 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
 // This `useHomeQueries` hook is essentially a **React Query mutation that batches multiple data-fetching calls** related to a music app’s home screen. Let me break it down in the context of a music player:
 
 // ---

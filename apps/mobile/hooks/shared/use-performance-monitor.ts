@@ -1,10 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
 
 interface PerformanceMetrics {
-	renderCount: number
-	lastRenderTime: number
-	averageRenderTime: number
-	totalRenderTime: number
+    renderCount: number;
+    lastRenderTime: number;
+    averageRenderTime: number;
+    totalRenderTime: number;
 }
 
 /**
@@ -14,58 +14,60 @@ interface PerformanceMetrics {
  * @returns Performance metrics object
  */
 export function usePerformanceMonitor(
-	componentName: string,
-	threshold: number = 10,
+    componentName: string,
+    threshold: number = 10,
 ): PerformanceMetrics {
-	const renderCount = useRef(0)
-	const renderTimes = useRef<number[]>([])
-	const lastRenderStart = useRef(Date.now())
-	const hasWarned = useRef(false) // Prevent repeated warnings
+    const renderCount = useRef(0);
+    const renderTimes = useRef<number[]>([]);
+    const lastRenderStart = useRef(Date.now());
+    const hasWarned = useRef(false); // Prevent repeated warnings
 
-	useEffect(() => {
-		const renderEnd = Date.now()
-		const renderTime = renderEnd - lastRenderStart.current
+    useEffect(() => {
+        const renderEnd = Date.now();
+        const renderTime = renderEnd - lastRenderStart.current;
 
-		renderCount.current += 1
-		renderTimes.current.push(renderTime)
+        renderCount.current += 1;
+        renderTimes.current.push(renderTime);
 
-		// Keep only last 20 render times for average calculation
-		if (renderTimes.current.length > 20) {
-			renderTimes.current.shift()
-		}
+        // Keep only last 20 render times for average calculation
+        if (renderTimes.current.length > 20) {
+            renderTimes.current.shift();
+        }
 
-		// Warn about excessive re-renders (only once)
-		if (renderCount.current > threshold && !hasWarned.current) {
-			console.warn(
-				`⚠️ Performance Warning: ${componentName} has rendered ${renderCount.current} times. Consider optimization.`,
-			)
-			hasWarned.current = true
-		}
+        // Warn about excessive re-renders (only once)
+        if (renderCount.current > threshold && !hasWarned.current) {
+            console.warn(
+                `⚠️ Performance Warning: ${componentName} has rendered ${renderCount.current} times. Consider optimization.`,
+            );
+            hasWarned.current = true;
+        }
 
-		// Log slow renders (but throttle to avoid spam)
-		if (renderTime > 16 && renderCount.current % 5 === 0) {
-			// Only log every 5th slow render
-			console.warn(
-				`🐌 Slow Render: ${componentName} took ${renderTime}ms to render (render #${renderCount.current})`,
-			)
-		}
+        // Log slow renders (but throttle to avoid spam)
+        if (renderTime > 16 && renderCount.current % 5 === 0) {
+            // Only log every 5th slow render
+            console.warn(
+                `🐌 Slow Render: ${componentName} took ${renderTime}ms to render (render #${renderCount.current})`,
+            );
+        }
 
-		lastRenderStart.current = Date.now()
-	})
+        lastRenderStart.current = Date.now();
+    });
 
-	const averageRenderTime =
-		renderTimes.current.length > 0
-			? renderTimes.current.reduce((a, b) => a + b, 0) / renderTimes.current.length
-			: 0
+    const averageRenderTime =
+        renderTimes.current.length > 0
+            ? renderTimes.current.reduce((a, b) => a + b, 0) /
+              renderTimes.current.length
+            : 0;
 
-	const totalRenderTime = renderTimes.current.reduce((a, b) => a + b, 0)
+    const totalRenderTime = renderTimes.current.reduce((a, b) => a + b, 0);
 
-	return {
-		renderCount: renderCount.current,
-		lastRenderTime: renderTimes.current[renderTimes.current.length - 1] || 0,
-		averageRenderTime,
-		totalRenderTime,
-	}
+    return {
+        renderCount: renderCount.current,
+        lastRenderTime:
+            renderTimes.current[renderTimes.current.length - 1] || 0,
+        averageRenderTime,
+        totalRenderTime,
+    };
 }
 
 /**
@@ -73,23 +75,26 @@ export function usePerformanceMonitor(
  * @param contextValue - The context value to monitor
  * @param contextName - Name of the context for logging
  */
-export function useContextChangeMonitor<T>(contextValue: T, contextName: string): void {
-	const prevValue = useRef<T>(contextValue)
-	const changeCount = useRef(0)
+export function useContextChangeMonitor<T>(
+    contextValue: T,
+    contextName: string,
+): void {
+    const prevValue = useRef<T>(contextValue);
+    const changeCount = useRef(0);
 
-	useEffect(() => {
-		if (prevValue.current !== contextValue) {
-			changeCount.current += 1
-			console.debug(
-				`🔄 Context Change: ${contextName} changed (change #${changeCount.current})`,
-				{
-					prev: prevValue.current,
-					next: contextValue,
-				},
-			)
-			prevValue.current = contextValue
-		}
-	}, [contextValue, contextName])
+    useEffect(() => {
+        if (prevValue.current !== contextValue) {
+            changeCount.current += 1;
+            console.debug(
+                `🔄 Context Change: ${contextName} changed (change #${changeCount.current})`,
+                {
+                    prev: prevValue.current,
+                    next: contextValue,
+                },
+            );
+            prevValue.current = contextValue;
+        }
+    }, [contextValue, contextName]);
 }
 
 /**
@@ -99,29 +104,31 @@ export function useContextChangeMonitor<T>(contextValue: T, contextName: string)
  * @param sizeThreshold - Threshold for warning about large data (default: 1000)
  */
 export function useDataSizeMonitor<T>(
-	data: T[] | Record<string, unknown>,
-	dataName: string,
-	sizeThreshold: number = 1000,
+    data: T[] | Record<string, unknown>,
+    dataName: string,
+    sizeThreshold: number = 1000,
 ): void {
-	const prevSize = useRef(0)
+    const prevSize = useRef(0);
 
-	useEffect(() => {
-		const currentSize = Array.isArray(data) ? data.length : Object.keys(data).length
+    useEffect(() => {
+        const currentSize = Array.isArray(data)
+            ? data.length
+            : Object.keys(data).length;
 
-		if (currentSize !== prevSize.current) {
-			console.debug(
-				`📏 Data Size Change: ${dataName} size changed from ${prevSize.current} to ${currentSize}`,
-			)
+        if (currentSize !== prevSize.current) {
+            console.debug(
+                `📏 Data Size Change: ${dataName} size changed from ${prevSize.current} to ${currentSize}`,
+            );
 
-			if (currentSize > sizeThreshold) {
-				console.warn(
-					`⚠️ Large Data Warning: ${dataName} has ${currentSize} items (threshold: ${sizeThreshold})`,
-				)
-			}
+            if (currentSize > sizeThreshold) {
+                console.warn(
+                    `⚠️ Large Data Warning: ${dataName} has ${currentSize} items (threshold: ${sizeThreshold})`,
+                );
+            }
 
-			prevSize.current = currentSize
-		}
-	}, [data, dataName, sizeThreshold])
+            prevSize.current = currentSize;
+        }
+    }, [data, dataName, sizeThreshold]);
 }
 
 /**
@@ -130,21 +137,23 @@ export function useDataSizeMonitor<T>(
  * @returns Function to mark the start and end of an operation
  */
 export function useOperationTimer(operationName: string) {
-	const startTime = useRef<number | null>(null)
+    const startTime = useRef<number | null>(null);
 
-	const startTimer = () => {
-		startTime.current = Date.now()
-	}
+    const startTimer = () => {
+        startTime.current = Date.now();
+    };
 
-	const endTimer = () => {
-		if (startTime.current) {
-			const duration = Date.now() - startTime.current
-			console.log(`⏱️ Operation Timer: ${operationName} took ${duration}ms`)
-			startTime.current = null
-			return duration
-		}
-		return 0
-	}
+    const endTimer = () => {
+        if (startTime.current) {
+            const duration = Date.now() - startTime.current;
+            console.log(
+                `⏱️ Operation Timer: ${operationName} took ${duration}ms`,
+            );
+            startTime.current = null;
+            return duration;
+        }
+        return 0;
+    };
 
-	return { startTimer, endTimer }
+    return { startTimer, endTimer };
 }

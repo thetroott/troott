@@ -1,0 +1,11 @@
+android/
+ios/
+node_modules/
+.expo/
+dist/
+build/
+web-build/
+
+# Not valid JSON (pseudo-schema text); Prettier cannot parse them.
+_data/ministers.json
+_data/series.json

@@ -1,5 +1,5 @@
-import sermonsData from "@/_data/sermon.json";
-import { ISermonTrack } from "@/dtos/sermon.dto";
+import sermonsData from '@/_data/sermon.json';
+import { ISermonTrack } from '@/dtos/sermon.dto';
 
 /**
  * @name loadSermons
@@ -8,67 +8,72 @@ import { ISermonTrack } from "@/dtos/sermon.dto";
  * @returns {Promise<ISermonTrack[]>} A promise that resolves to an array of `ISermonTrack` objects.
  */
 export async function loadSermons(): Promise<ISermonTrack[]> {
-  console.log('loadSermons: Function called');
-  console.log('loadSermons: Sermon data length:', sermonsData.length);
-  
-  // Statically import all audio assets within the function to avoid blocking the global scope.
-  const sermonAudio = {
-    "building-your-circle-of-intigators.mp3": require(`@/assets/audio/building-your-circle-of-intigators.mp3`),
-    "what-seekest-thou.mp3": require(`@/assets/audio/what-seekest-thou.mp3`),
-    "the-seeing-eyes.mp3": require(`@/assets/audio/the-seeing-eyes.mp3`),
-    "how_to_ask_god_for_anything_in_prayer_apostle_joshua_selman_apostlejoshuaselman_motivation_pray_aac_58818.mp4": require(`@/assets/audio/how_to_ask_god_for_anything_in_prayer_apostle_joshua_selman_apostlejoshuaselman_motivation_pray_aac_58818.mp4`),
-    "fishers-of-men.mp3": require(`@/assets/audio/fishers-of-men.mp3`),
-    "seedtime-and-harvest.mp3": require(`@/assets/audio/seedtime-and-harvest.mp3`),
-    "hacking-life-through-prayer.mp3": require(`@/assets/audio/hacking-life-through-prayer.mp3`),
-    "it_doesn_39_t_matter_what_you_are_going_through_motivational_pastor_chris_aac_58743.mp4": require(`@/assets/audio/it_doesn_39_t_matter_what_you_are_going_through_motivational_pastor_chris_aac_58743.mp4`),
-    "life_is_short_live_every_day_for_god_billy_graham_inspirational_amp_motivational_video_aac_58991.mp4": require(`@/assets/audio/life_is_short_live_every_day_for_god_billy_graham_inspirational_amp_motivational_video_aac_58991.mp4`),
-    "mastering-language.mp3": require(`@/assets/audio/mastering-language.mp3`),
-  };
+    console.log('loadSermons: Function called');
+    console.log('loadSermons: Sermon data length:', sermonsData.length);
 
-  // Statically import all image assets within the function.
-  const sermonImages = {
-    "building-your-circle-of-intigators.jpg": require(`@/assets/images/building-your-circle-of-intigators.jpg`),
-    "what-seekest-thou.jpg": require(`@/assets/images/what-seekest-thou.jpg`),
-    "the-seeing-eyes.jpg": require(`@/assets/images/the-seeing-eyes.jpg`),
-    "cover3.jpg": require(`@/assets/images/cover3.jpg`),
-    "fishers-of-men.jpg": require(`@/assets/images/fishers-of-men.jpg`),
-    "seedtime-and-harvest.jpg": require(`@/assets/images/seedtime-and-harvest.jpg`),
-    "hacking-life-through-prayer.jpg": require(`@/assets/images/hacking-life-through-prayer.jpg`),
-    "cover.jpg": require(`@/assets/images/cover.jpg`),
-    "cover2.jpg": require(`@/assets/images/cover2.jpg`),
-    "mastering-language.jpg": require(`@/assets/images/mastering-language.jpg`),
-  };
+    // Statically import all audio assets within the function to avoid blocking the global scope.
+    const sermonAudio = {
+        'building-your-circle-of-intigators.mp3': require(`@/assets/audio/building-your-circle-of-intigators.mp3`),
+        'what-seekest-thou.mp3': require(`@/assets/audio/what-seekest-thou.mp3`),
+        'the-seeing-eyes.mp3': require(`@/assets/audio/the-seeing-eyes.mp3`),
+        'how_to_ask_god_for_anything_in_prayer_apostle_joshua_selman_apostlejoshuaselman_motivation_pray_aac_58818.mp4': require(`@/assets/audio/how_to_ask_god_for_anything_in_prayer_apostle_joshua_selman_apostlejoshuaselman_motivation_pray_aac_58818.mp4`),
+        'fishers-of-men.mp3': require(`@/assets/audio/fishers-of-men.mp3`),
+        'seedtime-and-harvest.mp3': require(`@/assets/audio/seedtime-and-harvest.mp3`),
+        'hacking-life-through-prayer.mp3': require(`@/assets/audio/hacking-life-through-prayer.mp3`),
+        'it_doesn_39_t_matter_what_you_are_going_through_motivational_pastor_chris_aac_58743.mp4': require(`@/assets/audio/it_doesn_39_t_matter_what_you_are_going_through_motivational_pastor_chris_aac_58743.mp4`),
+        'life_is_short_live_every_day_for_god_billy_graham_inspirational_amp_motivational_video_aac_58991.mp4': require(`@/assets/audio/life_is_short_live_every_day_for_god_billy_graham_inspirational_amp_motivational_video_aac_58991.mp4`),
+        'mastering-language.mp3': require(`@/assets/audio/mastering-language.mp3`),
+    };
 
-  const tracks: ISermonTrack[] = sermonsData.map((data) => {
-    const audioModule =
-      sermonAudio[data.sermon.split("/").pop() as keyof typeof sermonAudio];
-    return {
-    // These are the REQUIRED keys for native player functionality
-    id: data.id,
-    sourceType: "stream",
-    url: audioModule,
-    /** Same as `url` — mocks use `sermon`; keeps {@link catalogRowToSermonItem} consistent. */
-    sermon: audioModule,
-    title: data.title,
-    artist: data.minister,
-    minister: data.minister,
-    duration: data.duration,
-    artwork: sermonImages[data.image.split('/').pop() as keyof typeof sermonImages],
-    description: data.description,
-    genre: data.topic,
-    date: data.releaseDate,
+    // Statically import all image assets within the function.
+    const sermonImages = {
+        'building-your-circle-of-intigators.jpg': require(`@/assets/images/building-your-circle-of-intigators.jpg`),
+        'what-seekest-thou.jpg': require(`@/assets/images/what-seekest-thou.jpg`),
+        'the-seeing-eyes.jpg': require(`@/assets/images/the-seeing-eyes.jpg`),
+        'cover3.jpg': require(`@/assets/images/cover3.jpg`),
+        'fishers-of-men.jpg': require(`@/assets/images/fishers-of-men.jpg`),
+        'seedtime-and-harvest.jpg': require(`@/assets/images/seedtime-and-harvest.jpg`),
+        'hacking-life-through-prayer.jpg': require(`@/assets/images/hacking-life-through-prayer.jpg`),
+        'cover.jpg': require(`@/assets/images/cover.jpg`),
+        'cover2.jpg': require(`@/assets/images/cover2.jpg`),
+        'mastering-language.jpg': require(`@/assets/images/mastering-language.jpg`),
+    };
 
-    // These are your custom properties for use in your UI
-    topic: data.topic,
-    tags: data.tags,
-    isSeries: data.isSeries,
-    size: data.size,
-    releaseYear: data.releaseYear,
-  };
-  });
-  
-  console.log('loadSermons: Tracks mapped, count:', tracks.length);
-  console.log('loadSermons: First track sample:', tracks[0]);
+    const tracks: ISermonTrack[] = sermonsData.map((data) => {
+        const audioModule =
+            sermonAudio[
+                data.sermon.split('/').pop() as keyof typeof sermonAudio
+            ];
+        return {
+            // These are the REQUIRED keys for native player functionality
+            id: data.id,
+            sourceType: 'stream',
+            url: audioModule,
+            /** Same as `url` — mocks use `sermon`; keeps {@link catalogRowToSermonItem} consistent. */
+            sermon: audioModule,
+            title: data.title,
+            artist: data.minister,
+            minister: data.minister,
+            duration: data.duration,
+            artwork:
+                sermonImages[
+                    data.image.split('/').pop() as keyof typeof sermonImages
+                ],
+            description: data.description,
+            genre: data.topic,
+            date: data.releaseDate,
 
-  return tracks;
+            // These are your custom properties for use in your UI
+            topic: data.topic,
+            tags: data.tags,
+            isSeries: data.isSeries,
+            size: data.size,
+            releaseYear: data.releaseYear,
+        };
+    });
+
+    console.log('loadSermons: Tracks mapped, count:', tracks.length);
+    console.log('loadSermons: First track sample:', tracks[0]);
+
+    return tracks;
 }

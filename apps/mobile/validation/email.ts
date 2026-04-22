@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * @name EmailSchema
@@ -11,9 +11,9 @@ import { z } from "zod";
  * @returns {EmailSchemaType} A Zod object schema containing a single email field.
  */
 export const EmailSchema = z.object({
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
+    email: z.string().email({
+        message: 'Please enter a valid email address.',
+    }),
 });
 
 /**

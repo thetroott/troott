@@ -1,16 +1,13 @@
-import { useRouter } from "expo-router"
-
+import { useRouter } from 'expo-router';
 
 const useGoBack = () => {
-
-    const router = useRouter()
+    const router = useRouter();
 
     const goBack = () => {
-        router.back
-    }
+        router.back;
+    };
 
-    return { goBack }
+    return { goBack };
+};
 
-}
-
-export default useGoBack
+export default useGoBack;

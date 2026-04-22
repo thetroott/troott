@@ -1,7 +1,3 @@
-
-
-
-
 // This `useTracks` hook is a **powerful data-fetching and caching tool for music tracks** in a React/React Native music player, built with **React Query’s `useInfiniteQuery`**. Let’s break down what it does and what it can do in the context of a music player.
 
 // ---

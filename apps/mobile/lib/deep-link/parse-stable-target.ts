@@ -6,7 +6,9 @@ export type PendingStableTarget =
 /**
  * Extract stable resource target from a cold-start or runtime URL (https universal link or custom scheme).
  */
-export function parseStableTargetFromUrl(url: string): PendingStableTarget | null {
+export function parseStableTargetFromUrl(
+    url: string,
+): PendingStableTarget | null {
     if (!url || typeof url !== 'string') {
         return null;
     }

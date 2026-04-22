@@ -1,4 +1,4 @@
-import AxiosService from "./core/axios"
+import AxiosService from './core/axios';
 
 class Sermon {
     client;
@@ -10,7 +10,13 @@ class Sermon {
     }
 
     getSermons(payload: any) {
-        return this.client.call({ type: "default", method: "POST", path: "/sermon/", isAuth: true, payload, });
+        return this.client.call({
+            type: 'default',
+            method: 'POST',
+            path: '/sermon/',
+            isAuth: true,
+            payload,
+        });
     }
 }
 

@@ -131,7 +131,6 @@
 //   )
 // );
 
-
 //     // Queue ended
 //     this.subs.push(
 //       TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async () => {
@@ -328,10 +327,9 @@
 //     );
 //   }
 
-
 //   /**
 //  * @name playTrack - Plays a specified sermon track.
-//  * 
+//  *
 //  * @description
 //  * This function handles two main scenarios:
 //  * 1. If the selected track is already the currently active track, it toggles playback (play/pause).
@@ -343,7 +341,7 @@
 //  */
 //   public async playTrack(track: ISermonTrack) {
 //     const store = useTrackStore.getState();
-    
+
 //     try {
 //       // Check if the active track id equals this track's id. `getActiveTrack()` often
 //       // returns the active track id (number/string) depending on RNTP version.
@@ -496,7 +494,6 @@
 //     }
 //   }
 
-
 //   async getPlaybackState() {
 //       try {
 //         const state = typeof TrackPlayer.getState === "function"
@@ -508,7 +505,6 @@
 //         return null;
 //       }
 // }
-
 
 // async isTrackPlaying() {
 //   try {
@@ -582,7 +578,6 @@
 //     return null;
 //   }
 // }
-
 
 // async addTrack(track:Partial<ISermonTrack>) {
 //   console.log(track, "track to add");
@@ -992,7 +987,6 @@
 // }
 
 // }
-
 
 // export const usePlayerService = () => {
 //   const playerRef = useRef<PlayerService | null>(null);

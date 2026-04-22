@@ -23,31 +23,34 @@ interface UseUploadPhotoReturn {
     isUploading: boolean;
 }
 
-export const useUploadPhoto = (data: IUploadPhoto = {}): UseUploadPhotoReturn => {
-
+export const useUploadPhoto = (
+    data: IUploadPhoto = {},
+): UseUploadPhotoReturn => {
     const {
         uploadEndpoint = 'YOUR_UPLOAD_ENDPOINT_HERE',
         maxFileSizeMB = 10,
         quality = 0.8,
         onSuccess,
         onError,
-    } = data
+    } = data;
 
     const [uploadState, setUploadState] = useState<UploadState>({
         isUploading: false,
-        progress: 0
+        progress: 0,
     });
 
     // Request permissions helper
     const requestPermissions = useCallback(async (): Promise<boolean> => {
-        const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
-        const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status: cameraStatus } =
+            await ImagePicker.requestCameraPermissionsAsync();
+        const { status: mediaStatus } =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
             Alert.alert(
                 'Permissions Required',
                 'Please enable camera and photo library permissions to upload images.',
-                [{ text: 'OK' }]
+                [{ text: 'OK' }],
             );
             return false;
         }
@@ -55,105 +58,123 @@ export const useUploadPhoto = (data: IUploadPhoto = {}): UseUploadPhotoReturn =>
     }, []);
 
     // Image validation
-    const validateImage = useCallback(async (imageUri: string): Promise<boolean> => {
-        try {
-            const fileInfo = await FileSystem.getInfoAsync(imageUri);
+    const validateImage = useCallback(
+        async (imageUri: string): Promise<boolean> => {
+            try {
+                const fileInfo = await FileSystem.getInfoAsync(imageUri);
 
-            if (!fileInfo.exists) {
-                throw new Error('File does not exist');
-            }
+                if (!fileInfo.exists) {
+                    throw new Error('File does not exist');
+                }
 
-            // Check file size
-            const maxSizeInBytes = maxFileSizeMB * 1024 * 1024;
-            if (fileInfo.size && fileInfo.size > maxSizeInBytes) {
-                Alert.alert('File Too Large', `Please select an image smaller than ${maxFileSizeMB}MB`);
+                // Check file size
+                const maxSizeInBytes = maxFileSizeMB * 1024 * 1024;
+                if (fileInfo.size && fileInfo.size > maxSizeInBytes) {
+                    Alert.alert(
+                        'File Too Large',
+                        `Please select an image smaller than ${maxFileSizeMB}MB`,
+                    );
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Error validating image:', error);
+                Alert.alert('Error', 'Failed to validate the selected image');
                 return false;
             }
-
-            return true;
-        } catch (error) {
-            console.error('Error validating image:', error);
-            Alert.alert('Error', 'Failed to validate the selected image');
-            return false;
-        }
-    }, [maxFileSizeMB]);
+        },
+        [maxFileSizeMB],
+    );
 
     // Upload image to server
-    const uploadImage = useCallback(async (imageUri: string): Promise<string | null> => {
-        try {
-            setUploadState({ isUploading: true, progress: 0 });
+    const uploadImage = useCallback(
+        async (imageUri: string): Promise<string | null> => {
+            try {
+                setUploadState({ isUploading: true, progress: 0 });
 
-            // Create FormData for multipart upload
-            const formData = new FormData();
+                // Create FormData for multipart upload
+                const formData = new FormData();
 
-            // Get file extension
-            const uriParts = imageUri.split('.');
-            const fileType = uriParts[uriParts.length - 1];
+                // Get file extension
+                const uriParts = imageUri.split('.');
+                const fileType = uriParts[uriParts.length - 1];
 
-            formData.append('avatar', {
-                uri: imageUri,
-                name: `avatar_${Date.now()}.${fileType}`,
-                type: `image/${fileType}`,
-            } as any);
+                formData.append('avatar', {
+                    uri: imageUri,
+                    name: `avatar_${Date.now()}.${fileType}`,
+                    type: `image/${fileType}`,
+                } as any);
 
-            setUploadState(prev => ({ ...prev, progress: 25 }));
+                setUploadState((prev) => ({ ...prev, progress: 25 }));
 
-            const response = await fetch(uploadEndpoint, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    // Add your auth headers here
-                    // 'Authorization': `Bearer ${yourAuthToken}`,
-                },
-            });
+                const response = await fetch(uploadEndpoint, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        // Add your auth headers here
+                        // 'Authorization': `Bearer ${yourAuthToken}`,
+                    },
+                });
 
-            setUploadState(prev => ({ ...prev, progress: 75 }));
+                setUploadState((prev) => ({ ...prev, progress: 75 }));
 
-            if (!response.ok) {
-                throw new Error(`Upload failed: ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`Upload failed: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                setUploadState((prev) => ({ ...prev, progress: 100 }));
+
+                // Return the uploaded image URL from your backend
+                const imageUrl =
+                    result.imageUrl || result.url || result.avatar_url;
+
+                if (onSuccess && imageUrl) {
+                    onSuccess(imageUrl);
+                }
+
+                return imageUrl;
+            } catch (error) {
+                console.error('Upload error:', error);
+                const errorMessage =
+                    error instanceof Error
+                        ? error.message
+                        : 'Failed to upload image';
+                Alert.alert(
+                    'Upload Failed',
+                    `${errorMessage}. Please try again.`,
+                );
+
+                if (onError) {
+                    onError(errorMessage);
+                }
+
+                return null;
+            } finally {
+                setTimeout(() => {
+                    setUploadState({ isUploading: false, progress: 0 });
+                }, 1000);
             }
-
-            const result = await response.json();
-            setUploadState(prev => ({ ...prev, progress: 100 }));
-
-            // Return the uploaded image URL from your backend
-            const imageUrl = result.imageUrl || result.url || result.avatar_url;
-
-            if (onSuccess && imageUrl) {
-                onSuccess(imageUrl);
-            }
-
-            return imageUrl;
-
-        } catch (error) {
-            console.error('Upload error:', error);
-            const errorMessage = error instanceof Error ? error.message : 'Failed to upload image';
-            Alert.alert('Upload Failed', `${errorMessage}. Please try again.`);
-
-            if (onError) {
-                onError(errorMessage);
-            }
-
-            return null;
-        } finally {
-            setTimeout(() => {
-                setUploadState({ isUploading: false, progress: 0 });
-            }, 1000);
-        }
-    }, [uploadEndpoint, onSuccess, onError]);
+        },
+        [uploadEndpoint, onSuccess, onError],
+    );
 
     // Handle image selection and upload
-    const handleImageSelection = useCallback(async (result: ImagePicker.ImagePickerResult) => {
-        if (!result.canceled && result.assets[0]) {
-            const imageUri = result.assets[0].uri;
+    const handleImageSelection = useCallback(
+        async (result: ImagePicker.ImagePickerResult) => {
+            if (!result.canceled && result.assets[0]) {
+                const imageUri = result.assets[0].uri;
 
-            const isValid = await validateImage(imageUri);
-            if (isValid) {
-                await uploadImage(imageUri);
+                const isValid = await validateImage(imageUri);
+                if (isValid) {
+                    await uploadImage(imageUri);
+                }
             }
-        }
-    }, [validateImage, uploadImage]);
+        },
+        [validateImage, uploadImage],
+    );
 
     // Capture from camera
     const captureFromCamera = useCallback(async (): Promise<void> => {

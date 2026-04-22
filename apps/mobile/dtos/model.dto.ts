@@ -1,1 +1,1 @@
-export { Models } from "@/types/models"
+export { Models } from '@/types/models';

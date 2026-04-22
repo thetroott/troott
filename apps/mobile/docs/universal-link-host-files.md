@@ -10,15 +10,15 @@ Replace `TEAMID` and verify `paths` against your Expo / Xcode associated domains
 
 ```json
 {
-  "applinks": {
-    "apps": [],
-    "details": [
-      {
-        "appID": "TEAMID.com.dmlscript.troottclient",
-        "paths": [ "/sermon/*", "/playlist/*", "/minister/*" ]
-      }
-    ]
-  }
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appID": "TEAMID.com.dmlscript.troottclient",
+                "paths": ["/sermon/*", "/playlist/*", "/minister/*"]
+            }
+        ]
+    }
 }
 ```
 
@@ -28,14 +28,14 @@ Replace `RELEASE_SHA256` with your **Play App Signing** or upload key cert finge
 
 ```json
 [
-  {
-    "relation": ["delegate_permission/common.handle_all_urls"],
-    "target": {
-      "namespace": "android_app",
-      "package_name": "com.dmlscript.troottclient",
-      "sha256_cert_fingerprints": ["RELEASE_SHA256"]
+    {
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.dmlscript.troottclient",
+            "sha256_cert_fingerprints": ["RELEASE_SHA256"]
+        }
     }
-  }
 ]
 ```
 
@@ -49,39 +49,37 @@ Replace `links.example.com` with the **exact** host from `CLIENT_APP_URL` (no `h
 
 ```json
 {
-  "expo": {
-    "ios": {
-      "associatedDomains": [
-        "applinks:links.example.com"
-      ]
-    },
-    "android": {
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "links.example.com",
-              "pathPrefix": "/sermon"
-            },
-            {
-              "scheme": "https",
-              "host": "links.example.com",
-              "pathPrefix": "/playlist"
-            },
-            {
-              "scheme": "https",
-              "host": "links.example.com",
-              "pathPrefix": "/minister"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
+    "expo": {
+        "ios": {
+            "associatedDomains": ["applinks:links.example.com"]
+        },
+        "android": {
+            "intentFilters": [
+                {
+                    "action": "VIEW",
+                    "autoVerify": true,
+                    "data": [
+                        {
+                            "scheme": "https",
+                            "host": "links.example.com",
+                            "pathPrefix": "/sermon"
+                        },
+                        {
+                            "scheme": "https",
+                            "host": "links.example.com",
+                            "pathPrefix": "/playlist"
+                        },
+                        {
+                            "scheme": "https",
+                            "host": "links.example.com",
+                            "pathPrefix": "/minister"
+                        }
+                    ],
+                    "category": ["BROWSABLE", "DEFAULT"]
+                }
+            ]
         }
-      ]
     }
-  }
 }
 ```
 
