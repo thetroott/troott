@@ -141,6 +141,7 @@ const FullPlayerTrackDetails: React.FC<FullPlayerTrackDetailsProps> = ({
   const dragToCloseGesture = useMemo(
     () =>
       Gesture.Pan()
+        .runOnJS(true)
         .activeOffsetY(12)
         .failOffsetX([-56, 56])
         .onStart(() => {

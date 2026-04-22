@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
     "scheme": "troottmobile",
     "splash": {
       "image": "./assets/app-icon.png",
@@ -57,12 +58,10 @@
         "expo-build-properties",
         {
           "android": {
-            "kotlinVersion": "2.0.21",
-            "newArchEnabled": true
+            "kotlinVersion": "2.0.21"
           },
           "ios": {
-            "deploymentTarget": "16.0",
-            "newArchEnabled": true
+            "deploymentTarget": "16.0"
           }
         }
       ],

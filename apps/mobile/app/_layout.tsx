@@ -1,13 +1,7 @@
 import { AppState, Platform } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SplashScreen, Stack } from "expo-router";
-import "react-native-reanimated";
-import { logWorkletsRuntimeDiagnostics } from "@/engine/helpers/worklets-runtime-diagnostics";
 import { StatusBar } from "expo-status-bar";
-
-if (__DEV__) {
-  logWorkletsRuntimeDiagnostics();
-}
 import { useFonts } from "expo-font";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { matterFonts } from "@/constants/typography";
@@ -28,6 +22,7 @@ import { attachEnginePlaybackListeners } from "@/engine/player/background";
 import { mergeLastPlayedPosition } from "@/engine/state/last-played-sync";
 import { usePendingDeepLinkBootstrap } from "@/lib/deep-link/use-pending-deeplink-bootstrap";
 import MiniPlayer from "@/components/engine/mini-player";
+import { EmbeddedBridgeGuard } from "@/components/dev/EmbeddedBridgeGuard";
 import TrackPlayer from "@rntp/player";
 
 
@@ -166,6 +161,7 @@ const RootLayout = () => {
                       <StatusBar style="light" />
                       <PortalHost />
                       <Toaster />
+                      <EmbeddedBridgeGuard />
                     </SafeAreaView>
                   </PersistQueryClientProvider>
               </SafeAreaProvider>

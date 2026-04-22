@@ -6,7 +6,6 @@ import { useCurrentTrack } from '@/stores/player/queue'
 import Slider from '@react-native-community/slider'
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { View } from 'react-native'
-import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { useSafeAreaFrame } from 'react-native-safe-area-context'
 import { useProgress } from "@rntp/player"
 // import { HorizontalSlider } from '../../../components/Global/helpers/slider'
@@ -24,8 +23,6 @@ import { useProgress } from "@rntp/player"
 // import { useCurrentTrack } from '../../../stores/player/queue'
 
 export const ProgressMultiplier = 10 ** 5
-// Create a simple pan gesture
-const scrubGesture = Gesture.Pan()
 
 export default function Scrubber(): React.JSX.Element {
 	const seekTo = useSeekTo()
@@ -154,7 +151,6 @@ export default function Scrubber(): React.JSX.Element {
 	)
 
 	return (
-		<GestureDetector gesture={scrubGesture}>
 		<View className="items-center w-full">
 			{/* <Slider
 				value={displayPosition}
@@ -183,6 +179,5 @@ export default function Scrubber(): React.JSX.Element {
 				</View>
 			</View>
 		</View>
-	</GestureDetector>
 	)
 }

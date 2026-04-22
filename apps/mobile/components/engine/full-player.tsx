@@ -5,7 +5,7 @@ import { useFocusEffect } from "expo-router"
 import { useCallback, useMemo, useState } from "react"
 import { Platform, useWindowDimensions } from "react-native"
 import { Gesture } from "react-native-gesture-handler"
-import { interpolate, runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSpring } from "react-native-reanimated"
+import { interpolate, useAnimatedStyle, useSharedValue, withDelay, withSpring } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 
@@ -50,6 +50,7 @@ const FullPlayer = () => {
   // Swipe gesture
   const swipeGesture = useMemo(() => {
     return Gesture.Pan()
+      .runOnJS(true)
       .activeOffsetX([-12, 12])
       .onUpdate((e) => {
         if (Math.abs(e.translationY) < 40) {
@@ -70,12 +71,12 @@ const FullPlayer = () => {
 
           if (e.translationX > 0) {
             translateX.value = withSpring(220)
-            runOnJS(trigger)("notificationSuccess")
-            runOnJS(previous)()
+            trigger("notificationSuccess")
+            void previous()
           } else {
             translateX.value = withSpring(-220)
-            runOnJS(trigger)("notificationSuccess")
-            runOnJS(skip)(undefined)           
+            trigger("notificationSuccess")
+            void skip(undefined)
           }
 
           translateX.value = withDelay(160, withSpring(0))

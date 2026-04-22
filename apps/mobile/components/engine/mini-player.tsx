@@ -13,7 +13,7 @@ import { sizes } from "@/constants/sizes";
 import { usePathname, useRouter, useSegments } from "expo-router";
 import React, { useCallback, useMemo, memo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, { runOnJS, useSharedValue, withSpring } from "react-native-reanimated";
+import Animated, { useSharedValue, withSpring } from "react-native-reanimated";
 import type { LastPlayedSummary } from "@/engine/state/player-queue-store";
 import type { SermonItemDTO } from "@/types/sermon";
 import type { SermonTrackDTO } from "@/dtos/sermon.dto";
@@ -214,6 +214,9 @@ const MiniPlayer = () => {
 	const gesture = useMemo(
 		() =>
 			Gesture.Pan()
+				// Run handlers on the JS thread (same pattern as SwipeableRow) so Reanimated + RNTP
+				// never hit the UI runtime with sync calls like `addListener` when the bridge is healthy.
+				.runOnJS(true)
 				.activeOffsetX([-18, 18])
 				.activeOffsetY([-22, 22])
 				.onUpdate((event) => {
@@ -223,11 +226,11 @@ const MiniPlayer = () => {
 				.onEnd((event) => {
 					const threshold = 100;
 					if (event.translationX > threshold) {
-						runOnJS(handleSwipe)("Swiped Right");
+						handleSwipe("Swiped Right");
 					} else if (event.translationX < -threshold) {
-						runOnJS(handleSwipe)("Swiped Left");
+						handleSwipe("Swiped Left");
 					} else if (event.translationY < -threshold) {
-						runOnJS(handleSwipe)("Swiped Up");
+						handleSwipe("Swiped Up");
 					}
 					translateX.value = withSpring(0);
 					translateY.value = withSpring(0);

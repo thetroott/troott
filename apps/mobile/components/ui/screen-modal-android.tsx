@@ -1,8 +1,6 @@
-import { StyleSheet, Text, View, Platform, Pressable } from "react-native";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -10,9 +8,11 @@ import Animated, {
 import { router } from "expo-router";
 
 /**
+ * Android wrapper for modal-style screen transitions.
  *
- * @description This is an android wrapper for IOS modal
- * screen/route transitions.
+ * Important: never mark a function as a Reanimated `worklet` if it closes over
+ * `router` / navigation objects. Worklets serialize their closure; capturing
+ * the Expo Router host triggers UI-thread errors (`addListener`, SharedValue).
  */
 
 interface ScreenModalAndroidViewProps {
@@ -22,31 +22,33 @@ const ScreenModalAndroidView = ({ children }: ScreenModalAndroidViewProps) => {
   const translateY = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
-    flex: 1
+    flex: 1,
   }));
-  const handleBackPress = () => {
-    "worklet";
-    runOnJS(router.back)();
-  };
-  const closeGesture = Gesture.Pan()
-    .onUpdate((event) => {
-      if (event.translationY > 0) {
-         translateY.value = withSpring(event.translationY);
-        return;
-      }
-     
-    })
-    .onEnd((event) => {
-  
-      if (event.translationY < 100) {
-        translateY.value = withSpring(0);
-        return;
-      }
-      if (event.translationY > 100) {
-        handleBackPress();
-        return;
-      }
-    });
+
+  const goBack = useCallback(() => {
+    router.back();
+  }, []);
+
+  const closeGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .runOnJS(true)
+        .onUpdate((event) => {
+          if (event.translationY > 0) {
+            translateY.value = event.translationY;
+          }
+        })
+        .onEnd((event) => {
+          const ty = event.translationY;
+          if (ty < 100) {
+            translateY.value = withSpring(0);
+            return;
+          }
+          translateY.value = 0;
+          goBack();
+        }),
+    [goBack, translateY],
+  );
 
   return (
     <GestureDetector gesture={closeGesture}>
@@ -56,5 +58,3 @@ const ScreenModalAndroidView = ({ children }: ScreenModalAndroidViewProps) => {
 };
 
 export default ScreenModalAndroidView;
-
-const styles = StyleSheet.create({});

@@ -4,11 +4,16 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+} from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
-  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -36,11 +41,6 @@ interface BottomSheetRootProps {
   children?: React.ReactNode;
 }
 
-function isNearClosedY(y: number, closedY: number): boolean {
-  "worklet";
-  return Math.abs(y - closedY) < 1;
-}
-
 const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
   ({ children }, ref) => {
     const [showSheet, setShowSheet] = React.useState(false);
@@ -52,9 +52,19 @@ const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
     const sheetTranslateY = useSharedValue(initialHeight + 200);
     const sheetHeight = useSharedValue(initialHeight);
 
+    const finishClose = useCallback(() => {
+      setShowSheet(false);
+    }, []);
+
     const runCloseAnimation = useCallback(() => {
-      sheetTranslateY.value = withTiming(closedTranslateY, { duration: 300 });
-    }, [closedTranslateY, sheetTranslateY]);
+      sheetTranslateY.value = withTiming(
+        closedTranslateY,
+        { duration: 300 },
+        (finished) => {
+          if (finished) runOnJS(finishClose)();
+        },
+      );
+    }, [closedTranslateY, finishClose, sheetTranslateY]);
 
     useImperativeHandle(
       ref,
@@ -72,71 +82,78 @@ const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
     useEffect(() => {
       if (showSheet) {
         sheetTranslateY.value = withTiming(0, { duration: 500 });
+      } else {
+        sheetTranslateY.value = initialHeight + 200;
+        sheetHeight.value = initialHeight;
       }
-    }, [showSheet, sheetTranslateY]);
+    }, [showSheet, sheetTranslateY, sheetHeight, initialHeight]);
 
-    useAnimatedReaction(
-      () => sheetTranslateY.value,
-      (current, previous) => {
-        if (
-          isNearClosedY(current, closedTranslateY) &&
-          previous !== null &&
-          !isNearClosedY(previous, closedTranslateY)
-        ) {
-          sheetHeight.value = withSpring(initialHeight);
-          runOnJS(setShowSheet)(false);
-        }
-      }
+    const gesture = useMemo(
+      () =>
+        Gesture.Pan()
+          .runOnJS(true)
+          .onUpdate((event) => {
+            if (sheetHeight.value >= finalHeight) {
+              if (event.translationY < 0) {
+                return;
+              }
+            }
+            if (event.translationY < 0 && sheetHeight.value < finalHeight) {
+              sheetHeight.value = Math.abs(event.translationY) + initialHeight;
+              return;
+            }
+            sheetTranslateY.value = event.translationY;
+          })
+          .onEnd((event) => {
+            if (event.translationY > 200) {
+              sheetTranslateY.value = withTiming(
+                closedTranslateY,
+                { duration: 300 },
+                (finished) => {
+                  if (finished) runOnJS(finishClose)();
+                },
+              );
+              return;
+            }
+            if (sheetHeight.value >= finalHeight) {
+              if (event.translationY > 0 && event.translationY < 100) {
+                sheetTranslateY.value = withTiming(0);
+                return;
+              }
+              if (event.translationY > 0 && event.translationY > 100) {
+                sheetTranslateY.value = withTiming(0);
+                sheetHeight.value = withTiming(initialHeight);
+                return;
+              }
+            }
+            if (
+              event.translationY > -100 &&
+              event.translationY < 0 &&
+              sheetHeight.value < finalHeight
+            ) {
+              sheetHeight.value = withSpring(initialHeight);
+              return;
+            }
+            if (
+              event.translationY < -100 &&
+              event.translationY < 0 &&
+              sheetHeight.value < finalHeight
+            ) {
+              sheetHeight.value = withSpring(finalHeight);
+              sheetTranslateY.value = withSpring(0);
+              return;
+            }
+            sheetTranslateY.value = withTiming(0);
+          }),
+      [
+        closedTranslateY,
+        finalHeight,
+        finishClose,
+        initialHeight,
+        sheetHeight,
+        sheetTranslateY,
+      ],
     );
-
-    const gesture = Gesture.Pan()
-      .onUpdate((event) => {
-        if (sheetHeight.value >= finalHeight) {
-          if (event.translationY < 0) {
-            return;
-          }
-        }
-        if (event.translationY < 0 && sheetHeight.value < finalHeight) {
-          sheetHeight.value = Math.abs(event.translationY) + initialHeight;
-          return;
-        }
-        sheetTranslateY.value = event.translationY;
-      })
-      .onEnd((event) => {
-        if (event.translationY > 200) {
-          sheetTranslateY.value = withTiming(closedTranslateY, { duration: 300 });
-          return;
-        }
-        if (sheetHeight.value >= finalHeight) {
-          if (event.translationY > 0 && event.translationY < 100) {
-            sheetTranslateY.value = withTiming(0);
-            return;
-          }
-          if (event.translationY > 0 && event.translationY > 100) {
-            sheetTranslateY.value = withTiming(0);
-            sheetHeight.value = withTiming(initialHeight);
-            return;
-          }
-        }
-        if (
-          event.translationY > -100 &&
-          event.translationY < 0 &&
-          sheetHeight.value < finalHeight
-        ) {
-          sheetHeight.value = withSpring(initialHeight);
-          return;
-        }
-        if (
-          event.translationY < -100 &&
-          event.translationY < 0 &&
-          sheetHeight.value < finalHeight
-        ) {
-          sheetHeight.value = withSpring(finalHeight);
-          sheetTranslateY.value = withSpring(0);
-          return;
-        }
-        sheetTranslateY.value = withTiming(0);
-      });
 
     const animatedRootStyle = useAnimatedStyle(() => ({
       height: sheetHeight.value,
