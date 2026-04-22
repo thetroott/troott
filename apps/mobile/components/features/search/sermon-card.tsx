@@ -16,7 +16,7 @@ import {
     BottomSheetModal,
     BottomSheetRef,
 } from '@/components/ui/bottom-sheet-modal';
-import { TrackListActions } from '@/components/features/player/controls/actions';
+import { getTrackListActions } from '@/components/features/player/controls/actions';
 import type { BaseSermonDtoSlimified, SermonItemDTO } from '@/types/sermon';
 import type { Queue } from '@/types/queue-ref';
 import { usePlayQueue } from '@/stores/player/queue';
@@ -116,6 +116,7 @@ export default function SermonCard({
     const handleSheetOpen = useCallback(() => {
         sheetRef.current?.open();
     }, []);
+    const trackListActions = useMemo(() => getTrackListActions(track), [track]);
 
     const imageEl = useMemo(() => {
         if (!source) {
@@ -214,7 +215,7 @@ export default function SermonCard({
                     </View>
                 </BottomSheetModal.Title>
                 <BottomSheetModal.Content>
-                    {TrackListActions.map((action, i) => (
+                    {trackListActions.map((action, i) => (
                         <Pressable
                             key={`${action.label}-${i}`}
                             style={styles.sheetRow}

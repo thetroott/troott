@@ -1,6 +1,7 @@
 import { SolidIcons } from '@/assets/icons';
 import { theme } from '@/constants/theme';
 import { router } from 'expo-router';
+import type { SermonItemDTO } from '@/types/sermon';
 import {
     ArchiveAdd,
     DocumentDownload,
@@ -13,8 +14,9 @@ import {
     Timer1,
     Warning2,
 } from 'iconsax-react-nativejs';
+import { openShareFlow } from '@/stores/app/share';
 
-export const TrackListActions = [
+export const getTrackListActions = (track?: SermonItemDTO) => [
     {
         icon: <Heart color={theme.colors.grey[50]} />,
         label: 'Like',
@@ -45,7 +47,15 @@ export const TrackListActions = [
     {
         icon: <Share color={theme.colors.grey[50]} />,
         label: 'Share',
-        action: () => {},
+        action: () => {
+            openShareFlow({
+                id: track?.id ?? null,
+                title: track?.title ?? 'Beauty For Ashes',
+                minister: track?.minister ?? 'Unknown minister',
+                image: track?.image ?? null,
+                artwork: track?.artwork ?? null,
+            });
+        },
     },
     {
         icon: <Profile color={theme.colors.grey[50]} />,
