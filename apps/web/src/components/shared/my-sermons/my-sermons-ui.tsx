@@ -11,9 +11,9 @@ import { cn } from '@/lib/utils';
 export const MY_SERMONS_PAGE = {
     /** Page background — Figma [`10154:35083`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10154-35083) canvas `#2b2a2c` (`Frame 1618868833`). */
     pageBg: 'bg-[#2b2a2c]',
-    /** Centered rail: max **1200**, **16px** gutter, vertical **16px** top/bottom. */
+    /** Full width of `main` with **16px** horizontal inset (Figma gutter), no centered max-width rail. */
     mainColumn:
-        'mx-auto box-border flex min-h-0 w-full max-w-[1200px] flex-1 flex-col  pb-2 pt-2',
+        'box-border flex min-h-0 w-full min-w-0 max-w-none flex-1 flex-col px-4 pb-2 pt-2',
     /** Header + tabs + toolbar — **154px** total; bottom stroke separates from table (`Frame 1618868833`). */
     chromeStack:
         'w-full shrink-0 border-b border-[#545454]/50 bg-[#2b2a2c]',
@@ -46,11 +46,12 @@ export const MY_SERMONS_PAGE = {
     toolbarRow: 'mt-0 flex h-14 w-full items-center justify-between gap-4',
     toolbarLeft: 'flex min-w-0 flex-1 items-center gap-2',
     toolbarRight: 'flex shrink-0 items-center gap-2',
-    /** Search field — **190×32**, radius **8**, stroke `#545454` @ 50%. */
-    searchWrap: 'relative h-8 w-[190px] shrink-0',
+    /** Search field — max **190px** wide, grows on narrow viewports; radius **8**. */
+    searchWrap:
+        'relative h-8 w-full min-w-0 max-w-[190px] shrink-[1] basis-[min(100%,190px)]',
     searchIcon: 'pointer-events-none absolute left-2 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#bdbdbd]',
     searchInput:
-        'h-8 w-full rounded-lg border border-[#545454]/50 bg-transparent py-0 pl-[34px] pr-3 font-matter text-sm leading-5 tracking-[0.14px] text-[#eaeaea] placeholder:text-[#bdbdbd] placeholder:opacity-100 focus-visible:border-[#545454] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#08ffdb]/40',
+        'h-8 w-full cursor-text rounded-lg border border-[#545454]/50 bg-transparent py-0 pl-[34px] pr-3 font-matter text-sm leading-5 tracking-[0.14px] text-[#eaeaea] placeholder:text-[#bdbdbd] placeholder:opacity-100 focus-visible:border-[#545454] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#08ffdb]/40',
     /** Filters / Sort — **32** tall, radius **6**, fill `#2b2a2c`, label `#bdbdbd`. */
     pillBtn:
         'inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md border border-transparent bg-[#2b2a2c] px-2 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#bdbdbd] transition-[color,background-color,border-color] hover:border-[#545454]/40 hover:bg-[#353437] hover:text-[#eaeaea] active:bg-[#3d3c3f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
@@ -69,7 +70,7 @@ export const MY_SERMONS_PAGE = {
     paginationCluster: 'flex items-center gap-2',
     /** **32×32** icon host (INSTANCE chip in file). */
     paginationNavBtn:
-        'inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded bg-[#333234] text-[#eaeaea] transition-colors hover:bg-white/10 active:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30 disabled:pointer-events-none disabled:opacity-40',
+        'inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded bg-[#333234] text-[#eaeaea] transition-colors hover:bg-white/10 active:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
     paginationRange:
         'font-matter text-sm font-normal leading-5 tracking-[0.14px] text-[#eaeaea]',
     pageSelect:
@@ -107,7 +108,7 @@ export const MY_SERMONS_LIST = {
     rowQuickActionsWrap:
         'flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover/sermon-row:pointer-events-auto group-hover/sermon-row:opacity-100',
     rowQuickActionBtn:
-        'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] border border-[#545454] bg-[#2b2a2c] text-[#eaeaea] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
+        'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-[3px] border border-[#545454] bg-[#2b2a2c] text-[#eaeaea] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
     tdCell:
         'box-border h-[64px] border-b border-[#545454]/50 px-4 py-0 align-middle first:pl-4 last:pr-4',
     /** Native checkbox — **18×18**, radius **4**, stroke `#9d9d9d` (Component 89). */

@@ -14,9 +14,25 @@ class Sermon {
 
   getSermonsByMinister(
     ministerId: string,
-    params?: { page?: number; limit?: number; sort?: string }
+    params?: {
+      page?: number;
+      limit?: number;
+      sort?: string;
+      q?: string;
+      status?: "all" | "draft" | "published";
+      dateFrom?: string;
+      dateTo?: string;
+    }
   ) {
     return this.client.get(`/sermon/minister/${ministerId}`, { params });
+  }
+
+  updateSermon(id: string, body: Record<string, unknown>) {
+    return this.client.put(`/sermon/update/${id}`, body);
+  }
+
+  moveSermonToBin(id: string, body?: Record<string, unknown>) {
+    return this.client.put(`/sermon/move-to-bin/${id}`, body ?? {});
   }
 
   startUpload(

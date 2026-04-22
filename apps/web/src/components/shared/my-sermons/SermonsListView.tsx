@@ -1,4 +1,4 @@
-import { ArrowDown, Link2, Pencil } from 'lucide-react';
+import { ArrowDown, ArrowUp, Link2, Pencil } from 'lucide-react';
 import type { Sermon } from '@/_data/dummySermons';
 import SermonContextMenu from './SermonContextMenu';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,8 @@ interface SermonsListViewProps {
     onDownload: (sermonId: string) => void;
     onAnalytics: (sermonId: string) => void;
     onMoveToTrash: (sermonId: string) => void;
+    sortKey?: string;
+    onDateCreatedSortClick?: () => void;
 }
 
 const SermonsListView = ({
@@ -38,7 +40,12 @@ const SermonsListView = ({
     onDownload,
     onAnalytics,
     onMoveToTrash,
+    sortKey = '-createdAt',
+    onDateCreatedSortClick,
 }: SermonsListViewProps) => {
+    const dateSortDesc =
+        sortKey === '-createdAt' ||
+        (sortKey?.includes('createdAt') && sortKey.startsWith('-'));
     return (
         <div className={MY_SERMONS_LIST.scrollWrap}>
             <table className={MY_SERMONS_LIST.table}>
@@ -76,18 +83,52 @@ const SermonsListView = ({
                             Sermon
                         </th>
                         <th scope="col" className={MY_SERMONS_LIST.thCell}>
-                            <span className={MY_SERMONS_LIST.thSortableInner}>
-                                Date Created
-                                <span
-                                    className={MY_SERMONS_LIST.thSortBadge}
-                                    aria-hidden
+                            {onDateCreatedSortClick ? (
+                                <button
+                                    type="button"
+                                    className={cn(
+                                        MY_SERMONS_LIST.thSortableInner,
+                                        'cursor-pointer rounded-sm text-left transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
+                                    )}
+                                    onClick={onDateCreatedSortClick}
+                                    aria-label={`Sort by date created, ${
+                                        dateSortDesc
+                                            ? 'newest first'
+                                            : 'oldest first'
+                                    }`}
                                 >
-                                    <ArrowDown
-                                        className="h-2.5 w-2.5 shrink-0"
-                                        strokeWidth={2.5}
-                                    />
+                                    Date Created
+                                    <span
+                                        className={MY_SERMONS_LIST.thSortBadge}
+                                        aria-hidden
+                                    >
+                                        {dateSortDesc ? (
+                                            <ArrowDown
+                                                className="h-2.5 w-2.5 shrink-0"
+                                                strokeWidth={2.5}
+                                            />
+                                        ) : (
+                                            <ArrowUp
+                                                className="h-2.5 w-2.5 shrink-0"
+                                                strokeWidth={2.5}
+                                            />
+                                        )}
+                                    </span>
+                                </button>
+                            ) : (
+                                <span className={MY_SERMONS_LIST.thSortableInner}>
+                                    Date Created
+                                    <span
+                                        className={MY_SERMONS_LIST.thSortBadge}
+                                        aria-hidden
+                                    >
+                                        <ArrowDown
+                                            className="h-2.5 w-2.5 shrink-0"
+                                            strokeWidth={2.5}
+                                        />
+                                    </span>
                                 </span>
-                            </span>
+                            )}
                         </th>
                         <th scope="col" className={MY_SERMONS_LIST.thCell}>
                             Status

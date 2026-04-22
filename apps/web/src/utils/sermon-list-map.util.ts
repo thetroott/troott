@@ -1,4 +1,5 @@
 import type { Sermon } from '@/_data/dummySermons';
+import type { AxiosResponse } from 'axios';
 
 function coalesceDurationSeconds(...candidates: unknown[]): number {
   for (const v of candidates) {
@@ -47,6 +48,15 @@ function stableDevPlaceholderDurationSec(seed: string): number {
   return minSec + (Math.abs(h) % span);
 }
 
+function dateFieldToMs(v: unknown): number | undefined {
+  if (v instanceof Date) return v.getTime();
+  if (typeof v === 'string' && v.trim()) {
+    const t = Date.parse(v);
+    return Number.isFinite(t) ? t : undefined;
+  }
+  return undefined;
+}
+
 /** Map API sermon document (mongoose / DTO) to My Sermons table row shape. */
 export function mapApiSermonToTableRow(raw: Record<string, unknown>): Sermon {
   const id = String(raw.id ?? raw._id ?? '');
@@ -86,11 +96,20 @@ export function mapApiSermonToTableRow(raw: Record<string, unknown>): Sermon {
         ? raw.playHistory.length
         : 0;
 
+  const createdAtMs = dateFieldToMs(raw.createdAt);
+  const updatedAtMs =
+    dateFieldToMs(raw.updatedAt) ?? createdAtMs;
+  const releaseDateMs =
+    dateFieldToMs(raw.releaseDate) ?? createdAtMs;
+
   return {
     id,
     name: title,
     duration: formatSecondsToLabel(durationSec),
     dateCreated: dateLabel,
+    createdAtMs,
+    updatedAtMs,
+    releaseDateMs,
     plays,
     comments: typeof raw.commentCount === 'number' ? raw.commentCount : 0,
     likes: typeof raw.likeCount === 'number' ? raw.likeCount : 0,
@@ -98,6 +117,30 @@ export function mapApiSermonToTableRow(raw: Record<string, unknown>): Sermon {
     type: 'audio',
     publicationStatus: isDraft ? 'draft' : 'published',
   };
+}
+
+/** Normalizes GET /sermon/minister/:id — supports `{ sermons, total }` or legacy array. */
+export function parseMinisterSermonsResponse(
+  res: AxiosResponse<{ data?: unknown }>,
+): { list: Record<string, unknown>[]; total: number } {
+  const raw = res.data?.data;
+  if (Array.isArray(raw)) {
+    return { list: raw as Record<string, unknown>[], total: raw.length };
+  }
+  if (
+    raw &&
+    typeof raw === 'object' &&
+    Array.isArray((raw as { sermons?: unknown }).sermons)
+  ) {
+    const o = raw as { sermons: Record<string, unknown>[]; total?: number };
+    const list = o.sermons;
+    const total =
+      typeof o.total === 'number' && Number.isFinite(o.total)
+        ? o.total
+        : list.length;
+    return { list, total };
+  }
+  return { list: [], total: 0 };
 }
 
 function formatSecondsToLabel(totalSeconds: number): string {

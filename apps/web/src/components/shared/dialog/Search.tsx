@@ -74,10 +74,12 @@ export function SearchForm(data: ISearchForm) {
                   onClick={() => setOpen(true)}
                   type="button"
                   data-active={true}
-                  className="border border-neutral-600"
+                  className="border border-neutral-600 text-white hover:bg-white/10 hover:text-white data-[active=true]:text-white [&>svg]:text-white"
                 >
-                  <Search className="size-4" />
-                  <span>Search</span>
+                  <Search className="size-4 shrink-0 text-white" aria-hidden />
+                  <span className="group-data-[collapsible=icon]:sr-only">
+                    Search
+                  </span>
                 </SidebarMenuButton>
               ) : (
                 <SidebarMenuButton

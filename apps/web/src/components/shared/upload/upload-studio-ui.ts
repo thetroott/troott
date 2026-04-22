@@ -4,8 +4,10 @@
  */
 export const UPLOAD_SHELL = {
     maxWidthClass: 'max-w-[827px]',
-    widthClass: 'w-[min(827px,calc(100vw-2rem))]',
-    minHeightClass: 'min-h-[min(620px,88vh)]',
+    /** Fill the dialog/inset width; avoid `100vw` so zoom and sidebar reflow stay correct. */
+    widthClass: 'w-full min-w-0',
+    /** Flexible bounds — `dvh` tracks dynamic viewport; no hard sidebar `px` coupling. */
+    minHeightClass: 'min-h-[min(280px,55dvh)] max-h-[92dvh]',
     outerRadius: 'rounded-2xl',
     outerBg: 'bg-[#2b2a2c]',
     outerBorder: 'border border-[#545454]/50',
@@ -37,7 +39,7 @@ export const UPLOAD_SHELL = {
     tabIconInactive: 'opacity-90',
     divider: 'h-4 w-px shrink-0 bg-[#545454]/50',
     contentCard:
-        'rounded-lg border border-[#707070] bg-[#333234] min-h-[min(337px,45vh)]',
+        'rounded-lg border border-[#707070] bg-[#333234] min-h-[min(200px,40dvh)]',
     footerBg: 'bg-[#333234]',
     footerMinH: 'min-h-[48px]',
     /** Footer status strip on Details / Listener (Figma `4535:21468`, `4499:19755`). */
@@ -88,10 +90,10 @@ export const UPLOAD_SHELL = {
 export const UPLOAD_OPTIONS_BAR = {
     railBg: 'bg-[#171717]',
     railDivider: 'border-b border-[#545454]/50',
-    /** Inner track — aligns with studio main `container` gutters. */
-    inner: 'mx-auto w-full max-w-7xl px-4 py-3 md:px-6',
+    /** Full-width track under `main` — no `max-w-*` so the rail stretches with the sidebar column. */
+    inner: 'w-full min-w-0 px-4 py-3 md:px-6',
     chipRow:
-        'scrollbar-none flex min-w-0 flex-nowrap items-stretch justify-start gap-4 overflow-x-auto md:justify-center',
+        'scrollbar-none flex min-w-0 flex-nowrap items-stretch justify-start gap-4 overflow-x-auto',
     chipBase:
         'flex min-h-[70px] w-[207px] shrink-0 cursor-pointer flex-row items-center gap-2 rounded-lg border px-4 py-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:pointer-events-none disabled:opacity-50',
     chipInactive:

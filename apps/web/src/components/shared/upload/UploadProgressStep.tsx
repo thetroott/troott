@@ -13,6 +13,8 @@ import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
 import apiCall from '@/api/config';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
+import { useUserStore } from '@/store/user-store';
+import { resolveMinisterId } from '@/utils/minister-id.util';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
@@ -27,6 +29,8 @@ import { probeAudioFileDurationSec } from '@/utils/audio-file-duration.util';
  */
 const UploadProgressStep: React.FC = () => {
     const queryClient = useQueryClient();
+    const user = useUserStore((s) => s.user) as Record<string, unknown> | null;
+    const ministerId = resolveMinisterId(user);
     const { state, dispatch } = useUpload();
     const { uploadData, progress, uploadComplete, isLoading } = state;
     const uploadSnapshotRef = useRef(uploadData);
@@ -85,6 +89,12 @@ const UploadProgressStep: React.FC = () => {
                     void queryClient.invalidateQueries({
                         queryKey: sermonQueryKeys.all,
                     });
+                    if (ministerId) {
+                        void queryClient.invalidateQueries({
+                            queryKey:
+                                sermonQueryKeys.ministerListRoot(ministerId),
+                        });
+                    }
                     return;
                 }
 
@@ -132,6 +142,11 @@ const UploadProgressStep: React.FC = () => {
                 void queryClient.invalidateQueries({
                     queryKey: sermonQueryKeys.all,
                 });
+                if (ministerId) {
+                    void queryClient.invalidateQueries({
+                        queryKey: sermonQueryKeys.ministerListRoot(ministerId),
+                    });
+                }
             } catch (e: unknown) {
                 if (cancelled || axios.isCancel(e)) return;
                 const message =

@@ -1,5 +1,4 @@
 import React from 'react';
-import { useSidebar } from '@/components/ui/sidebar';
 import { useUpload, uploadActions } from '@/context/upload/upload.context';
 import { cn } from '@/lib/utils';
 import { UPLOAD_OPTIONS_BAR } from '@/components/shared/upload/upload-studio-ui';
@@ -46,7 +45,6 @@ const CreatorIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 const UploadOptions: React.FC = () => {
-  const { open: sidebarOpen, isMobile } = useSidebar();
   const { state, dispatch } = useUpload();
   const { activeOption = 'upload' } = state;
 
@@ -84,15 +82,10 @@ const UploadOptions: React.FC = () => {
 
   return (
     <div
-      className={cn('fixed top-[60px] z-[1] w-full', UPLOAD_OPTIONS_BAR.railBg)}
-      style={{
-        left: !isMobile ? (sidebarOpen ? '240px' : '48px') : '0px',
-        width: !isMobile
-          ? sidebarOpen
-            ? 'calc(100% - 240px)'
-            : 'calc(100% - 48px)'
-          : '100%',
-      }}
+      className={cn(
+        'sticky top-0 z-10 w-full min-w-0 shrink-0',
+        UPLOAD_OPTIONS_BAR.railBg,
+      )}
     >
       <div className={UPLOAD_OPTIONS_BAR.railDivider}>
         <div className={UPLOAD_OPTIONS_BAR.inner}>

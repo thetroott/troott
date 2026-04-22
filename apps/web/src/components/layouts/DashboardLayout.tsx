@@ -7,7 +7,12 @@ import NavBar from "../shared/navigation/NavBar";
 import { cn } from "@/lib/utils";
 
 /** My Sermons matches Figma [`10154:35083`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10154-35083) — no global top nav; shell fill `#2b2a2c` (not theme `neutral-900`). */
-const MY_SERMONS_PATHS = new Set(["/get-sermons", "/my-sermon"]);
+/** My Sermons list — full canvas, no top nav (see Figma note above). */
+const MY_SERMONS_PATHS = new Set([
+  "/sermons",
+  "/get-sermons",
+  "/my-sermon",
+]);
 
 /** Figma frame fill for node `10154:35083` / `Frame 1618868833`. */
 const MY_SERMONS_CANVAS_BG = "bg-[#2b2a2c]";
@@ -17,6 +22,8 @@ const DashboardLayout = () => {
   const normalizedPath = pathname.replace(/\/+$/, "") || "/";
   const hideTopNav = MY_SERMONS_PATHS.has(normalizedPath);
   const shellBg = hideTopNav ? MY_SERMONS_CANVAS_BG : "bg-neutral-900";
+  /** Studio upload page — stretch content to the sidebar column (no double horizontal inset). */
+  const dashboardFullWidthMain = normalizedPath === "/dashboard";
 
   const [defaultOpen] = React.useState(() => {
     const stored = storage.fetch("sidebar-collapsed");
@@ -45,7 +52,9 @@ const DashboardLayout = () => {
               shellBg,
               hideTopNav
                 ? "p-0"
-                : "px-4 pb-4 pt-2 md:px-6",
+                : dashboardFullWidthMain
+                  ? "px-0 pb-4 pt-2"
+                  : "px-4 pb-4 pt-2 md:px-6",
             )}
           >
             <Outlet />
