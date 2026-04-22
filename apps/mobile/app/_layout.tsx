@@ -1,5 +1,5 @@
-import { AppState, Platform, View } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { AppState, Platform, Share, StyleSheet, View } from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
@@ -24,6 +24,34 @@ import { usePendingDeepLinkBootstrap } from '@/lib/deep-link/use-pending-deeplin
 import MiniPlayer from '@/components/features/player/mini-player/mini-player';
 import { EmbeddedBridgeGuard } from '@/components/dev/EmbeddedBridgeGuard';
 import TrackPlayer from '@rntp/player';
+import {
+    ListenerSharingFlow,
+} from '@/components/features/share';
+import { useShareFlow } from '@/stores/app/share';
+import { FullWindowOverlay } from 'react-native-screens';
+import { Portal } from '@/components/ui/portal';
+
+function getClipboardModule(): { setStringAsync: (value: string) => Promise<void> } | null {
+    try {
+        // Optional native module in some runtimes/build variants.
+        return require('expo-clipboard') as {
+            setStringAsync: (value: string) => Promise<void>;
+        };
+    } catch {
+        return null;
+    }
+}
+
+function getSharingModule(): { isAvailableAsync: () => Promise<boolean>; shareAsync: (url: string) => Promise<void> } | null {
+    try {
+        return require('expo-sharing') as {
+            isAvailableAsync: () => Promise<boolean>;
+            shareAsync: (url: string) => Promise<void>;
+        };
+    } catch {
+        return null;
+    }
+}
 
 enableScreens(true);
 
@@ -37,6 +65,63 @@ const RootLayout = () => {
     const [playerIsReady, setPlayerIsReady] = useState<boolean>(false);
     const androidSetupRetryRef = useRef(false);
     const playerListenersAttachedRef = useRef(false);
+    const { visible, step, track, close, setStep } = useShareFlow();
+    const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const buildShareUrl = useCallback(() => {
+        if (track.id != null && String(track.id).length > 0) {
+            return `https://app.troott.com/track/${track.id}`;
+        }
+        const slug = (track.title ?? 'sermon')
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-');
+        return `https://app.troott.com/track/${encodeURIComponent(slug)}`;
+    }, [track.id, track.title]);
+
+    const handleCopyToClipboard = useCallback(async () => {
+        const url = buildShareUrl();
+        const clipboard = getClipboardModule();
+        if (clipboard) {
+            await clipboard.setStringAsync(url);
+        } else {
+            await Share.share({ message: url, url });
+            close();
+            return;
+        }
+        setStep('copy-toast');
+
+        if (toastTimeoutRef.current) {
+            clearTimeout(toastTimeoutRef.current);
+        }
+        toastTimeoutRef.current = setTimeout(() => {
+            close();
+            toastTimeoutRef.current = null;
+        }, 1200);
+    }, [buildShareUrl, close, setStep]);
+
+    const handleOpenNativeShare = useCallback(async () => {
+        const url = buildShareUrl();
+        const message = `Listen to ${track.title ?? 'this sermon'} on Troott`;
+
+        try {
+            const sharing = getSharingModule();
+            // expo-sharing may not support raw HTTP urls on all platforms;
+            // fallback to RN Share for URL/text payloads.
+            const sharingAvailable = sharing
+                ? await sharing.isAvailableAsync()
+                : false;
+            if (sharingAvailable) {
+                await sharing?.shareAsync(url);
+            } else {
+                await Share.share({ message: `${message}\n${url}`, url });
+            }
+        } catch {
+            await Share.share({ message: `${message}\n${url}`, url });
+        } finally {
+            close();
+        }
+    }, [buildShareUrl, close, track.title]);
 
     useEffect(() => {
         let cancelled = false;
@@ -120,6 +205,14 @@ const RootLayout = () => {
         return () => sub.remove();
     }, [playerIsReady]);
 
+    useEffect(() => {
+        return () => {
+            if (toastTimeoutRef.current) {
+                clearTimeout(toastTimeoutRef.current);
+            }
+        };
+    }, []);
+
     // Hide splash screen once fonts and player are ready
     useEffect(() => {
         if (fontsLoaded && playerIsReady) {
@@ -174,17 +267,36 @@ const RootLayout = () => {
                          * Portals (bottom sheet, etc.) must stack above the mini player (zIndex 50
                          * on the player shell). Same-level siblings without a higher z-index sit under it.
                          */}
-                        <View
-                            pointerEvents="box-none"
-                            style={{
-                                zIndex: 200,
-                                elevation: 20,
-                            }}
-                        >
-                            <PortalHost />
-                        </View>
+                        {Platform.OS === 'ios' ? (
+                            <FullWindowOverlay>
+                                <View
+                                    pointerEvents="box-none"
+                                    style={styles.portalLayer}
+                                >
+                                    <PortalHost />
+                                </View>
+                            </FullWindowOverlay>
+                        ) : (
+                            <View
+                                pointerEvents="box-none"
+                                style={styles.portalLayer}
+                            >
+                                <PortalHost />
+                            </View>
+                        )}
                         <Toaster />
                         <EmbeddedBridgeGuard />
+                        <Portal name="listener-sharing-flow">
+                            <ListenerSharingFlow
+                                visible={visible}
+                                step={step}
+                                track={track}
+                                onDismiss={close}
+                                onPressCopy={handleCopyToClipboard}
+                                onPressInstagram={handleOpenNativeShare}
+                                onPressMoreOptions={handleOpenNativeShare}
+                            />
+                        </Portal>
                     </SafeAreaView>
                 </PersistQueryClientProvider>
             </SafeAreaProvider>
@@ -193,3 +305,11 @@ const RootLayout = () => {
 };
 
 export default RootLayout;
+
+const styles = StyleSheet.create({
+    portalLayer: {
+        ...StyleSheet.absoluteFillObject,
+        zIndex: 5000,
+        elevation: 5000,
+    },
+});
