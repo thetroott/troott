@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 
-import FullPlayerTrackDetails from '../sermon/[id]';
+import FullPlayerScreen from '@/components/features/player/full-player/full-player-screen';
 import { useTrackStore } from '@/stores/player-store';
 
 /**
@@ -18,5 +18,5 @@ export default function PlayerScreen() {
         }, [setShowFullPlayer]),
     );
 
-    return <FullPlayerTrackDetails />;
+    return <FullPlayerScreen />;
 }
