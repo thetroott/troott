@@ -8,14 +8,19 @@ import { router } from 'expo-router';
 import SermonCard from '@/components/features/search/sermon-card';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/types/sermon';
 import { tracks } from '@/_data/_mock/tracks';
+
+type CatalogRow = Parameters<typeof catalogRowToSermonItem>[0] & {
+    artist?: string | null;
+};
 
 const MoreFromMinister = () => {
     const { data: sermons, isLoading } = useSermonsCatalog();
 
     // Use fallback data if sermons are not loaded
-    const dataSource = sermons && sermons.length > 0 ? sermons : tracks;
+    const dataSource: CatalogRow[] =
+        sermons && sermons.length > 0 ? sermons : (tracks as CatalogRow[]);
 
     // Filter sermons by a specific minister (Apostle Joshua Selman in this case)
     const ministerSermons =
@@ -47,7 +52,7 @@ const MoreFromMinister = () => {
                         r.id != null
                             ? String(r.id)
                             : `more-minister-${i}`,
-                } as Partial<ISermonTrack> & { id: string | null }),
+                }),
             ),
         [sermonsToShow],
     );

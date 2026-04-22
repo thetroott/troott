@@ -15,7 +15,11 @@ import { tracks } from '@/_data/_mock/tracks';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
 import SermonCard from '@/components/features/search/sermon-card';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/types/sermon';
+
+type CatalogRow = Parameters<typeof catalogRowToSermonItem>[0] & {
+    artist?: string | null;
+};
 
 const TopSermons = () => {
     const { data: sermons, isLoading } = useSermonsCatalog();
@@ -25,7 +29,7 @@ const TopSermons = () => {
     const sermonsData =
         sermons && sermons.length > 0
             ? sermons
-            : (tracks as Partial<ISermonTrack>[]);
+            : (tracks as CatalogRow[]);
 
     const tracklistDtos: SermonItemDTO[] = useMemo(
         () =>
@@ -33,7 +37,7 @@ const TopSermons = () => {
                 catalogRowToSermonItem({
                     ...r,
                     id: r.id != null ? String(r.id) : `s4u-${i}`,
-                } as Partial<ISermonTrack> & { id: string | null }),
+                }),
             ),
         [sermonsData],
     );
