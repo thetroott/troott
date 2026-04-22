@@ -14,7 +14,7 @@ import { SolidIcons } from '@/assets/icons';
 import { usePlayFromCatalogList } from '@/hooks/player/use-play-from-catalog-list';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
 import type { IPlayListCard } from './types';
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/types/sermon';
 
 const FALLBACK_COVER = require('@/assets/images/cover.jpg');
 
@@ -36,14 +36,23 @@ function resolveCover(
 
 function toCatalogRows(
     tracks: IPlayListCard['tracks'],
-): (Partial<ISermonTrack> & { id: string | null })[] {
-    return tracks.map((t, i) => ({
-        ...t,
-        id:
-            t.id != null && String(t.id).length > 0
-                ? String(t.id)
-                : `pl-row-${i}`,
-    }));
+): Parameters<typeof catalogRowToSermonItem>[0][] {
+    return tracks.map((t, i) => {
+        const { sermon, ...rest } = t;
+        const sermonAsset =
+            typeof sermon === 'string' || typeof sermon === 'number'
+                ? sermon
+                : undefined;
+
+        return {
+            ...rest,
+            sermon: sermonAsset,
+            id:
+                t.id != null && String(t.id).length > 0
+                    ? String(t.id)
+                    : `pl-row-${i}`,
+        };
+    });
 }
 
 const PlayList = ({

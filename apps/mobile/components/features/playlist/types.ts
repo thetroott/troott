@@ -1,6 +1,6 @@
 import { ImageSourcePropType, ViewStyle } from 'react-native';
 
-import type { ISermonTrack } from '@/types/sermon';
+import type { SermonItemDTO } from '@/types/sermon';
 
 export interface ITrackCard {
     id?: string;
@@ -19,8 +19,8 @@ export interface IPlayListCard {
     title: string;
     church: string;
     description: string;
-    /** Catalog / mock sermon rows; optional ids are generated for play mapping */
-    tracks: Array<Partial<ISermonTrack> & { id?: string | number | null }>;
+    /** Sermon rows; optional ids are generated for play mapping */
+    tracks: Array<Partial<SermonItemDTO> & { id?: string | number | null }>;
     cardStyle?: ViewStyle;
 }
 
