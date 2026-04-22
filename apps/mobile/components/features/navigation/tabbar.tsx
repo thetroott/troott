@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 import Text from '@/components/ui/text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
@@ -17,6 +17,7 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import { useEffect } from 'react';
+import { useProfileIdentity } from '@/components/features/profile/use-profile-identity';
 
 /**
  *
@@ -25,6 +26,7 @@ import { useEffect } from 'react';
 
 const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
     const insets = useSafeAreaInsets();
+    const { avatarSource } = useProfileIdentity();
 
     const tabIcons = {
         home: {
@@ -76,6 +78,8 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
                     <Pressable onPress={handleNavigation} key={index}>
                         <TabBarIcon
                             focused={isFocused}
+                            routeName={routeName.name}
+                            profileAvatarSource={avatarSource}
                             Icon={
                                 tabIcons[
                                     routeName.name as keyof typeof tabIcons
@@ -100,7 +104,7 @@ const styles = StyleSheet.create({
     tabBarContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        paddingVertical: 10,
+        paddingTop: theme.sizes.spacing.md,
         backgroundColor: theme.colors.black[50],
         gap: theme.sizes.spacing['2xl'] + 15,
     },
@@ -108,15 +112,42 @@ const styles = StyleSheet.create({
         gap: theme.sizes.spacing.sm,
         alignItems: 'center',
     },
+    profileImageWrap: {
+        width: 24,
+        height: 24,
+        borderRadius: theme.sizes.radius.full,
+        borderWidth: 1.5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+    },
+    profileImageWrapFocused: {
+        borderColor: theme.colors.teal[500],
+    },
+    profileImageWrapBlur: {
+        borderColor: theme.colors.grey[300],
+    },
+    profileImage: {
+        width: '100%',
+        height: '100%',
+    },
 });
 
 interface TabBarIconProps {
     focused: boolean;
+    routeName: string;
+    profileAvatarSource: React.ComponentProps<typeof Image>['source'] | null;
     Icon: Icon;
     label: string;
 }
 
-const TabBarIcon = ({ focused, Icon, label }: TabBarIconProps) => {
+const TabBarIcon = ({
+    focused,
+    routeName,
+    profileAvatarSource,
+    Icon,
+    label,
+}: TabBarIconProps) => {
     const scalepProgess = useSharedValue(0);
     useEffect(() => {
         if (focused) {
@@ -135,13 +166,26 @@ const TabBarIcon = ({ focused, Icon, label }: TabBarIconProps) => {
     }));
     return (
         <Animated.View style={[styles.iconContainer, AnimatedStyle]}>
-            <Icon
-                size={24}
-                variant={focused ? 'Bold' : 'Outline'}
-                color={
-                    focused ? theme.colors.teal[500] : theme.colors.grey[300]
-                }
-            />
+            {routeName === 'profile' && profileAvatarSource ? (
+                <View
+                    style={[
+                        styles.profileImageWrap,
+                        focused
+                            ? styles.profileImageWrapFocused
+                            : styles.profileImageWrapBlur,
+                    ]}
+                >
+                    <Image source={profileAvatarSource} style={styles.profileImage} />
+                </View>
+            ) : (
+                <Icon
+                    size={24}
+                    variant={focused ? 'Bold' : 'Outline'}
+                    color={
+                        focused ? theme.colors.teal[500] : theme.colors.grey[300]
+                    }
+                />
+            )}
             <Text
                 textStyle={{
                     textAlign: 'center',

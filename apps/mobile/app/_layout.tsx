@@ -1,6 +1,6 @@
 import { AppState, Platform, Share, StyleSheet, View } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { SplashScreen, Stack } from 'expo-router';
+import { SplashScreen, Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
@@ -60,6 +60,7 @@ SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
     usePendingDeepLinkBootstrap();
+    const pathname = usePathname();
 
     const [fontsLoaded, fontError] = useFonts(matterFonts);
     const [playerIsReady, setPlayerIsReady] = useState<boolean>(false);
@@ -67,6 +68,10 @@ const RootLayout = () => {
     const playerListenersAttachedRef = useRef(false);
     const { visible, step, track, close, setStep } = useShareFlow();
     const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isEditingProfileRoute =
+        pathname === '/user/edit-profile' ||
+        pathname === '/user/photo-picker' ||
+        pathname === '/user/edit-profile-saved';
 
     const buildShareUrl = useCallback(() => {
         if (track.id != null && String(track.id).length > 0) {
@@ -260,8 +265,15 @@ const RootLayout = () => {
                                     animation: 'slide_from_bottom',
                                 }}
                             />
+                            <Stack.Screen
+                                name="user"
+                                options={{
+                                    presentation: 'fullScreenModal',
+                                    animation: 'slide_from_right',
+                                }}
+                            />
                         </Stack>
-                        <MiniPlayer />
+                        {!isEditingProfileRoute ? <MiniPlayer /> : null}
                         <StatusBar style="light" />
                         {/*
                          * Portals (bottom sheet, etc.) must stack above the mini player (zIndex 50
