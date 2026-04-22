@@ -106,6 +106,17 @@ export function fetchManuallyQueuedTracks(
     );
 }
 
+/**
+ * @name shuffleSermonTracks * Shuffles the sermon tracks
+ * @description tracks The tracks to shuffle
+ * Shuffles sermon tracks using the **Fisher-Yates (Knuth) shuffle**: reverse iteration
+ * from the last index, pick a random `j` in `[0, i]`, swap `shuffled[i]` and `shuffled[j]`.
+ * Only tracks with {@link QueuingType.FromSelection} are shuffled; manually queued
+ * tracks are returned separately and unchanged.
+ *
+ * @param tracks Tracks to shuffle (not mutated; `original` in the result is the same reference).
+ * @returns `shuffled` — Fisher-Yates permutation of selection tracks; `manuallyQueued` — play-next / directly-queued rows; `original` — input array.
+ */
 export function shuffleSermonTracks(tracks: SermonTrackDTO[]): {
     shuffled: SermonTrackDTO[];
     manuallyQueued: SermonTrackDTO[];
