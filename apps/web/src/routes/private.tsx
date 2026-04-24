@@ -23,7 +23,7 @@ import UserDraft from "@/app/dashboard/UserDraft";
 import path from "path";
 import HomeAddressForm from "@/components/shared/get-started/Home-address-form";
 import HomeAddressPage from "@/app/account/HomeAddressInfo";
-import HomeProfile from "@/app/account/HomeProfile";
+import HomeProfile from "@/app/account/HomeAddressInfo";
 import MinistryInput from "@/components/shared/get-started/MinistryInput";
 import MinistryInputPage from "@/app/account/MinistryInfo";
 
