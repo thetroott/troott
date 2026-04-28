@@ -1,32 +1,50 @@
-import { SolidIcons } from '@/assets/icons';
 import { theme } from '@/constants/theme';
+import { SaveToPlaylistIcon } from '@/components/features/shared/Icons';
 import { router } from 'expo-router';
 import type { SermonItemDTO } from '@/types/sermon';
+import type { ReactNode } from 'react';
 import {
-    ArchiveAdd,
     DocumentDownload,
     Heart,
-    Message,
     MusicFilter,
     Next,
     Profile,
-    Share,
-    Timer1,
-    Warning2,
+    Send2,
 } from 'iconsax-react-nativejs';
 import { openShareFlow } from '@/stores/app/share';
 
-export const getTrackListActions = (track?: SermonItemDTO) => [
+export type GetTrackListActionsOptions = {
+    /**
+     * When set (e.g. from a bottom sheet), opens add-to-playlist in a stacked sheet
+     * instead of navigating to the modal route.
+     */
+    onOpenAddToPlaylist?: () => void;
+};
+
+export type TrackListAction = {
+    icon: ReactNode;
+    label: string;
+    action: () => void;
+};
+
+export const getTrackListActions = (
+    track?: SermonItemDTO,
+    options?: GetTrackListActionsOptions,
+): TrackListAction[] => [
     {
         icon: <Heart color={theme.colors.grey[50]} />,
         label: 'Like',
         action: () => {},
     },
     {
-        icon: <ArchiveAdd color={theme.colors.grey[50]} />,
+        icon: <SaveToPlaylistIcon color={theme.colors.grey[50]} />,
         label: 'Save to playlist',
         action: () => {
-            router.push('/playlist/user-playlist-add-track');
+            if (options?.onOpenAddToPlaylist) {
+                options.onOpenAddToPlaylist();
+            } else {
+                router.push('/playlist/user-playlist-add-track');
+            }
         },
     },
     {
@@ -45,7 +63,7 @@ export const getTrackListActions = (track?: SermonItemDTO) => [
         action: () => {},
     },
     {
-        icon: <Share color={theme.colors.grey[50]} />,
+        icon: <Send2 color={theme.colors.grey[50]} />,
         label: 'Share',
         action: () => {
             openShareFlow({
@@ -59,17 +77,17 @@ export const getTrackListActions = (track?: SermonItemDTO) => [
     },
     {
         icon: <Profile color={theme.colors.grey[50]} />,
-        label: 'View Preacher',
+        label: 'View Minister',
         action: () => {},
     },
-    {
-        icon: <Warning2 color={theme.colors.grey[50]} />,
-        label: 'Report',
-        action: () => {},
-    },
-    {
-        icon: <Timer1 color={theme.colors.grey[50]} />,
-        label: 'Sleep Timer',
-        action: () => {},
-    },
+    // {
+    //     icon: <Warning2 color={theme.colors.grey[50]} />,
+    //     label: 'Report',
+    //     action: () => {},
+    // }, 
+    // {
+    //     icon: <Timer1 color={theme.colors.grey[50]} />,
+    //     label: 'Sleep Timer',
+    //     action: () => {},
+    // },
 ];

@@ -68,10 +68,12 @@ const RootLayout = () => {
     const playerListenersAttachedRef = useRef(false);
     const { visible, step, track, close, setStep } = useShareFlow();
     const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const isEditingProfileRoute =
-        pathname === '/user/edit-profile' ||
-        pathname === '/user/photo-picker' ||
-        pathname === '/user/edit-profile-saved';
+    const pathOnly = (pathname.split('?')[0] ?? '').replace(/\/$/, '') || '/';
+    const shouldHideMiniPlayer =
+        pathOnly === '/user/edit-profile' ||
+        pathOnly === '/user/photo-picker' ||
+        pathOnly === '/user/edit-profile-saved' ||
+        pathOnly === '/playlist/create-playlist';
 
     const buildShareUrl = useCallback(() => {
         if (track.id != null && String(track.id).length > 0) {
@@ -273,7 +275,7 @@ const RootLayout = () => {
                                 }}
                             />
                         </Stack>
-                        {!isEditingProfileRoute ? <MiniPlayer /> : null}
+                        {!shouldHideMiniPlayer ? <MiniPlayer /> : null}
                         <StatusBar style="light" />
                         {/*
                          * Portals (bottom sheet, etc.) must stack above the mini player (zIndex 50

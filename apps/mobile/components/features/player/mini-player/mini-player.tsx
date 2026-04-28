@@ -79,6 +79,7 @@ function useAllowMiniPlayerForCurrentRoute(): boolean {
         return false;
     // Root index / welcome (Expo may report segment `index` without tabs)
     if (segments.length === 1 && segments[0] === 'index') return false;
+    if (base === '/playlist/create-playlist') return false;
 
     return true;
 }
