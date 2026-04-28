@@ -40,7 +40,7 @@
         "components/features/player/player/instant-mix-button.tsx",
         "screens/Auth",
         "screens/Preview.tsx",
-        "hooks/use-theme-color.ts",
+        "hooks/platform/use-theme-color.ts",
         "hooks/use-user-profile.tsx",
         "stores/app/device-profile.ts",
         "utils/errorBoundary.util.tsx"
