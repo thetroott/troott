@@ -13,6 +13,7 @@ import {
 } from '../helpers/helpers';
 import { mapDtoToTrack } from '@/engine/utils/mappers';
 import { resolvePlaybackUrisForTrackPlayer } from '@/engine/utils/resolve-playback-uris';
+import { isPlayableTrackForPlayer } from '@/engine/utils/playable-track';
 import { QueuingType } from '@/utils/enums.util';
 import TrackPlayer from '@rntp/player';
 import { isUndefined } from 'lodash';
@@ -87,35 +88,51 @@ export async function loadQueue({
         queue = resolvedUnshuffled;
     }
 
-    const finalStartIndex = availableAudioItems.findIndex(
-        (item) => item.id === startingTrack.id,
-    );
+    const playable = queue.filter(isPlayableTrackForPlayer);
+    if (playable.length === 0) {
+        console.warn(
+            'loadQueue: no playable tracks after resolution (all URLs empty or unresolved bundles); skip setMediaItems',
+        );
+        TrackPlayer.stop();
+        return {
+            finalStartIndex: 0,
+            tracks: [],
+        };
+    }
+
+    const startId = startingTrack?.id;
+    const finalStartIndex = startId
+        ? playable.findIndex(
+              (t) => String(t.item?.id ?? t.mediaId) === String(startId),
+          )
+        : -1;
+
+    const safeStartIndex = finalStartIndex >= 0 ? finalStartIndex : 0;
 
     const filteredOut = Math.max(
         0,
         tracklist.length - availableAudioItems.length,
     );
     console.debug(
-        `loadQueue: ${availableAudioItems.length}/${tracklist.length} tracks after network filter (${networkStatus}); filtered ${filteredOut}`,
-    );
-
-    console.debug(`Final start index is ${finalStartIndex}`);
-
-    TrackPlayer.stop();
-    TrackPlayer.setMediaItems(
-        queue,
-        finalStartIndex >= 0 ? finalStartIndex : 0,
+        `loadQueue: ${availableAudioItems.length}/${tracklist.length} tracks after network filter (${networkStatus}); filtered ${filteredOut}; playable: ${playable.length}/${queue.length}`,
     );
 
     console.debug(
-        `Queued ${queue.length} tracks, starting at ${finalStartIndex}${
+        `Final start index is ${safeStartIndex} (resolved in playable queue)`,
+    );
+
+    TrackPlayer.stop();
+    TrackPlayer.setMediaItems(playable, safeStartIndex);
+
+    console.debug(
+        `Queued ${playable.length} tracks, starting at ${safeStartIndex}${
             shuffled ? ' (shuffled)' : ''
         }`,
     );
 
     return {
-        finalStartIndex: finalStartIndex >= 0 ? finalStartIndex : 0,
-        tracks: queue,
+        finalStartIndex: safeStartIndex,
+        tracks: playable,
     };
 }
 
@@ -124,20 +141,27 @@ export const playNextInQueue = async ({ api, tracks }: AddToQueueMutation) => {
         mapDtoToTrack('', item, QueuingType.PlayingNext),
     );
     const tracksToPlayNext = await resolvePlaybackUrisForTrackPlayer(mapped);
+    const playableNext = tracksToPlayNext.filter(isPlayableTrackForPlayer);
+    if (playableNext.length === 0) {
+        console.warn(
+            'playNextInQueue: no playable tracks after URI resolution; skipping',
+        );
+        return;
+    }
 
     const currentIndex = TrackPlayer.getActiveMediaItemIndex();
     const currentQueue = TrackPlayer.getQueue() as SermonTrackDTO[];
 
     console.debug(
-        `Adding ${tracks.length} to the queue at index ${currentIndex}`,
+        `Adding ${playableNext.length} to the queue at index ${currentIndex}`,
     );
 
     if (currentIndex === null || isUndefined(currentIndex)) {
-        TrackPlayer.addMediaItems(tracksToPlayNext);
+        TrackPlayer.addMediaItems(playableNext);
     } else if (currentIndex === currentQueue.length - 1) {
-        TrackPlayer.addMediaItems(tracksToPlayNext);
+        TrackPlayer.addMediaItems(playableNext);
     } else {
-        TrackPlayer.insertMediaItems(currentIndex + 1, tracksToPlayNext);
+        TrackPlayer.insertMediaItems(currentIndex + 1, playableNext);
     }
 
     const updatedQueue = TrackPlayer.getQueue() as SermonTrackDTO[];
@@ -151,21 +175,27 @@ export const playNextInQueue = async ({ api, tracks }: AddToQueueMutation) => {
             .getState()
             .setUnshuffledQueue([
                 ...uq.slice(0, anchor + 1),
-                ...tracksToPlayNext,
+                ...playableNext,
                 ...uq.slice(anchor + 1),
             ]);
     }
 };
 
 export const playLaterInQueue = async ({ api, tracks }: AddToQueueMutation) => {
-    console.debug(`Adding ${tracks.length} to queue`);
-
     const mapped = tracks.map((item) =>
         mapDtoToTrack('', item, QueuingType.DirectlyQueued),
     );
     const newTracks = await resolvePlaybackUrisForTrackPlayer(mapped);
+    const playable = newTracks.filter(isPlayableTrackForPlayer);
+    if (playable.length === 0) {
+        console.warn(
+            'playLaterInQueue: no playable tracks after URI resolution; skipping',
+        );
+        return;
+    }
+    console.debug(`Adding ${playable.length} to queue`);
 
-    TrackPlayer.addMediaItems(newTracks);
+    TrackPlayer.addMediaItems(playable);
 
     const updatedQueue = TrackPlayer.getQueue() as SermonTrackDTO[];
     usePlayerQueueStore.getState().setQueue(updatedQueue);
@@ -174,6 +204,6 @@ export const playLaterInQueue = async ({ api, tracks }: AddToQueueMutation) => {
         .getState()
         .setUnshuffledQueue([
             ...usePlayerQueueStore.getState().unShuffledQueue,
-            ...newTracks,
+            ...playable,
         ]);
 };

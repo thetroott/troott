@@ -117,9 +117,14 @@ type OfflineKV = Pick<
 >;
 
 function mediaUrlToDownloadString(url: SermonTrackDTO['url']): string {
+    if (url == null) return '';
     if (typeof url === 'string') return url;
     if (typeof url === 'number') return '';
-    return url.uri;
+    if (typeof url === 'object' && 'uri' in url) {
+        const u = (url as { uri: unknown }).uri;
+        return typeof u === 'string' ? u : '';
+    }
+    return '';
 }
 
 function createMemoryOfflineKV(): OfflineKV {

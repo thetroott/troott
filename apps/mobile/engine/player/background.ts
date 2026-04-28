@@ -9,6 +9,11 @@ let listenersAttached = false;
 let lastProgressPersistMs = 0;
 const PROGRESS_PERSIST_INTERVAL_MS = 20_000;
 
+/** Dedupe repeated PlaybackError logs for the same active URL (ExoPlayer can spam). */
+let lastPlaybackErrorKey = '';
+let lastPlaybackErrorAt = 0;
+const PLAYBACK_ERROR_LOG_DEDUPE_MS = 3_000;
+
 /**
  * Foreground listeners for @rntp/player v5: active item sync, custom Previous threshold, errors.
  * Call once after `setupPlayer` succeeds (e.g. from `app/_layout.tsx`). Do not register `registerPlaybackService`.
@@ -65,6 +70,16 @@ export function attachEnginePlaybackListeners(): void {
         } catch {
             /* player may be in a bad state while reporting the error */
         }
+        const errKey = `${String(code)}|${String(message)}|${String(url)}`;
+        const now = Date.now();
+        if (
+            errKey === lastPlaybackErrorKey &&
+            now - lastPlaybackErrorAt < PLAYBACK_ERROR_LOG_DEDUPE_MS
+        ) {
+            return;
+        }
+        lastPlaybackErrorKey = errKey;
+        lastPlaybackErrorAt = now;
         // `console.error` surfaces as a redbox in dev; content/codec issues are not always app bugs
         console.warn(
             '[TrackPlayer] PlaybackError',

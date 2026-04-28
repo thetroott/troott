@@ -231,6 +231,13 @@ export const useLoadNewQueue = () => {
                 autoplayPreferMinister: prefer,
             });
 
+            if (tracks.length === 0) {
+                console.warn(
+                    'useLoadNewQueue: no playable tracks; playback not started',
+                );
+                return;
+            }
+
             usePlayerQueueStore.getState().setCurrentIndex(finalStartIndex);
 
             console.debug('Successfully loaded new queue');

@@ -8,6 +8,10 @@ import TrackPlayer, { RepeatMode } from '@rntp/player';
 import { handleActiveTrackChanged } from '@/engine/queries/current-track';
 import { usePlayerQueueStore } from '@/engine/state/player-queue-store';
 import { resolvePlaybackUrisForTrackPlayer } from '@/engine/utils/resolve-playback-uris';
+import {
+    isPlayableTrackForPlayer,
+    resolvePlayableStartIndex,
+} from '@/engine/utils/playable-track';
 import { queryClient } from '../../services/query-client';
 import { REPEAT_MODE_QUERY_KEY } from '@/engine/queries/query-keys';
 
@@ -43,17 +47,40 @@ export default async function Initialize() {
         const restoredQueue = await resolvePlaybackUrisForTrackPlayer(
             storedPlayQueue,
         );
+        const playable = restoredQueue.filter(isPlayableTrackForPlayer);
 
-        TrackPlayer.clear();
-        TrackPlayer.setMediaItems(restoredQueue, storedIndex);
+        if (playable.length === 0) {
+            console.warn(
+                '[Initialize] no playable tracks after URI resolution; clearing player queue and persisted playback state',
+            );
+            TrackPlayer.clear();
+            usePlayerQueueStore.getState().setQueue([]);
+            usePlayerQueueStore.getState().setUnshuffledQueue([]);
+            usePlayerQueueStore.getState().setCurrentIndex(undefined);
+            usePlayerQueueStore.getState().setCurrentTrack(undefined);
+        } else {
+            const startIndex = resolvePlayableStartIndex(
+                restoredQueue,
+                storedIndex,
+                playable,
+            );
 
-        usePlayerQueueStore.getState().setQueue(restoredQueue);
-        usePlayerQueueStore.getState().setCurrentIndex(storedIndex);
-        usePlayerQueueStore
-            .getState()
-            .setCurrentTrack(restoredQueue[storedIndex] ?? undefined);
+            TrackPlayer.clear();
+            TrackPlayer.setMediaItems(playable, startIndex);
 
-        console.debug('Initialized play queue from storage');
+            usePlayerQueueStore.getState().setQueue(playable);
+            usePlayerQueueStore.getState().setCurrentIndex(startIndex);
+            usePlayerQueueStore
+                .getState()
+                .setCurrentTrack(playable[startIndex] ?? undefined);
+            usePlayerQueueStore.getState().setUnshuffledQueue(playable);
+
+            console.debug('Initialized play queue from storage', {
+                playable: playable.length,
+                total: restoredQueue.length,
+                startIndex,
+            });
+        }
     }
 
     await handleActiveTrackChanged();

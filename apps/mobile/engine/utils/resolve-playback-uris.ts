@@ -45,13 +45,15 @@ export async function resolvePlaybackUrisForTrackPlayer(
                 const asset = Asset.fromModule(track.url);
                 await asset.downloadAsync();
                 const uri = asset.localUri ?? asset.uri;
-                if (!uri) return track;
+                if (!uri) {
+                    return { ...track, url: '' };
+                }
                 if (isLikelyImageBundledAsset(uri, asset.type)) {
                     console.warn(
                         '[resolvePlaybackUris] refusing playback url: bundled module resolved to an image file (check catalog url vs artwork)',
                         { mediaId: track.mediaId, title: track.title, uri },
                     );
-                    return track;
+                    return { ...track, url: '' };
                 }
                 const mime =
                     track.mimeType ?? mimeFromAssetExtension(asset.type);
@@ -66,7 +68,7 @@ export async function resolvePlaybackUrisForTrackPlayer(
                     track.mediaId,
                     e,
                 );
-                return track;
+                return { ...track, url: '' };
             }
         }),
     );
