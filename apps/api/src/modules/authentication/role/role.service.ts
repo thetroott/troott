@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { dateToday, IDateToday } from '@btffamily/pacitude';
 import { IRoleDoc } from './role.interface';
 import roleRepository from './role.repository';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import User from '../../users/user/user.model';
 import { IUserDoc, UserType } from '../../users/user/user.interface';
 import permissionService from '../permission/permission.service';

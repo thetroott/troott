@@ -1,7 +1,7 @@
 import User from '../../users/user/user.model';
 import Role from '../role/role.model';
 import redisWrapper from '../../../middlewares/redis.mdw';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import { IRoleDoc } from '../role/role.interface';
 import { IUserDoc } from '../../users/user/user.interface';
 import { matchPermission as matchPermissionUtil } from '../role/role.util';

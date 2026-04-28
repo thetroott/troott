@@ -19,7 +19,6 @@ import {
 } from './auth.dto';
 import User from '../../users/user/user.model';
 import Role from '../role/role.model';
-import { detectPlatform } from '../../../utils/helpers.util';
 import ErrorResponse from '../../../utils/error.util';
 
 class AuthService {
