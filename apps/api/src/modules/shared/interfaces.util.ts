@@ -28,20 +28,20 @@ import {
     FileMimeType,
     ProcessingState,
     UploadStepType,
-} from '../../../utils/enums.util';
-import { IUploadMetadata } from '../../../utils/types.util';
+} from '../../utils/enums.util';
+import { IUploadMetadata } from '../../utils/types.util';
 import { PassThrough } from 'stream';
 import { FileInfo } from 'busboy';
 import { ConnectionOptions, TlsOptions } from 'tls';
 import type { Nullable } from './nullable';
 import type { IDebitCard } from './card.interface';
-import type { IUserDoc } from '../../users/user/user.interface';
+import type { IUserDoc } from '../users/user/user.interface';
 
 export type { Nullable } from './nullable';
-export type { IUserDoc } from '../../users/user/user.interface';
+export type { IUserDoc } from '../users/user/user.interface';
 
-export type { IRoleDoc } from '../../authentication/role/role.interface';
-export type { IPermissionDoc } from '../../authentication/permission/permission.interface';
+export type { IRoleDoc } from '../authentication/role/role.interface';
+export type { IPermissionDoc } from '../authentication/permission/permission.interface';
 export type {
     IAudioMetadata,
     IImageMetadata,
@@ -57,16 +57,16 @@ export type {
     IBiteEngagementStats,
     ISermonDoc,
     ISermonBiteDoc,
-} from '../../core/sermon/sermon.interface';
-export type { IListenerDoc } from '../../users/listener/listener.interface';
-export type { IMinisterDoc } from '../../users/minister/minister.interface';
-export type { ICreatorDoc } from '../../users/creator/creator.interface';
+} from '../core/sermon/sermon.interface';
+export type { IListenerDoc } from '../users/listener/listener.interface';
+export type { IMinisterDoc } from '../users/minister/minister.interface';
+export type { ICreatorDoc } from '../users/creator/creator.interface';
 export type {
     ISeries,
     ISeriesDoc,
-} from '../../core/series/series.interface';
-export type { ILibraryDoc } from '../../core/library/library.interface';
-export type { IPlaylistDoc } from '../../core/playlist/playlist.interface';
+} from '../core/series/series.interface';
+export type { ILibraryDoc } from '../core/library/library.interface';
+export type { IPlaylistDoc } from '../core/playlist/playlist.interface';
 export type { IDebitCard } from './card.interface';
 
 export interface ITransactionDoc extends Document {
