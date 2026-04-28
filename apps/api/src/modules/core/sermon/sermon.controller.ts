@@ -17,35 +17,6 @@ import sermonMapper from './sermon.mapper';
 import { canAccessSermonDocument } from './sermon-access.util';
 import { isSermonPublicTeaserEligible } from '../open/sermon-teaser.util';
 
-const MINISTER_LIST_SORT_WHITELIST = new Set([
-    '-updatedAt',
-    'updatedAt',
-    '-createdAt',
-    'createdAt',
-    '-releaseDate',
-    'releaseDate',
-    'title',
-    '-title',
-]);
-
-function normalizeMinisterListSort(raw: unknown): string {
-    const first = Array.isArray(raw) ? raw[0] : raw;
-    const s =
-        typeof first === 'string' && first.trim()
-            ? first.trim()
-            : '-updatedAt';
-    return MINISTER_LIST_SORT_WHITELIST.has(s) ? s : '-updatedAt';
-}
-
-function parsePublicationStatus(
-    raw: unknown,
-): 'draft' | 'published' | 'all' | undefined {
-    if (raw === 'draft' || raw === 'published' || raw === 'all') {
-        return raw;
-    }
-    return undefined;
-}
-
 /**
  * @name uploadSermom
  * @description A method to handle sermon file uploads.
@@ -71,7 +42,7 @@ export const uploadSermon = asyncHandler(
             return next(new ErrorResponse(upload.message, 500, []));
         }
 
-        const response = await sermonMapper.mapUploadSermon(
+        const response = await sermonMapper.mapSermon(
             upload.data as ISermonDoc,
         );
 
@@ -110,7 +81,7 @@ export const uploadSermonCover = asyncHandler(
             return next(new ErrorResponse(upload.message, 500, []));
         }
 
-        const response = await sermonMapper.mapSermonCover(
+        const response = await sermonMapper.mapSermon(
             upload.data as ISermonDoc,
         );
 
@@ -330,6 +301,24 @@ export const moveSermonToBin = asyncHandler(
                 new ErrorResponse(sermonExist.message, sermonExist.code!, []),
             );
         }
+        const doc = sermonExist.data as Record<string, unknown>;
+        const userId = getAuthUserId(req);
+        if (!userId) {
+            return next(new ErrorResponse('Unauthorized', 401, []));
+        }
+        const isOwner = await sermonService.isSermonOwnedByUser(
+            userId,
+            doc.minister,
+        );
+        const policy = sermonService.validateDeletePolicy({
+            action: 'move-to-bin',
+            sermonStatus: doc.status,
+            actorRole: (req.user as { role?: unknown } | undefined)?.role,
+            isOwner,
+        });
+        if (policy.error) {
+            return next(new ErrorResponse(policy.message, policy.code!, []));
+        }
 
         const deletePayload = {
             state: state || ContentState.DELETED,
@@ -373,6 +362,28 @@ export const deleteSermon = asyncHandler(
             return next(
                 new ErrorResponse(sermonExist.message, sermonExist.code!, []),
             );
+        }
+        const doc = sermonExist.data as Record<string, unknown>;
+        const userId = getAuthUserId(req);
+        if (!userId) {
+            return next(new ErrorResponse('Unauthorized', 401, []));
+        }
+        const isOwner = await sermonService.isSermonOwnedByUser(
+            userId,
+            doc.minister,
+        );
+        const policy = sermonService.validateDeletePolicy({
+            action: 'delete',
+            sermonStatus: doc.status,
+            actorRole: (req.user as { role?: unknown } | undefined)?.role,
+            isOwner,
+            allowPublishedDelete:
+                req.query.allowPublishedDelete ??
+                (req.body as { allowPublishedDelete?: unknown })
+                    ?.allowPublishedDelete,
+        });
+        if (policy.error) {
+            return next(new ErrorResponse(policy.message, policy.code!, []));
         }
 
         const deleted = await sermonRepository.deleteSermon(id);
@@ -525,8 +536,10 @@ export const getSermonsByminister = asyncHandler(
         const limit = Number(req.query.limit) || 25;
         const skip = (page - 1) * limit;
 
-        const sort = normalizeMinisterListSort(req.query.sort);
-        const publicationStatus = parsePublicationStatus(req.query.status);
+        const sort = sermonService.normalizeMinisterListSort(req.query.sort);
+        const publicationStatus = sermonService.parsePublicationStatus(
+            req.query.status,
+        );
         const search =
             typeof req.query.q === 'string' && req.query.q.trim()
                 ? req.query.q.trim()

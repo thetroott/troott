@@ -1,48 +1,30 @@
 import { Document, Types } from 'mongoose';
-import { ContentState, ContentStatus } from '../../../utils/content.enums';
+import { ContentStatus } from '../../../utils/content.enums';
+import { IMinisterDoc } from '@/utils/interfaces.util';
+import { ImageSource } from '../sermon/sermon.interface';
 
 type ObjectId = Types.ObjectId;
-
-export interface ISeries {
-    title: string;
-    description: string;
-    part: Array<string>;
-    position: string;
-    imageURL?: string;
-    toatlDuration: string;
-}
 
 export interface ISeriesDoc extends Document {
     title: string;
     description: string;
-    minister: ObjectId | any;
+    ministers: Array<IMinisterDoc | any>; // list of minister(s)
     sermons: Array<ObjectId | any>;
-    imageUrl?: string;
-    part: string;
-    totalDuration: string;
+    image: ImageSource | any;
+    totalDuration: number; // total duration of all the sermons in the series
+    numberOfSermons: number; // number of sermons in the series
+    topic: string; // series topic or category
     tags: Array<string>;
 
+    status: ContentStatus; // draft or published
     isPublic: boolean;
-    state: ContentState;
-    status: ContentStatus;
+    shareableUrl: string; // shareable URL for the series; // list of minister(s)
 
     totalPlay: number;
     totalShares: number;
     totalLikes: number;
 
-    versionId?: ObjectId;
-    modifiedAt: Date;
-    modifiedBy: ObjectId | any;
-    changesSummary: string;
-    deletedSeries: Array<{
-        id: ObjectId;
-        deletedBy: ObjectId | any;
-        deletedAt: Date;
-        reason?: string;
-    }>;
-
-    admin: ObjectId | any;
-    createdBy: ObjectId | any;
+    ownerId: IMinisterDoc | any;
 
     createdAt: string;
     updatedAt: string;

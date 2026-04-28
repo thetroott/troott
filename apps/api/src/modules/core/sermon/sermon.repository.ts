@@ -159,7 +159,7 @@ class SermonRepository {
         };
 
         const objectId = new Types.ObjectId(id);
-        const deletedSermon = await this.model.findByIdAndUpdate(objectId);
+        const deletedSermon = await this.model.findByIdAndDelete(objectId);
         if (!deletedSermon) {
             result.error = true;
             result.code = 404;

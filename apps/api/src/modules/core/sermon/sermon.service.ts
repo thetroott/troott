@@ -6,11 +6,14 @@ import {
     S3Folder,
     ContentStatus,
     UploadStepType,
+    UserType,
 } from '../../../utils/enums.util';
 import { PublishSermonDTO } from './sermon.dto';
 import { Upload } from '@aws-sdk/lib-storage';
 import sermonRepository from './sermon.repository';
 import Sermon from './sermon.model';
+import Minister from '../../users/minister/minister.model';
+import mongoose from 'mongoose';
 import { AWS_BUCKET_NAME, s3 } from '../../../configs/aws.config';
 import { addJob } from '../../../tasks/jobs/job';
 import { JobChannel, QueueChannel } from '../../../queues/channel.queue';
@@ -20,6 +23,35 @@ class SermonService {
     private readonly bucket = AWS_BUCKET_NAME;
     private readonly UPLOAD_EXPIRY = 1000 * 60 * 60 * 24;
     private readonly storageService = StorageService;
+    private readonly MINISTER_LIST_SORT_WHITELIST = new Set([
+        '-updatedAt',
+        'updatedAt',
+        '-createdAt',
+        'createdAt',
+        '-releaseDate',
+        'releaseDate',
+        'title',
+        '-title',
+    ]);
+
+    public normalizeMinisterListSort(raw: unknown): string {
+        const first = Array.isArray(raw) ? raw[0] : raw;
+        const s =
+            typeof first === 'string' && first.trim()
+                ? first.trim()
+                : '-updatedAt';
+        return this.MINISTER_LIST_SORT_WHITELIST.has(s) ? s : '-updatedAt';
+    }
+
+    public parsePublicationStatus(
+        raw: unknown,
+    ): 'draft' | 'published' | 'all' | undefined {
+        if (raw === 'draft' || raw === 'published' || raw === 'all') {
+            return raw;
+        }
+        return undefined;
+    }
+
 
     /**
      * @method handleSermonUpload
@@ -92,7 +124,7 @@ class SermonService {
             const s3Response = await s3Upload.done();
 
             // Prepare the upload summary for Sermon model
-            const uploadSummary = {
+            const uploadPayload = {
                 fileId: uploadId,
                 fileName: info.filename,
                 fileSize: size,
@@ -107,7 +139,7 @@ class SermonService {
 
             // Save upload session in DB
             const SermonUpload: Partial<ISermonDoc> = await Sermon.create({
-                uploadSummary,
+                uploadPayload,
                 status: ContentStatus.PROCESSING,
                 uploadState: UploadStepType.AUDIO_METADATA_PROCESSING,
             });
@@ -127,6 +159,25 @@ class SermonService {
                     jobId: `audio-meta-${uploadId}`,
                 },
             });
+
+            // enqueue the audio processing
+            const audioJobData: IAudioProcessingJobDTO = {
+                streamForProcessing: stream,
+                mimeType: mimeType,
+                uploadId: uploadId as string,
+            };
+            
+            
+            addJob({
+                queueName: JobChannel.extractAudioMetadata,
+                jobName: QueueChannel.AudioMetadata,
+                data: audioJobData,
+                options: {
+                    jobId: `audio-meta-${uploadId}`,
+                },
+            });
+
+            
 
             result.message = 'Sermon uploaded successfully';
             result.data = SermonUpload;
@@ -450,6 +501,102 @@ class SermonService {
         sermon.shareableUrl = shareableUrl;
 
         await sermon.save();
+    }
+
+
+
+    private isAdminRole(role: unknown): boolean {
+        const normalized = String(role ?? '').toLowerCase();
+        return normalized === UserType.ADMIN || normalized === UserType.SUPERADMIN;
+    }
+
+    private parseBooleanFlag(value: unknown): boolean {
+        if (typeof value === 'boolean') return value;
+        if (typeof value !== 'string') return false;
+        const normalized = value.trim().toLowerCase();
+        return normalized === 'true' || normalized === '1' || normalized === 'yes';
+    }
+
+    private ministerIdFromDoc(minister: unknown): string {
+        if (minister == null) return '';
+        if (typeof minister === 'object' && minister !== null && '_id' in minister) {
+            return String((minister as { _id: unknown })._id);
+        }
+        return String(minister);
+    }
+
+    public async isSermonOwnedByUser(
+        userId: string,
+        minister: unknown,
+    ): Promise<boolean> {
+        if (!userId) return false;
+        const mid = this.ministerIdFromDoc(minister);
+        if (
+            !mid ||
+            !mongoose.Types.ObjectId.isValid(mid) ||
+            !mongoose.Types.ObjectId.isValid(userId)
+        ) {
+            return false;
+        }
+        const owned = await Minister.findOne({
+            _id: new mongoose.Types.ObjectId(mid),
+            user: new mongoose.Types.ObjectId(userId),
+        })
+            .select('_id')
+            .lean();
+        return !!owned;
+    }
+
+    public validateDeletePolicy(data: {
+        action: 'delete' | 'move-to-bin';
+        sermonStatus: unknown;
+        actorRole: unknown;
+        isOwner: boolean;
+        allowPublishedDelete?: unknown;
+    }): IResult {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+        const isAdmin = this.isAdminRole(data.actorRole);
+        const isPublished = data.sermonStatus === ContentStatus.PUBLISHED;
+
+        if (!isAdmin && !data.isOwner) {
+            result.error = true;
+            result.code = 403;
+            result.message =
+                data.action === 'delete'
+                    ? 'You are not allowed to delete this sermon'
+                    : 'You are not allowed to modify this sermon';
+            return result;
+        }
+
+        if (!isAdmin && isPublished) {
+            result.error = true;
+            result.code = 403;
+            result.message =
+                data.action === 'delete'
+                    ? 'Published sermons cannot be deleted by non-admin users'
+                    : 'Published sermons cannot be moved to bin by non-admin users';
+            return result;
+        }
+
+        if (
+            isAdmin &&
+            data.action === 'delete' &&
+            isPublished &&
+            !this.parseBooleanFlag(data.allowPublishedDelete)
+        ) {
+            result.error = true;
+            result.code = 409;
+            result.message =
+                'Explicit allowPublishedDelete=true is required to hard-delete a published sermon';
+            return result;
+        }
+
+        return result;
     }
 }
 

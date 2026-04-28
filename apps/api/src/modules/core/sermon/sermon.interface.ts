@@ -1,10 +1,236 @@
-import type { Readable } from 'stream';
+import type { PassThrough, Readable } from 'stream';
 import { Document, Types } from 'mongoose';
 import { ContentState, ContentStatus } from '../../../utils/content.enums';
-import { FileType } from '../../shared/files/file.enums';
-import { UploadStatus, UploadStepType } from '../../platform/storage/upload.enums';
+import { FileMimeType, FileType } from '../../shared/file.enums';
+import {
+    UploadStatus,
+    UploadStepType,
+} from '../../platform/storage/upload.enums';
+import { ISeriesDoc } from '../series/series.interface';
+import { IResult } from '@/utils/interfaces.util';
 
 type ObjectId = Types.ObjectId;
+
+export interface ISermonDoc extends Document {
+    title: string;
+    description: string;
+    releaseDate: Date;
+    releaseYear: number;
+
+    sermon: SermonSource;
+    image: ImageSource;
+
+    topic: string; // sermon topic or category
+    tags: Array<string>;
+    isPublic: boolean;
+    allowDownload: boolean;
+    allowComment: boolean;
+
+    isSeries: boolean;
+    series: ISeriesDoc | any;
+
+    totalPlay: ISermonPlayCount;
+    totalLikes: ISermonLike;
+    totalShares: ISermonShareCount;
+
+    state: ContentState;
+    status: ContentStatus;
+    uploadState: UploadStepType;
+
+    versionId?: ObjectId;
+    changesSummary: string;
+
+    minister: ObjectId | any;
+    playlist: ObjectId | any;
+
+    isPublished: boolean;
+    publishedAt: Date;
+    publishedBy: ObjectId | any;
+
+    createdAt: string;
+    updatedAt: string;
+    _version: number;
+    _id: ObjectId;
+    id: ObjectId;
+}
+
+export interface ISermonBiteDoc extends Document {
+    title: string;
+    description: string;
+    duration: number;
+    category: Array<string>;
+    biteURL: string;
+    thumbnailUrl?: string;
+    tags: Array<string>;
+
+    engagementStats: IBiteEngagementStats;
+    viewHistory: Array<IBiteViewHistory>;
+    likeHistory: Array<IBiteLike>;
+    shareHistory: Array<IBiteShareHistory>;
+    savedHistory: Array<IBiteSavedHistory>;
+
+    isPublic: boolean;
+    state: ContentState;
+    status: ContentStatus;
+
+    versionId?: ObjectId;
+    modifiedAt: string;
+    modifiedBy: ObjectId | any;
+    changesSummary: string;
+    deletedBites: Array<{
+        id: ObjectId;
+        deletedBy: ObjectId | any;
+        deletedAt: string;
+        reason?: string;
+    }>;
+
+    minister: ObjectId | any;
+    creator: ObjectId | any;
+    Admin: ObjectId | any;
+    playlist: Array<ObjectId>;
+    library: Array<ObjectId>;
+    createdBy: ObjectId | any;
+
+    createdAt: string;
+    updatedAt: string;
+    _version: number;
+    _id: ObjectId;
+    id: ObjectId;
+}
+
+export interface SermonSource {
+    cdnUrl: string; // cdn URL
+    type: AudioType;
+
+    originalUrl: string; // original URL
+    duration: number; // in seconds
+    size: number; // in bytes
+    shareableUrl: string;
+    fileType: FileType;
+    mimetype: FileMimeType;
+
+    uploadedBy: ObjectId;
+    uploadStatus: UploadStatus;
+    uploadId: string;
+
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ImageSource {
+    thumbnailUrl: string;
+    width: number;
+    height: number;
+
+    originalUrl: string;
+    size: number; // in bytes
+    fileType: FileType;
+    mimetype: FileMimeType;
+
+    uploadedBy: ObjectId;
+    uploadStatus: UploadStatus;
+    uploadId: string;
+
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface Upload {
+    fileName: string;
+    s3Key: string;
+}
+
+export interface IAudioNormalisationDTO {
+    uploadId: string;
+    inputStream: PassThrough;
+    outputStream: PassThrough;
+    mimeType: string;
+    targetIntegrated?: number; // LUFS, default -14
+    targetTruePeak?: number; // dBTP, default -1
+}
+
+export interface AudioRenditionDTO {
+    name: string;
+    bitrate: number;
+    sampleRate: number;
+    channels: number;
+  }
+  export interface FFmpegRenditionDTO {
+    name?: string;        // e.g., "64k", "128k"
+    codec?: string;           // e.g., 'aac'
+    bitrate?: number;         // e.g., 128 (kbps)
+    sampleRate?: number;      // e.g., 48000 Hz
+    channels?: number;        // 1 for mono, 2 for stereo
+    extraArgs?: string[];     // any extra CLI args
+  }
+  
+  export interface IAudioHLSJobDTO {
+    uploadId: string;
+    /** Default/fallback; each uploaded segment uses a MIME from file extension. */
+    mimeType?: string;
+    inputStream: PassThrough;
+    renditions: AudioRenditionDTO[];
+    segmentDuration?: number;
+  }
+  
+  export interface IAudioDASHJobDTO {
+    uploadId: string;
+    mimeType?: string;
+    inputStream: PassThrough;
+    renditions: AudioRenditionDTO[];
+    segmentDuration?: number;
+  }
+
+  export interface HLSDTO {
+    inputStream: PassThrough;
+    /** Temp output root; HLS segment files and playlists are written per rendition under this path. */
+    outputDir: string;
+    renditions: AudioRenditionDTO[];
+    segmentDuration?: number;
+  }
+  
+  export interface DASHDTO {
+    inputStream: PassThrough;
+    outputDir: string;
+    renditions: AudioRenditionDTO[];
+    segmentDuration?: number;
+  }
+  
+  
+  
+  
+  
+export interface MeasureLoudnessDTO {
+    stream: PassThrough;
+  }
+
+/** Pipe loudness-normalized PCM/WAV to `outputStream` (FFmpeg `pipe:1` -> consumer). */
+export interface NormaliseAudioDTO {
+    inputStream: PassThrough;
+    outputStream: PassThrough;
+    targetIntegrated?: number;
+    targetTruePeak?: number;
+}
+
+export interface MultiBitrateDTO {
+    inputStream: PassThrough;
+    renditions: AudioRenditionDTO[];
+    outputDir: string;
+}
+
+export interface LoudnessMetadataDTO {
+    trackId: string;
+    integrated: number;
+    loudnessRange: number; // LRA
+    truePeak: number; // TP dB
+    path: string;
+}
+
+export interface AudioProcessingResult {
+    success?: IResult;
+    loudness?: LoudnessMetadataDTO;
+    outputs?: { name: string; path: string }[];
+}
 
 export interface IAudioMetadata {
     metadataType: FileType.AUDIO;
@@ -13,14 +239,47 @@ export interface IAudioMetadata {
     duration?: number;
     bitrate?: number;
     year?: number;
+   
 }
 
 /** Bull job payload for `audio:metadata` extraction workers. */
 export interface IAudioMetadataJobDTO {
-    streamForMetadata: Readable;
+    streamForMetadata: PassThrough;
+    mimeType: string;
+    uploadId: string;
+    sermonId?: ObjectId | any;
+}
+
+export interface IAudioProcessingJobDTO {
+    stream: Readable;
     mimeType: string;
     uploadId: string;
 }
+
+export interface FFmpegOptionsDTO {
+    args: string[];
+    /** Pipe this stream into ffmpeg stdin (mutually exclusive with `inputFilePath` for a typical transcode). */
+    inputStream?: PassThrough;
+    /** Read from a file path instead of stdin (e.g. after one-shot spool of the upload to disk for multi-rendition HLS). */
+    inputFilePath?: string;
+    outputStream?: PassThrough;
+    onData?: string[];
+}
+
+export interface FFmpegJobDTO {
+    input: string;
+    output: string;
+    options: FFmpegOptionsDTO;
+}
+
+export enum AudioType {
+    HLS = 'hls',
+    DASH = 'dash',
+    PROGRESSIVE = 'progressive',
+    SMOOTHSTREAMING = 'smoothstreaming',
+}
+
+export enum G {}
 
 export interface IImageMetadata {
     metadataType: FileType.IMAGE;
@@ -88,115 +347,4 @@ export interface IBiteEngagementStats {
     totalSaves: number;
     avgWatchTime: number;
     completionRate: number;
-}
-
-export interface ISermonDoc extends Document {
-    title: string;
-    description: string;
-    duration: number;
-    releaseDate: Date;
-    releaseYear: number;
-    sermonUrl: string;
-    imageUrl: string;
-    size: number;
-
-    topic: string;
-    /** Optional stable segment for share URLs (`/sermon/:slug`). */
-    slug?: string;
-    tags: Array<string>;
-    isPublic: boolean;
-    shareableUrl: string;
-
-    isSeries: boolean;
-    series: Array<ObjectId>;
-
-    totalPlay: ISermonPlayCount;
-    totalLikes: ISermonLike;
-    totalShares: ISermonShareCount;
-    state: ContentState;
-    status: ContentStatus;
-    uploadState: UploadStepType;
-
-    uploadSummary: {
-        fileId: string;
-        fileName: string;
-        fileSize: number;
-        fileType: FileType;
-        mimetype: string;
-        metadata: Partial<IAudioMetadata>;
-        uploadedBy: ObjectId;
-        uploadStatus: UploadStatus;
-        uploadId: string;
-        s3Key: string;
-        rawFile: string;
-    };
-
-    imageSummary: {
-        fileName: string;
-        fileSize: number;
-        fileType: FileType;
-        mimetype: string;
-        uploadedBy: ObjectId;
-        uploadStatus: UploadStatus;
-        uploadId: string;
-        s3Key: string;
-        rawFile: string;
-    };
-
-    versionId?: ObjectId;
-    changesSummary: string;
-
-    minister: ObjectId | any;
-    playlist: ObjectId | any;
-    publishedBy: ObjectId | any;
-
-    createdAt: string;
-    updatedAt: string;
-    _version: number;
-    _id: ObjectId;
-    id: ObjectId;
-}
-
-export interface ISermonBiteDoc extends Document {
-    title: string;
-    description: string;
-    duration: number;
-    category: Array<string>;
-    biteURL: string;
-    thumbnailUrl?: string;
-    tags: Array<string>;
-
-    engagementStats: IBiteEngagementStats;
-    viewHistory: Array<IBiteViewHistory>;
-    likeHistory: Array<IBiteLike>;
-    shareHistory: Array<IBiteShareHistory>;
-    savedHistory: Array<IBiteSavedHistory>;
-
-    isPublic: boolean;
-    state: ContentState;
-    status: ContentStatus;
-
-    versionId?: ObjectId;
-    modifiedAt: string;
-    modifiedBy: ObjectId | any;
-    changesSummary: string;
-    deletedBites: Array<{
-        id: ObjectId;
-        deletedBy: ObjectId | any;
-        deletedAt: string;
-        reason?: string;
-    }>;
-
-    minister: ObjectId | any;
-    creator: ObjectId | any;
-    Admin: ObjectId | any;
-    playlist: Array<ObjectId>;
-    library: Array<ObjectId>;
-    createdBy: ObjectId | any;
-
-    createdAt: string;
-    updatedAt: string;
-    _version: number;
-    _id: ObjectId;
-    id: ObjectId;
 }
