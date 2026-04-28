@@ -90,6 +90,14 @@ export const startSchedulerWorkers = async (): Promise<void> => {
             label: 'scheduler-worker',
             type: 'success',
         });
+
+        return {
+            reminderQueue,
+            cleanupQueue,
+            marketingQueue,
+            invitationQueue,
+        };
+        
     } catch (error) {
         logger.log({
             data: `Failed to start scheduler workers: ${

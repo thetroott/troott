@@ -2,12 +2,14 @@ import { Job } from 'bull';
 import { FileType } from '../../utils/enums.util';
 import Sermon from '../../modules/core/sermon/sermon.model';
 import { DoneCallback } from 'bull';
-import { IAudioMetadata } from '../../utils/interfaces.util';
 import logger from '../../utils/logger.util';
-import type { IAudioMetadataJobDTO } from '../../modules/core/sermon/sermon.interface';
+import type {
+    IAudioMetadata,
+    IAudioMetadataJobDTO,
+} from '../../modules/core/sermon/sermon.interface';
 
 /**
- * @name audioProcessor
+ * @name audioMetadataProcessor
  * @description The core function that the Bull worker executes for each 'audio:metadata' job.
  * It extracts metadata and updates the database, using the 'done' callback to signal completion.
  * @param job The Bull job object containing the audio data reference
@@ -17,9 +19,14 @@ const audioMetadataProcessor = async (
     job: Job<IAudioMetadataJobDTO>,
     done: DoneCallback,
 ) => {
-    const streamForMetadata = job.data.streamForMetadata;
-    const mimeType = job.data.mimeType;
-    const uploadId = job.data.uploadId;
+    const { streamForMetadata, mimeType, uploadId, sermonId } = job.data;
+    if (!streamForMetadata || !mimeType || !uploadId) {
+        return done(
+            new Error(
+                'Invalid audio metadata job payload: streamForMetadata, mimeType, and uploadId are required.',
+            ),
+        );
+    }
 
     try {
         let metadata: IAudioMetadata;
@@ -39,8 +46,12 @@ const audioMetadataProcessor = async (
             year: mmMetadata.common.year,
         };
 
+        const query = sermonId
+            ? { _id: sermonId }
+            : { 'uploadSummary.uploadId': uploadId };
+            
         const updateSermon = await Sermon.findOneAndUpdate(
-            { 'uploadSummary.uploadId': uploadId },
+            query,
             {
                 $set: {
                     'uploadSummary.metadata': metadata,

@@ -5,16 +5,16 @@ import audioMetadataProcessor from '../jobs/audio-metadata.job';
 import logger from '../../utils/logger.util';
 
 /**
- * @name startAudioMetadataWorker
+ * @name startAudioProcessingWorker
  * @description Starts the Bull worker for the Audio Metadata Queue.
  * @returns The Bull Queue instance
  */
-const startAudioMetadataWorker = async () => {
+const startAudioProcessingWorker = async () => {
     // JOB: The queue channel that will be monitored for new jobs
     const queueName: JobChannel = JobChannel.extractAudioMetadata;
 
     // JOB NAME: The specific name the processor listens for
-    const jobName: QueueChannel = QueueChannel.AUDIOMETADATA;
+    const jobName: QueueChannel = QueueChannel.AUDIOPROCESSING;
 
     // PROCESSOR: The function to execute when a job is received
     const processor = await audioMetadataProcessor;
@@ -40,4 +40,4 @@ const startAudioMetadataWorker = async () => {
     return queue;
 };
 
-export default startAudioMetadataWorker;
+export default startAudioProcessingWorker;

@@ -1,5 +1,8 @@
 export enum QueueChannel {
-    AudioMetadata = 'audio-metadata',
+    EMAIL = 'email',
+    VIDEO = 'video',
+    AUDIOMETADATA = 'audio-metadata',
+    AUDIOPROCESSING = 'audio-processing',
     Emails = 'emails',
     UnlockUsers = 'users',
     Reminders = 'reminders',
@@ -10,6 +13,7 @@ export enum QueueChannel {
 
 export enum JobChannel {
     extractAudioMetadata = 'audio:metadata',
+    processAudio = 'audio:processing',
     SendEmail = 'emails:send',
     SendOTPEmail = 'emails:send-otp-email',
     SendPasswordResetEmail = 'emails:send-password-reset-email',
