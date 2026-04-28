@@ -1,6 +1,6 @@
 import Axios from 'axios';
 import { CallApiDTO } from './axios.dto';
-import storage from '../../storage/web-storage';
+//import storage from '../../services/web-storage';
 import { IAPIResponse } from './types';
 
 class AxiosService {
@@ -28,9 +28,9 @@ class AxiosService {
             method: method,
             url: urlpath,
             data: payload,
-            headers: isAuth
-                ? storage.getConfigWithBearer().headers
-                : storage.getConfig().headers,
+            // headers: isAuth
+            //     ? storage.getConfigWithBearer().headers
+            //     : storage.getConfig().headers,
         })
             .then((resp) => {
                 result = resp.data;
@@ -91,7 +91,7 @@ class AxiosService {
      * @name logout
      */
     public async logout(): Promise<void> {
-        storage.clearAuth();
+        //storage.clearAuth();
         await this.call({
             method: 'POST',
             type: 'default',

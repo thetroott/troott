@@ -1,6 +1,5 @@
 import AxiosService from './axios'
 import AuthAPI from '../authentication/auth'
-import WorkspaceAPI from '../core/catalog/catalog'
 import UserAPI from '../users/guest/user'
 
 
@@ -10,12 +9,10 @@ import UserAPI from '../users/guest/user'
  */
 class TroottAPIClient {
   public auth: AuthAPI
-  public workspace: WorkspaceAPI
   public user: UserAPI
 
   constructor(axiosService: AxiosService) {
     this.auth = new AuthAPI(axiosService)
-    this.workspace = new WorkspaceAPI(axiosService)
     this.user = new UserAPI(axiosService)
   }
 }

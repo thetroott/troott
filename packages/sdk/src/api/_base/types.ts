@@ -1,4 +1,4 @@
-import type { IStorageAdapter } from '@/storage/storage.interface';
+//import type { IStorageAdapter } from '@/services/storage.interface';
 import { IAPIReport, IPagination } from '@/utils/interfaces';
 
 export interface IAPIResponse {
@@ -17,7 +17,7 @@ export interface IAPIResponse {
 
 export interface AxiosConfig {
     baseUrl: string;
-    storage: IStorageAdapter;
+  //  storage: IStorageAdapter;
     tokenKey?: string;
     refreshPath?: string;
     onUnauthorized?: () => void | Promise<void>;
