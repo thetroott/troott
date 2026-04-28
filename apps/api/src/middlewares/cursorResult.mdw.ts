@@ -1,6 +1,6 @@
 import { Request, NextFunction } from 'express';
 import { Model, Document, PopulateOptions } from 'mongoose';
-import { IcreatedAt, ICursorResponse } from '@/modules/shared/interfaces/interfaces.util';
+import { IcreatedAt, ICursorResponse } from '@/modules/shared/interfaces.util';
 
 const cursorResults =
     <T extends Document & IcreatedAt>(

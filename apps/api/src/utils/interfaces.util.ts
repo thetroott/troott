@@ -1,1 +1,1 @@
-export * from '../modules/shared/interfaces/interfaces.util';
+export * from '../modules/shared/interfaces.util';

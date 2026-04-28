@@ -1,5 +1,5 @@
 import { ENVType } from '../utils/enums.util';
-import { FrontendURLConfig } from '@/modules/shared/interfaces/interfaces.util';
+import { FrontendURLConfig } from '@/modules/shared/interfaces.util';
 
 let config: FrontendURLConfig;
 

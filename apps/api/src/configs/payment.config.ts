@@ -1,5 +1,5 @@
 import { ENVType, PaymentProviders } from '../utils/enums.util';
-import { PaymentConfig } from '@/modules/shared/interfaces/interfaces.util';
+import { PaymentConfig } from '@/modules/shared/interfaces.util';
 
 let config: PaymentConfig;
 

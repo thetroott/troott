@@ -4,7 +4,7 @@ import {
     leadingNum,
     strIncludesEs6,
 } from '@btffamily/pacitude';
-import { IPagination, ISearchQuery } from '@/modules/shared/interfaces/interfaces.util';
+import { IPagination, ISearchQuery } from '@/modules/shared/interfaces.util';
 
 const defineRef = (ref: any): string => {
     return ref === 'id' ? '_id' : ref;

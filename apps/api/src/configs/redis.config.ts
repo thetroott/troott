@@ -1,5 +1,5 @@
 import { ENVType } from '../utils/enums.util';
-import { IRedisOptions } from '@/modules/shared/interfaces/interfaces.util';
+import { IRedisOptions } from '@/modules/shared/interfaces.util';
 
 let config: IRedisOptions;
 

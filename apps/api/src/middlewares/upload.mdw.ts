@@ -6,7 +6,7 @@ import { PassThrough } from 'stream';
 import redisMdw from './redis.mdw';
 import ErrorResponse from '../utils/error.util';
 import { FileFormat, FileMimeType } from '../utils/enums.util';
-import { IFile, IFIleUpload } from '@/modules/shared/interfaces/interfaces.util';
+import { IFile, IFIleUpload } from '@/modules/shared/interfaces.util';
 import { determineFileType, genFileName } from '@/utils/helpers.util';
 
 const acceptedMimeType = Object.values(FileMimeType);

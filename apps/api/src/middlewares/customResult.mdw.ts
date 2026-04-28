@@ -1,6 +1,6 @@
 import { Request, NextFunction } from 'express';
 import { Model, Document, PopulateOptions } from 'mongoose';
-import { ICustomResponse } from '@/modules/shared/interfaces/interfaces.util';
+import { ICustomResponse } from '@/modules/shared/interfaces.util';
 
 const customResults =
     <T extends Document>(

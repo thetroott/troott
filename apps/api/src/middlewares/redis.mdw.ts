@@ -1,5 +1,5 @@
 import { RedisClientType } from 'redis';
-import { IData, IRedisOptions } from '@/modules/shared/interfaces/interfaces.util';
+import { IData, IRedisOptions } from '@/modules/shared/interfaces.util';
 import { createClient } from 'redis';
 import { REDIS_CONFIG } from '../configs/redis.config';
 import colors from 'colors';

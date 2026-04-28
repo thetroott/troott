@@ -3,14 +3,14 @@
  * (configs, per-module enum files, and user.interface.ts).
  */
 export { ENVType, AppChannel } from '../configs/env.enums';
-export { DbModels } from '../modules/shared/db/db-models.enum';
+export { DbModels } from '../modules/shared/db-models.enum';
 export {
     S3Folder,
     FileFormat,
     FileType,
     FileMimeType,
-} from '../modules/shared/files/file.enums';
-export { OAuthProvider } from '../modules/authentication/auth/oauth.enums';
+} from '../modules/shared/file.enums';
+export { OAuthProvider } from '../modules/authentication/auth/auth.enums';
 export {
     StaffUnit,
     AdminRole,
