@@ -26,8 +26,8 @@ export const PlayListValidationSchema = z.object({
         .optional(),
     image: z
         .string()
-        .url({
-            message: 'Image must be a valid URL',
+        .max(5000, {
+            message: 'Image reference is too long',
         })
         .optional(),
     collaborative: z.boolean().optional(),

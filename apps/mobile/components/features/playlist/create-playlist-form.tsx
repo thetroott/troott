@@ -16,8 +16,19 @@ import {
     PlayListValidationSchemaType,
 } from '@/validation/playlist';
 import { IncognitoIcon } from '@/components/features/shared/Icons';
-const CreatePlaylistForm = () => {
-    const { control, handleSubmit, formState, setValue, getValues } =
+
+export type CreatePlaylistFormProps = {
+    /** When set, submit does not leave the flow (e.g. in-memory step after "New playlist"). */
+    onCreated?: (values: PlayListValidationSchemaType) => void;
+    /** Slightly tighter spacing for bottom-sheet step. */
+    compact?: boolean;
+};
+
+const CreatePlaylistForm = ({
+    onCreated,
+    compact = false,
+}: CreatePlaylistFormProps) => {
+    const { control, handleSubmit, setValue } =
         useForm<PlayListValidationSchemaType>({
             defaultValues: {
                 title: '',
@@ -29,8 +40,10 @@ const CreatePlaylistForm = () => {
             resolver: zodResolver(PlayListValidationSchema),
         });
 
-    async function handleImagePicker() {
-        let result = await ImagePicker.launchImageLibraryAsync({
+    const [image, setImage] = React.useState<string | null>(null);
+
+    const handleImagePicker = React.useCallback(async () => {
+        const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images', 'videos'],
             allowsEditing: false,
             aspect: [4, 3],
@@ -43,12 +56,18 @@ const CreatePlaylistForm = () => {
         } else {
             console.log('Image picker was canceled');
         }
-    }
-    const [image, setImage] = React.useState<string | null>(null);
+    }, [setValue]);
+
+    const onSubmit = handleSubmit((values) => {
+        onCreated?.(values);
+    });
 
     return (
         <View>
-            <Pressable style={styles.camera} onPress={handleImagePicker}>
+            <Pressable
+                style={[styles.camera, compact && styles.cameraCompact]}
+                onPress={handleImagePicker}
+            >
                 {!image && (
                     <SolidIcons.CameraIcon
                         color={theme.colors.white[50]}
@@ -78,7 +97,7 @@ const CreatePlaylistForm = () => {
                 <FormInput
                     label="Description"
                     control={control}
-                    name="title"
+                    name="description"
                     // multiline
                     placeholder="Uplift, inspire and share the word"
                 />
@@ -167,6 +186,7 @@ const CreatePlaylistForm = () => {
                 </View>
                 <Button
                     label="Create playlist"
+                    onPress={onSubmit}
                     containerStyle={{
                         marginTop: theme.sizes.spacing.xl,
                         width: '100%',
@@ -192,6 +212,9 @@ const styles = StyleSheet.create({
         elevation: 5,
         shadowColor: theme.colors.grey[500],
         marginTop: theme.sizes.spacing.md,
+    },
+    cameraCompact: {
+        marginTop: theme.sizes.spacing.sm,
     },
     iconBackground: {
         backgroundColor: theme.colors.grey[700],
