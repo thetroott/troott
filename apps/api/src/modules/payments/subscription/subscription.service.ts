@@ -1,4 +1,4 @@
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import { IPlanPaystackCode } from '../plan/plan.interface';
 import planService from '../plan/plan.service';
 import transactionService from '../transaction/transaction.service';

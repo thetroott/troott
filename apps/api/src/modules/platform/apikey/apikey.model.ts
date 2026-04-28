@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { IAPIKeyDoc } from '@/modules/shared/interfaces/interfaces.util';
+import { IAPIKeyDoc } from '@/modules/shared/interfaces.util';
 import {
     APIKeyEnvironment,
     APIKeyStatus,

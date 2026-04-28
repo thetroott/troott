@@ -1,4 +1,4 @@
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import {
     CreateSubscriptionIntentDTO,
     ISubscriptionIntentDoc,

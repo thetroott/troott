@@ -4,7 +4,7 @@ import { IUserDoc } from './user.interface';
 import RepositoryService from '../../internals/repository/repository.service';
 import { IResult } from '../../../utils/interfaces.util';
 import tokenService from '../../internals/token/token.service';
-import { OAuthProvider } from '../../authentication/auth/oauth.enums';
+import { OAuthProvider } from '../../authentication/auth/auth.enums';
 
 /**
  * User Repository

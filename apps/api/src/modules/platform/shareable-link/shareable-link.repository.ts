@@ -1,5 +1,5 @@
 import ShareableLink from './shareable-link.model';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import { IShareableLinkDoc } from './shareable-link.interface';
 import { CreateShareableLinkDTO } from './shareable-link.dto';
 

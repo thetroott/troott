@@ -1,6 +1,6 @@
 import slugify from 'slugify';
 import { Random } from '@btffamily/pacitude';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import {
     allowedPlanUpdateDTO,
     newPlanDTO,

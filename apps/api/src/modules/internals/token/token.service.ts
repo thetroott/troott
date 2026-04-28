@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import ErrorResponse from '../../../utils/error.util';
 import User from '../../users/user/user.model';
 import dotenv from 'dotenv';

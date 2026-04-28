@@ -1,6 +1,6 @@
 import { CreateListenerDTO, UpdateListenerDTO } from './listener.dto';
 import listenerRepository from './listener.repository';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import type { IListenerDoc } from './listener.interface';
 import type { IUserDoc } from '../user/user.interface';
 import { UserType } from '../user/user.interface';

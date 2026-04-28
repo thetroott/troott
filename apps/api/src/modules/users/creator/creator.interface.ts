@@ -2,7 +2,7 @@ import { Document, Types } from 'mongoose';
 import {
     AccountManagerRole,
     VerificationStatus,
-} from '../admin/admin.enums';
+} from '../minister/minister.interface';
 
 type ObjectId = Types.ObjectId;
 

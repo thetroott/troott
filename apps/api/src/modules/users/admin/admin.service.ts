@@ -8,7 +8,7 @@ import {
 } from './admin.interface';
 import { CreateAdminDTO, UpdateAdminDTO } from './admin.dto';
 import adminRepository from './admin.repository';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import { IUserDoc, UserType } from '../user/user.interface';
 import { genUserCode } from '../../../utils/code.util';
 import roleService from '../../authentication/role/role.service';

@@ -1,5 +1,5 @@
 import { IUserDoc } from '../user/user.interface';
-import { IDebitCard } from '../../shared/interfaces/card.interface';
+import { IDebitCard } from '../../shared/card.interface';
 
 export interface CreateListenerDTO {
     user: IUserDoc;

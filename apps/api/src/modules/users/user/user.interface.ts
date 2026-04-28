@@ -1,9 +1,10 @@
 import { Types, Document } from 'mongoose';
-import type { Nullable } from '../../shared/interfaces/nullable';
+import type { Nullable } from '../../shared/nullable';
 import { IAPIKey, IAPIKeyDoc } from '../../platform/apikey/apikey.interface';
 import { IRoleDoc } from '../../authentication/role/role.interface';
 import { IPermissionDoc } from '../../authentication/permission/permission.interface';
 import { INotificationDoc } from '../../notifications/push/push.interface';
+
 
 type ObjectId = Types.ObjectId;
 
@@ -20,19 +21,12 @@ export interface IUserDoc extends Document {
     phoneCode: string;
     phoneNumber: string;
 
-    avatar: {
-        fileName: string;
-        s3Key: string;
-    };
-
-    coverImage: {
-        fileName: string;
-        s3Key: string;
-    };
+    avatar: Upload
+    coverImage: Upload
 
     location: ILocation;
     timeZone: string;
-
+    
     login: {
         last: string;
         method: LoginMethod;
@@ -66,20 +60,6 @@ export interface IUserDoc extends Document {
     isLocked: boolean;
     lockedUntil: Nullable<Date>;
     twoFactorEnabled: boolean;
-
-    /**
-     * Legacy embedded listener prefs (`topics`, `minister`). Prefer
-     * `userPreferences` collection via PreferenceService; new writes should not
-     * rely on this field.
-     */
-    preferences?: Record<string, unknown>;
-
-    /** @deprecated Use UserPreferences.notifications; may remain on old documents until lazy migration. */
-    notificationPreferences?: {
-        email?: boolean;
-        push?: boolean;
-        sms?: boolean;
-    };
 
     devices: Array<IDevice>;
     googleId: string;
@@ -119,6 +99,12 @@ export enum UserType {
     LISTENER = 'listener',
     USER = 'user',
 }
+
+export interface Upload {
+    fileName: string;
+    s3Key: string;
+}
+
 
 export enum OtpType {
     REGISTER = 'register',
@@ -164,4 +150,6 @@ export enum LoginMethod {
 export enum DeviceType {
     ANDROID = 'android',
     IOS = 'ios',
+    MAC = 'macbook',
+    WINDOWS = 'windows'
 }

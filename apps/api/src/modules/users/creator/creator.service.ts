@@ -1,6 +1,6 @@
 import { CreateCreatorDTO, UpdateCreatorDTO } from './creator.dto';
 import creatorRepository from './creator.repository';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import type { ICreatorDoc } from './creator.interface';
 import type { IUserDoc } from '../user/user.interface';
 import { UserType } from '../user/user.interface';

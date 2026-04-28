@@ -1,6 +1,6 @@
 import { CreateMinisterDTO, UpdateMinisterDTO } from './minister.dto';
 import ministerRepository from './minister.repository';
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import type { IMinisterDoc } from './minister.interface';
 import type { IUserDoc } from '../user/user.interface';
 import { UserType } from '../user/user.interface';

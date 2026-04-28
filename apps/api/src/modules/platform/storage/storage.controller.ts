@@ -2,7 +2,7 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import asyncHandler from '../../../middlewares/async.mdw';
 import ErrorResponse from '../../../utils/error.util';
 import storageService from './storage.service';
-import { IFile } from '@/modules/shared/interfaces/interfaces.util';
+import { IFile } from '@/modules/shared/interfaces.util';
 import imageMapper, { ImageDTO } from './storage.dto';
 
 /**

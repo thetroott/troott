@@ -1,4 +1,4 @@
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 
 export interface ImageDTO {
     uploadRef: string; // Unique upload identifier

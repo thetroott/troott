@@ -1,7 +1,4 @@
-export enum QueueChannels {
-    EMAIL = 'email-queue',
-    VIDEO = 'video-queue',
-}
+
 
 export enum UploadStepType {
     IMAGE_UPLOADING = 'image-uploading',

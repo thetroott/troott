@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { ITransactionDoc } from '@/modules/shared/interfaces/interfaces.util';
+import { ITransactionDoc } from '@/modules/shared/interfaces.util';
 import { DbModels, TransactionsType } from '../../../utils/enums.util';
 import { decrypt, encrypt } from '../../../utils/encryption.util';
 

@@ -1,9 +1,10 @@
 import { Document, Types } from 'mongoose';
-import { IDebitCard } from '../../shared/interfaces/card.interface';
+import { IDebitCard } from '../../shared/card.interface';
 
 type ObjectId = Types.ObjectId;
 
 export interface IListenerDoc extends Document {
+    code: string; // user public ID
     firstName: string;
     lastName: string;
     email: string;
@@ -17,7 +18,7 @@ export interface IListenerDoc extends Document {
     dateOfBirth: Date;
     gender: string;
     slug: string;
-    card?: IDebitCard;
+    card: IDebitCard;
 
     playlists: Array<ObjectId | any>;
     listeningHistory: Array<ObjectId | any>;

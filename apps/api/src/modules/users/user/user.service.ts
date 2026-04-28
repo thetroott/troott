@@ -22,7 +22,7 @@ import authService from '../../authentication/auth/auth.service';
 import PermissionService from '../../authentication/permission/permission.service';
 import { genSlug } from '../../../utils/helpers.util';
 import { generateRandomChars } from '../../../utils/helpers.util';
-import { OAuthProvider } from '../../authentication/auth/oauth.enums';
+import { OAuthProvider } from '../../authentication/auth/auth.enums';
 import { SocialIdKey } from '../../../utils/types.util';
 import { genUserCode } from '../../../utils/code.util';
 import storageService from '../../platform/storage/storage.service';

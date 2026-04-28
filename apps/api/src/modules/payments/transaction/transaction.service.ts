@@ -1,4 +1,4 @@
-import { IResult } from '@/modules/shared/interfaces/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import { initializePayment } from '../paystack/paystack.service';
 import { NewTransactionDTO, SubscriptionDTO } from './transaction.dto';
 

@@ -20,16 +20,6 @@ export enum AccountManagerRole {
     EDITOR = 'editor',
     ANALYST = 'analyst',
 }
-
-export enum VerificationStatus {
-    PENDING = 'pending',
-    APPROVED = 'approved',
-    REJECTED = 'rejected',
-    UNDER_REVIEW = 'under-review',
-    NEEDS_REVISION = 'needs-revision',
-    SUSPENDED = 'suspended',
-}
-
 export enum AdminPermissions {
     Moderate = 'moderate',
     Create = 'create',
