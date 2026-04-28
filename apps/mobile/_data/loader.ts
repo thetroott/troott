@@ -40,10 +40,31 @@ export async function loadSermons(): Promise<ISermonTrack[]> {
     };
 
     const tracks: ISermonTrack[] = sermonsData.map((data) => {
-        const audioModule =
-            sermonAudio[
-                data.sermon.split('/').pop() as keyof typeof sermonAudio
-            ];
+        const audioKey = data.sermon.split('/').pop() ?? '';
+        const audioFromMap =
+            sermonAudio[audioKey as keyof typeof sermonAudio];
+        const imageKey = data.image.split('/').pop() ?? '';
+        const imageFromMap =
+            sermonImages[imageKey as keyof typeof sermonImages];
+        if (audioFromMap == null) {
+            console.warn(
+                '[loadSermons] no bundled audio for file',
+                audioKey,
+                'id',
+                data.id,
+                '— using what-seekest-thou.mp3',
+            );
+        }
+        if (imageFromMap == null) {
+            console.warn(
+                '[loadSermons] no bundled image for file',
+                imageKey,
+                'id',
+                data.id,
+            );
+        }
+        const audioModule = audioFromMap ?? sermonAudio['what-seekest-thou.mp3'];
+        const imageModule = imageFromMap ?? sermonImages['what-seekest-thou.jpg'];
         return {
             // These are the REQUIRED keys for native player functionality
             id: data.id,
@@ -55,10 +76,7 @@ export async function loadSermons(): Promise<ISermonTrack[]> {
             artist: data.minister,
             minister: data.minister,
             duration: data.duration,
-            artwork:
-                sermonImages[
-                    data.image.split('/').pop() as keyof typeof sermonImages
-                ],
+            artwork: imageModule,
             description: data.description,
             genre: data.topic,
             date: data.releaseDate,

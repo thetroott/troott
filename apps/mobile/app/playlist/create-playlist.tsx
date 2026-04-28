@@ -1,10 +1,11 @@
 import { StyleSheet, View } from 'react-native';
 import React from 'react';
-import ScreenModalAndroidView from '@/components/ui/screen-modal-android';
-import { theme } from '@/constants/theme';
-import Header from '@/components/features/shared/headers';
+import { router } from 'expo-router';
 import { ScrollView } from 'react-native-gesture-handler';
 import CreatePlaylistForm from '@/components/features/playlist/create-playlist-form';
+import Header from '@/components/features/shared/headers';
+import ScreenModalAndroidView from '@/components/ui/screen-modal-android';
+import { theme } from '@/constants/theme';
 
 const CreatePlayListScreen = () => {
     return (
@@ -15,7 +16,11 @@ const CreatePlayListScreen = () => {
                     contentContainerStyle={styles.scrollView}
                     nestedScrollEnabled
                 >
-                    <CreatePlaylistForm />
+                    <CreatePlaylistForm
+                        onCreated={() => {
+                            router.back();
+                        }}
+                    />
                 </ScrollView>
             </View>
         </ScreenModalAndroidView>

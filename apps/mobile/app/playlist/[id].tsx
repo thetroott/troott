@@ -1,3 +1,7 @@
+/**
+ * Playlist detail placeholder. "Create playlist" form lives at
+ * `app/playlist/create-playlist.tsx` (and optional embeds in bottom sheets), not here.
+ */
 import React from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import ScreenView from '@/components/ui/screenview';
