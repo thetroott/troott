@@ -1,4 +1,5 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { router } from 'expo-router';
 import {
     Image,
     type ImageSourcePropType,
@@ -8,14 +9,23 @@ import {
     type ViewStyle,
     View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import Text from '@/components/ui/text';
+import { getToastBottomAboveMiniPlayer } from '@/components/features/player/mini-player/mini-player-layout';
 import { theme } from '@/constants/theme';
+import { Portal } from '@/components/ui/portal';
 import { SolidIcons } from '@/assets/icons';
 import {
     BottomSheetModal,
     BottomSheetRef,
 } from '@/components/ui/bottom-sheet-modal';
+import AddToPlaylistBottomSheet from '@/components/features/playlist/add-to-playlist-bottom-sheet';
+import AddToPlaylistConfirmationBar from '@/components/features/playlist/add-to-playlist-confirmation-bar';
+import {
+    ADD_TO_PLAYLIST_TOAST_MS,
+    type SermonAddedToPlaylistInfo,
+} from '@/components/features/playlist/use-add-to-playlist';
 import { getTrackListActions } from '@/components/features/player/controls/actions';
 import type { BaseSermonDtoSlimified, SermonItemDTO } from '@/types/sermon';
 import type { Queue } from '@/types/queue-ref';
@@ -75,6 +85,10 @@ export default function SermonCard({
     testID,
 }: SermonCardProps) {
     const sheetRef = useRef<BottomSheetRef>(null);
+    const addToPlaylistRef = useRef<BottomSheetRef>(null);
+    const insets = useSafeAreaInsets();
+    const [sermonAddedToast, setSermonAddedToast] =
+        useState<SermonAddedToPlaylistInfo | null>(null);
     const playQueue = usePlayQueue();
     const loadNewQueue = useLoadNewQueue();
     const [networkStatus] = useNetworkStatus();
@@ -116,7 +130,41 @@ export default function SermonCard({
     const handleSheetOpen = useCallback(() => {
         sheetRef.current?.open();
     }, []);
-    const trackListActions = useMemo(() => getTrackListActions(track), [track]);
+    useEffect(() => {
+        if (!sermonAddedToast) {
+            return;
+        }
+        const t = setTimeout(
+            () => setSermonAddedToast(null),
+            ADD_TO_PLAYLIST_TOAST_MS,
+        );
+        return () => clearTimeout(t);
+    }, [sermonAddedToast]);
+
+    const onSermonAddedToPlaylist = useCallback(
+        (info: SermonAddedToPlaylistInfo) => {
+            addToPlaylistRef.current?.close();
+            setTimeout(() => {
+                setSermonAddedToast(info);
+            }, 300);
+        },
+        [],
+    );
+
+    const openAddToPlaylistSheet = useCallback(() => {
+        setSermonAddedToast(null);
+        sheetRef.current?.close();
+        setTimeout(() => {
+            addToPlaylistRef.current?.open();
+        }, 300);
+    }, []);
+    const trackListActions = useMemo(
+        () =>
+            getTrackListActions(track, {
+                onOpenAddToPlaylist: openAddToPlaylistSheet,
+            }),
+        [track, openAddToPlaylistSheet],
+    );
 
     const imageEl = useMemo(() => {
         if (!source) {
@@ -139,8 +187,40 @@ export default function SermonCard({
         );
     }, [source, variant, title]);
 
+    const toastBottom = getToastBottomAboveMiniPlayer(insets.bottom, {
+        isMainTabs: true,
+    });
+
     return (
         <View testID={testID}>
+            {sermonAddedToast ? (
+                <Portal
+                    name={`sermon-playlist-toast-${String(track.id ?? 'unknown')}`}
+                >
+                    <View
+                        style={styles.portalToastRoot}
+                        pointerEvents="box-none"
+                    >
+                        <View
+                            style={[
+                                styles.sermonAddedToastSheet,
+                                { bottom: toastBottom },
+                            ]}
+                        >
+                            <AddToPlaylistConfirmationBar
+                                playlistName={sermonAddedToast.name}
+                                onView={() => {
+                                    const { playlistId } = sermonAddedToast;
+                                    setSermonAddedToast(null);
+                                    router.push(
+                                        `/playlist/${playlistId}`,
+                                    );
+                                }}
+                            />
+                        </View>
+                    </View>
+                </Portal>
+            ) : null}
             {variant === 'large' && (
                 <Pressable
                     style={[styles.largeContainer, cardStyle]}
@@ -232,11 +312,23 @@ export default function SermonCard({
                     ))}
                 </BottomSheetModal.Content>
             </BottomSheetModal.Root>
+            <AddToPlaylistBottomSheet
+                ref={addToPlaylistRef}
+                onSermonAddedToPlaylist={onSermonAddedToPlaylist}
+            />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
+    portalToastRoot: {
+        ...StyleSheet.absoluteFillObject,
+    },
+    sermonAddedToastSheet: {
+        position: 'absolute',
+        left: theme.sizes.spacing.md,
+        right: theme.sizes.spacing.md,
+    },
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',

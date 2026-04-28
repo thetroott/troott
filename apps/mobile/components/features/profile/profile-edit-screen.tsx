@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 import ScreenView from '@/components/ui/screenview';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import { useUploadPhoto } from '@/hooks/useUploadPhoto';
+import { useUploadPhoto } from '@/hooks/platform/useUploadPhoto';
 
 type FieldProps = {
     label: string;

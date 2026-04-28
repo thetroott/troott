@@ -32,13 +32,22 @@ export interface BottomSheetRef {
     close: () => void;
 }
 
-interface BottomSheetRootProps {
+export interface BottomSheetRootProps {
     children?: React.ReactNode;
+    /**
+     * Must be unique when several bottom sheets are mounted; otherwise all instances
+     * would register the same portal name and clobber one another in the host map.
+     */
+    portalName?: string;
+    /** When stacking sheets, the later sheet should have a higher z-elevation. */
+    zIndex?: number;
 }
 
 const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
-    ({ children }, ref) => {
+    ({ children, portalName, zIndex: zIndexProp = 1 }, ref) => {
         const [showSheet, setShowSheet] = React.useState(false);
+        const generatedName = `bottom-sheet-${React.useId().replace(/:/g, '')}`;
+        const resolvedPortal = portalName ?? generatedName;
 
         const initialHeight = theme.sizes.screen.height * 0.5;
         const finalHeight = theme.sizes.screen.height * 0.9;
@@ -170,8 +179,13 @@ const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
         }
 
         return (
-            <Portal name="bottom-sheet-modal">
-                <View style={styles.overlayContainer}>
+            <Portal name={resolvedPortal}>
+                <View
+                    style={[
+                        styles.overlayContainer,
+                        { zIndex: zIndexProp, elevation: zIndexProp },
+                    ]}
+                >
                     {/*
                       Backdrop is a separate layer *under* the sheet so:
                       1) Taps on the dimmed area (not covered by the sheet) reliably call onPress

@@ -7,12 +7,10 @@ import {
     Path,
     PathValue,
     RegisterOptions,
-    useController,
 } from 'react-hook-form';
 import Animated, {
     FadeInLeft,
     FadeOutLeft,
-    FadeOutRight,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
@@ -58,26 +56,27 @@ const FormInput = <T extends FieldValues>({
     function handleBlurTextAnimation() {
         textcolor.value = withTiming('#9ca3af', { duration: 200 });
     }
-    const { field, fieldState } = useController({
-        name,
-        control,
-        rules,
-        defaultValue,
-    });
 
     return (
         <Controller
             control={control}
             name={name}
+            rules={rules}
             defaultValue={defaultValue}
-            render={() => (
+            render={({ field, fieldState }) => (
                 <Animated.View
                     style={[containerStyle, { gap: theme.sizes.spacing.sm }]}
                 >
                     <AnimatedText textStyle={[animatedTextStyle]}>
                         {label}
                     </AnimatedText>
+                    {/* RHF ref omitted: React 19 can throw on frozen ref when unmounting. */}
                     <Input
+                        value={
+                            field.value == null
+                                ? ''
+                                : String(field.value as string)
+                        }
                         onFocus={handleFocusTextAnimation}
                         onBlur={() => {
                             field.onBlur();
@@ -91,7 +90,6 @@ const FormInput = <T extends FieldValues>({
                         multiline={multiline}
                         containerstyle={containerStyle}
                         inputcontainerstyles={inputContainerStyle}
-                        // isInvalid={!!fieldState.error}
                     />
 
                     {fieldState.error && (

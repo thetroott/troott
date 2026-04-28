@@ -1,8 +1,6 @@
-import { View, ViewStyle } from 'react-native';
 import React, { useEffect } from 'react';
 import {
     Control,
-    Controller,
     FieldValues,
     Path,
     PathValue,
@@ -31,7 +29,7 @@ const FormSwitch = <T extends FieldValues>({
     rules,
     defaultValue,
 }: FormInputProps<T>) => {
-    const { field, fieldState } = useController({
+    const { field } = useController({
         name,
         control,
         rules,
@@ -54,36 +52,29 @@ const FormSwitch = <T extends FieldValues>({
         ],
     }));
     return (
-        <Controller
-            control={control}
-            name={name}
-            defaultValue={defaultValue}
-            render={() => (
-                <Switch.Root
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
+        <Switch.Root
+            checked={Boolean(field.value)}
+            onCheckedChange={(v) => field.onChange(Boolean(v))}
+            style={{
+                borderRadius: theme.sizes.radius.full,
+                backgroundColor: field.value
+                    ? theme.colors.grey[600]
+                    : theme.colors.grey[400],
+                width: 56,
+                padding: 2,
+            }}
+        >
+            <Animated.View style={animatedStyle}>
+                <Switch.Thumb
                     style={{
+                        width: theme.sizes.spacing.lg + 4,
+                        height: theme.sizes.spacing.lg + 4,
                         borderRadius: theme.sizes.radius.full,
-                        backgroundColor: field.value
-                            ? theme.colors.grey[600]
-                            : theme.colors.grey[400],
-                        width: 56,
-                        padding: 2,
+                        backgroundColor: '#ffffff',
                     }}
-                >
-                    <Animated.View style={animatedStyle}>
-                        <Switch.Thumb
-                            style={{
-                                width: theme.sizes.spacing.lg + 4,
-                                height: theme.sizes.spacing.lg + 4,
-                                borderRadius: theme.sizes.radius.full,
-                                backgroundColor: '#ffffff',
-                            }}
-                        />
-                    </Animated.View>
-                </Switch.Root>
-            )}
-        />
+                />
+            </Animated.View>
+        </Switch.Root>
     );
 };
 
