@@ -10,6 +10,8 @@ export interface IShareableLinkDoc extends Document {
 
     // Token information
     token: string; // Encrypted token
+    /** SHA-256 of raw token for lookup without `resourceId` (deep-link resolve). */
+    tokenLookupHash?: string;
     rawToken?: string; // Plain token (not stored, only returned on creation)
 
     // Link configuration
@@ -37,17 +39,13 @@ export interface IShareableLinkDoc extends Document {
 // ENUMS
 
 export enum ShareableLinkType {
-    WORKSPACE = 'workspace',
-    HACKATHON = 'hackathon',
-    PROJECT = 'project',
-    ENTRY = 'entry',
-    SUBMISSION = 'submission',
-    TEAM = 'team',
-    SQUAD = 'squad',
-    TASK = 'task',
+    SERMON = 'sermon',
+    SERIES = 'series',
+    PLAYLIST = 'playlist',
+    MINISTER = 'minister',
+    LIBRARY = 'library',
+    BITE = 'bite',
     FORM = 'form',
-    PORTFOLIO = 'portfolio',
-    TEMPLATE = 'template',
     CAMPAIGN = 'campaign',
 }
 

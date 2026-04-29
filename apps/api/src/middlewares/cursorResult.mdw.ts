@@ -1,49 +1,49 @@
-import { Request, NextFunction } from "express";
-import { Model, Document, PopulateOptions } from "mongoose";
-import { IcreatedAt, ICursorResponse } from "../utils/interfaces.util";
+import { Request, NextFunction } from 'express';
+import { Model, Document, PopulateOptions } from 'mongoose';
+import { IcreatedAt, ICursorResponse } from '@/modules/shared/interfaces.util';
 
 const cursorResults =
-  <T extends Document & IcreatedAt>(
-    model: Model<T>,
-    populate?: string | PopulateOptions | (string | PopulateOptions)[]
-  ) =>
-  async (req: Request, res: ICursorResponse<T>, next: NextFunction) => {
-    const { limit = "10", cursor } = req.query;
-    const pageLimit = parseInt(limit as string, 10);
+    <T extends Document & IcreatedAt>(
+        model: Model<T>,
+        populate?: string | PopulateOptions | (string | PopulateOptions)[],
+    ) =>
+    async (req: Request, res: ICursorResponse<T>, next: NextFunction) => {
+        const { limit = '10', cursor } = req.query;
+        const pageLimit = parseInt(limit as string, 10);
 
-    let queryFilter: any = {};
+        let queryFilter: any = {};
 
-    if (cursor) {
-      queryFilter.createdAt = { $lt: new Date(cursor as string) };
-    }
+        if (cursor) {
+            queryFilter.createdAt = { $lt: new Date(cursor as string) };
+        }
 
-    let query = model
-      .find(queryFilter)
-      .sort({ createdAt: -1 }) // newest first
-      .limit(pageLimit);
+        let query = model
+            .find(queryFilter)
+            .sort({ createdAt: -1 }) // newest first
+            .limit(pageLimit);
 
-    if (populate) {
-      if (typeof populate === "string") {
-        query = query.populate(populate);
-      } else {
-        query = query.populate(populate);
-      }
-    }
+        if (populate) {
+            if (typeof populate === 'string') {
+                query = query.populate(populate);
+            } else {
+                query = query.populate(populate);
+            }
+        }
 
-    const results = await query;
+        const results = await query;
 
-    const last = results.length > 0 ? results.at(-1) : undefined;
-    const nextCursor =
-      last?.createdAt != null ? last.createdAt.toISOString() : null;
-        
-    res.customResults = {
-      success: true,
-      count: results.length,
-      nextCursor,
-      data: results,
+        const last = results.length > 0 ? results.at(-1) : undefined;
+        const nextCursor =
+            last?.createdAt != null ? last.createdAt.toISOString() : null;
+
+        res.customResults = {
+            success: true,
+            count: results.length,
+            nextCursor,
+            data: results,
+        };
+
+        next();
     };
-
-    next();
-  };
 
 export default cursorResults;

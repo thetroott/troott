@@ -1,8 +1,7 @@
-import { FilterQuery } from 'mongoose';
-import mongoose from 'mongoose';
+import { FilterQuery, UpdateQuery } from 'mongoose';
 import Admin from './admin.model';
 import { IAdminDoc } from './admin.interface';
-import RepositoryService from '../../../services/repository.service';
+import RepositoryService from '../../internals/repository/repository.service';
 import { IResult } from '../../../utils/interfaces.util';
 
 /**
@@ -46,7 +45,7 @@ class AdminRepository extends RepositoryService<IAdminDoc> {
         },
     ): Promise<IResult> {
         if (options) {
-            return this.findAll(filter || {}, options);
+            return this.findAll(filter || {}, options as any);
         }
         return this.findAll(filter);
     }
@@ -57,9 +56,7 @@ class AdminRepository extends RepositoryService<IAdminDoc> {
      * @returns {Promise<IResult>}
      * @description Create a new admin
      */
-    public async createAdmin(
-        adminData: Partial<IAdminDoc>,
-    ): Promise<IResult> {
+    public async createAdmin(adminData: Partial<IAdminDoc>): Promise<IResult> {
         return this.create(adminData);
     }
 
@@ -72,7 +69,7 @@ class AdminRepository extends RepositoryService<IAdminDoc> {
      */
     public async updateAdmin(
         id: string,
-        updateData: Partial<IAdminDoc>,
+        updateData: UpdateQuery<IAdminDoc> | Partial<IAdminDoc>,
     ): Promise<IResult> {
         return this.update(id, updateData);
     }
@@ -134,6 +131,34 @@ class AdminRepository extends RepositoryService<IAdminDoc> {
         }
 
         return result;
+    }
+
+    // [MIGRATION-REVIEW] Methods merged from flat repositories/admin.repository.ts
+
+    public async findByEmail(email: string): Promise<IResult> {
+        return this.findOne({ email });
+    }
+
+    public async getAllAdmins(): Promise<IResult> {
+        return this.findAll({});
+    }
+
+    public async getStaffByRole(role: string): Promise<IResult> {
+        return this.findAll({ role } as any);
+    }
+
+    public async getStaffByUnit(unit: string): Promise<IResult> {
+        return this.findAll({ unit } as any);
+    }
+
+    public async updateVerificationStatus(
+        id: string,
+        status: string,
+    ): Promise<IResult> {
+        return this.update(id, {
+            verificationStatus: status,
+            isVerified: status === 'VERIFIED',
+        } as any);
     }
 }
 

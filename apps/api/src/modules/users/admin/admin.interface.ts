@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose';
 import { IUserDoc } from '../user/user.interface';
-import { DbModels } from '../../../utils/enums.util';
+import { DbModels } from '../../shared/db-models.enum';
 
 type ObjectId = Types.ObjectId;
 
@@ -14,11 +14,14 @@ export interface IAdminDoc extends Document {
     adminType: AdminTypeEnum; // staff or board member
     department: AdminDepartmentEnum; // product, platform, developer experience, infrastructure, data, security, education, people (required for all - executive board members have operational departments)
     position: CompanyRoleEnum; // junior, associate, intermediate, senior, staff, principal, manager, director, vp, executive
-    
+
     accessLevel: number;
 
     createdBy: ObjectId | any;
     settings: ObjectId | any;
+
+    /** Optional: used by API key helpers in admin.service (schema may be extended) */
+    apiKeys?: Array<{ key: string; createdAt: Date; lastUsed: Date }>;
 
     // relationships
     user: IUserDoc | any;
@@ -30,7 +33,6 @@ export interface IAdminDoc extends Document {
     _id: ObjectId;
     id: ObjectId;
 }
-
 
 export enum AdminTypeEnum {
     STAFF = 'staff', // Operational staff - must have a department
@@ -47,7 +49,6 @@ export enum AdminDepartmentEnum {
     EDUCATION = 'education', // Owns operations and education e.g hackathon as a education platform, API or product education, etc.
     PEOPLE = 'people', // Owns people and operations e.g HR, finance, legal, support, customer success team, etc.
 }
-
 
 export enum CompanyRoleEnum {
     JUNIOR = 'junior',

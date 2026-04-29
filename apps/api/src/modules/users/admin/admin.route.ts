@@ -9,6 +9,7 @@ import {
     getAdmin,
     getAdmins,
     getAdminProfile,
+    updateCurrentAdmin,
     updateAdmin,
     deleteAdmin,
 } from './admin.controller';
@@ -26,6 +27,7 @@ adminRoutes.post('/set-password', Protect, setAdminPassword);
 // Admin profile routes
 adminRoutes.post('/', Protect, createAdmin);
 adminRoutes.get('/', Protect, getAdminProfile);
+adminRoutes.put('/', Protect, updateCurrentAdmin);
 adminRoutes.get('/list', Protect, getAdmins);
 adminRoutes.get('/:id', Protect, getAdmin);
 adminRoutes.put('/:id', Protect, updateAdmin);

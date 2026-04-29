@@ -2,11 +2,10 @@ import { Types } from 'mongoose';
 import { dateToday, IDateToday } from '@btffamily/pacitude';
 import { IRoleDoc } from './role.interface';
 import roleRepository from './role.repository';
-import { IResult } from '../../../utils/interfaces.util';
+import { IResult } from '@/modules/shared/interfaces.util';
 import User from '../../users/user/user.model';
 import { IUserDoc, UserType } from '../../users/user/user.interface';
 import permissionService from '../permission/permission.service';
-
 
 class RoleService {
     public result: IResult;
@@ -16,7 +15,7 @@ class RoleService {
         this.today = dateToday(new Date());
         this.result = { error: false, message: '', code: 200, data: {} };
     }
-    
+
     /**
      * @name attachRole
      * @description Attach a role to a user (supports multiple roles and hierarchical roles)
@@ -24,7 +23,10 @@ class RoleService {
      * @param roleName - Role name to attach
      * @returns Promise<IResult>
      */
-    public async attachRole(user: IUserDoc, roleName: string): Promise<IResult> {
+    public async attachRole(
+        user: IUserDoc,
+        roleName: string,
+    ): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -43,7 +45,10 @@ class RoleService {
         const role = roleResult.data as IRoleDoc;
 
         // Check if trying to attach superadmin role
-        if (roleName === UserType.SUPERADMIN || role.name === UserType.SUPERADMIN) {
+        if (
+            roleName === UserType.SUPERADMIN ||
+            role.name === UserType.SUPERADMIN
+        ) {
             // Check if another user already has superadmin role
             const existingSuperAdmin = await User.findOne({
                 roles: role._id,
@@ -67,7 +72,8 @@ class RoleService {
             // Add role if not already present
             const roleId = role._id.toString();
             const existingRoleIndex = user.roles.findIndex(
-                (r: any) => r?.toString() === roleId || r?._id?.toString() === roleId
+                (r: any) =>
+                    r?.toString() === roleId || r?._id?.toString() === roleId,
             );
 
             if (existingRoleIndex === -1) {
@@ -76,7 +82,13 @@ class RoleService {
 
                 // Update role's users array
                 const userId = user._id.toString();
-                if (!role.users.some((u: any) => u?.toString() === userId || u?._id?.toString() === userId)) {
+                if (
+                    !role.users.some(
+                        (u: any) =>
+                            u?.toString() === userId ||
+                            u?._id?.toString() === userId,
+                    )
+                ) {
                     role.users = [...role.users, user._id];
                     await role.save();
                 }
@@ -107,7 +119,10 @@ class RoleService {
      * @param roleName - Role name to detach
      * @returns Promise<IResult>
      */
-    public async detachRole(user: IUserDoc, roleName: string): Promise<IResult> {
+    public async detachRole(
+        user: IUserDoc,
+        roleName: string,
+    ): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -126,7 +141,10 @@ class RoleService {
         const role = roleResult.data as IRoleDoc;
 
         // Check if trying to detach superadmin role
-        if (roleName === UserType.SUPERADMIN || role.name === UserType.SUPERADMIN) {
+        if (
+            roleName === UserType.SUPERADMIN ||
+            role.name === UserType.SUPERADMIN
+        ) {
             // Check if this is the only user with superadmin role
             const superAdminCount = await User.countDocuments({
                 roles: role._id,
@@ -135,7 +153,8 @@ class RoleService {
             if (superAdminCount <= 1) {
                 result.error = true;
                 result.code = 400;
-                result.message = 'Cannot detach superadmin role. System must have at least one superadmin.';
+                result.message =
+                    'Cannot detach superadmin role. System must have at least one superadmin.';
                 return result;
             }
         }
@@ -151,7 +170,8 @@ class RoleService {
             const roleId = role._id.toString();
             const initialLength = user.roles.length;
             user.roles = user.roles.filter(
-                (r: any) => r?.toString() !== roleId && r?._id?.toString() !== roleId
+                (r: any) =>
+                    r?.toString() !== roleId && r?._id?.toString() !== roleId,
             );
 
             if (user.roles.length < initialLength) {
@@ -160,7 +180,9 @@ class RoleService {
                 // Remove user from role's users array
                 const userId = user._id.toString();
                 role.users = role.users.filter(
-                    (u: any) => u?.toString() !== userId && u?._id?.toString() !== userId
+                    (u: any) =>
+                        u?.toString() !== userId &&
+                        u?._id?.toString() !== userId,
                 );
                 await role.save();
 

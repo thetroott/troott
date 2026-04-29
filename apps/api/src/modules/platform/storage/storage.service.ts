@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, AWS_BUCKET_NAME } from '../../../configs/aws.config';
-import { IFile, IResult } from '../../../utils/interfaces.util';
+import { IFile, IResult } from '@/modules/shared/interfaces.util';
 
 import { Upload } from '@aws-sdk/lib-storage';
 import { UploadStatus } from '../../../utils/enums.util';

@@ -6,19 +6,18 @@
 
 With troott, users can listen to old and new sermons from their favorite ministers, gain control over how they listen to sermons and messages, and share sermons with the people they love!
 
-
 ## Introduction
 
-Christian content consumers face annoyances and difficulties in accessing messages of their favourite ministers and discovering their old sermons. Many struggle to find specific messages without knowing exact titles, and downloading features directly to phone internal storage are inadequate for organising content. The current value propositions offer poor experience (no mobile first experience) for our target users. 
+Christian content consumers face annoyances and difficulties in accessing messages of their favourite ministers and discovering their old sermons. Many struggle to find specific messages without knowing exact titles, and downloading features directly to phone internal storage are inadequate for organising content. The current value propositions offer poor experience (no mobile first experience) for our target users.
 
 Solving these issues is important to provide a seamless and enjoyable experience, allowing users to efficiently access, manage, and discover religious content, thereby enhancing their spiritual growth and connection.
 
 To build this enhanced product experience, we asking the following questions:
-- How can we eliminate the frustration of people in searching, listening and sharing sermons on the go? 
+
+- How can we eliminate the frustration of people in searching, listening and sharing sermons on the go?
 - How can we help people feel organised and free from the clutter of downloaded sermon collections to make more space for other items? ~ Allow me the freedom to carry my entire sermon collection in my pocket.
 - How can we help people gain control of their spiritual life by listening to sermons seamlessly so that they can improve their lifestyle?
 - How can we help people to share a common spiritual experience by sharing messages to their loved ones on their mobile device?
-
 
 ## Techonologies
 
@@ -78,21 +77,21 @@ npm run dev
 
 ## Branch Structure
 
-| Branch               | Purpose                                                                 |
-|----------------------|-------------------------------------------------------------------------|
-| `master`             | Production-ready code. Always stable. Protected.                        |
-| `staging`            | QA/testing branch for integrating all features before a release.        |
-| `release/vX.Y.Z`     | Pre-production branch used for final testing before going live.         |
-| `@username/feature-*`| Feature branches under a personal namespace.                            |
-| `@username/fix-*`    | Bugfix branches under a personal namespace.                             |
+| Branch                | Purpose                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| `master`              | Production-ready code. Always stable. Protected.                 |
+| `staging`             | QA/testing branch for integrating all features before a release. |
+| `release/vX.Y.Z`      | Pre-production branch used for final testing before going live.  |
+| `@username/feature-*` | Feature branches under a personal namespace.                     |
+| `@username/fix-*`     | Bugfix branches under a personal namespace.                      |
 
 ### Example Branch Naming
 
-| Type     | Pattern                        | Example                                   |
-|----------|--------------------------------|-------------------------------------------|
-| Feature  | `@username/feature-<desc>`     | `@damolaoladipo/feature-invite-endpoint`  |
-| Bug Fix  | `@username/fix-<desc>`         | `@topeokuselu/fix-auth-token-expiry`      |
-| Release  | `release/v<semver>`            | `release/v1.0.2`                           |
+| Type    | Pattern                    | Example                                  |
+| ------- | -------------------------- | ---------------------------------------- |
+| Feature | `@username/feature-<desc>` | `@damolaoladipo/feature-invite-endpoint` |
+| Bug Fix | `@username/fix-<desc>`     | `@topeokuselu/fix-auth-token-expiry`     |
+| Release | `release/v<semver>`        | `release/v1.0.2`                         |
 
 > Use lowercase with hyphens in branch names. Keep it descriptive and concise.
 
@@ -138,7 +137,8 @@ git rebase origin/staging
 git push origin @username/feature-your-task
 ```
 
-### 6. Create a PR into Staging 
+### 6. Create a PR into Staging
+
 ```bash
 git checkout staging
 git merge @username/feature-your-task-name
@@ -156,7 +156,8 @@ When ready for deployment, create a release branch from staging.
 git checkout -b release/v1.0.2
 git push origin release/v1.0.2
 ```
-Final QA and bug-fixing happen on this release/* branch before production deployment.
+
+Final QA and bug-fixing happen on this release/\* branch before production deployment.
 
 ### 8. Merge Release into master and staging
 
@@ -174,19 +175,17 @@ git merge release/v1.0.2
 git push origin staging
 ```
 
-
 ### Creating an Issue
 
 If you discover a bug or have a suggestion, raise an issue via the GitHub Issues tab (if you have permission), or notify your team lead for triage and assignment.
 
 ## Useful Commands
 
-| Command         | Description                          |
-|-----------------|--------------------------------------|
-| `npm run dev`   | Starts the server with nodemon       |
-| `npm start`     | Starts the server in production mode |
-| `npm run test`  | run unit tests                `````  |
-
+| Command        | Description                          |
+| -------------- | ------------------------------------ |
+| `npm run dev`  | Starts the server with nodemon       |
+| `npm start`    | Starts the server in production mode |
+| `npm run test` | run unit tests `````                 |
 
 ## Pull Request Notes
 

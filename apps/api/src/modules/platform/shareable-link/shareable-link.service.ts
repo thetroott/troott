@@ -9,9 +9,18 @@ import {
 } from './shareable-link.dto';
 import shareableLinkRepository from './shareable-link.repository';
 import ShareableLink from './shareable-link.model';
-import { IShareableLinkDoc, ShareableLinkType } from './shareable-link.interface';
-import systemService from '../../../services/system.service';
+import {
+    IShareableLinkDoc,
+    ShareableLinkType,
+} from './shareable-link.interface';
+import systemService from '../../internals/system/system.service';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
+import sermonRepository from '../../core/sermon/sermon.repository';
+import playlistRepository from '../../core/playlist/playlist.repository';
+import ministerRepository from '../../users/minister/minister.repository';
+import seriesRepository from '../../core/series/series.repository';
+import libraryRepository from '../../core/library/library.repository';
 
 /**
  * @name ShareableLinkService
@@ -68,14 +77,16 @@ class ShareableLinkService {
         if (!this.validateObjectId(resourceId)) {
             result.error = true;
             result.code = 400;
-            result.message = 'Invalid resourceId format (must be valid ObjectId)';
+            result.message =
+                'Invalid resourceId format (must be valid ObjectId)';
             return result;
         }
 
         if (!this.validateObjectId(createdBy)) {
             result.error = true;
             result.code = 400;
-            result.message = 'Invalid createdBy format (must be valid ObjectId)';
+            result.message =
+                'Invalid createdBy format (must be valid ObjectId)';
             return result;
         }
 
@@ -97,12 +108,17 @@ class ShareableLinkService {
             separator: '-',
         });
 
-        if (encryptedToken.error || !encryptedToken.data) {
+        if (!encryptedToken || typeof encryptedToken !== 'string') {
             result.error = true;
             result.code = 500;
             result.message = 'Failed to encrypt token';
             return result;
         }
+
+        const tokenLookupHash = crypto
+            .createHash('sha256')
+            .update(rawToken)
+            .digest('hex');
 
         // Calculate expiration date
         const expiresAt = new Date();
@@ -113,7 +129,8 @@ class ShareableLinkService {
             linkType,
             resourceId,
             createdBy,
-            token: encryptedToken.data,
+            token: encryptedToken,
+            tokenLookupHash,
             expiresAt,
             linkName,
             metadata,
@@ -130,7 +147,9 @@ class ShareableLinkService {
         result.code = 201;
         result.data = {
             token: rawToken, // Return raw token for immediate use
-            linkId: (createResult.data as IShareableLinkDoc)?._id || (createResult.data as IShareableLinkDoc)?.id,
+            linkId:
+                (createResult.data as IShareableLinkDoc)?._id ||
+                (createResult.data as IShareableLinkDoc)?.id,
             expiresAt,
             linkName,
             linkType,
@@ -179,7 +198,7 @@ class ShareableLinkService {
             separator: '-',
         });
 
-        if (encryptedToken.error || !encryptedToken.data) {
+        if (!encryptedToken || typeof encryptedToken !== 'string') {
             result.error = true;
             result.code = 500;
             result.message = 'Failed to process token';
@@ -188,7 +207,7 @@ class ShareableLinkService {
 
         // Find the link
         const link = await shareableLinkRepository.findShareableLinkByToken(
-            encryptedToken.data,
+            encryptedToken,
         );
 
         if (!link) {
@@ -231,7 +250,7 @@ class ShareableLinkService {
         }
 
         // Increment access count
-        await shareableLinkRepository.incrementAccessCount(encryptedToken.data);
+        await shareableLinkRepository.incrementAccessCount(encryptedToken);
 
         result.message = 'Shareable link is valid';
         result.data = {
@@ -287,14 +306,14 @@ class ShareableLinkService {
                 separator: '-',
             });
 
-            if (encryptResult.error || !encryptResult.data) {
+            if (!encryptResult || typeof encryptResult !== 'string') {
                 result.error = true;
                 result.code = 500;
                 result.message = 'Failed to process token';
                 return result;
             }
 
-            encryptedToken = encryptResult.data;
+            encryptedToken = encryptResult;
         }
 
         // Revoke the link(s)
@@ -325,7 +344,12 @@ class ShareableLinkService {
             data: {},
         };
 
-        const { resourceId, linkType, includeRevoked = false, includeExpired = false } = dto;
+        const {
+            resourceId,
+            linkType,
+            includeRevoked = false,
+            includeExpired = false,
+        } = dto;
 
         if (!resourceId || !linkType) {
             result.error = true;
@@ -342,14 +366,15 @@ class ShareableLinkService {
             return result;
         }
 
-        const links = await shareableLinkRepository.findShareableLinksByResource(
-            resourceId,
-            linkType,
-            {
-                includeRevoked,
-                includeExpired,
-            },
-        );
+        const links =
+            await shareableLinkRepository.findShareableLinksByResource(
+                resourceId,
+                linkType,
+                {
+                    includeRevoked,
+                    includeExpired,
+                },
+            );
 
         result.message = `Found ${links.length} shareable link(s)`;
         result.data = links.map((link) => ({
@@ -408,7 +433,7 @@ class ShareableLinkService {
             separator: '-',
         });
 
-        if (encryptedToken.error || !encryptedToken.data) {
+        if (!encryptedToken || typeof encryptedToken !== 'string') {
             result.error = true;
             result.code = 500;
             result.message = 'Failed to process token';
@@ -433,7 +458,7 @@ class ShareableLinkService {
         }
 
         const updateResult = await shareableLinkRepository.updateShareableLink(
-            encryptedToken.data,
+            encryptedToken,
             resourceId,
             linkType,
             updateData,
@@ -457,9 +482,7 @@ class ShareableLinkService {
      * @param daysOld - Number of days old (default: 30)
      * @returns Promise<IResult>
      */
-    public async cleanupExpiredLinks(
-        daysOld: number = 30,
-    ): Promise<IResult> {
+    public async cleanupExpiredLinks(daysOld: number = 30): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -467,9 +490,8 @@ class ShareableLinkService {
             data: {},
         };
 
-        const cleanupResult = await shareableLinkRepository.deleteExpiredLinks(
-            daysOld,
-        );
+        const cleanupResult =
+            await shareableLinkRepository.deleteExpiredLinks(daysOld);
 
         result.message = cleanupResult.message;
         result.data = cleanupResult.data;
@@ -482,40 +504,175 @@ class ShareableLinkService {
      * @returns Promise<string> Raw token
      */
     private async generateToken(): Promise<string> {
-        let token: string;
-        let exists: boolean;
-        let attempts = 0;
-        const maxAttempts = 10;
-
-        do {
-            // Generate 32-byte random token (64 hex characters)
-            token = Random.randomCode(32, true).toString();
-
-            // Check if token exists (encrypt and check)
-            const encryptToken = await systemService.encryptData({
-                password: token,
-                payload: '', // Empty payload for checking uniqueness
-                separator: '-',
-            });
-
-            if (encryptToken.error || !encryptToken.data) {
-                throw new Error('Failed to encrypt token during generation');
+        for (let attempts = 0; attempts < 10; attempts++) {
+            const token = Random.randomCode(32, true).toString();
+            const tokenLookupHash = crypto
+                .createHash('sha256')
+                .update(token)
+                .digest('hex');
+            const existing = await ShareableLink.findOne({ tokenLookupHash });
+            if (!existing) {
+                return token;
             }
+        }
+        throw new Error(
+            'Failed to generate unique token after maximum attempts',
+        );
+    }
 
-            const existingLink = await ShareableLink.findOne({
-                token: encryptToken.data,
+    /**
+     * @name resolveForHttp
+     * @description Resolve a share link for mobile deep links.
+     * - Prefer `?token=` only (requires `tokenLookupHash` on the stored link).
+     * - Legacy: `?token=&resourceId=` uses encrypted-token lookup (older clients).
+     * Mobile callback example: `troott://share/open?token=<raw>&resourceId=<id>` (resourceId optional for new links).
+     */
+    public async resolveForHttp(
+        rawToken: string,
+        resourceId?: string,
+    ): Promise<IResult> {
+        const trimmed = rawToken?.trim();
+        if (!trimmed) {
+            return {
+                error: true,
+                code: 400,
+                message: 'token query parameter is required',
+                data: {},
+            };
+        }
+
+        if (resourceId) {
+            const validated = await this.validateShareableLink({
+                token: trimmed,
+                resourceId,
             });
-            exists = !!existingLink;
-            attempts++;
+            if (validated.error) {
+                return validated;
+            }
+            const payload = validated.data as {
+                linkType?: ShareableLinkType;
+                resourceId?: string;
+            };
+            if (!payload.linkType || !payload.resourceId) {
+                return {
+                    error: true,
+                    code: 500,
+                    message: 'Invalid validation payload',
+                    data: {},
+                };
+            }
+            const resource = await this.hydrateResource(
+                payload.linkType,
+                payload.resourceId,
+            );
+            return {
+                error: false,
+                code: 200,
+                message: validated.message,
+                data: { ...validated.data, resource },
+            };
+        }
 
-            if (attempts >= maxAttempts) {
-                throw new Error(
-                    'Failed to generate unique token after maximum attempts',
+        return this.resolveByRawToken(trimmed);
+    }
+
+    private async resolveByRawToken(rawToken: string): Promise<IResult> {
+        const hash = crypto.createHash('sha256').update(rawToken).digest('hex');
+        const link = await shareableLinkRepository.findByTokenLookupHash(hash);
+        if (!link) {
+            return {
+                error: true,
+                code: 404,
+                message:
+                    'Share link not found. Older links may require `resourceId` in addition to `token`.',
+                data: {},
+            };
+        }
+
+        const resourceIdStr = String(link.resourceId);
+        const recomputed = await systemService.encryptData({
+            password: rawToken,
+            payload: resourceIdStr,
+            separator: '-',
+        });
+
+        if (!recomputed || recomputed !== link.token) {
+            return {
+                error: true,
+                code: 400,
+                message: 'Invalid token',
+                data: {},
+            };
+        }
+
+        if (link.isRevoked || !link.isActive) {
+            return {
+                error: true,
+                code: 400,
+                message: 'Shareable link has been revoked',
+                data: {},
+            };
+        }
+        if (new Date() > link.expiresAt) {
+            return {
+                error: true,
+                code: 400,
+                message: 'Shareable link has expired',
+                data: {},
+            };
+        }
+
+        await shareableLinkRepository.incrementAccessCount(link.token);
+
+        const resource = await this.hydrateResource(
+            link.linkType,
+            resourceIdStr,
+        );
+
+        return {
+            error: false,
+            code: 200,
+            message: 'Shareable link resolved',
+            data: {
+                linkType: link.linkType,
+                resourceId: resourceIdStr,
+                metadata: link.metadata,
+                resource,
+            },
+        };
+    }
+
+    private async hydrateResource(
+        linkType: ShareableLinkType,
+        resourceId: string,
+    ): Promise<unknown> {
+        switch (linkType) {
+            case ShareableLinkType.SERMON: {
+                const r = await sermonRepository.findSermon(resourceId);
+                return r.error ? null : r.data;
+            }
+            case ShareableLinkType.PLAYLIST: {
+                const r = await playlistRepository.findById(resourceId);
+                return r.error ? null : r.data;
+            }
+            case ShareableLinkType.MINISTER: {
+                const r = await ministerRepository.findMinister(
+                    resourceId,
+                    false,
                 );
+                return r.error ? null : r.data;
             }
-        } while (exists);
-
-        return token;
+            case ShareableLinkType.SERIES: {
+                const r = await seriesRepository.findById(resourceId);
+                return r.error ? null : r.data;
+            }
+            case ShareableLinkType.LIBRARY: {
+                const r = await libraryRepository.findById(resourceId);
+                return r.error ? null : r.data;
+            }
+            default:
+                return null;
+        }
     }
 
     /**

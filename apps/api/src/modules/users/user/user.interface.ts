@@ -1,5 +1,5 @@
 import { Types, Document } from 'mongoose';
-import { Nullable } from '../../../utils/interfaces.util';
+import type { Nullable } from '../../shared/nullable';
 import { IAPIKey, IAPIKeyDoc } from '../../platform/apikey/apikey.interface';
 import { IRoleDoc } from '../../authentication/role/role.interface';
 import { IPermissionDoc } from '../../authentication/permission/permission.interface';
@@ -21,19 +21,12 @@ export interface IUserDoc extends Document {
     phoneCode: string;
     phoneNumber: string;
 
-    avatar: {
-        fileName: string;
-        s3Key: string;
-    };
-
-    coverImage: {
-        fileName: string;
-        s3Key: string;
-    };
+    avatar: Upload
+    coverImage: Upload
 
     location: ILocation;
     timeZone: string;
-
+    
     login: {
         last: string;
         method: LoginMethod;
@@ -57,10 +50,8 @@ export interface IUserDoc extends Document {
 
     isSuper: boolean;
     isAdmin: boolean;
-    isBusiness: boolean;
-    isTalent: boolean;
     isUser: boolean;
-    
+
     isActivated: boolean;
     isDeactivated: boolean;
     isSuspended: boolean;
@@ -71,9 +62,9 @@ export interface IUserDoc extends Document {
     twoFactorEnabled: boolean;
 
     devices: Array<IDevice>;
-    googleId: string 
-    appleId: string 
-    githubId: string  
+    googleId: string;
+    appleId: string;
+    githubId: string;
 
     // relationships
     roles: Array<IRoleDoc | any>;
@@ -97,15 +88,23 @@ export enum PasswordType {
     SYSTEMGENERATED = 'system-generated',
     TEMPORARY = 'temporary',
     RESET = 'reset',
+    OAUTH = 'social-oauth',
 }
 
 export enum UserType {
     SUPERADMIN = 'super-admin',
     ADMIN = 'admin',
-    BUSINESS = 'business',
-    TALENT = 'talent',
+    MINISTER = 'minister',
+    CREATOR = 'creator',
+    LISTENER = 'listener',
     USER = 'user',
 }
+
+export interface Upload {
+    fileName: string;
+    s3Key: string;
+}
+
 
 export enum OtpType {
     REGISTER = 'register',
@@ -116,8 +115,6 @@ export enum OtpType {
     ACTIVATEACCOUNT = 'activate-account',
     CHANGEPASSWORD = 'change-password',
     FORGOTPASSWORD = 'forgot-password',
-    GUEST_INVITE = 'guest-invite',
-    TEAM_INVITE = 'team-invite',
 }
 
 export interface ILocation {
@@ -128,10 +125,8 @@ export interface ILocation {
     postalCode: string;
 }
 
-export interface IDevice {
+export interface IDevice {}
 
-}
-    
 export enum OnboardStatus {
     NOT_STARTED = 'not-started',
     IN_PROGRESS = 'in-progress',
@@ -152,3 +147,9 @@ export enum LoginMethod {
     SOCIAL = 'social',
 }
 
+export enum DeviceType {
+    ANDROID = 'android',
+    IOS = 'ios',
+    MAC = 'macbook',
+    WINDOWS = 'windows'
+}

@@ -1,0 +1,417 @@
+import { Model, ObjectId } from 'mongoose';
+import Library from './library.model';
+import { IResult, IQueryOptions } from '../../../utils/interfaces.util';
+import type { ILibraryDoc } from './library.interface';
+
+class LibraryRepository {
+    private model: Model<ILibraryDoc>;
+
+    constructor() {
+        this.model = Library;
+    }
+
+    /**
+     * @name createLibrary
+     * @param libraryData
+     * @returns {Promise<IResult>}
+     */
+    public async createLibrary(
+        libraryData: Partial<ILibraryDoc>,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 201,
+            data: {},
+        };
+
+        const existing = await this.model.findOne({ user: libraryData.user });
+        if (existing) {
+            result.error = true;
+            result.code = 400;
+            result.message = 'Library already exists for this user';
+            return result;
+        }
+
+        const newLibrary = await this.model.create(libraryData);
+        result.data = newLibrary;
+        result.message = 'Library created successfully';
+
+        return result;
+    }
+
+    /**
+     * @name findById
+     * @param id
+     * @returns {Promise<IResult>}
+     */
+    public async findById(id: string): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const library = await this.model.findById(id);
+        if (!library) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.data = library;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name findByUser
+     * @param userId
+     * @returns {Promise<IResult>}
+     */
+    public async findByUser(userId: string): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const library = await this.model
+            .findOne({ user: userId })
+            .populate(
+                'likedSermons savedBtes playlists favouriteministers mostPlayed',
+            );
+
+        if (!library) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.data = library;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name findAll
+     * @description Fetch all  libraries with optional filters, pagination, and sorting
+     * @returns {Promise<IResult>}
+     */
+    public async findAll(
+        filters = {},
+        options: IQueryOptions = {},
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const libraries = await this.model
+            .find(filters)
+            .sort(options.sort)
+            .skip(options.skip || 0)
+            .limit(options.limit || 25)
+            .populate(
+                options.populate ||
+                    'likedSermons savedBtes playlists favouriteministers mostPlayed',
+            );
+
+        if (!libraries) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Sermon not found';
+        } else {
+            result.data = libraries;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name countDocuments
+     * @param filters
+     */
+    public async countDocuments(filters = {}): Promise<number> {
+        return this.model.countDocuments(filters).exec();
+    }
+
+    /**
+     * @name updateLibrary
+     * @param userId Owner user id (library document is keyed by `user`)
+     * @param updateData
+     * @returns {Promise<IResult>}
+     */
+    public async updateLibrary(
+        userId: string,
+        updateData: Partial<ILibraryDoc>,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const updatedLibrary = await this.model
+            .findOneAndUpdate({ user: userId }, updateData, {
+                new: true,
+            })
+            .populate('likedSermons playlists favouriteministers mostPlayed');
+
+        if (!updatedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'Library updated successfully';
+            result.data = updatedLibrary;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name deleteLibrary
+     * @param userId User id (library is keyed by `user`)
+     * @returns {Promise<IResult>}
+     */
+    public async deleteLibrary(userId: string | ObjectId): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const deletedLibrary = await this.model.findOneAndDelete({
+            user: userId,
+        });
+        if (!deletedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'Library deleted successfully';
+            result.data = deletedLibrary;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name addLikedSermon
+     * @param userId
+     * @param sermonId
+     * @returns {Promise<IResult>}
+     */
+    public async addLikedSermon(
+        userId: string,
+        sermonId: string,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const updatedLibrary = await this.model.findOneAndUpdate(
+            { user: userId },
+            { $addToSet: { likedlibraries: sermonId } },
+            { new: true },
+        );
+
+        if (!updatedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'Sermon added to liked list';
+            result.data = updatedLibrary;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name removeLikedSermon
+     * @param userId
+     * @param sermonId
+     * @returns {Promise<IResult>}
+     */
+    public async removeLikedSermon(
+        userId: string,
+        sermonId: string,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const updatedLibrary = await this.model.findOneAndUpdate(
+            { user: userId },
+            { $pull: { likedSermons: sermonId } },
+            { new: true },
+        );
+
+        if (!updatedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'Sermon removed from liked list';
+            result.data = updatedLibrary;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name addSavedBite
+     * @param userId
+     * @param biteId
+     * @returns {Promise<IResult>}
+     */
+    public async addSavedBite(
+        userId: string,
+        biteId: string,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const updatedLibrary = await this.model.findOneAndUpdate(
+            { user: userId },
+            { $addToSet: { savedBtes: biteId } },
+            { new: true },
+        );
+
+        if (!updatedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'Sermon Bite saved successfully';
+            result.data = updatedLibrary;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name removeSavedBite
+     * @param userId
+     * @param biteId
+     * @returns {Promise<IResult>}
+     */
+    public async removeSavedBite(
+        userId: string,
+        biteId: string,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const updatedLibrary = await this.model.findOneAndUpdate(
+            { user: userId },
+            { $pull: { savedBtes: biteId } },
+            { new: true },
+        );
+
+        if (!updatedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'Sermon Bite removed from saved list';
+            result.data = updatedLibrary;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name addFavouriteminister
+     * @param userId
+     * @param ministerId
+     * @returns {Promise<IResult>}
+     */
+    public async addFavouriteminister(
+        userId: string,
+        ministerId: string,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const updatedLibrary = await this.model.findOneAndUpdate(
+            { user: userId },
+            { $addToSet: { favouriteministers: ministerId } },
+            { new: true },
+        );
+
+        if (!updatedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'minister added to favourites';
+            result.data = updatedLibrary;
+        }
+
+        return result;
+    }
+
+    /**
+     * @name removeFavouriteminister
+     * @param userId
+     * @param ministerId
+     * @returns {Promise<IResult>}
+     */
+    public async removeFavouriteminister(
+        userId: string,
+        ministerId: string,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const updatedLibrary = await this.model.findOneAndUpdate(
+            { user: userId },
+            { $pull: { favouriteministers: ministerId } },
+            { new: true },
+        );
+
+        if (!updatedLibrary) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Library not found';
+        } else {
+            result.message = 'minister removed from favourites';
+            result.data = updatedLibrary;
+        }
+
+        return result;
+    }
+}
+
+export default new LibraryRepository();

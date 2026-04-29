@@ -1,5 +1,10 @@
-import { MapActivatedUserDTO, MapRegisteredUserDTO } from './auth.dto';
-import { IUserDoc } from '../../users/user/user.interface';
+import {
+    MapActivatedUserDTO,
+    MapRegisteredUserDTO,
+    MapUserDTO,
+} from './auth.dto';
+import type { IUserDoc } from '../../users/user/user.interface';
+import { UserType } from '../../users/user/user.interface';
 
 class AuthMapper {
     constructor() {}
@@ -13,31 +18,34 @@ class AuthMapper {
         user: IUserDoc,
     ): Promise<MapRegisteredUserDTO> {
         const result: MapRegisteredUserDTO = {
-            id: user.id,
+            id: user.id.toString(),
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-
-            phoneNumber: user.location?.phoneNumber || '',
-            phoneCode: user.location?.phoneCode || '',
-            country: user.location?.country || '',
-            dateOfBirth: (user as any).dateOfBirth || null,
-            gender: (user as any).gender || '',
-
-            avatar: user.avatar?.s3Key || undefined,
             userType: user.userType,
-            passwordType: user.passwordType,
+
+            phoneNumber: user.phoneNumber,
+            phoneCode: user.phoneCode,
+            country: user.location?.country ?? '',
+            dateOfBirth: undefined,
+            gender: '',
 
             isSuper: user.isSuper,
             isAdmin: user.isAdmin,
-            isOrganisation: user.isBusiness,
-            isTalent: user.isTalent,
+            isMinister: user.userType === UserType.MINISTER,
+            isCreator: user.userType === UserType.CREATOR,
+            isListener: user.userType === UserType.LISTENER,
 
             isActive: user.isActive,
             isLocked: user.isLocked,
             lockedUntil: user.lockedUntil,
-
-            roles: user.roles || [],
+            isActivated: user.isActivated,
+            isDeactivated: user.isDeactivated,
+            roles: (user.roles || []).map((r: any) =>
+                typeof r === 'string'
+                    ? r
+                    : (r?.slug ?? r?.name ?? r?._id?.toString?.() ?? ''),
+            ),
         };
 
         return result;
@@ -50,40 +58,25 @@ class AuthMapper {
      */
     public async mapActivatedUser(
         user: IUserDoc,
+        token: string,
     ): Promise<MapActivatedUserDTO> {
         const result: MapActivatedUserDTO = {
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
+            user: await this.mapRegisteredUser(user),
+            token: token,
+        };
 
-            phoneNumber: user.location?.phoneNumber || '',
-            country: user.location?.country || '',
-            dateOfBirth: (user as any).dateOfBirth || null,
-            gender: (user as any).gender || '',
+        return result;
+    }
 
-            avatar: user.avatar?.s3Key || undefined,
-            userType: user.userType,
-
-            onboard: {
-                step: user.onboard?.step || 1,
-                status: user.onboard?.status || 'not-started',
-            },
-            status: {
-                profile: user.isActive ? 'active' : 'inactive',
-            },
-            inviteStatus: user.inviteStatus || 'pending',
-
-            isSuper: user.isSuper,
-            isAdmin: user.isAdmin,
-            isOrganisation: user.isBusiness,
-            isTalent: user.isTalent,
-
-            isActive: user.isActive,
-            isLocked: user.isLocked,
-            lockedUntil: user.lockedUntil,
-
-            roles: user.roles || [],
+    /**
+     * @name mapActivatedUser
+     * @param user - IUserDoc
+     * @returns result
+     */
+    public async mapUser(user: IUserDoc, token: string): Promise<MapUserDTO> {
+        const result: MapUserDTO = {
+            user: await this.mapRegisteredUser(user),
+            token: token,
         };
 
         return result;

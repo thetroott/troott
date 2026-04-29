@@ -1,8 +1,12 @@
 import { IUserDoc } from '../user/user.interface';
-import { AdminDepartmentEnum, AdminTypeEnum, CompanyRoleEnum } from './admin.interface';
+import {
+    AdminDepartmentEnum,
+    AdminTypeEnum,
+    CompanyRoleEnum,
+} from './admin.interface';
 
 export interface CreateAdminDTO {
-    code: string
+    code: string;
     user: IUserDoc;
     firstName: string;
     lastName: string;

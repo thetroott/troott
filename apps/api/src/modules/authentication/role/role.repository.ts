@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import Role from './role.model';
 import { IRoleDoc } from './role.interface';
-import RepositoryService from '../../../services/repository.service';
+import RepositoryService from '../../internals/repository/repository.service';
 import { IResult } from '../../../utils/interfaces.util';
 
 /**
@@ -95,9 +95,7 @@ class RoleRepository extends RepositoryService<IRoleDoc> {
      * @returns {Promise<IResult>}
      * @description Create a new role
      */
-    public async createRole(
-        roleData: Partial<IRoleDoc>,
-    ): Promise<IResult> {
+    public async createRole(roleData: Partial<IRoleDoc>): Promise<IResult> {
         return this.create(roleData);
     }
 
@@ -126,6 +124,18 @@ class RoleRepository extends RepositoryService<IRoleDoc> {
      */
     public async deleteRole(id: string): Promise<IResult> {
         return this.delete(id);
+    }
+
+    // [MIGRATION-REVIEW] Methods merged from flat repositories/role.repository.ts
+
+    public async findBySlug(slug: string): Promise<IResult> {
+        return this.findOne({ slug } as any);
+    }
+
+    public async getRolesByPermissions(
+        permissions: string[],
+    ): Promise<IResult> {
+        return this.findAll({ permissions: { $in: permissions } } as any);
     }
 }
 
