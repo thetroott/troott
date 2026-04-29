@@ -2,13 +2,13 @@ class Notification {
     client;
     secondaryClient;
 
-    constructor( client: any, secondaryClient?: any ) {
+    constructor(client: any, secondaryClient?: any) {
         this.client = client;
         this.secondaryClient = secondaryClient;
     }
 
-    getNotifications( payload: any ) {
-        return this.client.get( "/notifications", payload );
+    getNotifications(payload: any) {
+        return this.client.get('/notifications', payload);
     }
 }
 

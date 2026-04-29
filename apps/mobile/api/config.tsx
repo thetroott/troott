@@ -18,7 +18,6 @@
 // import Subscription from "./subscription";
 // import storage from "@/services/shared/storage-service";
 
-
 // /**
 //  * Sets the navigation reference for handling navigation outside of React components
 //  * @param {any} ref - The navigation reference object
@@ -39,7 +38,7 @@
 //     "X-Client-Type": "mobile",
 //     "X-Platform": Platform.OS,
 //     "X-App-Version": appVersion,
-//     "User-Agent": `Troott/${appVersion} (${Platform.OS} 
+//     "User-Agent": `Troott/${appVersion} (${Platform.OS}
 //       ${Device.osVersion}; ${Device.modelName})`,
 //     "X-Locale": RNLocalize.getLocales()[0].languageTag,
 //     "X-Timezone": moment.tz.guess(),
@@ -53,7 +52,7 @@
 //     "X-Client-Type": "mobile",
 //     "X-Platform": Platform.OS,
 //     "X-App-Version": appVersion,
-//     "User-Agent": `Troott/${appVersion} (${Platform.OS} 
+//     "User-Agent": `Troott/${appVersion} (${Platform.OS}
 //       ${Device.osVersion}; ${Device.modelName})`,
 //     "X-Locale": RNLocalize.getLocales()[0].languageTag,
 //     "X-Timezone": moment.tz.guess(),
@@ -81,7 +80,6 @@
 //   }
 // );
 
-
 // /**
 //  * Axios response interceptor that handles request timeouts
 //  * @param {AxiosResponse} response - The axios response object
@@ -104,7 +102,7 @@
 //     if (status === 403 || status === 401) {
 //       await storage.removeData("acessToken");
 //       console.log("Unauthorized. Redirecting to login.");
-      
+
 //       if (navigationRef?.dispatch) {
 //         navigationRef.dispatch(
 //           CommonActions.reset({
@@ -120,7 +118,6 @@
 // );
 
 // axiosPrivate.defaults.timeout = 10000;
-
 
 // /**
 //  * Axios response interceptor that handles request timeouts
@@ -158,9 +155,6 @@
 //   requestController.abort();
 // };
 
-
-
-
 // /**
 //  * API instance containing all service endpoints
 //  * @type {Object} API service instances for different endpoints
@@ -187,6 +181,5 @@
 //   subsription: new Subscription(axiosPrivate),
 //   user: new User(axiosPrivate),
 // };
-
 
 // export default api;

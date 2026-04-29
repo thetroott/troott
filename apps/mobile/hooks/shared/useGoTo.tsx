@@ -1,42 +1,31 @@
-import { useRouter } from "expo-router"
-import { useSearchParams } from "expo-router/build/hooks"
-
-
+import { useRouter } from 'expo-router';
+import { useSearchParams } from 'expo-router/build/hooks';
 
 const useGoTo = () => {
-
-    const location = useSearchParams()
-    const router = useRouter()
+    const location = useSearchParams();
+    const router = useRouter();
 
     const goTo = (url: string) => {
-        
         if (url) {
-            router.push(url)
+            router.push(url);
         }
-    }
+    };
 
     const reload = () => {
-
-        router.reload()
-
-    }
+        router.reload();
+    };
 
     const navigate = (url: string) => {
-       
         if (url) {
-            router.navigate(url)
+            router.navigate(url);
         }
-    }
+    };
 
     const goToNewScreen = (url: string) => {
-        
         if (url) {
-            router.replace(url)
+            router.replace(url);
         }
-    }
-
-
-
+    };
 
     return {
         location,
@@ -44,8 +33,8 @@ const useGoTo = () => {
         goTo,
         reload,
         navigate,
-        goToNewScreen
-    }
-}
+        goToNewScreen,
+    };
+};
 
-export default useGoTo
+export default useGoTo;

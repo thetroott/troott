@@ -1,61 +1,70 @@
-
-import { mmkvStateStorage } from '@/services/storage'
-import { create } from 'zustand'
-import { createJSONStorage, devtools, persist } from 'zustand/middleware'
-import { useShallow } from 'zustand/react/shallow'
-
-
+import { mmkvStateStorage } from '@/services/storage';
+import { create } from 'zustand';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 
 type AppSettingsStore = {
-	sendMetrics: boolean
-	setSendMetrics: (sendMetrics: boolean) => void
+    sendMetrics: boolean;
+    setSendMetrics: (sendMetrics: boolean) => void;
 
-	hideRunTimes: boolean
-	setHideRunTimes: (hideRunTimes: boolean) => void
+    hideRunTimes: boolean;
+    setHideRunTimes: (hideRunTimes: boolean) => void;
 
-	reducedHaptics: boolean
-	setReducedHaptics: (reducedHaptics: boolean) => void
-
-}
+    reducedHaptics: boolean;
+    setReducedHaptics: (reducedHaptics: boolean) => void;
+};
 
 export const useAppSettingsStore = create<AppSettingsStore>()(
-	devtools(
-		persist(
-			(set): AppSettingsStore => ({
-				sendMetrics: false,
-				setSendMetrics: (sendMetrics: boolean) => set({ sendMetrics }),
+    devtools(
+        persist(
+            (set): AppSettingsStore => ({
+                sendMetrics: false,
+                setSendMetrics: (sendMetrics: boolean) => set({ sendMetrics }),
 
-				hideRunTimes: false,
-				setHideRunTimes: (hideRunTimes: boolean) => set({ hideRunTimes }),
+                hideRunTimes: false,
+                setHideRunTimes: (hideRunTimes: boolean) =>
+                    set({ hideRunTimes }),
 
-				reducedHaptics: false,
-				setReducedHaptics: (reducedHaptics: boolean) => set({ reducedHaptics }),
+                reducedHaptics: false,
+                setReducedHaptics: (reducedHaptics: boolean) =>
+                    set({ reducedHaptics }),
+            }),
+            {
+                name: 'app-settings-storage',
+                storage: createJSONStorage(() => mmkvStateStorage),
+            },
+        ),
+    ),
+);
 
-			}),
-			{
-				name: 'app-settings-storage',
-				storage: createJSONStorage(() => mmkvStateStorage),
-			},
-		),
-	),
-)
+export const useReducedHapticsSetting: () => [
+    boolean,
+    (reducedHaptics: boolean) => void,
+] = () => {
+    const reducedHaptics = useAppSettingsStore((state) => state.reducedHaptics);
 
+    const setReducedHaptics = useAppSettingsStore(
+        (state) => state.setReducedHaptics,
+    );
 
-export const useReducedHapticsSetting: () => [boolean, (reducedHaptics: boolean) => void] = () => {
-	const reducedHaptics = useAppSettingsStore((state) => state.reducedHaptics)
+    return [reducedHaptics, setReducedHaptics];
+};
 
-	const setReducedHaptics = useAppSettingsStore((state) => state.setReducedHaptics)
+export const useSendMetricsSetting: () => [
+    boolean,
+    (sendMetrics: boolean) => void,
+] = () => {
+    const sendMetrics = useAppSettingsStore((state) => state.sendMetrics);
 
-	return [reducedHaptics, setReducedHaptics]
-}
+    const setSendMetrics = useAppSettingsStore((state) => state.setSendMetrics);
 
-export const useSendMetricsSetting: () => [boolean, (sendMetrics: boolean) => void] = () => {
-	const sendMetrics = useAppSettingsStore((state) => state.sendMetrics)
+    return [sendMetrics, setSendMetrics];
+};
 
-	const setSendMetrics = useAppSettingsStore((state) => state.setSendMetrics)
-
-	return [sendMetrics, setSendMetrics]
-}
-
-export const useHideRunTimesSetting: () => [boolean, (hideRunTimes: boolean) => void] = () =>
-	useAppSettingsStore(useShallow((state) => [state.hideRunTimes, state.setHideRunTimes]))
+export const useHideRunTimesSetting: () => [
+    boolean,
+    (hideRunTimes: boolean) => void,
+] = () =>
+    useAppSettingsStore(
+        useShallow((state) => [state.hideRunTimes, state.setHideRunTimes]),
+    );

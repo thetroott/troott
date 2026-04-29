@@ -2,10 +2,10 @@
 
 ## Talk to Figma channel vs file URL
 
-| What | Value |
-|------|--------|
-| **WebSocket channel** (plugin + `join_channel`) | Agreed value, e.g. `7t5m5zh5` or `mehslzoh` |
-| **Figma file** (open in desktop) | [Troott](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott) — file key `9lFM6TncipSv0pNVGBWZwA` |
+| What                                            | Value                                                                                                    |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **WebSocket channel** (plugin + `join_channel`) | Agreed value, e.g. `7t5m5zh5` or `mehslzoh`                                                              |
+| **Figma file** (open in desktop)                | [Troott](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott) — file key `9lFM6TncipSv0pNVGBWZwA` |
 
 The channel name is whatever you type in the **Cursor Talk to Figma MCP** plugin; it does **not** have to match the file key. Cursor and the plugin must use the **same** channel (e.g. `7t5m5zh5`).
 
@@ -14,8 +14,9 @@ The channel name is whatever you type in the **Cursor Talk to Figma MCP** plugin
 ## Connect Cursor to Figma
 
 1. **WebSocket server** must be running (TalkToFigma bridges Cursor and Figma):
-   - From a clone of [cursor-talk-to-figma-mcp](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp): run `bun socket`, **or**
-   - Follow the package README for your setup.
+
+    - From a clone of [cursor-talk-to-figma-mcp](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp): run `bun socket`, **or**
+    - Follow the package README for your setup.
 
 2. **Figma desktop:** install the [Cursor Talk to Figma MCP plugin](https://www.figma.com/community/plugin/1485687494525374295/cursor-talk-to-figma-mcp-plugin), open the **Troott** file above, run the plugin, and **join channel** with the same value you use in Cursor (e.g. `7t5m5zh5`).
 

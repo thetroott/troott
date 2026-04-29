@@ -1,1 +1,0 @@
-export {default as IncognitoIcon} from './incognito';

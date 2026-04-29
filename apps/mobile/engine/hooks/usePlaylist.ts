@@ -1,27 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Here’s the simplest way to understand what this whole file **does** and **can do** inside a real music player app.
 
 // I’ll explain it in plain english without any heavy terms.

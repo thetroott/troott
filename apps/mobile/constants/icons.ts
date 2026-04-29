@@ -1,3 +1,1 @@
-const icons = {
-    
-}
+const icons = {};

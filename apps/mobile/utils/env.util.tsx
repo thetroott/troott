@@ -9,17 +9,17 @@ export type Environment = 'development' | 'staging' | 'production';
  * Get current environment from Expo constants
  */
 export const getEnvironment = (): Environment => {
-  const env = Constants.expoConfig?.extra?.env || process.env.NODE_ENV || 'development';
-  
-  if (env === 'production' || env === 'prod') return 'production';
-  if (env === 'staging' || env === 'stage') return 'staging';
-  return 'development';
+    const env =
+        Constants.expoConfig?.extra?.env ||
+        process.env.NODE_ENV ||
+        'development';
+
+    if (env === 'production' || env === 'prod') return 'production';
+    if (env === 'staging' || env === 'stage') return 'staging';
+    return 'development';
 };
 
-
-
 // import { ENVType } from "@/utils/enums.util";
-
 
 // class AppENV {
 //   constructor() {}
@@ -38,7 +38,6 @@ export const getEnvironment = (): Environment => {
 //     return result;
 //   }
 
-
 //   /**
 //    * @name isStaging
 //    * @description Determine if app is in staging
@@ -52,7 +51,6 @@ export const getEnvironment = (): Environment => {
 //     }
 //     return result;
 //   }
-
 
 //   /**
 //    * @name isDevelopment
@@ -70,5 +68,3 @@ export const getEnvironment = (): Environment => {
 // }
 
 // export default new AppENV
-
-

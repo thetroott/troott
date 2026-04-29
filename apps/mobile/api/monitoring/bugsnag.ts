@@ -1,6 +1,6 @@
 // /**
 //  * Bugsnag Configuration
-//  * 
+//  *
 //  * Initialize Bugsnag for error tracking and monitoring.
 //  * Configured for React Native Expo.
 //  */
@@ -8,12 +8,11 @@
 // import { getEnvironment } from '@/utils/env.util';
 // import Bugsnag from '@bugsnag/expo';
 
-
 // /**
 //  * Initialize Bugsnag
-//  * 
+//  *
 //  * Call this in your app entry point (e.g., app/_layout.tsx)
-//  * 
+//  *
 //  * @param apiKey - Your Bugsnag API key (get from environment variables)
 //  */
 // export const initializeBugsnag = (apiKey?: string): void => {
@@ -59,7 +58,7 @@
 
 // /**
 //  * Set user context for Bugsnag
-//  * 
+//  *
 //  * Call this when user logs in
 //  */
 // export const setBugsnagUser = (userId: string, email?: string, name?: string): void => {
@@ -68,7 +67,7 @@
 
 // /**
 //  * Clear user context
-//  * 
+//  *
 //  * Call this when user logs out
 //  */
 // export const clearBugsnagUser = (): void => {
@@ -81,4 +80,3 @@
 // export const addBreadcrumb = (message: string, metadata?: Record<string, unknown>): void => {
 //   Bugsnag.leaveBreadcrumb(message, metadata);
 // };
-

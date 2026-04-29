@@ -1,1 +1,5 @@
-export type { AddToQueueMutation, QueueMutationDTO, QueueOrderMutation } from "@/types/player-mutations"
+export type {
+    AddToQueueMutation,
+    QueueMutationDTO,
+    QueueOrderMutation,
+} from '@/types/player-mutations';

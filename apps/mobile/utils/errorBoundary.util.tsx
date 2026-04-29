@@ -1,50 +1,50 @@
-import React, { type ComponentType, type PropsWithChildren } from "react";
+import React, { type ComponentType, type PropsWithChildren } from 'react';
 import FallbackComponent, {
-  type Props as FallbackComponentProps,
-} from "../components/containers/Error";
+    type Props as FallbackComponentProps,
+} from '@/components/features/shared/Error';
 
 export type Props = PropsWithChildren<{
-  FallbackComponent: ComponentType<FallbackComponentProps>;
-  onError?: (error: Error, stackTrace: string) => void;
+    FallbackComponent: ComponentType<FallbackComponentProps>;
+    onError?: (error: Error, stackTrace: string) => void;
 }>;
 
 type State = { error: Error | null };
 
 class ErrorBoundary extends React.Component<Props, State> {
-  state: State = { error: null };
+    state: State = { error: null };
 
-  static defaultProps: {
-    FallbackComponent: ComponentType<FallbackComponentProps>;
-  } = {
-    FallbackComponent: FallbackComponent,
-  };
+    static defaultProps: {
+        FallbackComponent: ComponentType<FallbackComponentProps>;
+    } = {
+        FallbackComponent: FallbackComponent,
+    };
 
-  static getDerivedStateFromError(error: Error): State {
-    return { error };
-  }
-
-  componentDidCatch(error: Error, info: { componentStack: string }) {
-    if (typeof this.props.onError === "function") {
-      this.props.onError(error, info.componentStack);
+    static getDerivedStateFromError(error: Error): State {
+        return { error };
     }
-  }
 
-  resetError: () => void = () => {
-    this.setState({ error: null });
-  };
+    componentDidCatch(error: Error, info: { componentStack: string }) {
+        if (typeof this.props.onError === 'function') {
+            this.props.onError(error, info.componentStack);
+        }
+    }
 
-  render() {
-    const { FallbackComponent } = this.props;
+    resetError: () => void = () => {
+        this.setState({ error: null });
+    };
 
-    return this.state.error ? (
-      <FallbackComponent
-        error={this.state.error}
-        resetError={this.resetError}
-      />
-    ) : (
-      this.props.children
-    );
-  }
+    render() {
+        const { FallbackComponent } = this.props;
+
+        return this.state.error ? (
+            <FallbackComponent
+                error={this.state.error}
+                resetError={this.resetError}
+            />
+        ) : (
+            this.props.children
+        );
+    }
 }
 
 export default ErrorBoundary;

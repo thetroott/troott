@@ -10,10 +10,10 @@ This plan migrates **the whole app** from legacy playback (`hooks/useTrackPlayer
 
 These filenames are referenced historically but **are not present** under `apps/mobile/docs/`. Either recreate them or treat the bullets below as the working spec until dedicated docs exist.
 
-| Intended doc | Purpose | Minimal content to capture |
-|--------------|---------|----------------------------|
-| `docs/01 - engine.md` | Single source of truth for queue / now playing | Queue store + `engine/queries`; forbid `TrackPlayer` / `@rntp/player` outside `engine/` (except agreed DTOs). |
-| `docs/02 - continue-listening.md` | Resume + persistence | `Initialize()` restore rules; where position is saved (e.g. on `MediaItemTransition`); per-track resume product decision. |
+| Intended doc                      | Purpose                                        | Minimal content to capture                                                                                                |
+| --------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `docs/01 - engine.md`             | Single source of truth for queue / now playing | Queue store + `engine/queries`; forbid `TrackPlayer` / `@rntp/player` outside `engine/` (except agreed DTOs).             |
+| `docs/02 - continue-listening.md` | Resume + persistence                           | `Initialize()` restore rules; where position is saved (e.g. on `MediaItemTransition`); per-track resume product decision. |
 
 **Action:** Add `apps/mobile/docs/specs/engine.md` and `apps/mobile/docs/specs/continue-listening.md` (or one combined `playback-spec.md`) and link them from this file when written.
 
@@ -21,12 +21,12 @@ These filenames are referenced historically but **are not present** under `apps/
 
 ## Current package vs target
 
-| | Current (typical) | Target |
-|---|-------------------|--------|
-| npm package | `react-native-track-player` ^4.x | `@rntp/player` (v5 per rntp.dev + license) |
-| Patches | Root `patches/react-native-track-player+4.1.2.patch` via `patch-package` | Remove 4.x patches after cutover; follow `@rntp/player` upgrade notes |
-| Native | Dev client built against 4.x native module | **Rebuild** iOS/Android (`expo prebuild` / EAS) after switching package |
-| API surface | `TrackPlayer.*`, service registration patterns from v4 | v5: no `registerPlaybackService`; foreground listeners in `engine/player/background.ts` (see Cursor rule) |
+|             | Current (typical)                                                        | Target                                                                                                    |
+| ----------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
+| npm package | `react-native-track-player` ^4.x                                         | `@rntp/player` (v5 per rntp.dev + license)                                                                |
+| Patches     | Root `patches/react-native-track-player+4.1.2.patch` via `patch-package` | Remove 4.x patches after cutover; follow `@rntp/player` upgrade notes                                     |
+| Native      | Dev client built against 4.x native module                               | **Rebuild** iOS/Android (`expo prebuild` / EAS) after switching package                                   |
+| API surface | `TrackPlayer.*`, service registration patterns from v4                   | v5: no `registerPlaybackService`; foreground listeners in `engine/player/background.ts` (see Cursor rule) |
 
 **Sleep-timer / ObjC warnings:** If the JS package exposes methods the native binary does not implement, versions are skewed—align npm and native, then rebuild the dev client.
 
@@ -34,9 +34,9 @@ These filenames are referenced historically but **are not present** under `apps/
 
 ## Monorepo (Troott / pnpm)
 
-- Install from **repository root**; mobile is **`@troott/mobile`** under `apps/mobile`.
-- **Hoisted** `node_modules` at root: Metro must resolve **one** `react` / `react-native` for the app (see [`apps/mobile/metro.config.js`](../../metro.config.js) `resolveRequest` and [`apps/mobile/README.md`](../../README.md) monorepo section).
-- After changing `@rntp/player` or any native dependency: `pnpm install` at root, then rebuild the mobile dev client.
+-   Install from **repository root**; mobile is **`@troott/mobile`** under `apps/mobile`.
+-   **Hoisted** `node_modules` at root: Metro must resolve **one** `react` / `react-native` for the app (see [`apps/mobile/metro.config.js`](../../metro.config.js) `resolveRequest` and [`apps/mobile/README.md`](../../README.md) monorepo section).
+-   After changing `@rntp/player` or any native dependency: `pnpm install` at root, then rebuild the mobile dev client.
 
 ---
 
@@ -53,17 +53,17 @@ These filenames are referenced historically but **are not present** under `apps/
 
 This migration is **breaking by design**. Do **not** preserve parallel code paths “just in case” old behavior is still needed.
 
-| Area | Rule |
-|------|------|
-| **Packages** | After v5 cutover, **`react-native-track-player` must not remain** as a second dependency, re-export shim, or optional import. One player package: **`@rntp/player`** at a pinned version. |
-| **Native** | No “works with either native module” branching. If you roll back, you roll back **git + lockfile + patches + native project** together ([Phase 7.8](#78-rollback-plan)); do not ship an app that tries to detect which native player is linked at runtime. |
-| **APIs** | No wrappers that accept both v4 and v5 shapes (e.g. dual `Track` / `MediaItem` converters in hot paths). Migrate call sites; delete v4-only helpers. |
-| **Registration** | No hybrid **`registerPlaybackService`** (v4) **and** v5 foreground-only wiring in the same production build. Pick the model that matches the installed package. |
-| **Patches** | RNTP **4.x** `patch-package` patches are **removed** when leaving 4.x; do not keep them “for reference” in a way that still runs on install. |
-| **Config / env** | No alternate keys for the same concern (e.g. legacy API base URL env vars alongside the canonical one). One source of truth; update `.env.example` and docs, do not read deprecated names. |
-| **Layering** | No **upward** dependencies into playback: **`engine/`** does not import **`@/stores`**, **`@/dtos`**, or **`@/components`** for player logic; **`dtos/`** does not import **`engine/`**. Shared shapes live in **`types/`** (see codebase conventions). |
+| Area             | Rule                                                                                                                                                                                                                                                       |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Packages**     | After v5 cutover, **`react-native-track-player` must not remain** as a second dependency, re-export shim, or optional import. One player package: **`@rntp/player`** at a pinned version.                                                                  |
+| **Native**       | No “works with either native module” branching. If you roll back, you roll back **git + lockfile + patches + native project** together ([Phase 7.8](#78-rollback-plan)); do not ship an app that tries to detect which native player is linked at runtime. |
+| **APIs**         | No wrappers that accept both v4 and v5 shapes (e.g. dual `Track` / `MediaItem` converters in hot paths). Migrate call sites; delete v4-only helpers.                                                                                                       |
+| **Registration** | No hybrid **`registerPlaybackService`** (v4) **and** v5 foreground-only wiring in the same production build. Pick the model that matches the installed package.                                                                                            |
+| **Patches**      | RNTP **4.x** `patch-package` patches are **removed** when leaving 4.x; do not keep them “for reference” in a way that still runs on install.                                                                                                               |
+| **Config / env** | No alternate keys for the same concern (e.g. legacy API base URL env vars alongside the canonical one). One source of truth; update `.env.example` and docs, do not read deprecated names.                                                                 |
+| **Layering**     | No **upward** dependencies into playback: **`engine/`** does not import **`@/stores`**, **`@/dtos`**, or **`@/components`** for player logic; **`dtos/`** does not import **`engine/`**. Shared shapes live in **`types/`** (see codebase conventions).    |
 
-**Intent:** Reduce conflicts, binary skew, and maintenance cost. Temporary feature flags for *product* behavior are fine; **dual stack** for the audio engine is not.
+**Intent:** Reduce conflicts, binary skew, and maintenance cost. Temporary feature flags for _product_ behavior are fine; **dual stack** for the audio engine is not.
 
 ---
 
@@ -73,23 +73,23 @@ Source: [`.cursor/rules/react-native-track-player-expo.mdc`](../../../../.cursor
 
 ### Registration and setup
 
-- **Foreground listeners**: After successful `startPlayerService()` + `Initialize()`, call `attachEnginePlaybackListeners()` from `engine/player/background.ts` (wired in `app/_layout.tsx` when `trackPlayerBootstrapped` is true). Optional: `registerBackgroundEventHandler` only for headless Android analytics/queue work.
-- **Player setup**: `startPlayerService()` in `app/_layout.tsx` with Android foreground retry when setup fails in background.
-- **Do not** use legacy `TrackPlayer.updateOptions`. Use `useUpdateOptions` → `setCommands` / `applyTrackPlayerNotificationOptions`. Commands live in `engine/constants/capabilities.ts` (`PlayerCommand`).
+-   **Foreground listeners**: After successful `startPlayerService()` + `Initialize()`, call `attachEnginePlaybackListeners()` from `engine/player/background.ts` (wired in `app/_layout.tsx` when `trackPlayerBootstrapped` is true). Optional: `registerBackgroundEventHandler` only for headless Android analytics/queue work.
+-   **Player setup**: `startPlayerService()` in `app/_layout.tsx` with Android foreground retry when setup fails in background.
+-   **Do not** use legacy `TrackPlayer.updateOptions`. Use `useUpdateOptions` → `setCommands` / `applyTrackPlayerNotificationOptions`. Commands live in `engine/constants/capabilities.ts` (`PlayerCommand`).
 
 ### Engine usage
 
-- **Setup**: `engine/player/setup.ts`, `applyTrackPlayerOptions.ts`, `background.ts` (`Event.MediaItemTransition`, `RemotePrevious`, `PlaybackError`).
-- **Queue and state**: `engine/core/queue.ts` (`setMediaItems`, `insertMediaItems`, `addMediaItems`, etc.); `engine/queries/current-track.ts`; `@/stores/player/queue`.
-- **Shuffle / skip**: `engine/core/shuffle.ts`, `engine/core/skip-previous.ts`.
-- **Controls**: `engine/hooks/useControl.ts`. Progress: `engine/queries/playback-queries.ts` (Cast + local).
-- **Track type**: `SermonTrackDTO` / `MediaItem` + `engine/utils/mappers.ts`.
-- **Offline**: Same as before (`networkStatus`, `getAudioCache()`).
+-   **Setup**: `engine/player/setup.ts`, `applyTrackPlayerOptions.ts`, `background.ts` (`Event.MediaItemTransition`, `RemotePrevious`, `PlaybackError`).
+-   **Queue and state**: `engine/core/queue.ts` (`setMediaItems`, `insertMediaItems`, `addMediaItems`, etc.); `engine/queries/current-track.ts`; `@/stores/player/queue`.
+-   **Shuffle / skip**: `engine/core/shuffle.ts`, `engine/core/skip-previous.ts`.
+-   **Controls**: `engine/hooks/useControl.ts`. Progress: `engine/queries/playback-queries.ts` (Cast + local).
+-   **Track type**: `SermonTrackDTO` / `MediaItem` + `engine/utils/mappers.ts`.
+-   **Offline**: Same as before (`networkStatus`, `getAudioCache()`).
 
 ### Expo-specific
 
-- **Background audio**: `app.json` iOS `UIBackgroundModes` includes `"audio"`.
-- **Native modules**: `expo-dev-client`; rebuild after `@rntp/player` or native changes.
+-   **Background audio**: `app.json` iOS `UIBackgroundModes` includes `"audio"`.
+-   **Native modules**: `expo-dev-client`; rebuild after `@rntp/player` or native changes.
 
 ---
 
@@ -97,24 +97,24 @@ Source: [`.cursor/rules/react-native-track-player-expo.mdc`](../../../../.cursor
 
 ### In good shape (engine)
 
-- `engine/core/queue.ts`, `shuffle.ts`, `skip-previous.ts`
-- `engine/player/setup.ts`, `background.ts`, `useUpdateOptions.ts`
-- `engine/hooks/useControl.ts`
-- `engine/queries/*`, `engine/helpers/initialization.ts`, `engine/utils/mappers.ts`, `offline.tsx`
+-   `engine/core/queue.ts`, `shuffle.ts`, `skip-previous.ts`
+-   `engine/player/setup.ts`, `background.ts`, `useUpdateOptions.ts`
+-   `engine/hooks/useControl.ts`
+-   `engine/queries/*`, `engine/helpers/initialization.ts`, `engine/utils/mappers.ts`, `offline.tsx`
 
 ### Legacy / duplicate (migrate away)
 
-| Area | Location | Issue |
-|------|----------|--------|
-| Player facade | `hooks/useTrackPlayer.tsx` | Direct `TrackPlayer.*`, inline track maps, `useTrackStore` – bypasses `mapDtoToTrack`, `loadQueue`, queue store |
-| Home tab | `app/(tabs)/home.tsx` | Uses `useTrackPlayer` **and** direct `TrackPlayer.getQueue` / `TrackPlayer.skip` |
-| Home widgets | `components/containers/tabs/home/*` | `useTrackPlayer` / `playerService` |
-| Old player UI | `components/containers/player-old/*` | Same |
-| Cast / engine store | `stores/player/engine.ts` | `TrackPlayer.pause()` – align with engine + Google Cast strategy |
+| Area                | Location                             | Issue                                                                                                           |
+| ------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| Player facade       | `hooks/useTrackPlayer.tsx`           | Direct `TrackPlayer.*`, inline track maps, `useTrackStore` – bypasses `mapDtoToTrack`, `loadQueue`, queue store |
+| Home tab            | `app/(tabs)/home.tsx`                | Uses `useTrackPlayer` **and** direct `TrackPlayer.getQueue` / `TrackPlayer.skip`                                |
+| Home widgets        | `components/containers/tabs/home/*`  | `useTrackPlayer` / `playerService`                                                                              |
+| Old player UI       | `components/containers/player-old/*` | Same                                                                                                            |
+| Cast / engine store | `stores/player/engine.ts`            | `TrackPlayer.pause()` – align with engine + Google Cast strategy                                                |
 
 ### Registration
 
-- Grep `attachEnginePlaybackListeners` / `trackPlayerBootstrapped`. Listeners attach **only** after successful bootstrap in `app/_layout.tsx` (not duplicated on every navigation).
+-   Grep `attachEnginePlaybackListeners` / `trackPlayerBootstrapped`. Listeners attach **only** after successful bootstrap in `app/_layout.tsx` (not duplicated on every navigation).
 
 ---
 
@@ -131,8 +131,8 @@ Screens / features
   └── no direct @rntp/player outside engine/ (except typed imports where agreed)
 ```
 
-- Remove or replace `hooks/useTrackPlayer.tsx` after call sites migrate.
-- Resolve **dual state**: `stores/player-store` vs `usePlayerQueueStore` / query keys – pick one source of truth for now playing + queue (recommended: queue store + engine queries; formalize in [Companion specs](#companion-specs-missing-in-repo)).
+-   Remove or replace `hooks/useTrackPlayer.tsx` after call sites migrate.
+-   Resolve **dual state**: `stores/player-store` vs `usePlayerQueueStore` / query keys – pick one source of truth for now playing + queue (recommended: queue store + engine queries; formalize in [Companion specs](#companion-specs-missing-in-repo)).
 
 ---
 
@@ -159,13 +159,13 @@ rg 'TrackPlayer\.' apps/mobile --glob '!node_modules' --glob '!**/engine/**'
 2. List all `useTrackPlayer` / `playerService` usages.
 3. Map each to engine APIs (table—fill rows as you migrate):
 
-| Screen / file | Old behavior | Engine replacement |
-|---------------|--------------|-------------------|
-| `hooks/useTrackPlayer.tsx` | Facade over `TrackPlayer`, `useTrackStore` | Delete after call sites use `useControl` / `loadQueue` / queue store |
-| `app/(tabs)/home.tsx` | `useTrackPlayer`, `TrackPlayer.getQueue` / `skip` | `useLoadNewQueue` / `useAddToQueue`, `useSkip`, store-backed queue reads |
-| `components/containers/tabs/home/*` | `useTrackPlayer` / `playerService` | Same as home; prefer engine hooks + mappers |
-| `components/containers/player-old/*` | Legacy UI + direct player | Rewrite or remove; use `engine/` + current player components |
-| `stores/player/engine.ts` | `TrackPlayer.pause()` etc. | Route through `useControl` / queue APIs; keep Cast branches in sync with `playback-queries` |
+| Screen / file                        | Old behavior                                      | Engine replacement                                                                          |
+| ------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `hooks/useTrackPlayer.tsx`           | Facade over `TrackPlayer`, `useTrackStore`        | Delete after call sites use `useControl` / `loadQueue` / queue store                        |
+| `app/(tabs)/home.tsx`                | `useTrackPlayer`, `TrackPlayer.getQueue` / `skip` | `useLoadNewQueue` / `useAddToQueue`, `useSkip`, store-backed queue reads                    |
+| `components/containers/tabs/home/*`  | `useTrackPlayer` / `playerService`                | Same as home; prefer engine hooks + mappers                                                 |
+| `components/containers/player-old/*` | Legacy UI + direct player                         | Rewrite or remove; use `engine/` + current player components                                |
+| `stores/player/engine.ts`            | `TrackPlayer.pause()` etc.                        | Route through `useControl` / queue APIs; keep Cast branches in sync with `playback-queries` |
 
 ---
 
@@ -181,8 +181,8 @@ rg 'TrackPlayer\.' apps/mobile --glob '!node_modules' --glob '!**/engine/**'
 
 **Suggested order:** home list widgets → `app/(tabs)/home.tsx` → `player-old` (delete or rewrite).
 
-- Replace `playTrack` / `addTrack` with **`useLoadNewQueue`** (full list + start index + `queueRef` + `networkStatus` + optional shuffle) or **`useAddToQueue`** + play as product requires.
-- Replace transport with **`useTogglePlayback`**, **`useSkip`**, **`usePrevious`**, **`useSeekTo`**, **`useToggleRepeatMode`**, **`useToggleShuffle`**.
+-   Replace `playTrack` / `addTrack` with **`useLoadNewQueue`** (full list + start index + `queueRef` + `networkStatus` + optional shuffle) or **`useAddToQueue`** + play as product requires.
+-   Replace transport with **`useTogglePlayback`**, **`useSkip`**, **`usePrevious`**, **`useSeekTo`**, **`useToggleRepeatMode`**, **`useToggleShuffle`**.
 
 If a screen needs “play sermon **i** in this list”, add a small **engine-local** helper (e.g. `engine/hooks/usePlayFromList.ts`) instead of calling `TrackPlayer` in the screen.
 
@@ -198,11 +198,11 @@ After migration: delete `hooks/useTrackPlayer.tsx` or make it throw in dev on im
 
 ### Product decisions (record answers here)
 
-| Question | Decision | Notes |
-|----------|----------|--------|
-| Setup fails on cold start | Retry only / block UI / continue without player | Affects splash and error UI |
-| Per-item resume required? | Y / N | Drives MMKV + `seekTo` on track open |
-| Offline-first queue | Allowed tracks only vs error state | Align with `getAudioCache()` |
+| Question                  | Decision                                        | Notes                                |
+| ------------------------- | ----------------------------------------------- | ------------------------------------ |
+| Setup fails on cold start | Retry only / block UI / continue without player | Affects splash and error UI          |
+| Per-item resume required? | Y / N                                           | Drives MMKV + `seekTo` on track open |
+| Offline-first queue       | Allowed tracks only vs error state              | Align with `getAudioCache()`         |
 
 ---
 
@@ -223,9 +223,9 @@ Every `loadQueue` path passes **`networkStatus`**; confirm offline filtering via
 
 ## Phase 6b: Google Cast
 
-- **Rule reference:** Cursor rule § Google Cast: `useControl` and `playback-queries` branch on `PlayerEngine.GOOGLE_CAST` and `react-native-google-cast`.
-- **Migration work:** After queue APIs unify on `loadQueue` / engine hooks, smoke-test: start local playback, connect Cast, load/play queue changes from device, disconnect.
-- **Files to touch when auditing:** `engine/hooks/useControl.ts`, `engine/queries/playback-queries.ts`, any UI that starts Cast sessions (search `GOOGLE_CAST`, `CastButton`, `useCast`).
+-   **Rule reference:** Cursor rule § Google Cast: `useControl` and `playback-queries` branch on `PlayerEngine.GOOGLE_CAST` and `react-native-google-cast`.
+-   **Migration work:** After queue APIs unify on `loadQueue` / engine hooks, smoke-test: start local playback, connect Cast, load/play queue changes from device, disconnect.
+-   **Files to touch when auditing:** `engine/hooks/useControl.ts`, `engine/queries/playback-queries.ts`, any UI that starts Cast sessions (search `GOOGLE_CAST`, `CastButton`, `useCast`).
 
 ---
 
@@ -242,7 +242,7 @@ The checklist below is **Troott-specific**: it maps this codebase from **`react-
 1. **License / package access** – Confirm you can install `@rntp/player` and which versions your agreement allows. Keep one pinned version across the monorepo.
 2. **Expo SDK + New Architecture** – v5 targets the new architecture; align `newArchEnabled` (and Expo’s RN version) with `@rntp/player` release notes. Resolve any conflicts before the swap.
 3. **Baseline** – Finish or consciously defer [Execution checklist](#execution-checklist) items that still assume v4 (e.g. duplicate listener wiring, direct `TrackPlayer` outside `engine/`).
-4. **Inventory** – Run Phase 1 `rg` commands; save the list of files importing `react-native-track-player` or deep paths (e.g. `lib/src/interfaces/...`). After cutover, only **`engine/**`** (plus the agreed type barrel, e.g. `types/sermon.ts` if it still extends the player’s `MediaItem`/`Track` type) should import the player package.
+4. **Inventory** – Run Phase 1 `rg` commands; save the list of files importing `react-native-track-player` or deep paths (e.g. `lib/src/interfaces/...`). After cutover, only **`engine/**`** (plus the agreed type barrel, e.g. `types/sermon.ts`if it still extends the player’s`MediaItem`/`Track` type) should import the player package.
 
 ### 7.1 Dependencies and patches (monorepo root)
 
@@ -278,16 +278,16 @@ Work inside **`engine/`** first; use a single barrel if helpful (e.g. **`engine/
 
 Suggested order:
 
-| Step | Area | Actions |
-|------|------|--------|
-| A | **`engine/player/setup.ts`** | Replace v4 `setupPlayer` / options with v5 setup API. Remove v4-only cold **`updateOptions`** if still present; keep notification/command configuration aligned with **`useUpdateOptions`** / **`applyTrackPlayerNotificationOptions`**. |
-| B | **`engine/player/background.ts`** | Re-map remote and lifecycle events to v5 names (e.g. active track / media item transition, seek, duck, errors). Call **`handleActiveTrackChanged()`** from the v5 equivalent of “active track changed”. Keep **`SKIP_TO_PREVIOUS_THRESHOLD`** behavior for **Previous**. |
-| C | **`engine/player/pause-local-playback.ts`**, **`skip-previous.ts`**, **`shuffle.ts`**, **`queue.ts`** | Replace **`TrackPlayer.*`** calls with v5 queue/transport APIs (`setMediaItems`, `insertMediaItems`, `addMediaItems`, skip, seek, etc. per docs). |
-| D | **`engine/queries/current-track.ts`**, **`queries.ts`**, **`playback-queries.ts`** | Replace **`getQueue`**, **`getActiveTrack`**, **`getProgress`**, playback state with v5 hooks or imperative APIs. Preserve **Google Cast** branches in **`useControl`** / **`playback-queries`**. |
-| E | **`engine/player/useUpdateOptions.ts`**, **`applyTrackPlayerOptions.ts`**, **`capabilities.ts`** | Map **`Capability`** / **`RatingType`** to v5 **`setCommands`** / options model. |
-| F | **`engine/constants/*`**, **`types/sermon.ts`** (if applicable) | Ensure **`SermonTrackDTO`** (or rename to **`MediaItem`**) matches v5’s expected fields (**`mediaId`**, artwork URL field names, etc.). Update **`mapDtoToTrack`** accordingly. |
-| G | **`engine/state/player-queue-store.ts`** | Import **`RepeatMode`** (or equivalent) from **`@rntp/player`**, not from `react-native-track-player`. |
-| H | **`index.ts`**, **`stores/types.ts`**, **`components/**`** | Eliminate any remaining **`react-native-track-player`** imports outside the agreed boundary; use engine hooks or **`types/`** re-exports. |
+| Step | Area                                                                                                  | Actions                                                                                                                                                                                                                                                                  |
+| ---- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A    | **`engine/player/setup.ts`**                                                                          | Replace v4 `setupPlayer` / options with v5 setup API. Remove v4-only cold **`updateOptions`** if still present; keep notification/command configuration aligned with **`useUpdateOptions`** / **`applyTrackPlayerNotificationOptions`**.                                 |
+| B    | **`engine/player/background.ts`**                                                                     | Re-map remote and lifecycle events to v5 names (e.g. active track / media item transition, seek, duck, errors). Call **`handleActiveTrackChanged()`** from the v5 equivalent of “active track changed”. Keep **`SKIP_TO_PREVIOUS_THRESHOLD`** behavior for **Previous**. |
+| C    | **`engine/player/pause-local-playback.ts`**, **`skip-previous.ts`**, **`shuffle.ts`**, **`queue.ts`** | Replace **`TrackPlayer.*`** calls with v5 queue/transport APIs (`setMediaItems`, `insertMediaItems`, `addMediaItems`, skip, seek, etc. per docs).                                                                                                                        |
+| D    | **`engine/queries/current-track.ts`**, **`queries.ts`**, **`playback-queries.ts`**                    | Replace **`getQueue`**, **`getActiveTrack`**, **`getProgress`**, playback state with v5 hooks or imperative APIs. Preserve **Google Cast** branches in **`useControl`** / **`playback-queries`**.                                                                        |
+| E    | **`engine/player/useUpdateOptions.ts`**, **`applyTrackPlayerOptions.ts`**, **`capabilities.ts`**      | Map **`Capability`** / **`RatingType`** to v5 **`setCommands`** / options model.                                                                                                                                                                                         |
+| F    | **`engine/constants/*`**, **`types/sermon.ts`** (if applicable)                                       | Ensure **`SermonTrackDTO`** (or rename to **`MediaItem`**) matches v5’s expected fields (**`mediaId`**, artwork URL field names, etc.). Update **`mapDtoToTrack`** accordingly.                                                                                          |
+| G    | **`engine/state/player-queue-store.ts`**                                                              | Import **`RepeatMode`** (or equivalent) from **`@rntp/player`**, not from `react-native-track-player`.                                                                                                                                                                   |
+| H    | **`index.ts`**, **`stores/types.ts`**, **`components/**`\*\*                                          | Eliminate any remaining **`react-native-track-player`** imports outside the agreed boundary; use engine hooks or **`types/`** re-exports.                                                                                                                                |
 
 ### 7.6 Google Cast, offline, and edge cases
 
@@ -315,18 +315,18 @@ Rollback is a **full revert** of the branch or commit set (dependencies, patches
 
 Use **Pass / Fail / Skip** (or date + initials) in cells. `Skip` = not applicable for that platform.
 
-| Case | iOS | Android | Notes |
-|------|-----|---------|--------|
-| Cold start + Initialize | | | |
-| Setup when foreground (Android) | Skip | | Background setup must fail gracefully then retry |
-| Play from list / home | | | |
-| Queue add / play next | | | |
-| Shuffle / repeat | | | |
-| Previous threshold | | | Hybrid `Previous: 'js'` |
-| Lock screen / notification controls | | | |
-| Offline queue | | | |
-| Favorite → `useUpdateOptions` | | | |
-| Google Cast queue sync | | | See Phase 6b |
+| Case                                | iOS  | Android | Notes                                            |
+| ----------------------------------- | ---- | ------- | ------------------------------------------------ |
+| Cold start + Initialize             |      |         |                                                  |
+| Setup when foreground (Android)     | Skip |         | Background setup must fail gracefully then retry |
+| Play from list / home               |      |         |                                                  |
+| Queue add / play next               |      |         |                                                  |
+| Shuffle / repeat                    |      |         |                                                  |
+| Previous threshold                  |      |         | Hybrid `Previous: 'js'`                          |
+| Lock screen / notification controls |      |         |                                                  |
+| Offline queue                       |      |         |                                                  |
+| Favorite → `useUpdateOptions`       |      |         |                                                  |
+| Google Cast queue sync              |      |         | See Phase 6b                                     |
 
 ---
 
@@ -365,18 +365,18 @@ Tune patterns for `require()` or barrel files; run in CI after tests.
 
 ## Execution checklist
 
-- [ ] **No backward compatibility** – [Policy](#policy-no-backward-compatibility): single player package after cutover, no dual v4/v5 APIs, no deprecated env/config fallbacks for the same value
-- [ ] `attachEnginePlaybackListeners` after successful bootstrap in `_layout` (once)
-- [ ] `startPlayerService` + foreground handling in `_layout`
-- [ ] `Initialize()` after successful setup
-- [ ] Remove direct player API from app screens (use engine hooks)
-- [ ] Remove / replace `hooks/useTrackPlayer.tsx`
-- [ ] Unify queue / now-playing state with engine + store
-- [ ] `useUpdateOptions` / `setCommands` outside cold setup
-- [ ] Background module: `MediaItemTransition` + `RemotePrevious` + `PlaybackError`
-- [ ] Offline `networkStatus` on all queue loads
-- [ ] Google Cast paths smoke-tested with new queue APIs
-- [ ] Test matrix signed off
+-   [ ] **No backward compatibility** – [Policy](#policy-no-backward-compatibility): single player package after cutover, no dual v4/v5 APIs, no deprecated env/config fallbacks for the same value
+-   [ ] `attachEnginePlaybackListeners` after successful bootstrap in `_layout` (once)
+-   [ ] `startPlayerService` + foreground handling in `_layout`
+-   [ ] `Initialize()` after successful setup
+-   [ ] Remove direct player API from app screens (use engine hooks)
+-   [ ] Remove / replace `hooks/useTrackPlayer.tsx`
+-   [ ] Unify queue / now-playing state with engine + store
+-   [ ] `useUpdateOptions` / `setCommands` outside cold setup
+-   [ ] Background module: `MediaItemTransition` + `RemotePrevious` + `PlaybackError`
+-   [ ] Offline `networkStatus` on all queue loads
+-   [ ] Google Cast paths smoke-tested with new queue APIs
+-   [ ] Test matrix signed off
 
 ---
 
@@ -384,19 +384,19 @@ Tune patterns for `require()` or barrel files; run in CI after tests.
 
 Fill **Owner** (person or team), **Target** (date or sprint), **Status** (`not started` / `in progress` / `blocked` / `done`). Example:
 
-| Phase | Owner | Target | Status |
-|-------|-------|--------|--------|
-| 0 | | | not started |
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
-| 6b | | | Cast smoke tests |
-| 7 | | | optional until v5 cutover |
-| 8 | | | |
-| 9 | | | |
+| Phase | Owner | Target | Status                    |
+| ----- | ----- | ------ | ------------------------- |
+| 0     |       |        | not started               |
+| 1     |       |        |                           |
+| 2     |       |        |                           |
+| 3     |       |        |                           |
+| 4     |       |        |                           |
+| 5     |       |        |                           |
+| 6     |       |        |                           |
+| 6b    |       |        | Cast smoke tests          |
+| 7     |       |        | optional until v5 cutover |
+| 8     |       |        |                           |
+| 9     |       |        |                           |
 
 ---
 

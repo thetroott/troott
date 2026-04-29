@@ -1,4 +1,4 @@
-import { Dimensions, ScaledSize, Platform, StatusBar } from "react-native";
+import { Dimensions, ScaledSize, Platform, StatusBar } from 'react-native';
 const DEFAULT_STATUSBAR_HEIGHT = 30;
 // ? iPhone X Family
 const iPhoneX_HEIGHT = 812;
@@ -19,64 +19,64 @@ const isIPhoneXsMax = (dim: ScaledSize) => dim.height === iPhoneXsMax_HEIGHT;
 
 const isIPhone11Pro = (dim: ScaledSize) => dim.height === iPhone11Pro_HEIGHT;
 const isIPhone11ProMax = (dim: ScaledSize) =>
-  dim.height === iPhone11ProMax_HEIGHT;
+    dim.height === iPhone11ProMax_HEIGHT;
 
 const isIPhone12ProMax = (dim: ScaledSize) =>
-  dim.height === iPhone12ProMax_HEIGHT;
+    dim.height === iPhone12ProMax_HEIGHT;
 const isIPhone12Mini = (dim: ScaledSize) => dim.height === iPhone12Mini_HEIGHT;
 
 const isIPhone14 = (dim: ScaledSize) => dim.height === iPhone14_HEIGHT;
 const isIPhone14Plus = (dim: ScaledSize) => dim.height === iPhone14Plus_HEIGHT;
 const isIPhone14Pro = (dim: ScaledSize) => dim.height === iPhone14Pro_HEIGHT;
 const isIPhone14ProMax = (dim: ScaledSize) =>
-  dim.height === iPhone14ProMax_HEIGHT;
+    dim.height === iPhone14ProMax_HEIGHT;
 
 const detection = (): boolean => {
-  const dim = Dimensions.get("window");
-  return (
-    Platform.OS === "ios" &&
-    !Platform.isPad &&
-    !Platform.isTV &&
-    (isIPhone14(dim) ||
-      isIPhone14Pro(dim) ||
-      isIPhone14ProMax(dim) ||
-      isIPhone14Plus(dim) ||
-      isIPhone12ProMax(dim) ||
-      isIPhone12Mini(dim) ||
-      isIPhone11ProMax(dim) ||
-      isIPhone11Pro(dim) ||
-      isIPhoneSE(dim) ||
-      isIPhoneX(dim) ||
-      isIPhoneXsMax(dim))
-  );
+    const dim = Dimensions.get('window');
+    return (
+        Platform.OS === 'ios' &&
+        !Platform.isPad &&
+        !Platform.isTV &&
+        (isIPhone14(dim) ||
+            isIPhone14Pro(dim) ||
+            isIPhone14ProMax(dim) ||
+            isIPhone14Plus(dim) ||
+            isIPhone12ProMax(dim) ||
+            isIPhone12Mini(dim) ||
+            isIPhone11ProMax(dim) ||
+            isIPhone11Pro(dim) ||
+            isIPhoneSE(dim) ||
+            isIPhoneX(dim) ||
+            isIPhoneXsMax(dim))
+    );
 };
 
 const detectionNotchOnly = (): boolean => {
-  const dim = Dimensions.get("window");
-  return (
-    Platform.OS === "ios" &&
-    !Platform.isPad &&
-    !Platform.isTV &&
-    (isIPhone14Plus(dim) ||
-      isIPhone14(dim) ||
-      isIPhone12ProMax(dim) ||
-      isIPhone12Mini(dim) ||
-      isIPhone11ProMax(dim) ||
-      isIPhone11Pro(dim) ||
-      isIPhoneXsMax(dim) ||
-      isIPhoneSE(dim) ||
-      isIPhoneX(dim))
-  );
+    const dim = Dimensions.get('window');
+    return (
+        Platform.OS === 'ios' &&
+        !Platform.isPad &&
+        !Platform.isTV &&
+        (isIPhone14Plus(dim) ||
+            isIPhone14(dim) ||
+            isIPhone12ProMax(dim) ||
+            isIPhone12Mini(dim) ||
+            isIPhone11ProMax(dim) ||
+            isIPhone11Pro(dim) ||
+            isIPhoneXsMax(dim) ||
+            isIPhoneSE(dim) ||
+            isIPhoneX(dim))
+    );
 };
 
 const detectionForDynamicIsland = (): boolean => {
-  const dim = Dimensions.get("window");
-  return (
-    Platform.OS === "ios" &&
-    !Platform.isPad &&
-    !Platform.isTV &&
-    (isIPhone14Pro(dim) || isIPhone14ProMax(dim))
-  );
+    const dim = Dimensions.get('window');
+    return (
+        Platform.OS === 'ios' &&
+        !Platform.isPad &&
+        !Platform.isTV &&
+        (isIPhone14Pro(dim) || isIPhone14ProMax(dim))
+    );
 };
 
 /**
@@ -91,12 +91,12 @@ const hasNotchOnly = (): boolean => detectionNotchOnly();
 const hasDynamicIsland = (): boolean => detectionForDynamicIsland();
 
 const getStatusBarHeight = (): number => {
-  return (
-    Platform.select({
-      ios: hasNotch() ? 44 : DEFAULT_STATUSBAR_HEIGHT,
-      android: StatusBar.currentHeight || DEFAULT_STATUSBAR_HEIGHT,
-    }) || DEFAULT_STATUSBAR_HEIGHT
-  );
+    return (
+        Platform.select({
+            ios: hasNotch() ? 44 : DEFAULT_STATUSBAR_HEIGHT,
+            android: StatusBar.currentHeight || DEFAULT_STATUSBAR_HEIGHT,
+        }) || DEFAULT_STATUSBAR_HEIGHT
+    );
 };
 
 export { getStatusBarHeight, hasNotch, hasNotchOnly, hasDynamicIsland };

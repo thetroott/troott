@@ -1,58 +1,58 @@
-import { UserType } from "./enums.util";
+import { UserType } from './enums.util';
 
 export interface registerUserPayload {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  userType?: UserType;
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    userType?: UserType;
 }
 export interface loginPayload {
-  email: string;
-  password: string;
+    email: string;
+    password: string;
 }
 
 export interface forgotPasswordPayload {
-  email: string;
+    email: string;
 }
 export interface verifyOtpPayload {
-  email: string;
-  OTP: number;
+    email: string;
+    OTP: number;
 }
 export interface activatePayload {
-  email: string;
-  OTP: number;
+    email: string;
+    OTP: number;
 }
 
 export interface resendOtpPayload {
-  email: string;
-  OTP: number;
+    email: string;
+    OTP: number;
 }
 export interface resetPasswordPayload {
-  email: string;
-  newPassword: string;
+    email: string;
+    newPassword: string;
 }
 
 export interface changePasswordPayload {
-  currentPassword: string;
-  newPassword: string;
+    currentPassword: string;
+    newPassword: string;
 }
 
 export interface logoutPayload {
-  userId: string;
+    userId: string;
 }
 
 export interface editUserDTO {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  password?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    password?: string;
 
-  country?: string;
-  phoneNumber?: string;
-  phoneCode?: string;
+    country?: string;
+    phoneNumber?: string;
+    phoneCode?: string;
 
-  avatar?: string;
-  dateOfBirth?: Date;
-  gender?: string;
+    avatar?: string;
+    dateOfBirth?: Date;
+    gender?: string;
 }

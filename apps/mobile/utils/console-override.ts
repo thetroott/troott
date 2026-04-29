@@ -14,7 +14,7 @@
  */
 
 // No-op function for production console methods
-const noop = () => {}
+const noop = () => {};
 
 /**
  * Initialize console override
@@ -22,33 +22,33 @@ const noop = () => {}
  * Preserves console methods in development builds (__DEV__ = true)
  */
 export const initializeConsoleOverride = () => {
-	if (!__DEV__) {
-		// Production: Replace all console methods with no-op functions
-		console.log = noop
-		console.warn = noop
-		console.error = noop
-		console.info = noop
-		console.debug = noop
-		console.trace = noop
-		console.table = noop
-		console.group = noop
-		console.groupCollapsed = noop
-		console.groupEnd = noop
-		console.time = noop
-		console.timeEnd = noop
-		console.timeLog = noop
-		console.count = noop
-		console.countReset = noop
-		console.assert = noop
-		console.clear = noop
-		console.dir = noop
-		console.dirxml = noop
-		console.profile = noop
-		console.profileEnd = noop
-		console.timeStamp = noop
-	}
-	// In development (__DEV__ = true), console methods remain unchanged
-}
+    if (!__DEV__) {
+        // Production: Replace all console methods with no-op functions
+        console.log = noop;
+        console.warn = noop;
+        console.error = noop;
+        console.info = noop;
+        console.debug = noop;
+        console.trace = noop;
+        console.table = noop;
+        console.group = noop;
+        console.groupCollapsed = noop;
+        console.groupEnd = noop;
+        console.time = noop;
+        console.timeEnd = noop;
+        console.timeLog = noop;
+        console.count = noop;
+        console.countReset = noop;
+        console.assert = noop;
+        console.clear = noop;
+        console.dir = noop;
+        console.dirxml = noop;
+        console.profile = noop;
+        console.profileEnd = noop;
+        console.timeStamp = noop;
+    }
+    // In development (__DEV__ = true), console methods remain unchanged
+};
 
 // Auto-initialize when this module is imported
-initializeConsoleOverride()
+initializeConsoleOverride();

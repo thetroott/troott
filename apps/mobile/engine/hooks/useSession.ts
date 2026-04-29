@@ -1,9 +1,3 @@
-
-
-
-
-
-
 // This hook, `usePostFullCapabilities`, is designed to **report the player’s capabilities to the server** in the context of a music or media player. Let me break it down step by step:
 
 // ---

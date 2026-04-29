@@ -1,50 +1,48 @@
 {
-  "extends": "expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "types": [],
-    "baseUrl": ".",
-    "moduleResolution": "bundler",
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
-  },
-  "include": [
-    "app",
-    "api",
-    "assets",
-    "components",
-    "constants",
-    "_data",
-    "dtos",
-    "engine",
-    "hooks",
-    "lib",
-    "screens",
-    "services",
-    "stores",
-    "types",
-    "utils",
-    "validation",
-    "app.config.tsx",
-    "**/*.ts",
-    "**/*.tsx",
-    "metro.config.js",
-    "nativewind-env.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "components/containers/engine/player/favorite-context-menu-row.tsx",
-    "components/containers/engine/player/favorite-icon.tsx",
-    "components/containers/engine/player/horizontal-list.tsx",
-    "components/containers/engine/player/instant-mix-button.tsx",
-    "screens/Auth",
-    "screens/Preview.tsx",
-    "hooks/use-theme-color.ts",
-    "hooks/use-user-profile.tsx",
-    "stores/app/device-profile.ts",
-    "utils/errorBoundary.util.tsx"
-  ]
+    "extends": "expo/tsconfig.base",
+    "compilerOptions": {
+        "strict": true,
+        "types": [],
+        "baseUrl": ".",
+        "moduleResolution": "bundler",
+        "paths": {
+            "@/*": ["./*"]
+        }
+    },
+    "include": [
+        "app",
+        "api",
+        "assets",
+        "components",
+        "constants",
+        "_data",
+        "dtos",
+        "engine",
+        "hooks",
+        "lib",
+        "screens",
+        "services",
+        "stores",
+        "types",
+        "utils",
+        "validation",
+        "app.config.tsx",
+        "**/*.ts",
+        "**/*.tsx",
+        "metro.config.js",
+        "nativewind-env.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "components/features/player/player/favorite-context-menu-row.tsx",
+        "components/features/player/player/favorite-icon.tsx",
+        "components/features/player/player/horizontal-list.tsx",
+        "components/features/player/player/instant-mix-button.tsx",
+        "screens/Auth",
+        "screens/Preview.tsx",
+        "hooks/platform/use-theme-color.ts",
+        "hooks/use-user-profile.tsx",
+        "stores/app/device-profile.ts",
+        "utils/errorBoundary.util.tsx"
+    ]
 }

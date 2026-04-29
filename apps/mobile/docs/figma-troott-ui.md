@@ -4,18 +4,18 @@
 
 **Reference nodes (examples):**
 
-- [4081-19306](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4081-19306) — welcome / pre-auth (`app/index.tsx`: hero, logo, headline, CTAs)
-- [8841-19674](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=8841-19674)
-- [2950-19555](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=2950-19555)
+-   [4081-19306](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4081-19306) — welcome / pre-auth (`app/index.tsx`: hero, logo, headline, CTAs)
+-   [8841-19674](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=8841-19674)
+-   [2950-19555](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=2950-19555)
 
 ## App shell (code)
 
-| Figma intent | Implementation |
-|--------------|----------------|
-| Dark canvas | Root `#171717`, `bg-neutral-950` on `ScreenView`, auth `SharedHeader` |
+| Figma intent                   | Implementation                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Dark canvas                    | Root `#171717`, `bg-neutral-950` on `ScreenView`, auth `SharedHeader`                                                    |
 | App bar (title + side actions) | `Header` / `SharedHeader` from `@/components/containers/shared/headers` with `variant="playlist"` (left / title / right) |
-| Auth titles | `SharedHeader` + `variant="auth"` |
-| Error boundary | `FallbackComponent` from `@/components/containers/shared` (teal CTA) |
+| Auth titles                    | `SharedHeader` + `variant="auth"`                                                                                        |
+| Error boundary                 | `FallbackComponent` from `@/components/containers/shared` (teal CTA)                                                     |
 
 ## Talk to Figma (MCP)
 
