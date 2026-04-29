@@ -1,17 +1,25 @@
 // Cookie Service
-export { default as cookieService } from './services/cookies';
+export { default as cookieService } from '../../../apps/mobile/hooks/services/cookies';
 
 // Storage Service
-export { default as storage } from './storage/local-storage';
+export { default as storage } from './services/web-storage';
+export {
+    AUTH_STORAGE_KEYS,
+    AsyncStorageAdapter,
+    LocalStorageAdapter,
+    STORAGE_KEYS,
+    type IAsyncKeyValueStore,
+    type IStorageAdapter,
+} from './services/index';
 
 // Idempotent Service
-export { default as idempotentService } from './services/idempotent';
+export { default as idempotentService } from '../../../apps/mobile/hooks/services/idempotent';
 
 // Query Provider
-export { QueryProvider } from './services/query';
+export { QueryProvider } from '../../../apps/mobile/hooks/services/query';
 
 // SDK Main Class
-export { default as Troott, troottAPIClient } from './api/clients/troott';
+export { default as Troott, troottAPIClient } from './api/_base/troott';
 
 // Types
 export * from './types/types';
