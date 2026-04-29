@@ -33,6 +33,21 @@ export const privateRoutes = [
                 element: <GetStarted />,
                 roles: ['admin', 'staff', 'preacher'],
             },
+    {
+        path: '/',
+        element: <Home />,
+        roles: ['admin', 'staff', 'preacher'],
+    },
+    {
+        path: '',
+        element: <DashboardLayout />,
+        children: [
+            // get-started landing page
+            {
+                path: 'get-started',
+                element: <GetStarted />,
+                roles: ['admin', 'staff', 'preacher'],
+            },
 
             // get-started sub routes using InnerLayout
             {

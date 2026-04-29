@@ -20,9 +20,15 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useUpload, uploadActions } from '@/context/upload/upload.context';
 import { useDraft } from '@/context/draft/draft.context';
+import apiCall from '@/api/config';
+import storage from '@/utils/storage.util';
+import { sermonQueryKeys } from '@/constants/sermon-query-keys';
+import { useUserStore } from '@/store/user-store';
+import { resolveMinisterId } from '@/utils/minister-id.util';
 import apiCall from '@/api/config';
 import storage from '@/utils/storage.util';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
@@ -33,6 +39,18 @@ interface ReviewSubmitProps {
     onModalClose?: () => void;
     onSubmitRef?: React.MutableRefObject<(() => void) | null>;
     onSaveDraftRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+}
+
+function apiErrorMessage(err: unknown): string {
+  if (
+    err &&
+    typeof err === 'object' &&
+    'message' in err &&
+    typeof (err as { message: unknown }).message === 'string'
+  ) {
+    return (err as { message: string }).message;
+  }
+  return 'Something went wrong. Please try again.';
 }
 
 function apiErrorMessage(err: unknown): string {
