@@ -1,10 +1,25 @@
-- sharing sermons
-- sharing playlist  
-- share favourite sermons  
-- share Sermon Series  
-- sharing minister profile  
-- sharing personal profile  
- 
+# Sharing (sermons, playlists, profiles)
+
+**Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Cross-flow share (§6), deep link when not signed in (§3), edge cases (§8).
+
+**Stable URLs and token links:** [`specs/api/deep-links.md`](../api/deep-links.md) (paths, teaser route, universal links, rollout).
+
+**Scope:** What the user **shares**, from **where**, and what the **recipient** experiences when opening a link. Recipient must **sign in** to full app experience (no guest account).
+
+---
+
+## Shareable entities (product checklist)
+
+- Sermon (audio link / deep link)  
+- Playlist  
+- Favourite sermons (collection or single)  
+- Sermon series  
+- Minister profile  
+- Listener **own** profile (if public sharing is allowed)
+
+Each needs: **preview** (title, image, speaker), **link**, and **access** messaging if content is restricted.
+
+---
 
 For a **sermon audio app**, a share feature should be **simple, contextual, and meaningful**—users want to share not just “something they listened to,” but a specific sermon, passage, or moment that can be acted on by the recipient. Here’s a breakdown:
 
@@ -59,4 +74,24 @@ The sharing feature doesn’t need anything too complex, but a few **small algor
 - **Allow copying link or sharing to apps** (WhatsApp, Messenger, email, social).
 - **Optional timestamp inclusion**: give the user a toggle “Share from current point” or “Share full sermon.”
 - **Avoid sending raw audio files** unless it’s a small snippet; most users prefer links.
+
+---
+
+## Recipient opens link (not signed in)
+
+- Show **app install** CTA if needed, then **Sign up / Log in**; after auth, open **target content** (master §3).  
+- If content is **paywalled:** clear message + **Subscribe** or **Preview** per product.
+
+---
+
+## Sender errors
+
+- **Share sheet fails:** toast “Couldn’t share” + **Copy link** fallback.  
+- **Link generation fails:** retry; do not show broken `null` link.
+
+---
+
+## Revision history
+
+- **2026-04-14:** Structured with master doc link; added recipient and error UX.
 

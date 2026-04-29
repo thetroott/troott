@@ -1,5 +1,7 @@
 # Continue Listening – Core Loop and Engine Gaps
 
+**Related UX spec:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — §4E First Home load (“Continue listening” row), §5A resume to player, §7 resume after hours/days. **User-facing goal:** the listener never feels “stuck at zero” after leaving the app or finishing a queue.
+
 This document describes the **continue listening** core loop for the sermon app and what is **missing in the engine** to support it. Continue listening means: the user can leave and return (or let the queue finish) and the app resumes or suggests what to play next so listening never has to "start from zero."
 
 ---

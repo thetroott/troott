@@ -6,6 +6,8 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 **Companion:** My Sermon (View), Trash page, modals — [`05 -  sermon-view-trash.md`](./05%20-%20%20sermon-view-trash.md).
 
+**Listener-facing share and deep links** (stable URLs, universal links, teaser API): [`../api/deep-links.md`](../api/deep-links.md).
+
 **Use case framework** (actors, system, goals, preconditions, triggers, basic and alternate flows) follows [What is a use case? (Figma)](https://www.figma.com/resource-library/what-is-a-use-case/).
 
 ---
