@@ -18,21 +18,7 @@ import HomeAddressPage from '@/app/account/HomeAddressInfo';
 import MinistryInputPage from '@/app/account/MinistryInfo';
 
 export const privateRoutes = [
-    {
-        path: '/',
-        element: <Home />,
-        roles: ['admin', 'staff', 'preacher'],
-    },
-    {
-        path: '',
-        element: <DashboardLayout />,
-        children: [
-            // get-started landing page
-            {
-                path: 'get-started',
-                element: <GetStarted />,
-                roles: ['admin', 'staff', 'preacher'],
-            },
+    
     {
         path: '/',
         element: <Home />,
