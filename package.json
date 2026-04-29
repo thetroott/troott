@@ -1,58 +1,58 @@
 {
-  "private": true,
-  "name": "troott",
-  "packageManager": "pnpm@10.33.0",
-  "scripts": {
-    "postinstall": "patch-package",
-    "dev": "TURBO_UI=tui turbo dev",
-    "dev:api": "turbo dev --filter=\"{./apps/api}...\"",
-    "dev:web": "turbo dev --filter=\"{./apps/web}...\"",
-    "dev:mobile": "turbo dev --filter=\"{./apps/mobile}...\"",
-    "expo:mobile": "pnpm --filter @troott/mobile exec expo",
-    "expo:mobile:start": "pnpm --filter @troott/mobile run start",
-    "dev:website": "turbo dev --filter=\"{./apps/website}...\"",
-    "dev:fe": "turbo dev --ui=tui --filter=\"{./apps/website}...\" --filter=\"{./apps/web}...\"",
-    "clean:cache": "(turbo daemon stop || true) && rm -rf .turbo",
-    "clean:cache:fe": "(turbo daemon stop || true) && rm -rf .turbo apps/web/node_modules/.vite apps/website/.next",
-    "lint": "turbo lint",
-    "test": "turbo test",
-    "build": "turbo build",
-    "build:api": "turbo build --filter=\"...{./apps/api}\"",
-    "build:web": "turbo build --filter=\"...{./apps/web}\"",
-    "build:mobile": "turbo build --filter=\"...{./apps/mobile}\"",
-    "build:website": "turbo build --filter=\"...{./apps/website}\"",
-    "build:fe": "turbo build --filter=\"...{./apps/website}\" --filter=\"...{./apps/web}\"",
-    "android": "pnpm --filter @troott/mobile run android",
-    "ios": "pnpm --filter @troott/mobile run ios",
-    "prebuild:mobile": "pnpm --dir apps/mobile exec expo prebuild --pnpm",
-    "prebuild:mobile:clean": "pnpm --dir apps/mobile exec expo prebuild --clean --pnpm",
-    "start:mobile": "pnpm --filter @troott/mobile run start",
-    "start:mobile:clear": "pnpm --filter @troott/mobile run start:clear",
-    "typecheck:workspace": "tsc -b tsconfig.workspace.json"
-  },
-  "devDependencies": {
-    "@types/node": "^22.15.21",
-    "patch-package": "^8.0.1",
-    "turbo": "^2.5.6",
-    "typescript": "~5.9.2"
-  },
-  "version": "1.0.0",
-  "dependencies": {
-    "expo": "~55.0.11",
-    "react": "19.2.0",
-    "react-native": "0.83.4"
-  },
-  "pnpm": {
-    "dedupePeerDependents": true,
-    "overrides": {
-      "react": "19.2.0",
-      "react-dom": "19.2.0",
-      "@types/react": "19.1.0",
-      "@types/react-dom": "19.1.0"
+    "private": true,
+    "name": "troott",
+    "packageManager": "pnpm@10.33.0",
+    "scripts": {
+        "postinstall": "patch-package",
+        "dev": "TURBO_UI=tui turbo dev",
+        "dev:api": "turbo dev --filter=\"{./apps/api}...\"",
+        "dev:web": "turbo dev --filter=\"{./apps/web}...\"",
+        "dev:mobile": "turbo dev --filter=\"{./apps/mobile}...\"",
+        "expo:mobile": "pnpm --filter @troott/mobile exec expo",
+        "expo:mobile:start": "pnpm --filter @troott/mobile run start",
+        "dev:website": "turbo dev --filter=\"{./apps/website}...\"",
+        "dev:fe": "turbo dev --ui=tui --filter=\"{./apps/website}...\" --filter=\"{./apps/web}...\"",
+        "clean:cache": "(turbo daemon stop || true) && rm -rf .turbo",
+        "clean:cache:fe": "(turbo daemon stop || true) && rm -rf .turbo apps/web/node_modules/.vite apps/website/.next",
+        "lint": "turbo lint",
+        "test": "turbo test",
+        "build": "turbo build",
+        "build:api": "turbo build --filter=\"...{./apps/api}\"",
+        "build:web": "turbo build --filter=\"...{./apps/web}\"",
+        "build:mobile": "turbo build --filter=\"...{./apps/mobile}\"",
+        "build:website": "turbo build --filter=\"...{./apps/website}\"",
+        "build:fe": "turbo build --filter=\"...{./apps/website}\" --filter=\"...{./apps/web}\"",
+        "android": "pnpm --filter @troott/mobile run android",
+        "ios": "pnpm --filter @troott/mobile run ios",
+        "prebuild:mobile": "pnpm --dir apps/mobile exec expo prebuild --pnpm",
+        "prebuild:mobile:clean": "pnpm --dir apps/mobile exec expo prebuild --clean --pnpm",
+        "start:mobile": "pnpm --filter @troott/mobile run start",
+        "start:mobile:clear": "pnpm --filter @troott/mobile run start:clear",
+        "typecheck:workspace": "tsc -b tsconfig.workspace.json"
     },
-    "patchedDependencies": {
-      "@rntp/player@5.0.0-beta.4": "patches/@rntp__player@5.0.0-beta.4.patch",
-      "react-native-css-interop@0.2.2": "patches/react-native-css-interop@0.2.2.patch"
+    "devDependencies": {
+        "@types/node": "^22.15.21",
+        "patch-package": "^8.0.1",
+        "turbo": "^2.5.6",
+        "typescript": "~5.9.2"
+    },
+    "version": "1.0.0",
+    "dependencies": {
+        "expo": "~54.0.33",
+        "react": "19.1.0",
+        "react-native": "0.81.5"
+    },
+    "pnpm": {
+        "dedupePeerDependents": true,
+        "overrides": {
+            "react": "19.1.0",
+            "react-dom": "19.1.0",
+            "@types/react": "19.1.0",
+            "@types/react-dom": "19.1.0"
+        },
+        "patchedDependencies": {
+            "@rntp/player@5.0.0-beta.4": "patches/@rntp__player@5.0.0-beta.4.patch",
+            "react-native-css-interop@0.2.2": "patches/react-native-css-interop@0.2.2.patch"
+        }
     }
-  }
 }
