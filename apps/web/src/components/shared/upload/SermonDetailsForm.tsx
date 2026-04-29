@@ -2,8 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { X, Upload as UploadIcon,  Copy, ChevronUp, Link, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { Icon } from '@iconify/react';
+import {
+  X,
+  Upload as UploadIcon,
+  Copy,
+  ChevronUp,
+  Link,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
 import { useUpload, uploadActions } from '@/context/upload/upload.context';
 import type { IUploadFormErrors } from '@/utils/interfaces.util';
 
@@ -128,9 +139,15 @@ const SermonDetailsForm: React.FC = () => {
   };
 
   const validateThumbnailFile = (file: File): string | null => {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+    ];
     if (!allowedTypes.includes(file.type)) {
-      return 'Please upload a valid image file (JPEG, PNG, or WebP)';
+      return 'Please upload a valid image file (JPEG, PNG, WebP, or GIF)';
     }
     
     const maxSize = 5 * 1024 * 1024;
@@ -408,17 +425,37 @@ const SermonDetailsForm: React.FC = () => {
     <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 h-full">
       {/* Left Column - Form Fields (Scrollable) */}
       <div className="space-y-4 overflow-y-auto scrollbar-none max-h-[calc(100vh-150px)] pr-2">
-        {/* Title */}
+        {/* Title — Figma [`4535:21468`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4535-21468) */}
         <div className="space-y-2">
-          <Label htmlFor="title">Title (required)</Label>
+          <div className="flex items-center gap-2">
+            <span id="upload-title-hint" className="sr-only">
+              This title is shown on your sermon page and in search.
+            </span>
+            <Label
+              htmlFor="title"
+              className="cursor-default font-matter-medium text-[14px] text-[#eaeaea]"
+              title="This title is shown on your sermon page and in search."
+              aria-describedby="upload-title-hint"
+            >
+              Title (required)
+            </Label>
+            <Icon
+              icon={UPLOAD_SHELL.iconifyFieldLabelHintGlyph}
+              width={18}
+              height={18}
+              className="shrink-0 text-[#bdbdbd]"
+              aria-hidden
+            />
+          </div>
           <Input
             id="title"
             value={localData.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
             onBlur={() => handleBlur('title')}
-            placeholder="Enter sermon title"
+            placeholder="Add a title"
             className={cn(
-              localErrors.title || errors.title ? 'border-red-500' : ''
+              'border-[#545454]/60 bg-[#242325] text-[#eaeaea] placeholder:text-[#707070] focus-visible:border-[#707070] focus-visible:ring-[#08ffdb]/30',
+              localErrors.title || errors.title ? 'border-red-500' : '',
             )}
           />
           {(localErrors.title || errors.title) && (
@@ -428,17 +465,38 @@ const SermonDetailsForm: React.FC = () => {
 
         {/* Description */}
         <div className="space-y-2">
-          <Label htmlFor="description">Description (required)</Label>
+          <div className="flex items-center gap-2">
+            <span id="upload-description-hint" className="sr-only">
+              Help listeners understand what this sermon is about.
+            </span>
+            <Label
+              htmlFor="description"
+              className="cursor-default font-matter-medium text-[14px] text-[#eaeaea]"
+              title="Help listeners understand what this sermon is about."
+              aria-describedby="upload-description-hint"
+            >
+              Description (required)
+            </Label>
+            <Icon
+              icon={UPLOAD_SHELL.iconifyFieldLabelHintGlyph}
+              width={18}
+              height={18}
+              className="shrink-0 text-[#bdbdbd]"
+              aria-hidden
+            />
+          </div>
           <textarea
             id="description"
             value={localData.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
             onBlur={() => handleBlur('description')}
-            placeholder="Enter sermon description"
+            placeholder="Tell viewers about your sermon"
             rows={4}
             className={cn(
-              "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none",
-              localErrors.description || errors.description ? 'border-red-500' : ''
+              'flex w-full resize-none rounded-md border border-[#545454]/60 bg-[#242325] px-3 py-2 font-matter text-[14px] leading-5 text-[#eaeaea] placeholder:text-[#707070] ring-offset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
+              localErrors.description || errors.description
+                ? 'border-red-500'
+                : '',
             )}
           />
           {(localErrors.description || errors.description) && (
@@ -446,18 +504,26 @@ const SermonDetailsForm: React.FC = () => {
           )}
         </div>
 
-        {/* Sermon Link - Always visible */}
+        {/* Sermon link row — studio readonly field [`4499:19755`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4499-19755) */}
         <div className="space-y-2">
-          <Label>Link</Label>
+          <Label className="font-matter-medium text-[14px] text-[#eaeaea]">
+            Link
+          </Label>
           <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
-              <Link className="h-4 w-4 text-muted-foreground" />
+            <div className={cn('flex min-w-0 flex-1 items-center gap-2', UPLOAD_SHELL.footerLinkField)}>
+              <Link className="h-4 w-4 shrink-0 text-[#707070]" aria-hidden />
               {uploadComplete && generateSermonLink() ? (
-                <span className="text-sm text-blue-600 truncate">{generateSermonLink()}</span>
-              ) : uploadData.file && progress > 0 ? (
-                <span className="text-sm text-muted-foreground">Pending...</span>
+                <span className="truncate font-matter text-[13px] leading-5 text-[#08ffdb]">
+                  {generateSermonLink()}
+                </span>
+              ) : uploadData.file && progress > 0 && !uploadComplete ? (
+                <span className="font-matter text-[13px] text-[#bdbdbd]">
+                  Pending…
+                </span>
               ) : (
-                <span className="text-sm text-muted-foreground">Your sermon link will appear here after upload</span>
+                <span className="font-matter text-[13px] leading-5 text-[#707070]">
+                  Your sermon link will appear here after upload
+                </span>
               )}
             </div>
             {uploadComplete && generateSermonLink() ? (
@@ -466,10 +532,12 @@ const SermonDetailsForm: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleCopyLink}
-                className="shrink-0"
+                className="h-9 shrink-0 border-[#707070] bg-transparent px-2.5 text-[#eaeaea] hover:bg-white/5"
               >
-                <Copy className="h-4 w-4" />
-                {linkCopied ? 'Copied!' : ''}
+                <Copy className="h-4 w-4" aria-hidden />
+                <span className="sr-only">
+                  {linkCopied ? 'Copied' : 'Copy link'}
+                </span>
               </Button>
             ) : (
               <Button
@@ -477,9 +545,10 @@ const SermonDetailsForm: React.FC = () => {
                 variant="outline"
                 size="sm"
                 disabled
-                className="shrink-0"
+                className="h-9 shrink-0 border-[#545454]/50 bg-transparent text-[#707070]"
               >
-                <Copy className="h-4 w-4" />
+                <Copy className="h-4 w-4" aria-hidden />
+                <span className="sr-only">Copy link (available after upload)</span>
               </Button>
             )}
           </div>
@@ -490,10 +559,9 @@ const SermonDetailsForm: React.FC = () => {
           <Button
             type="button"
             onClick={() => setShowMoreFields(true)}
-            className=" bg-[#707070] cursor-pointer hover:bg-[#404040] text-[#EAEAEA] rounded-full border-0"
+            className="rounded-full border-0 bg-[#707070] px-4 font-matter-medium text-[13px] text-[#eaeaea] hover:bg-[#5a5a5a]"
           >
-            
-            Show More
+            Show more
           </Button>
         )}
 
@@ -611,11 +679,12 @@ const SermonDetailsForm: React.FC = () => {
       {/* Right Column - Thumbnail Upload (Fixed Position) */}
       <div className="space-y-4 lg:sticky lg:top-0 lg:h-fit">
         <div className="space-y-2">
-          {/* Align heading and description with thumbnail left border */}
           <div className="mb-2">
-            <Label>Thumbnail (required)</Label>
-            <div className="text-sm text-muted-foreground mb-2">
-              Set a thumbnail that stands out and draws viewers' attention.
+            <Label className="font-matter-medium text-[14px] text-[#eaeaea]">
+              Thumbnail (required)
+            </Label>
+            <div className="mb-2 font-matter text-[13px] leading-5 text-[#bdbdbd]">
+              Set a thumbnail that stands out and draws viewers&apos; attention
             </div>
           </div>
           
@@ -785,23 +854,23 @@ const SermonDetailsForm: React.FC = () => {
           ) : (
             <div
               className={cn(
-                "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors flex flex-col items-center justify-center w-full min-h-[200px]",
-                dragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-muted-foreground/50"
+                'flex min-h-[220px] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-colors',
+                dragActive
+                  ? 'border-[#08ffdb] bg-[#08ffdb]/5'
+                  : 'border-[#707070]/60 hover:border-[#707070]',
               )}
               onDragOver={handleThumbnailDragOver}
               onDragLeave={handleThumbnailDragLeave}
               onDrop={handleThumbnailDrop}
               onClick={handleThumbnailClick}
             >
-              <UploadIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground mb-2">
-                Drag and drop an image here, or click to select
+              <UploadIcon className="mx-auto mb-4 h-10 w-10 text-[#bdbdbd]" aria-hidden />
+              <p className="mb-1 font-matter text-[13px] leading-5 text-[#bdbdbd]">
+                Minimum size of{' '}
+                <span className="font-matter-medium text-[#eaeaea]">808 × 632px</span>
               </p>
-              <p className="text-xs text-muted-foreground">
-                Supports JPEG, PNG, WebP (max 5MB)
-              </p>
-              <p className="text-xs text-muted-foreground mt-2 opacity-75">
-                Portrait format: 256×320px
+              <p className="font-matter text-[12px] leading-4 text-[#707070]">
+                Use a JPG, PNG, or GIF file format
               </p>
             </div>
           )}
@@ -813,7 +882,7 @@ const SermonDetailsForm: React.FC = () => {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/jpeg,image/jpg,image/png,image/webp"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
             onChange={handleThumbnailInputChange}
             className="hidden"
           />

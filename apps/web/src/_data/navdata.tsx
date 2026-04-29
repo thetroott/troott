@@ -1,7 +1,6 @@
 import {
   BarChart3Icon,
   CloudUploadIcon,
-  FolderEdit,
   Home,
   Inbox,
   LogOut,
@@ -12,6 +11,7 @@ import {
   PlaySquare,
   RocketIcon,
   TrashIcon,
+  UsersIcon,
 } from "lucide-react";
 
 export const navItems = {
@@ -36,65 +36,77 @@ export const navItems = {
           isActive: false,
         },
         {
-          title: "Upload Sermon",
-          url: "/upload-sermon",
-          icon: CloudUploadIcon,
-          isActive: true,
-        },
-      ],
-    },
-  ],
-  sermonNav: [
-    {
-      title: "Sermon Management",
-      roles: ["staff", "minister"],
-      url: "#",
-      items: [
-        {
-          title: "My Sermon",
-          url: "/get-sermons",
+          title: "Sermons",
+          url: "/sermons",
           icon: LucideBookAudio,
           isActive: false,
         },
         {
-          title: "Series",
-          url: "/my-series",
-          icon: PlaySquare,
+          title: "Community",
+          url: "/community",
+          icon: UsersIcon,
           isActive: false,
         },
         {
-          title: "Drafts",
-          url: "/user-drafts",
-          icon: FolderEdit,
+          title: "Analytics",
+          url: "/analytics",
+          icon: BarChart3Icon,
           isActive: false,
         },
         {
-          title: "Trash",
-          url: "/my-trash",
+          title: "Bin",
+          url: "/bin",
           icon: TrashIcon,
           isActive: false,
         },
       ],
     },
   ],
+  sermonNav: [
+    {
+      //title: "Sermon Management",
+      roles: ["staff", "minister"],
+      url: "#",
+      items: [
+        // {
+        //   title: "My Sermon",
+        //   url: "/get-sermons",
+        //   icon: LucideBookAudio,
+        //   isActive: false,
+        // },
+        // {
+        //   title: "Series",
+        //   url: "/my-series",
+        //   icon: PlaySquare,
+        //   isActive: false,
+        // },
+        // {
+        //   title: "Trash",
+        //   url: "/my-trash",
+        //   icon: TrashIcon,
+        //   isActive: false,
+        // },
+      ],
+    },
+  ],
   engagementNav: [
     {
-      title: "Engagement & Analytics",
+     // title: "Engagement & Analytics",
       url: "#",
       roles: ["staff", "minister"],
       items: [
-        {
-          title: "Sermon Analytics",
-          url: "/my-analytics",
-          icon: BarChart3Icon,
-          isActive: false,
-        },
-        {
-          title: "Comments & Feedback",
-          url: "#",
-          icon: MessageCircle,
-          isActive: false,
-        },
+        // {
+        //   title: "Sermon Analytics",
+        //   url: "/my-analytics",
+        //   icon: BarChart3Icon,
+        //   isActive: false,
+        // },
+        // {
+        //   title: "Comments & Feedback",
+        //   url: "#",
+        //   icon: MessageCircle,
+        //   isActive: false,
+        // },
       ],
     },
   ],

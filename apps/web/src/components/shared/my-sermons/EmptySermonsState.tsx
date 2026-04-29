@@ -1,12 +1,28 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { features } from "@/_data/mysermonFeatures";
 import { useNavigate } from "react-router-dom";
+import { useUpload } from "@/context/upload/upload.context";
+import UploadEntryStepModal from "@/components/shared/upload/UploadEntryStepModal";
+import { applySelectedAudioToUpload } from "@/utils/upload-audio-selection.util";
 
 const EmptySermonsState = () => {
   const navigate = useNavigate();
+  const { dispatch, state: uploadState } = useUpload();
+  const [entryModalOpen, setEntryModalOpen] = useState(false);
 
   return (
     <div className=" bg-neutral-900/60 p-8">
+      <UploadEntryStepModal
+        open={entryModalOpen}
+        onOpenChange={setEntryModalOpen}
+        isLoading={uploadState.isLoading}
+        onFileSelected={(file) => {
+          applySelectedAudioToUpload(dispatch, file);
+          setEntryModalOpen(false);
+          navigate("/upload-sermon");
+        }}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-7">
@@ -52,7 +68,8 @@ const EmptySermonsState = () => {
           </div>
 
           <Button
-            onClick={() => navigate("/upload-sermon")}
+            type="button"
+            onClick={() => setEntryModalOpen(true)}
             className="bg-primary text-sm  hover:bg-teal-500 text-primary-foreground px-4 py-6  font-[500] "
           >
             Create sermon

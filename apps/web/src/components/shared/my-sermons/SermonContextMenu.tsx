@@ -5,8 +5,10 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 import {
   MoreHorizontal,
+  MoreVertical,
   Scissors,
   Pencil,
   Copy,
@@ -16,9 +18,14 @@ import {
   BarChart3,
   Trash2,
 } from "lucide-react";
+import { MY_SERMONS_LIST } from "@/components/shared/my-sermons/my-sermons-ui";
 
 interface SermonContextMenuProps {
   sermonId: string;
+  /** Overrides list row trigger (e.g. grid `#252525` 24×24 chip). */
+  triggerClassName?: string;
+  /** Grid cards use vertical dots per Figma `ph:dots-three-vertical-bold`. */
+  menuIcon?: "horizontal" | "vertical";
   onEdit?: (sermonId: string) => void;
   onRename?: (sermonId: string) => void;
   onDuplicate?: (sermonId: string) => void;
@@ -31,6 +38,8 @@ interface SermonContextMenuProps {
 
 const SermonContextMenu = ({
   sermonId,
+  triggerClassName,
+  menuIcon = "horizontal",
   onEdit,
   onRename,
   onDuplicate,
@@ -105,11 +114,20 @@ const SermonContextMenu = ({
     }
   };
 
+  const MenuGlyph =
+    menuIcon === "vertical" ? MoreVertical : MoreHorizontal;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="cursor-pointer hover:bg-gray-700/50 rounded p-1 transition-colors">
-          <MoreHorizontal className="w-4 h-4 text-gray-400" />
+        <button
+          type="button"
+          className={cn(
+            triggerClassName ?? MY_SERMONS_LIST.rowActionTrigger,
+          )}
+          aria-label="Sermon actions"
+        >
+          <MenuGlyph className="h-4 w-4" strokeWidth={2} />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

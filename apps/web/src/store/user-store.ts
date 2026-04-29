@@ -8,6 +8,8 @@ interface User {
   lastName?: string;
   userType?: string;
   isActive?: boolean;
+  /** Minister profile id for studio sermon list (`GET /sermon/minister/:id`). */
+  ministerId?: string;
   [key: string]: any;
 }
 

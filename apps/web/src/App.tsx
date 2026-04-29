@@ -6,7 +6,9 @@ const App = () => {
   return (
     <AppProvider>
       <Router>
-        <AppRoutes />
+        <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
+          <AppRoutes />
+        </div>
       </Router>
     </AppProvider>
   );

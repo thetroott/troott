@@ -324,6 +324,7 @@ export interface ISermonUpload {
   scheduledDate?: Date | null;
   // Add these fields for dynamic link generation
   sermonId?: string;
+  uploadRef?: string;
   slug?: string;
   preacherId?: string;
   seriesId?: string;

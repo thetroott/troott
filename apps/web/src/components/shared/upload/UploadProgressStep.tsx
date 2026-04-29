@@ -1,430 +1,423 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { FileAudio,  Trash2, Loader2, X, Video } from 'lucide-react';
+import { FileAudio, Loader2, Trash2 } from 'lucide-react';
 import { useUpload, uploadActions } from '@/context/upload/upload.context';
-import { cn } from '@/lib/utils';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
-import { backgroundUploadService, UploadTask } from '@/services/background-upload.service';
+import axios from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
+import apiCall from '@/api/config';
+import { sermonQueryKeys } from '@/constants/sermon-query-keys';
+import { useUserStore } from '@/store/user-store';
+import { resolveMinisterId } from '@/utils/minister-id.util';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
+import { shouldMockSermonUpload } from '@/utils/upload-dev-mock.util';
+import { recordDevUploadAfterAudioComplete } from '@/utils/dev-upload-drafts.util';
+import { probeAudioFileDurationSec } from '@/utils/audio-file-duration.util';
 
+/**
+ * Upload progress UI — Figma 4530:20801 (0%), 4530:21351 (in progress), 4555:6094 (finalizing),
+ * 4558:8281 (complete + remove). Remove audio control matches details-frame
+ * [`4660:6496`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4660-6496). Shell tokens in `UPLOAD_SHELL`.
+ */
 const UploadProgressStep: React.FC = () => {
-  const { state, dispatch } = useUpload();
-  const { uploadData, progress, uploadComplete, isLoading, backgroundUploadId } = state;
-  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+    const queryClient = useQueryClient();
+    const user = useUserStore((s) => s.user) as Record<string, unknown> | null;
+    const ministerId = resolveMinisterId(user);
+    const { state, dispatch } = useUpload();
+    const { uploadData, progress, uploadComplete, isLoading } = state;
+    const uploadSnapshotRef = useRef(uploadData);
+    uploadSnapshotRef.current = uploadData;
+    const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+    const [showCancelDialog, setShowCancelDialog] = useState(false);
+    const [uploadError, setUploadError] = useState(false);
+    const [retryToken, setRetryToken] = useState(0);
 
-  useEffect(() => {
-    if (!uploadData.file) {
-      return;
-    }
+    useEffect(() => {
+        const file = uploadData.file;
+        if (!file || uploadComplete) return;
 
-    let currentUploadId = backgroundUploadId ?? null;
-    let serviceTask = currentUploadId ? backgroundUploadService.getUploadStatus(currentUploadId) : null;
+        const ac = new AbortController();
+        let cancelled = false;
+        setUploadError(false);
 
-    if (currentUploadId && !serviceTask) {
-      currentUploadId = null;
-      dispatch(uploadActions.setBackgroundUploadId(null));
-    }
-
-    if (serviceTask) {
-      dispatch(uploadActions.setProgress(serviceTask.progress));
-      if (serviceTask.status === 'completed') {
-        dispatch(uploadActions.setUploadComplete(true));
-        dispatch(uploadActions.setLoading(false));
-      } else {
         dispatch(uploadActions.setLoading(true));
-      }
-    }
-
-    const handleProgress = (id: string, newProgress: number) => {
-      if (currentUploadId && id === currentUploadId) {
-        dispatch(uploadActions.setProgress(newProgress));
-      }
-    };
-
-    const handleComplete = (id: string, task: UploadTask) => {
-      if (currentUploadId && id === currentUploadId) {
-        dispatch(uploadActions.setUploadComplete(true));
-        dispatch(uploadActions.setLoading(false));
-        dispatch(uploadActions.setProgress(100));
-      }
-    };
-
-    const handleCancelled = (id: string) => {
-      if (currentUploadId && id === currentUploadId) {
-        dispatch(uploadActions.setLoading(false));
         dispatch(uploadActions.setProgress(0));
-        dispatch(uploadActions.setBackgroundUploadId(null));
-      }
+
+        const mockUpload = shouldMockSermonUpload();
+
+        void (async () => {
+            try {
+                if (mockUpload) {
+                    for (let p = 0; p <= 100; p += 12) {
+                        if (cancelled) return;
+                        dispatch(
+                            uploadActions.setProgress(Math.min(100, p)),
+                        );
+                        await new Promise<void>((resolve) => {
+                            setTimeout(resolve, 90);
+                        });
+                    }
+                    if (cancelled) return;
+                    dispatch(
+                        uploadActions.setUploadData({
+                            sermonId: 'dev-mock-sermon-id',
+                            uploadRef: 'dev-mock-upload-ref',
+                        }),
+                    );
+                    dispatch(uploadActions.setUploadComplete(true));
+                    dispatch(uploadActions.setProgress(100));
+                    const snap = uploadSnapshotRef.current;
+                    const durationSec = await probeAudioFileDurationSec(file);
+                    recordDevUploadAfterAudioComplete({
+                        title: snap.title,
+                        description: snap.description,
+                        category: snap.category,
+                        tags: snap.tags,
+                        isPublic: snap.isPublic,
+                        sermonId: 'dev-mock-sermon-id',
+                        sourceFileName: file.name,
+                        durationSec,
+                    });
+                    void queryClient.invalidateQueries({
+                        queryKey: sermonQueryKeys.all,
+                    });
+                    if (ministerId) {
+                        void queryClient.invalidateQueries({
+                            queryKey:
+                                sermonQueryKeys.ministerListRoot(ministerId),
+                        });
+                    }
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const res = await apiCall.sermon.startUpload(
+                    formData,
+                    (pct) => {
+                        if (!cancelled) dispatch(uploadActions.setProgress(pct));
+                    },
+                    ac.signal,
+                );
+
+                if (cancelled) return;
+
+                const payload = res.data?.data as
+                    | { id?: string; uploadRef?: string }
+                    | undefined;
+
+                if (!payload?.id) {
+                    throw new Error('Upload response did not include a sermon id.');
+                }
+
+                dispatch(
+                    uploadActions.setUploadData({
+                        sermonId: payload.id,
+                        uploadRef: payload.uploadRef,
+                    }),
+                );
+                dispatch(uploadActions.setUploadComplete(true));
+                dispatch(uploadActions.setProgress(100));
+                const snap = uploadSnapshotRef.current;
+                const durationSec = await probeAudioFileDurationSec(file);
+                recordDevUploadAfterAudioComplete({
+                    title: snap.title,
+                    description: snap.description,
+                    category: snap.category,
+                    tags: snap.tags,
+                    isPublic: snap.isPublic,
+                    sermonId: payload.id,
+                    sourceFileName: file.name,
+                    durationSec,
+                });
+                void queryClient.invalidateQueries({
+                    queryKey: sermonQueryKeys.all,
+                });
+                if (ministerId) {
+                    void queryClient.invalidateQueries({
+                        queryKey: sermonQueryKeys.ministerListRoot(ministerId),
+                    });
+                }
+            } catch (e: unknown) {
+                if (cancelled || axios.isCancel(e)) return;
+                const message =
+                    e &&
+                    typeof e === 'object' &&
+                    'message' in e &&
+                    typeof (e as { message: unknown }).message === 'string'
+                        ? (e as { message: string }).message
+                        : 'Upload failed. Please try again.';
+                toast.error(message);
+                setUploadError(true);
+                dispatch(uploadActions.setProgress(0));
+                dispatch(uploadActions.setUploadComplete(false));
+            } finally {
+                if (!cancelled) {
+                    dispatch(uploadActions.setLoading(false));
+                }
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+            ac.abort();
+        };
+    }, [uploadData.file, uploadComplete, retryToken, dispatch, queryClient]);
+
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     };
 
-    backgroundUploadService.onProgress(handleProgress);
-    backgroundUploadService.onComplete(handleComplete);
-    backgroundUploadService.onCancelled(handleCancelled);
-
-    if (!currentUploadId && !uploadComplete) {
-      const newUploadId = backgroundUploadService.startUpload(uploadData.file);
-      dispatch(uploadActions.setBackgroundUploadId(newUploadId));
-      dispatch(uploadActions.setLoading(true));
-    }
-
-    return () => {
-      backgroundUploadService.offProgress(handleProgress);
-      backgroundUploadService.offComplete(handleComplete);
-      backgroundUploadService.offCancelled(handleCancelled);
+    const handleRemoveAudio = () => {
+        setShowRemoveDialog(true);
     };
-  }, [uploadData.file, dispatch, backgroundUploadId, uploadComplete]);
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+    const handleConfirmRemove = () => {
+        dispatch(uploadActions.resetUpload());
+        setShowRemoveDialog(false);
+    };
 
-  const handleRemoveAudio = () => {
-    setShowRemoveDialog(true);
-  };
+    const handleCancelRemove = () => {
+        setShowRemoveDialog(false);
+    };
 
-  const handleConfirmRemove = () => {
-    if (backgroundUploadId) {
-      backgroundUploadService.cancelUpload(backgroundUploadId);
-      dispatch(uploadActions.setBackgroundUploadId(null));
+    const handleConfirmCancelUpload = () => {
+        setShowCancelDialog(false);
+        dispatch(uploadActions.resetUpload());
+    };
+
+    const handleRetry = () => {
+        setUploadError(false);
+        setRetryToken((t) => t + 1);
+    };
+
+    const showFinalizing =
+        isLoading && progress >= 100 && !uploadComplete && !uploadError;
+
+    const cancelUploadDisabled =
+        uploadComplete || (!isLoading && progress === 0 && !uploadError);
+
+    if (!uploadData.file) {
+        return (
+            <div className="flex min-h-0 w-full flex-1 flex-col">
+                <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 py-6 text-center">
+                    <p className={UPLOAD_SHELL.mutedLabel}>
+                        No file selected. Go back and choose an audio file to upload.
+                    </p>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        className="border-[#707070] font-matter-medium text-[#eaeaea]"
+                        onClick={() => dispatch(uploadActions.setStep('file'))}
+                    >
+                        Back to file selection
+                    </Button>
+                </div>
+            </div>
+        );
     }
-    // Move to drafts logic would go here
-    dispatch(uploadActions.resetUpload());
-    setShowRemoveDialog(false);
-  };
 
-  const handleCancelRemove = () => {
-    setShowRemoveDialog(false);
-  };
-
-  const handleCancelUpload = () => {
-    if (backgroundUploadId) {
-      backgroundUploadService.cancelUpload(backgroundUploadId);
-      dispatch(uploadActions.setBackgroundUploadId(null));
-    }
-    dispatch(uploadActions.setLoading(false));
-    dispatch(uploadActions.setProgress(0));
-    dispatch(uploadActions.setUploadComplete(false));
-    // Optionally reset the file
-    // dispatch(uploadActions.setFile(null));
-  };
-
-  const [isDragActive, setIsDragActive] = useState(false);
-  const [validationError, setValidationError] = useState<string>('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Configuration - Audio formats only
-  const acceptedTypes = [
-    'audio/mp3', 'audio/mpeg', 'audio/wav', 'audio/wave', 'audio/x-wav',
-    'audio/m4a', 'audio/mp4', 'audio/aac', 'audio/ogg', 'audio/webm',
-    'audio/flac', 'audio/x-flac', 'audio/wma', 'audio/x-ms-wma'
-  ];
-  
-  const acceptedExtensions = [
-    '.mp3', '.wav', '.m4a', '.aac', '.ogg', '.webm', '.flac', '.wma'
-  ];
-  const maxSize = 100 * 1024 * 1024; // 100MB
-
-  const validateFile = (file: File): string | null => {
-    if (file.size > maxSize) {
-      return `File size must be less than ${Math.round(maxSize / (1024 * 1024))}MB`;
-    }
-    
-    const fileType = file.type.toLowerCase();
-    const fileName = file.name.toLowerCase();
-    const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
-    
-    const isValidMimeType = acceptedTypes.includes(fileType) || fileType.startsWith('audio/');
-    const isValidExtension = acceptedExtensions.includes(fileExtension);
-    
-    if (!isValidMimeType && !isValidExtension) {
-      return 'Please upload a valid audio file (MP3, WAV, M4A, AAC, OGG, FLAC, etc.)';
-    }
-    
-    return null;
-  };
-
-  const handleFileSelect = (file: File) => {
-    const error = validateFile(file);
-    if (error) {
-      setValidationError(error);
-      return;
-    }
-    
-    setValidationError('');
-    dispatch(uploadActions.setFile(file));
-    
-    const fileName = file.name;
-    const titleFromFile = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
-    const cleanTitle = titleFromFile
-      .replace(/[_-]/g, ' ')
-      .replace(/\b\w/g, char => char.toUpperCase())
-      .trim();
-    
-    dispatch(uploadActions.setUploadData({ title: cleanTitle }));
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(false);
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      handleFileSelect(files[0]);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileSelect(files[0]);
-    }
-  };
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  if (!uploadData.file) {
     return (
-      <div className="h-full flex flex-col">
-        <div className="relative flex-1 min-h-0">
-          <div 
-            className={cn(
-              "border-2 border-dashed border-border/50 bg-[#2b2a2c]/70 rounded-xl min-h-[40vh] transition-all duration-200 cursor-pointer flex items-center justify-center",
-              isDragActive && "border-primary bg-primary/5"
-            )}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={handleClick}
-          >
-            <div className="flex flex-col items-center justify-center space-y-4 p-8">
-              {/* Upload Icon */}
-              <div className="relative">
-                <img 
-                  src="/images/assets/upload-file.svg" 
-                  alt="Upload" 
-                  className="h-12 w-12"
-                />
-              </div>
-              
-              {/* Upload Text */}
-              <div className="text-center">
-                <p className="text-base text-white">
-                  Drag and drop sermon to upload or select sermon from your device.
-                </p>
-              </div>
-              
-              {/* Select Files Button */}
-              <Button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  fileInputRef.current?.click();
-                }}
-                className="bg-[#00C8C8] cursor-pointer hover:bg-[#00B8B8] text-black px-6 py-2 rounded-md font-medium"
-              >
-                Select files
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Error Display */}
-        {validationError && (
-          <div className="relative">
-            <div className="flex items-center space-x-3 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-destructive">
-              <div className="flex-1">
-                <p className="text-sm font-medium">{validationError}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Hidden File Input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={[...acceptedTypes, ...acceptedExtensions].join(',')}
-          onChange={handleInputChange}
-          className="hidden"
-        />
-      </div>
-    );
-  }
-
-  // Check if upload is in progress
-  const isUploading = !uploadComplete && isLoading && progress > 0 && progress < 100;
-
-  return (
-    <>
-      <div className="space-y-6">
-        {/* Upload Progress Screen - matches screenshot design */}
-        {isUploading && (
-          <div className="flex flex-col items-center justify-center py-4 space-y-6">
-            {/* Spinner */}
-            <Loader2 className="h-12 w-12 text-primary animate-spin" />
-            
-            {/* Uploading text */}
-            <h3 className="text-lg font-medium text-foreground">Uploading...</h3>
-            
-            {/* File name */}
-            {uploadData.file && (
-              <p className="text-sm text-muted-foreground text-center">
-                {uploadData.file.name}
-              </p>
-            )}
-            
-            {/* Progress Bar */}
-            <div className="w-full max-w-md space-y-2">
-              <Progress value={progress} className="h-2" />
-              <p className="text-sm text-muted-foreground text-center">
-                {Math.round(progress)}% completed
-              </p>
-            </div>
-            
-            {/* Cancel Upload Button */}
-            <Button
-              variant="outline"
-              onClick={handleCancelUpload}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Cancel upload
-            </Button>
-          </div>
-        )}
-
-        {/* Upload Complete - File Preview Style */}
-        {uploadComplete && uploadData.file && (() => {
-          // Detect file type based on extension
-          const fileName = uploadData.file.name.toLowerCase();
-          const isVideoFile = fileName.endsWith('.mp4') || fileName.endsWith('.mov') || fileName.endsWith('.avi') || 
-                             fileName.endsWith('.webm') || fileName.endsWith('.mkv');
-          
-          return (
-            <div className="relative border-2 border-dashed border-white/20 rounded-lg overflow-hidden min-h-[250px] flex items-center justify-center">
-              {/* Blurred Background - using thumbnail if available, otherwise a placeholder */}
-              {uploadData.thumbnailPreview ? (
-                <div 
-                  className="absolute inset-0 bg-cover bg-center filter blur-md opacity-30"
-                  style={{ backgroundImage: `url(${uploadData.thumbnailPreview})` }}
-                />
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-muted/50 to-muted/30" />
-              )}
-              
-              {/* Content Overlay */}
-              <div className="relative z-10 flex flex-col items-center justify-center space-y-4 p-6">
-                {/* File Type Icon */}
-                {isVideoFile ? (
-                  <Video className="h-12 w-12 text-white" />
-                ) : (
-                  <FileAudio className="h-12 w-12 text-white" />
+        <div className="flex min-h-0 w-full flex-1 flex-col">
+            <div
+                className={cn(
+                    'mx-auto flex min-h-0 w-full max-w-[394px] flex-1 flex-col items-center justify-center gap-8',
                 )}
-                
-                {/* File Name */}
-                <div className="text-center">
-                  <p className="text-white text-lg font-medium">
-                    {uploadData.file.name}
-                  </p>
-                </div>
-                
-                {/* Remove Button - shows "Remove audio" or "Remove video" based on file type */}
-                <Button
-                  variant="outline"
-                  onClick={handleRemoveAudio}
-                  className="bg-white/10 hover:bg-white/20 border-white/30 text-white backdrop-blur-sm"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {isVideoFile ? 'Remove video' : 'Remove audio'}
-                </Button>
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* File Info - shown when not uploading and not complete */}
-        {!isUploading && !uploadComplete && (
-          <>
-            <div className="border border-border/50 rounded-lg p-6 bg-gradient-to-br from-background to-muted/10">
-              <div className="flex items-center space-x-4">
-                <div className="relative">
-                  <FileAudio className="h-10 w-10 text-blue-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg text-foreground truncate">
-                    {uploadData.file.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {formatFileSize(uploadData.file.size)} • Audio File
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Upload Progress */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-foreground">Uploading...</h4>
-                <span className="text-sm text-muted-foreground">
-                  {Math.round(progress)}%
-                </span>
-              </div>
-              
-              <Progress value={progress} className="h-2" />
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Remove Audio Confirmation Dialog */}
-      <Dialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Trash2 className="h-5 w-5 text-destructive" />
-              <span>Remove audio?</span>
-            </DialogTitle>
-            <DialogDescription>
-              This will remove the uploaded audio file and move it to drafts. You can access it later from your drafts folder.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" onClick={handleCancelRemove}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={handleConfirmRemove}
-              className="bg-destructive hover:bg-destructive/90"
             >
-              Move to Drafts
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
+                {!uploadComplete && !uploadError ? (
+                    <>
+                        <div className="flex flex-col items-center gap-4">
+                            <Loader2
+                                className="h-6 w-6 shrink-0 animate-spin text-[#bdbdbd]"
+                                aria-hidden
+                            />
+                            <p className="font-matter text-center text-[14px] leading-5 tracking-wide text-[#bdbdbd]">
+                                {showFinalizing ? 'Finalizing...' : 'Uploading...'}
+                            </p>
+                        </div>
+
+                        <div className="flex w-full flex-col items-center gap-3">
+                            <div className={UPLOAD_SHELL.progressTrack}>
+                                <div
+                                    className={UPLOAD_SHELL.progressFill}
+                                    style={{
+                                        width: `${Math.min(100, Math.round(progress))}%`,
+                                    }}
+                                />
+                            </div>
+                            <p className={cn(UPLOAD_SHELL.mediumLabel, 'text-center')}>
+                                {Math.round(progress)}% completed
+                            </p>
+                        </div>
+
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            disabled={cancelUploadDisabled}
+                            className={cn(
+                                UPLOAD_SHELL.studioOutlineCta,
+                                cancelUploadDisabled &&
+                                    UPLOAD_SHELL.studioOutlineCtaDisabled,
+                            )}
+                            onClick={() => setShowCancelDialog(true)}
+                        >
+                            Cancel upload
+                        </Button>
+                    </>
+                ) : null}
+
+                {uploadError ? (
+                    <div className="flex w-full max-w-[28rem] flex-col items-center justify-center gap-4 text-center">
+                        <p className="font-matter text-[14px] leading-5 tracking-wide text-destructive">
+                            Something went wrong while uploading. You can retry
+                            without selecting the file again.
+                        </p>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="border-[#707070] font-matter-medium text-[#eaeaea]"
+                            onClick={handleRetry}
+                        >
+                            Retry upload
+                        </Button>
+                    </div>
+                ) : null}
+
+                {uploadComplete ? (
+                    <div className="flex w-full flex-col items-center gap-6">
+                        <div className="flex flex-col items-center gap-3">
+                            <FileAudio
+                                className="h-6 w-6 text-[#bdbdbd]"
+                                aria-hidden
+                            />
+                            <p
+                                className={cn(
+                                    UPLOAD_SHELL.mediumLabel,
+                                    'max-w-full break-words px-1 text-center',
+                                )}
+                                title={uploadData.file.name}
+                            >
+                                {uploadData.file.name}
+                            </p>
+                            <p className="font-matter text-center text-[12px] text-[#707070]">
+                                {formatFileSize(uploadData.file.size)} · Audio
+                            </p>
+                        </div>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            className={UPLOAD_SHELL.studioOutlineCta}
+                            onClick={handleRemoveAudio}
+                        >
+                            <Trash2
+                                className="mr-2 h-4 w-4 shrink-0"
+                                strokeWidth={2}
+                                aria-hidden
+                            />
+                            Remove audio
+                        </Button>
+                    </div>
+                ) : null}
+            </div>
+
+            {/* Confirm move to draft — copy/layout ref Figma [`4660:6496`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4660-6496) */}
+            <Dialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+                <DialogContent
+                    className={cn(
+                        'sm:max-w-md border-[#545454]/50 bg-[#2b2a2c] p-6 text-[#eaeaea] shadow-xl',
+                        '[&_[data-slot=dialog-close]]:text-[#eaeaea] [&_[data-slot=dialog-close]]:hover:bg-white/10',
+                    )}
+                >
+                    <DialogHeader className="gap-3 text-left sm:text-left">
+                        <DialogTitle
+                            className={cn(UPLOAD_SHELL.titleText, 'text-left')}
+                        >
+                            Move audio to draft
+                        </DialogTitle>
+                        <DialogDescription asChild>
+                            <div
+                                className={cn(
+                                    UPLOAD_SHELL.mutedLabel,
+                                    'space-y-3 text-left text-[14px] leading-5',
+                                )}
+                            >
+                                <p>
+                                    You&apos;re about to move the audio{' '}
+                                    <span className="font-matter-medium break-words text-[#eaeaea]">
+                                        {uploadData.file?.name ?? 'this file'}
+                                    </span>{' '}
+                                    to draft.
+                                </p>
+                                <p>
+                                    You can always restore it later from the Draft
+                                    section.
+                                </p>
+                            </div>
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-2 pt-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="border-[#707070] font-matter-medium text-[#eaeaea] hover:bg-white/5"
+                            onClick={handleCancelRemove}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            className={UPLOAD_SHELL.primaryCta}
+                            onClick={handleConfirmRemove}
+                        >
+                            Move to draft
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Cancel upload?</DialogTitle>
+                        <DialogDescription>
+                            This stops the current upload and clears the selected
+                            file. You can start again from the upload step.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex justify-end gap-2 pt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setShowCancelDialog(false)}
+                        >
+                            Keep uploading
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={handleConfirmCancelUpload}
+                        >
+                            Cancel upload
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </div>
+    );
 };
 
 export default UploadProgressStep;

@@ -23,6 +23,12 @@ const config = {
         "primary-foreground": "#ffffff", // white text on teal
       },
       fontFamily: {
+        sans: [
+          "Matter-Regular",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
         matter: ["Matter-Regular", "sans-serif"],
         "matter-bold": ["Matter-Bold", "sans-serif"],
         "matter-light": ["Matter-Light", "sans-serif"],

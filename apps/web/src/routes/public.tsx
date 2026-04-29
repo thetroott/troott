@@ -43,4 +43,8 @@ export const publicRoutes = [
     path: "/preview",
     element: <Preview />
   },
+  {
+    path: "/peview",
+    element: <Preview />
+  },
 ];

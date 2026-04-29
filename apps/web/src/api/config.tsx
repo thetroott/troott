@@ -20,20 +20,46 @@ import logger from "@/utils/logger.util";
 
 /**
  * All web API paths are written as `/auth/...`, `/sermon/...`, etc., which assume
- * the server mount point includes `/v1` (see apps/api `app.use("/v1", v1Routes)`).
- * Accept env values with or without the suffix to avoid failed requests / CORS noise.
+ * the server mount point is `/api/v1` (see apps/api `app.use("/api/v1", v1Routes)`).
+ * Accept env values with or without the suffix so uploads and other calls hit the real routes.
  */
-// function normalizeApiBaseUrl(url: string): string {
-//   const trimmed = url.trim().replace(/\/+$/, "");
-//   if (!trimmed) return url;
-//   if (/\/v1$/i.test(trimmed)) return trimmed;
-//   return `${trimmed}/v1`;
-// }
+function normalizeApiBaseUrl(url: string): string {
+  const trimmed = url.trim().replace(/\/+$/, "");
+  if (!trimmed) return url;
+  if (/\/api\/v1$/i.test(trimmed)) return trimmed;
+  // Legacy envs pointed at `.../v1` only; map to the correct API prefix.
+  if (/\/v1$/i.test(trimmed)) {
+    return trimmed.replace(/\/v1$/i, "/api/v1");
+  }
+  return `${trimmed}/api/v1`;
+}
 
-const BaseURL = import.meta.env.VITE_APP_API_URL as string;
+function resolveRawApiBaseUrl(): string {
+  const fromPrimary = (import.meta.env.VITE_APP_API_URL as string | undefined)?.trim();
+  const fromLegacy = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+  return fromPrimary || fromLegacy || "";
+}
+
+const rawApiUrl = resolveRawApiBaseUrl();
+/** Lets `vite` start without `.env` while building UI; sermon upload is mocked in dev unless opted in. */
+const DEV_API_PLACEHOLDER_ORIGIN = "http://localhost:3000";
+const effectiveRawApiUrl =
+  rawApiUrl || (import.meta.env.DEV ? DEV_API_PLACEHOLDER_ORIGIN : "");
+const BaseURL = normalizeApiBaseUrl(effectiveRawApiUrl);
 
 logger.log({ data: BaseURL, label: "The BaseURL is: ", type: "info" });
-if (BaseURL) throw new Error("API base url not defined");
+if (!rawApiUrl && import.meta.env.DEV) {
+  logger.log({
+    type: "warning",
+    label: "DEV",
+    data: "VITE_APP_API_URL / VITE_API_BASE_URL unset — using localhost placeholder. Sermon upload is mocked unless VITE_USE_REAL_API_UPLOAD=true.",
+  });
+}
+if (!effectiveRawApiUrl) {
+  throw new Error(
+    "API base url not defined: set VITE_APP_API_URL or VITE_API_BASE_URL (origin only, e.g. http://localhost:3000)",
+  );
+}
 
 /**
  * Axios instance for public API requests that do not require authentication.
@@ -102,14 +128,26 @@ axiosPrivate.interceptors.request.use(
 axiosPrivate.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    // If no response, probably a network error
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
+    // No HTTP response: wrong URL, CORS, offline, or (for some clients) timeout/abort
     if (!error.response) {
-      console.error("The Network error:", error.message);
-      
+      if (error.code === "ECONNABORTED") {
+        console.error("Request timeout:", error.message);
+        return Promise.reject({
+          error: true,
+          data: null,
+          message: "Request timed out. Please try again.",
+          errors: [error.message],
+        });
+      }
+      console.error("Network or connection error:", error.message);
       return Promise.reject({
         error: true,
         data: null,
-        message: "As Network Error. Please check your connection.",
+        message: "A network error occurred. Please check your connection.",
         errors: [error.message],
       });
     }
@@ -130,14 +168,12 @@ axiosPrivate.interceptors.response.use(
       });
     }
 
-    // Request timeout
     if (error.code === "ECONNABORTED") {
       console.error("Request timeout:", error.message);
-     
       return Promise.reject({
         error: true,
         data: null,
-        message: "Request Timeout. Please try again.",
+        message: "Request timed out. Please try again.",
         errors: [error.message],
       });
     }
