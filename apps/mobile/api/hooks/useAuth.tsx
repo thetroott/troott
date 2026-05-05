@@ -13,6 +13,7 @@ import { UserType } from '@/utils/enums.util';
 import AUthAPI from '@/api/auth';
 import { storage } from '@/services/storage-service';
 import { UserDTO } from '@/dtos/user.dto';
+import { removeCatalogSearchQueries } from '@/lib/catalog-search-cache';
 
 const authKeys = {
     all: ['auth'] as const,
@@ -131,6 +132,8 @@ export const useAuth = () => {
                     //   storage.setData({ key: 'onboarding_progress', payload: user.onboarding });
                     // }
 
+                    removeCatalogSearchQueries(queryClient);
+
                     goTo('/home');
                 }
             }
@@ -209,6 +212,8 @@ export const useAuth = () => {
 
                     // }
 
+                    removeCatalogSearchQueries(queryClient);
+
                     goTo('/home');
                 }
             }
@@ -263,6 +268,7 @@ export const useAuth = () => {
                 setToken(null);
 
                 queryClient.invalidateQueries({ queryKey: authKeys.user() });
+                removeCatalogSearchQueries(queryClient);
 
                 // storage.clearAll();
                 secureStorage.resetAllData();
@@ -276,6 +282,7 @@ export const useAuth = () => {
             setToken(null);
 
             queryClient.invalidateQueries({ queryKey: authKeys.user() });
+            removeCatalogSearchQueries(queryClient);
             // storage.clearAll();
             secureStorage.resetAllData();
 

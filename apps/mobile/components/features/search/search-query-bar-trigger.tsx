@@ -4,9 +4,11 @@ import { SearchNormal } from 'iconsax-react-nativejs';
 import { router } from 'expo-router';
 
 import Input from '@/components/ui/input';
+import {
+    SEARCH_FIELD_FILL,
+    SEARCH_QUERY_PLACEHOLDER,
+} from '@/constants/search-ui';
 import { theme } from '@/constants/theme';
-
-const PLACEHOLDER = 'Search sermons, pastors, topics…';
 
 type Props = {
     /** Optional style override (e.g. for landing vs modal). */
@@ -26,7 +28,7 @@ export default function SearchQueryBarTrigger({ style }: Props) {
             ]}
             accessibilityRole="button"
             accessibilityLabel="Open search"
-            accessibilityHint={PLACEHOLDER}
+            accessibilityHint={SEARCH_QUERY_PLACEHOLDER}
         >
             <View pointerEvents="none">
                 <Input
@@ -34,10 +36,10 @@ export default function SearchQueryBarTrigger({ style }: Props) {
                     leftIcon={
                         <SearchNormal
                             size={20}
-                            color={theme.colors.white[100]}
+                            color={theme.colors.grey[400]}
                         />
                     }
-                    placeholder={PLACEHOLDER}
+                    placeholder={SEARCH_QUERY_PLACEHOLDER}
                     containerstyle={styles.inputContainer}
                 />
             </View>
@@ -49,7 +51,7 @@ const styles = StyleSheet.create({
     inputContainer: {
         height: 44,
         borderWidth: 0,
-        borderRadius: 12,
-        backgroundColor: '#292929',
+        borderRadius: theme.sizes.radius.sm,
+        backgroundColor: SEARCH_FIELD_FILL,
     },
 });

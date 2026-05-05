@@ -18,12 +18,12 @@ class AxiosService {
 
     /**
      * @name call
-     * @param params
-     * @returns
+     * @param params.signal optional `AbortSignal` — forward from TanStack Query `queryFn`
+     * so requests cancel when the query key changes or the observer unmounts.
      */
     public async call(params: CallApiDTO): Promise<IAPIResponse> {
         let result: any = {};
-        const { isAuth = false, method, path, type, payload } = params;
+        const { isAuth = false, method, path, type, payload, signal } = params;
 
         let urlpath = `${this.baseUrl}${path}`;
 
@@ -36,11 +36,19 @@ class AxiosService {
             url: urlpath,
             data: payload,
             headers: headerConfig.headers,
+            ...(signal != null ? { signal } : {}),
         })
             .then((resp) => {
                 result = resp.data;
             })
             .catch((err) => {
+                if (Axios.isCancel(err)) {
+                    throw err;
+                }
+                const e = err as { code?: string; name?: string };
+                if (e?.code === 'ERR_CANCELED' || e?.name === 'CanceledError') {
+                    throw err;
+                }
                 if (err.response) {
                     if (err.response.status === 404) {
                         result.error = true;

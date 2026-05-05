@@ -47,6 +47,8 @@ export interface SermonCardProps {
     variant?: SermonCardVariant;
     cardStyle?: StyleProp<ViewStyle>;
     testID?: string;
+    /** Invoked after the player queue has been loaded (e.g. dismiss search, record history). */
+    onPlaybackStarted?: (playedTitle: string) => void;
 }
 
 function artworkSource(track: SermonItemDTO): ImageSourcePropType | null {
@@ -68,6 +70,19 @@ function formatDurationSeconds(total: number | null | undefined): string {
     return `${min}:${sec.toString().padStart(2, '0')}`;
 }
 
+function formatTotalPlays(n: number | null | undefined): string | null {
+    if (n == null || !Number.isFinite(n) || n < 0) {
+        return null;
+    }
+    if (n >= 1_000_000) {
+        return `${(n / 1_000_000).toFixed(1)}m plays`;
+    }
+    if (n >= 1000) {
+        return `${Math.round(n / 1000)}k plays`;
+    }
+    return `${Math.floor(n)} plays`;
+}
+
 function ministerLabel(track: SermonItemDTO): string {
     const m = track.minister;
     if (m == null) return '';
@@ -83,6 +98,7 @@ export default function SermonCard({
     variant = 'small',
     cardStyle,
     testID,
+    onPlaybackStarted,
 }: SermonCardProps) {
     const sheetRef = useRef<BottomSheetRef>(null);
     const addToPlaylistRef = useRef<BottomSheetRef>(null);
@@ -99,6 +115,10 @@ export default function SermonCard({
     const durationLabel = useMemo(
         () => formatDurationSeconds(track.duration ?? null),
         [track.duration],
+    );
+    const playsLabel = useMemo(
+        () => formatTotalPlays(track.totalPlays ?? null),
+        [track.totalPlays],
     );
 
     const memoizedTracklist = useMemo(
@@ -117,7 +137,13 @@ export default function SermonCard({
             queue,
             queuingType: QueuingType.FromSelection,
             startPlayback: true,
-        });
+        })
+            .then(() => {
+                onPlaybackStarted?.(title);
+            })
+            .catch(() => {
+                /* loadQueue failed — keep search UI */
+            });
     }, [
         loadNewQueue,
         networkStatus,
@@ -125,6 +151,7 @@ export default function SermonCard({
         index,
         memoizedTracklist,
         queue,
+        onPlaybackStarted,
     ]);
 
     const handleSheetOpen = useCallback(() => {
@@ -251,22 +278,56 @@ export default function SermonCard({
                 >
                     <View style={styles.titleContainer}>
                         {imageEl}
-                        <View style={{ gap: theme.sizes.spacing.sm, width: '60%' }}>
-                            <Text size="base" color={theme.colors.white[50]}>
+                        <View
+                            style={{
+                                gap: theme.sizes.spacing.xs,
+                                flex: 1,
+                                minWidth: 0,
+                            }}
+                        >
+                            <Text
+                                size="sm"
+                                weight="medium"
+                                color={theme.colors.white[50]}
+                                numberOfLines={1}
+                            >
                                 {title}
                             </Text>
                             <View style={styles.textContainer}>
-                                <Text textStyle={{ alignItems: 'center' }}>
+                                <Text
+                                    size="xs"
+                                    color={theme.colors.grey[300]}
+                                    numberOfLines={1}
+                                >
                                     {minister}
                                 </Text>
                                 <View style={styles.dot} />
-                                <Text>{durationLabel}</Text>
+                                <Text
+                                    size="xs"
+                                    color={theme.colors.grey[400]}
+                                    numberOfLines={1}
+                                >
+                                    {durationLabel}
+                                </Text>
+                                {playsLabel ? (
+                                    <>
+                                        <View style={styles.dot} />
+                                        <Text
+                                            size="xs"
+                                            color={theme.colors.grey[400]}
+                                            numberOfLines={1}
+                                        >
+                                            {playsLabel}
+                                        </Text>
+                                    </>
+                                ) : null}
                             </View>
                         </View>
                     </View>
                     <Pressable onPress={handleSheetOpen} hitSlop={8}>
                         <SolidIcons.EllipsisVerticalIcon
-                            color={theme.colors.grey[50]}
+                            size={20}
+                            color={theme.colors.grey[400]}
                         />
                     </Pressable>
                 </Pressable>
@@ -333,20 +394,20 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingBottom: theme.sizes.spacing.base,
+        paddingBottom: theme.sizes.spacing.sm,
         borderBottomWidth: 1,
         borderColor: theme.colors.grey[600],
         width: theme.sizes.screen.width * 0.8,
     },
     imageSmall: {
-        height: 64,
-        width: 64,
-        borderRadius: theme.sizes.radius.sm,
+        height: 56,
+        width: 56,
+        borderRadius: 4,
     },
     imageSmallPlaceholder: {
-        height: 64,
-        width: 64,
-        borderRadius: theme.sizes.radius.sm,
+        height: 56,
+        width: 56,
+        borderRadius: 4,
         backgroundColor: theme.colors.grey[700],
     },
     titleContainer: {
@@ -355,9 +416,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     dot: {
-        height: 4,
-        width: 4,
-        backgroundColor: theme.colors.grey[300],
+        height: 3,
+        width: 3,
+        backgroundColor: theme.colors.grey[100],
         borderRadius: theme.sizes.radius.full,
     },
     textContainer: {

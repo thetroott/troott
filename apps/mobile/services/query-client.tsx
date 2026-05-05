@@ -13,6 +13,11 @@ export const ONE_DAY = ONE_HOUR * 24;
  * Default stale time is set to 1 hour. Users have the option
  * to refresh relevant datasets by design (i.e. refreshing
  * Discover page for more results)
+ *
+ * **Search-specific:** local MMKV search *history* is capped separately
+ * (`SEARCH_HISTORY_MAX_ITEMS` in `library-recent-search-storage`). Catalog
+ * *network* results use a shorter per-query `gcTime` in `useCatalogSearchQuery`
+ * so the global `gcTime` here does not unbounded-grow search payloads.
  */
 export const queryClient = new QueryClient({
     defaultOptions: {

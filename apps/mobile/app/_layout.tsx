@@ -1,3 +1,4 @@
+import Constants from 'expo-constants';
 import { AppState, Platform, Share, StyleSheet, View } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SplashScreen, Stack, usePathname } from 'expo-router';
@@ -24,25 +25,16 @@ import { usePendingDeepLinkBootstrap } from '@/lib/deep-link/use-pending-deeplin
 import MiniPlayer from '@/components/features/player/mini-player/mini-player';
 import { EmbeddedBridgeGuard } from '@/components/dev/EmbeddedBridgeGuard';
 import TrackPlayer from '@rntp/player';
-import {
-    ListenerSharingFlow,
-} from '@/components/features/share';
+import { ListenerSharingFlow } from '@/components/features/share';
 import { useShareFlow } from '@/stores/app/share';
 import { FullWindowOverlay } from 'react-native-screens';
 import { Portal } from '@/components/ui/portal';
+import { GlobalLoadingPortal } from '@/components/ui/loading-state';
 
-function getClipboardModule(): { setStringAsync: (value: string) => Promise<void> } | null {
-    try {
-        // Optional native module in some runtimes/build variants.
-        return require('expo-clipboard') as {
-            setStringAsync: (value: string) => Promise<void>;
-        };
-    } catch {
-        return null;
-    }
-}
-
-function getSharingModule(): { isAvailableAsync: () => Promise<boolean>; shareAsync: (url: string) => Promise<void> } | null {
+function getSharingModule(): {
+    isAvailableAsync: () => Promise<boolean>;
+    shareAsync: (url: string) => Promise<void>;
+} | null {
     try {
         return require('expo-sharing') as {
             isAvailableAsync: () => Promise<boolean>;
@@ -57,6 +49,11 @@ enableScreens(true);
 
 // Prevent splash from auto hiding
 SplashScreen.preventAutoHideAsync();
+
+const QUERY_PERSIST_APP_VERSION =
+    Constants.expoConfig?.version ??
+    Constants.nativeAppVersion ??
+    'unknown';
 
 const RootLayout = () => {
     usePendingDeepLinkBootstrap();
@@ -88,11 +85,17 @@ const RootLayout = () => {
 
     const handleCopyToClipboard = useCallback(async () => {
         const url = buildShareUrl();
-        const clipboard = getClipboardModule();
-        if (clipboard) {
-            await clipboard.setStringAsync(url);
-        } else {
-            await Share.share({ message: url, url });
+        try {
+            // Lazy-require so missing native `ExpoClipboard` (web, stale dev client) does not crash app startup.
+            const Clipboard = require('expo-clipboard') as typeof import('expo-clipboard');
+            await Clipboard.setStringAsync(url);
+        } catch (error) {
+            console.error('[Share] Clipboard.setStringAsync failed:', error);
+            try {
+                await Share.share({ message: url, url });
+            } catch {
+                /* ignore */
+            }
             close();
             return;
         }
@@ -243,6 +246,8 @@ const RootLayout = () => {
                          * Maximum query data age of one day
                          */
                         maxAge: ONE_DAY,
+                        /** Drop persisted cache when the app version changes (install / OTA). */
+                        buster: QUERY_PERSIST_APP_VERSION,
                     }}
                 >
                     <SafeAreaView
@@ -253,6 +258,10 @@ const RootLayout = () => {
                     >
                         <Stack screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="index" />
+                            <Stack.Screen
+                                name="(tabs)"
+                                options={{ headerShown: false }}
+                            />
                             <Stack.Screen
                                 name="(auth)"
                                 options={{
@@ -272,6 +281,13 @@ const RootLayout = () => {
                                 options={{
                                     presentation: 'fullScreenModal',
                                     animation: 'slide_from_right',
+                                }}
+                            />
+                            <Stack.Screen
+                                name="(pickers)"
+                                options={{
+                                    presentation: 'modal',
+                                    animation: 'slide_from_bottom',
                                 }}
                             />
                         </Stack>
@@ -298,6 +314,7 @@ const RootLayout = () => {
                                 <PortalHost />
                             </View>
                         )}
+                        <GlobalLoadingPortal />
                         <Toaster />
                         <EmbeddedBridgeGuard />
                         <Portal name="listener-sharing-flow">
@@ -307,7 +324,6 @@ const RootLayout = () => {
                                 track={track}
                                 onDismiss={close}
                                 onPressCopy={handleCopyToClipboard}
-                                onPressInstagram={handleOpenNativeShare}
                                 onPressMoreOptions={handleOpenNativeShare}
                             />
                         </Portal>
