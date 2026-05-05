@@ -231,8 +231,8 @@ export const saveAudio = async (
             typeof track.artwork === 'string'
                 ? track.artwork
                 : typeof track.artworkUrl === 'string'
-                ? track.artworkUrl
-                : undefined;
+                  ? track.artworkUrl
+                  : undefined;
         if (artworkSource) {
             downloadedArtworkFile = await downloadSermonfinFile(
                 artworkSource,

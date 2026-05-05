@@ -39,11 +39,11 @@ Sections and key frames:
 
 ## Color styles (Figma)
 
--   **White**
--   **Primary/Green:** 50, 100, 200, 300, 400, **500 (P)** — primary CTA `#08ffdb`, 600–1000 for darker steps
--   **Grey:** 50–900; **600 (P)** used for borders/muted; 900 for background `#171717`
--   **Blue:** 50–800 (secondary palette)
--   **Warning/Red:** 50–900 (destructive / alerts)
+- **White**
+- **Primary/Green:** 50, 100, 200, 300, 400, **500 (P)** — primary CTA `#08ffdb`, 600–1000 for darker steps
+- **Grey:** 50–900; **600 (P)** used for borders/muted; 900 for background `#171717`
+- **Blue:** 50–800 (secondary palette)
+- **Warning/Red:** 50–900 (destructive / alerts)
 
 Semantic mapping: use Primary/Green-500 for primary actions, Grey-900 for background, Grey-600 for borders, Grey-50 for card foreground / outline label.
 

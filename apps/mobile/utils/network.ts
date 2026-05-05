@@ -47,12 +47,12 @@ export const getNetworkState = async (): Promise<NetworkState> => {
         state.type === NetInfoStateType.wifi
             ? 'wifi'
             : state.type === NetInfoStateType.cellular
-            ? 'cellular'
-            : state.type === NetInfoStateType.ethernet
-            ? 'ethernet'
-            : state.type === NetInfoStateType.none
-            ? 'none'
-            : 'unknown';
+              ? 'cellular'
+              : state.type === NetInfoStateType.ethernet
+                ? 'ethernet'
+                : state.type === NetInfoStateType.none
+                  ? 'none'
+                  : 'unknown';
 
     const isConnected = state.isConnected ?? false;
     const isInternetReachable = state.isInternetReachable;
@@ -92,12 +92,12 @@ export const subscribeToNetworkState = (
             state.type === NetInfoStateType.wifi
                 ? 'wifi'
                 : state.type === NetInfoStateType.cellular
-                ? 'cellular'
-                : state.type === NetInfoStateType.ethernet
-                ? 'ethernet'
-                : state.type === NetInfoStateType.none
-                ? 'none'
-                : 'unknown';
+                  ? 'cellular'
+                  : state.type === NetInfoStateType.ethernet
+                    ? 'ethernet'
+                    : state.type === NetInfoStateType.none
+                      ? 'none'
+                      : 'unknown';
 
         const isConnected = state.isConnected ?? false;
         const isInternetReachable = state.isInternetReachable;

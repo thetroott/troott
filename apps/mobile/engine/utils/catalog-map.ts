@@ -24,8 +24,9 @@ export function catalogRowToSermonItem(
             typeof row.artwork === 'string' || typeof row.artwork === 'number'
                 ? row.artwork
                 : typeof row.image === 'number'
-                ? row.image
-                : null,
+                  ? row.image
+                  : null,
         seriesId: row.seriesId ?? null,
+        seriesTitle: row.seriesTitle ?? null,
     };
 }

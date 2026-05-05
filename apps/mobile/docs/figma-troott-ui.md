@@ -4,9 +4,9 @@
 
 **Reference nodes (examples):**
 
--   [4081-19306](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4081-19306) — welcome / pre-auth (`app/index.tsx`: hero, logo, headline, CTAs)
--   [8841-19674](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=8841-19674)
--   [2950-19555](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=2950-19555)
+- [4081-19306](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4081-19306) — welcome / pre-auth (`app/index.tsx`: hero, logo, headline, CTAs)
+- [8841-19674](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=8841-19674)
+- [2950-19555](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=2950-19555)
 
 ## App shell (code)
 

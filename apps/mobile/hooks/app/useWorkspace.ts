@@ -7,10 +7,7 @@ import {
 import useContextType from '@/state/useContextType';
 import { IListQuery } from '@/utils/interfaces';
 import { ICollection } from '@/state/helpers/interface';
-import type {
-    CreateWorkspaceDTO,
-    UpdateWorkspaceDTO,
-} from '@/dtos/sermon.dto';
+import type { CreateWorkspaceDTO, UpdateWorkspaceDTO } from '@/dtos/sermon.dto';
 import { useCallback } from 'react';
 import { troottAPIClient } from '@/api/_base/troott';
 

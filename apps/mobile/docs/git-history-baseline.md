@@ -11,8 +11,8 @@ git ls-tree -r --name-only fd49531 -- apps/mobile | wc -l
 
 Expected:
 
--   History is shallow: **`2533c47`** (workspace sources) and **`fd49531`** (Initial commit) on the current branch.
--   **`git ls-tree fd49531 -- apps/mobile`** returns **no paths** (count **0**): the initial commit has **no** `apps/mobile` tree. The mobile app appears only in the later commit.
+- History is shallow: **`2533c47`** (workspace sources) and **`fd49531`** (Initial commit) on the current branch.
+- **`git ls-tree fd49531 -- apps/mobile`** returns **no paths** (count **0**): the initial commit has **no** `apps/mobile` tree. The mobile app appears only in the later commit.
 
 So **`git checkout HEAD~1` cannot restore a prior `apps/mobile`** in this clone; there is no older mobile snapshot in local history.
 

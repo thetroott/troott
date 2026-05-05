@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
 import useContextType from '@/state/useContextType';
 import storage from '@/storage/web-storage';
-import { 
-    GET_LOGGEDIN_USER, 
+import {
+    GET_LOGGEDIN_USER,
     GET_TALENT,
-    GET_TALENTS, 
-    GET_USER, 
-    GET_USERS, 
-    SET_ITEMS 
+    GET_TALENTS,
+    GET_USER,
+    GET_USERS,
+    SET_ITEMS,
 } from '@/state/helpers/types';
 import { IListQuery } from '@/utils/interfaces';
 import { ICollection } from '@/state/helpers/interface';
@@ -44,9 +44,16 @@ const useUser = () => {
         setCollection,
         setResource,
     } = userContext;
-    
+
     // Access talents from appContext (if available) or userContext
-    const talents = (appContext as any)?.talents || (userContext as any)?.talents || { data: [], count: 0, total: 0, pagination: {}, loading: false };
+    const talents = (appContext as any)?.talents ||
+        (userContext as any)?.talents || {
+            data: [],
+            count: 0,
+            total: 0,
+            pagination: {},
+            loading: false,
+        };
     const items = appContext.items || [];
     const loader = (userContext as any)?.loader || loading;
 
@@ -82,39 +89,50 @@ const useUser = () => {
      * @param {boolean} all - Whether to fetch all users or paginated.
      * @returns {Promise<void>}
      */
-    const getUsers = useCallback(async (data: IListQuery, all: boolean = false) => {
-        setLoading({ option: 'resource', type: GET_USERS });
+    const getUsers = useCallback(
+        async (data: IListQuery, all: boolean = false) => {
+            setLoading({ option: 'resource', type: GET_USERS });
 
-        const response = await troottAPIClient().user.getUsers(data, all);
+            const response = await troottAPIClient().user.getUsers(data, all);
 
-        if (response.error === false) {
-            if (response.status === 200) {
-                const result: ICollection = {
-                    count: response.count!,
-                    total: response.total!,
-                    data: response.data,
-                    pagination: response.pagination!,
-                    loading: false,
-                    message: response.data.length > 0 ? `displaying ${response.count!} users` : 'There are no users currently',
-                };
-                setCollection(GET_USERS, result);
+            if (response.error === false) {
+                if (response.status === 200) {
+                    const result: ICollection = {
+                        count: response.count!,
+                        total: response.total!,
+                        data: response.data,
+                        pagination: response.pagination!,
+                        loading: false,
+                        message:
+                            response.data.length > 0
+                                ? `displaying ${response.count!} users`
+                                : 'There are no users currently',
+                    };
+                    setCollection(GET_USERS, result);
+                }
+            } else {
+                unsetLoading({
+                    option: 'resource',
+                    type: GET_USERS,
+                    message: response.message
+                        ? response.message
+                        : response.data,
+                });
+
+                if (response.status === 401) {
+                    troottAPIClient().auth.logout();
+                } else if (
+                    response.message &&
+                    response.message === 'Error: Network Error'
+                ) {
+                    popNetwork();
+                } else if (response.data) {
+                    console.log(`Error! Could not get users ${response.data}`);
+                }
             }
-        } else {
-            unsetLoading({ 
-                option: 'resource', 
-                type: GET_USERS,
-                message: response.message ? response.message : response.data 
-            });
-
-            if (response.status === 401) {
-                troottAPIClient().auth.logout();
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not get users ${response.data}`);
-            }
-        }
-    }, [setLoading, unsetLoading, setCollection, popNetwork]);
+        },
+        [setLoading, unsetLoading, setCollection, popNetwork],
+    );
 
     /**
      * @name getUser
@@ -122,29 +140,43 @@ const useUser = () => {
      * @param {string} id - Optional user ID. If not provided, fetches the logged-in user.
      * @returns {Promise<void>}
      */
-    const getUser = useCallback(async (id?: string) => {
-        const userId = id ? id : storage.getUserID();
+    const getUser = useCallback(
+        async (id?: string) => {
+            const userId = id ? id : storage.getUserID();
 
-        setLoading({ option: 'default' });
+            setLoading({ option: 'default' });
 
-        const response = await troottAPIClient().user.getUser(userId);
+            const response = await troottAPIClient().user.getUser(userId);
 
-        if (response.error === false) {
-            setResource(GET_LOGGEDIN_USER, response.data);
-            unsetLoading({ option: 'default', message: 'data fetched successfully' });
-        } else {
-            setResource(GET_LOGGEDIN_USER, {});
-            unsetLoading({ option: 'default', message: response.message ? response.message : response.data });
+            if (response.error === false) {
+                setResource(GET_LOGGEDIN_USER, response.data);
+                unsetLoading({
+                    option: 'default',
+                    message: 'data fetched successfully',
+                });
+            } else {
+                setResource(GET_LOGGEDIN_USER, {});
+                unsetLoading({
+                    option: 'default',
+                    message: response.message
+                        ? response.message
+                        : response.data,
+                });
 
-            if (response.status === 401) {
-                troottAPIClient().auth.logout();
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not get user ${response.data}`);
+                if (response.status === 401) {
+                    troottAPIClient().auth.logout();
+                } else if (
+                    response.message &&
+                    response.message === 'Error: Network Error'
+                ) {
+                    popNetwork();
+                } else if (response.data) {
+                    console.log(`Error! Could not get user ${response.data}`);
+                }
             }
-        }
-    }, [setLoading, unsetLoading, setResource, popNetwork]);
+        },
+        [setLoading, unsetLoading, setResource, popNetwork],
+    );
 
     /**
      * @name getTalents
@@ -152,39 +184,52 @@ const useUser = () => {
      * @param {IListQuery} data - The query parameters for fetching talents.
      * @returns {Promise<void>}
      */
-    const getTalents = useCallback(async (data: IListQuery) => {
-        setLoading({ option: 'resource', type: GET_TALENTS });
+    const getTalents = useCallback(
+        async (data: IListQuery) => {
+            setLoading({ option: 'resource', type: GET_TALENTS });
 
-        const response = await troottAPIClient().user.getTalents(data);
+            const response = await troottAPIClient().user.getTalents(data);
 
-        if (response.error === false) {
-            if (response.status === 200) {
-                const result: ICollection = {
-                    count: response.count!,
-                    total: response.total!,
-                    data: response.data,
-                    pagination: response.pagination!,
-                    loading: false,
-                    message: response.data.length > 0 ? `displaying ${response.count!} talents` : 'There are no talents currently',
-                };
-                setCollection(GET_TALENTS, result);
+            if (response.error === false) {
+                if (response.status === 200) {
+                    const result: ICollection = {
+                        count: response.count!,
+                        total: response.total!,
+                        data: response.data,
+                        pagination: response.pagination!,
+                        loading: false,
+                        message:
+                            response.data.length > 0
+                                ? `displaying ${response.count!} talents`
+                                : 'There are no talents currently',
+                    };
+                    setCollection(GET_TALENTS, result);
+                }
+            } else {
+                unsetLoading({
+                    option: 'resource',
+                    type: GET_TALENTS,
+                    message: response.message
+                        ? response.message
+                        : response.data,
+                });
+
+                if (response.status === 401) {
+                    troottAPIClient().auth.logout();
+                } else if (
+                    response.message &&
+                    response.message === 'Error: Network Error'
+                ) {
+                    popNetwork();
+                } else if (response.data) {
+                    console.log(
+                        `Error! Could not get talents ${response.data}`,
+                    );
+                }
             }
-        } else {
-            unsetLoading({ 
-                option: 'resource', 
-                type: GET_TALENTS,
-                message: response.message ? response.message : response.data 
-            });
-
-            if (response.status === 401) {
-                troottAPIClient().auth.logout();
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not get talents ${response.data}`);
-            }
-        }
-    }, [setLoading, unsetLoading, setCollection, popNetwork]);
+        },
+        [setLoading, unsetLoading, setCollection, popNetwork],
+    );
 
     /**
      * @name getTalent
@@ -192,29 +237,43 @@ const useUser = () => {
      * @param {string} id - Optional talent/user ID. If not provided, uses the logged-in user ID.
      * @returns {Promise<void>}
      */
-    const getTalent = useCallback(async (id?: string) => {
-        const userId = id ? id : storage.getUserID();
+    const getTalent = useCallback(
+        async (id?: string) => {
+            const userId = id ? id : storage.getUserID();
 
-        setLoading({ option: 'default' });
+            setLoading({ option: 'default' });
 
-        const response = await troottAPIClient().user.getTalent(userId);
+            const response = await troottAPIClient().user.getTalent(userId);
 
-        if (response.error === false) {
-            setResource(GET_TALENT, response.data);
-            unsetLoading({ option: 'default', message: 'data fetched successfully' });
-        } else {
-            setResource(GET_TALENT, {});
-            unsetLoading({ option: 'default', message: response.message ? response.message : response.data });
+            if (response.error === false) {
+                setResource(GET_TALENT, response.data);
+                unsetLoading({
+                    option: 'default',
+                    message: 'data fetched successfully',
+                });
+            } else {
+                setResource(GET_TALENT, {});
+                unsetLoading({
+                    option: 'default',
+                    message: response.message
+                        ? response.message
+                        : response.data,
+                });
 
-            if (response.status === 401) {
-                troottAPIClient().auth.logout();
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not get talent ${response.data}`);
+                if (response.status === 401) {
+                    troottAPIClient().auth.logout();
+                } else if (
+                    response.message &&
+                    response.message === 'Error: Network Error'
+                ) {
+                    popNetwork();
+                } else if (response.data) {
+                    console.log(`Error! Could not get talent ${response.data}`);
+                }
             }
-        }
-    }, [setLoading, unsetLoading, setResource, popNetwork]);
+        },
+        [setLoading, unsetLoading, setResource, popNetwork],
+    );
 
     /**
      * @name sendUsersUpdate
@@ -222,27 +281,40 @@ const useUser = () => {
      * @param {ISendUsersUpdate} data - The data for sending updates.
      * @returns {Promise<any>}
      */
-    const sendUsersUpdate = useCallback(async (data: ISendUsersUpdate) => {
-        setLoading({ option: 'loader' });
+    const sendUsersUpdate = useCallback(
+        async (data: ISendUsersUpdate) => {
+            setLoading({ option: 'loader' });
 
-        const response = await troottAPIClient().user.sendUsersUpdate(data);
+            const response = await troottAPIClient().user.sendUsersUpdate(data);
 
-        if (response.error === false) {
-            unsetLoading({ option: 'loader', message: 'successful' });
-        } else {
-            unsetLoading({ option: 'loader', message: response.message ? response.message : response.data });
+            if (response.error === false) {
+                unsetLoading({ option: 'loader', message: 'successful' });
+            } else {
+                unsetLoading({
+                    option: 'loader',
+                    message: response.message
+                        ? response.message
+                        : response.data,
+                });
 
-            if (response.status === 401) {
-                troottAPIClient().auth.logout();
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not send verification code ${response.data}`);
+                if (response.status === 401) {
+                    troottAPIClient().auth.logout();
+                } else if (
+                    response.message &&
+                    response.message === 'Error: Network Error'
+                ) {
+                    popNetwork();
+                } else if (response.data) {
+                    console.log(
+                        `Error! Could not send verification code ${response.data}`,
+                    );
+                }
             }
-        }
 
-        return response;
-    }, [setLoading, unsetLoading, popNetwork]);
+            return response;
+        },
+        [setLoading, unsetLoading, popNetwork],
+    );
 
     /**
      * @name inviteTalent
@@ -250,27 +322,40 @@ const useUser = () => {
      * @param {IInviteTalent} data - The data for inviting a talent.
      * @returns {Promise<any>}
      */
-    const inviteTalent = useCallback(async (data: IInviteTalent) => {
-        setLoading({ option: 'loader' });
+    const inviteTalent = useCallback(
+        async (data: IInviteTalent) => {
+            setLoading({ option: 'loader' });
 
-        const response = await troottAPIClient().user.inviteTalent(data);
+            const response = await troottAPIClient().user.inviteTalent(data);
 
-        if (response.error === false) {
-            unsetLoading({ option: 'loader', message: 'successful' });
-        } else {
-            unsetLoading({ option: 'loader', message: response.message ? response.message : response.data });
+            if (response.error === false) {
+                unsetLoading({ option: 'loader', message: 'successful' });
+            } else {
+                unsetLoading({
+                    option: 'loader',
+                    message: response.message
+                        ? response.message
+                        : response.data,
+                });
 
-            if (response.status === 401) {
-                troottAPIClient().auth.logout();
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not send invite talent ${response.data}`);
+                if (response.status === 401) {
+                    troottAPIClient().auth.logout();
+                } else if (
+                    response.message &&
+                    response.message === 'Error: Network Error'
+                ) {
+                    popNetwork();
+                } else if (response.data) {
+                    console.log(
+                        `Error! Could not send invite talent ${response.data}`,
+                    );
+                }
             }
-        }
 
-        return response;
-    }, [setLoading, unsetLoading, popNetwork]);
+            return response;
+        },
+        [setLoading, unsetLoading, popNetwork],
+    );
 
     return {
         users,

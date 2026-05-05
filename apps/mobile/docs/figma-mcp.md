@@ -14,7 +14,6 @@ The channel name is whatever you type in the **Cursor Talk to Figma MCP** plugin
 ## Connect Cursor to Figma
 
 1. **WebSocket server** must be running (TalkToFigma bridges Cursor and Figma):
-
     - From a clone of [cursor-talk-to-figma-mcp](https://github.com/sonnylazuardi/cursor-talk-to-figma-mcp): run `bun socket`, **or**
     - Follow the package README for your setup.
 

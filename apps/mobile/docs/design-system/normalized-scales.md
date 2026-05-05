@@ -65,5 +65,5 @@ Maps to Tailwind `p-4` = 16, etc. (default Tailwind spacing already 4px-based; e
 
 ## Extended palettes
 
--   **primary** (teal): 50–900 from codebase teal scale.
--   **neutral**: grey 50–950 + black entries for true black overlays.
+- **primary** (teal): 50–900 from codebase teal scale.
+- **neutral**: grey 50–950 + black entries for true black overlays.

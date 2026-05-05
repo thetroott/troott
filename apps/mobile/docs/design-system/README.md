@@ -13,8 +13,8 @@ Dark-first tokens and primitives for NativeWind. Figma audit and normalized scal
 
 ## Token source of truth
 
--   **Tailwind:** `theme.extend` is populated from [`constants/tailwind-bridge.cjs`](../../constants/tailwind-bridge.cjs) (required by `tailwind.config.js`).
--   **JS (Reanimated, icons):** import [`semanticColors`](../../constants/tailwind-bridge.ts) from `@/constants/tailwind-bridge` or `@/constants` — hex values stay aligned with the CJS bridge.
+- **Tailwind:** `theme.extend` is populated from [`constants/tailwind-bridge.cjs`](../../constants/tailwind-bridge.cjs) (required by `tailwind.config.js`).
+- **JS (Reanimated, icons):** import [`semanticColors`](../../constants/tailwind-bridge.ts) from `@/constants/tailwind-bridge` or `@/constants` — hex values stay aligned with the CJS bridge.
 
 ## Canonical UI imports
 
@@ -26,9 +26,9 @@ import { Button } from '@/components/ui/button';
 import { VStack, HStack, ScreenSection } from '@/components/ui/layout';
 ```
 
--   **Text:** `variant`, `weight`, `tone` (`foreground` | `muted` | `primary` | `onPrimary` | `destructive` | `card`), `className`, Slot / `asChild`.
--   **Button:** variants `primary` | `secondary` | `tertiary` | `error` | `outline` | `ghost`; primary/outline/ghost colors track semantic tokens.
--   **Layout:** `VStack` / `HStack` (gap, justify, align), `ScreenSection` (inset) — Figma-friendly stack rhythm; use with `className` for padding/bg/rounded.
+- **Text:** `variant`, `weight`, `tone` (`foreground` | `muted` | `primary` | `onPrimary` | `destructive` | `card`), `className`, Slot / `asChild`.
+- **Button:** variants `primary` | `secondary` | `tertiary` | `error` | `outline` | `ghost`; primary/outline/ghost colors track semantic tokens.
+- **Layout:** `VStack` / `HStack` (gap, justify, align), `ScreenSection` (inset) — Figma-friendly stack rhythm; use with `className` for padding/bg/rounded.
 
 ## Semantic Tailwind colors (dark shell)
 

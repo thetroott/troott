@@ -144,8 +144,8 @@ export function mapDtoToTrack(
         typeof cover === 'string'
             ? cover
             : typeof cover === 'number'
-            ? cover
-            : undefined;
+              ? cover
+              : undefined;
 
     const resolvedArtwork =
         typeof artworkUrl === 'number'

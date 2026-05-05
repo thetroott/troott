@@ -20,17 +20,17 @@ function trackToSummary(
         typeof track.url === 'string'
             ? track.url
             : typeof track.url === 'object' && track.url && 'uri' in track.url
-            ? String((track.url as { uri: string }).uri)
-            : '';
+              ? String((track.url as { uri: string }).uri)
+              : '';
 
     const art =
         typeof track.artwork === 'string'
             ? track.artwork
             : typeof track.artworkUrl === 'string'
-            ? track.artworkUrl
-            : typeof track.item?.image === 'string'
-            ? track.item.image
-            : undefined;
+              ? track.artworkUrl
+              : typeof track.item?.image === 'string'
+                ? track.item.image
+                : undefined;
 
     return {
         sermonId: id != null ? String(id) : '',

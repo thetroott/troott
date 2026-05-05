@@ -25,8 +25,8 @@ Reference: [Figma document structure](./figma-styles.md) (Mobile Screens, channe
 
 ## components/ui (current exports)
 
--   Button, Card, Checkbox, Collapsible, Input, Loader, RadioButton, RadioGroup, SelectionPill, SelectionPillGroup, Switch, TabBar, Text.
--   Also present (not all in index): Separator, Toast, Modal, BottomSheet, Dropdown, DropdownMenu, Portal, Layout (VStack, HStack, ScreenSection), Chip, Icon, etc.
+- Button, Card, Checkbox, Collapsible, Input, Loader, RadioButton, RadioGroup, SelectionPill, SelectionPillGroup, Switch, TabBar, Text.
+- Also present (not all in index): Separator, Toast, Modal, BottomSheet, Dropdown, DropdownMenu, Portal, Layout (VStack, HStack, ScreenSection), Chip, Icon, etc.
 
 ## rn-primitives core (npm @rn-primitives/\*)
 

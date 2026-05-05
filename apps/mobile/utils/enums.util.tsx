@@ -133,6 +133,7 @@ export enum QueryKeys {
     UpdatePlayerOptions = 'UpdatePlayerOptions',
     Item = 'Item',
     Search = 'Search',
+    CatalogSearch = 'CatalogSearch',
     SearchSuggestions = 'SearchSuggestions',
     FavoritePlaylists = 'FavoritePlaylists',
     UserViews = 'UserViews',

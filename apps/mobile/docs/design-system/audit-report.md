@@ -82,9 +82,9 @@ Typography scale (xs, sm, base, lg, xl, 2xl, etc.) is defined in normalized-scal
 | ----------------------------------------------------------------------------- | ------- |
 | Do all Figma-relevant primitives exist and follow the design system patterns? | **No.** |
 
--   **Missing:** Token-based Slider in ui; Layout and OTP not in ui barrel; Modal/BottomSheet not in barrel.
--   **Violations:** Dropdown uses Poppins and hardcoded colors/sizes; multiple ui components use hex, raw px, or non-token radius/padding; Button secondary/tertiary/error not on semantic tokens.
--   **Font:** Matter is the designated family; Dropdown is the only primitive using Poppins.
--   **Layout:** Layout (VStack, HStack, ScreenSection) is token-aligned and handles container/stacking; Box is correctly unused.
+- **Missing:** Token-based Slider in ui; Layout and OTP not in ui barrel; Modal/BottomSheet not in barrel.
+- **Violations:** Dropdown uses Poppins and hardcoded colors/sizes; multiple ui components use hex, raw px, or non-token radius/padding; Button secondary/tertiary/error not on semantic tokens.
+- **Font:** Matter is the designated family; Dropdown is the only primitive using Poppins.
+- **Layout:** Layout (VStack, HStack, ScreenSection) is token-aligned and handles container/stacking; Box is correctly unused.
 
 After applying the recommendations (Layout + Slider in barrel, Matter-only fonts, token migration for listed components, Button token alignment), the base `@components/ui` layer can be considered complete and consistent with the design system.

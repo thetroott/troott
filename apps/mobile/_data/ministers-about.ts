@@ -64,7 +64,9 @@ function topicsSummary(rows: ISermonTrack[]): string {
     const topics = Array.from(
         new Set(
             rows
-                .map((r) => String((r as { topic?: unknown }).topic ?? '').trim())
+                .map((r) =>
+                    String((r as { topic?: unknown }).topic ?? '').trim(),
+                )
                 .filter((t) => t.length > 0),
         ),
     ).slice(0, 2);
@@ -72,7 +74,9 @@ function topicsSummary(rows: ISermonTrack[]): string {
     return ` Popular themes include ${topics.join(' and ')}.`;
 }
 
-function findSeedByLabel(label: string | null | undefined): MinisterAboutSeed | null {
+function findSeedByLabel(
+    label: string | null | undefined,
+): MinisterAboutSeed | null {
     const norm = normalize(label);
     if (!norm) return null;
     return (
@@ -82,7 +86,9 @@ function findSeedByLabel(label: string | null | undefined): MinisterAboutSeed | 
     );
 }
 
-export function resolveMinisterIdFromLabel(label: string | null | undefined): string {
+export function resolveMinisterIdFromLabel(
+    label: string | null | undefined,
+): string {
     const seed = findSeedByLabel(label);
     return seed?.id ?? slugFromLabel(label);
 }

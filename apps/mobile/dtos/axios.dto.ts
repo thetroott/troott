@@ -13,4 +13,6 @@ export interface CallApiDTO {
     path: string;
     isAuth?: boolean;
     payload?: any;
+    /** When set, the request is aborted if the signal is aborted (e.g. React Query cancellation). */
+    signal?: AbortSignal;
 }

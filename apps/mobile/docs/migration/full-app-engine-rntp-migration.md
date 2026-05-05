@@ -34,9 +34,9 @@ These filenames are referenced historically but **are not present** under `apps/
 
 ## Monorepo (Troott / pnpm)
 
--   Install from **repository root**; mobile is **`@troott/mobile`** under `apps/mobile`.
--   **Hoisted** `node_modules` at root: Metro must resolve **one** `react` / `react-native` for the app (see [`apps/mobile/metro.config.js`](../../metro.config.js) `resolveRequest` and [`apps/mobile/README.md`](../../README.md) monorepo section).
--   After changing `@rntp/player` or any native dependency: `pnpm install` at root, then rebuild the mobile dev client.
+- Install from **repository root**; mobile is **`@troott/mobile`** under `apps/mobile`.
+- **Hoisted** `node_modules` at root: Metro must resolve **one** `react` / `react-native` for the app (see [`apps/mobile/metro.config.js`](../../metro.config.js) `resolveRequest` and [`apps/mobile/README.md`](../../README.md) monorepo section).
+- After changing `@rntp/player` or any native dependency: `pnpm install` at root, then rebuild the mobile dev client.
 
 ---
 
@@ -73,23 +73,23 @@ Source: [`.cursor/rules/react-native-track-player-expo.mdc`](../../../../.cursor
 
 ### Registration and setup
 
--   **Foreground listeners**: After successful `startPlayerService()` + `Initialize()`, call `attachEnginePlaybackListeners()` from `engine/player/background.ts` (wired in `app/_layout.tsx` when `trackPlayerBootstrapped` is true). Optional: `registerBackgroundEventHandler` only for headless Android analytics/queue work.
--   **Player setup**: `startPlayerService()` in `app/_layout.tsx` with Android foreground retry when setup fails in background.
--   **Do not** use legacy `TrackPlayer.updateOptions`. Use `useUpdateOptions` → `setCommands` / `applyTrackPlayerNotificationOptions`. Commands live in `engine/constants/capabilities.ts` (`PlayerCommand`).
+- **Foreground listeners**: After successful `startPlayerService()` + `Initialize()`, call `attachEnginePlaybackListeners()` from `engine/player/background.ts` (wired in `app/_layout.tsx` when `trackPlayerBootstrapped` is true). Optional: `registerBackgroundEventHandler` only for headless Android analytics/queue work.
+- **Player setup**: `startPlayerService()` in `app/_layout.tsx` with Android foreground retry when setup fails in background.
+- **Do not** use legacy `TrackPlayer.updateOptions`. Use `useUpdateOptions` → `setCommands` / `applyTrackPlayerNotificationOptions`. Commands live in `engine/constants/capabilities.ts` (`PlayerCommand`).
 
 ### Engine usage
 
--   **Setup**: `engine/player/setup.ts`, `applyTrackPlayerOptions.ts`, `background.ts` (`Event.MediaItemTransition`, `RemotePrevious`, `PlaybackError`).
--   **Queue and state**: `engine/core/queue.ts` (`setMediaItems`, `insertMediaItems`, `addMediaItems`, etc.); `engine/queries/current-track.ts`; `@/stores/player/queue`.
--   **Shuffle / skip**: `engine/core/shuffle.ts`, `engine/core/skip-previous.ts`.
--   **Controls**: `engine/hooks/useControl.ts`. Progress: `engine/queries/playback-queries.ts` (Cast + local).
--   **Track type**: `SermonTrackDTO` / `MediaItem` + `engine/utils/mappers.ts`.
--   **Offline**: Same as before (`networkStatus`, `getAudioCache()`).
+- **Setup**: `engine/player/setup.ts`, `applyTrackPlayerOptions.ts`, `background.ts` (`Event.MediaItemTransition`, `RemotePrevious`, `PlaybackError`).
+- **Queue and state**: `engine/core/queue.ts` (`setMediaItems`, `insertMediaItems`, `addMediaItems`, etc.); `engine/queries/current-track.ts`; `@/stores/player/queue`.
+- **Shuffle / skip**: `engine/core/shuffle.ts`, `engine/core/skip-previous.ts`.
+- **Controls**: `engine/hooks/useControl.ts`. Progress: `engine/queries/playback-queries.ts` (Cast + local).
+- **Track type**: `SermonTrackDTO` / `MediaItem` + `engine/utils/mappers.ts`.
+- **Offline**: Same as before (`networkStatus`, `getAudioCache()`).
 
 ### Expo-specific
 
--   **Background audio**: `app.json` iOS `UIBackgroundModes` includes `"audio"`.
--   **Native modules**: `expo-dev-client`; rebuild after `@rntp/player` or native changes.
+- **Background audio**: `app.json` iOS `UIBackgroundModes` includes `"audio"`.
+- **Native modules**: `expo-dev-client`; rebuild after `@rntp/player` or native changes.
 
 ---
 
@@ -97,10 +97,10 @@ Source: [`.cursor/rules/react-native-track-player-expo.mdc`](../../../../.cursor
 
 ### In good shape (engine)
 
--   `engine/core/queue.ts`, `shuffle.ts`, `skip-previous.ts`
--   `engine/player/setup.ts`, `background.ts`, `useUpdateOptions.ts`
--   `engine/hooks/useControl.ts`
--   `engine/queries/*`, `engine/helpers/initialization.ts`, `engine/utils/mappers.ts`, `offline.tsx`
+- `engine/core/queue.ts`, `shuffle.ts`, `skip-previous.ts`
+- `engine/player/setup.ts`, `background.ts`, `useUpdateOptions.ts`
+- `engine/hooks/useControl.ts`
+- `engine/queries/*`, `engine/helpers/initialization.ts`, `engine/utils/mappers.ts`, `offline.tsx`
 
 ### Legacy / duplicate (migrate away)
 
@@ -114,7 +114,7 @@ Source: [`.cursor/rules/react-native-track-player-expo.mdc`](../../../../.cursor
 
 ### Registration
 
--   Grep `attachEnginePlaybackListeners` / `trackPlayerBootstrapped`. Listeners attach **only** after successful bootstrap in `app/_layout.tsx` (not duplicated on every navigation).
+- Grep `attachEnginePlaybackListeners` / `trackPlayerBootstrapped`. Listeners attach **only** after successful bootstrap in `app/_layout.tsx` (not duplicated on every navigation).
 
 ---
 
@@ -131,8 +131,8 @@ Screens / features
   └── no direct @rntp/player outside engine/ (except typed imports where agreed)
 ```
 
--   Remove or replace `hooks/useTrackPlayer.tsx` after call sites migrate.
--   Resolve **dual state**: `stores/player-store` vs `usePlayerQueueStore` / query keys – pick one source of truth for now playing + queue (recommended: queue store + engine queries; formalize in [Companion specs](#companion-specs-missing-in-repo)).
+- Remove or replace `hooks/useTrackPlayer.tsx` after call sites migrate.
+- Resolve **dual state**: `stores/player-store` vs `usePlayerQueueStore` / query keys – pick one source of truth for now playing + queue (recommended: queue store + engine queries; formalize in [Companion specs](#companion-specs-missing-in-repo)).
 
 ---
 
@@ -181,8 +181,8 @@ rg 'TrackPlayer\.' apps/mobile --glob '!node_modules' --glob '!**/engine/**'
 
 **Suggested order:** home list widgets → `app/(tabs)/home.tsx` → `player-old` (delete or rewrite).
 
--   Replace `playTrack` / `addTrack` with **`useLoadNewQueue`** (full list + start index + `queueRef` + `networkStatus` + optional shuffle) or **`useAddToQueue`** + play as product requires.
--   Replace transport with **`useTogglePlayback`**, **`useSkip`**, **`usePrevious`**, **`useSeekTo`**, **`useToggleRepeatMode`**, **`useToggleShuffle`**.
+- Replace `playTrack` / `addTrack` with **`useLoadNewQueue`** (full list + start index + `queueRef` + `networkStatus` + optional shuffle) or **`useAddToQueue`** + play as product requires.
+- Replace transport with **`useTogglePlayback`**, **`useSkip`**, **`usePrevious`**, **`useSeekTo`**, **`useToggleRepeatMode`**, **`useToggleShuffle`**.
 
 If a screen needs “play sermon **i** in this list”, add a small **engine-local** helper (e.g. `engine/hooks/usePlayFromList.ts`) instead of calling `TrackPlayer` in the screen.
 
@@ -223,9 +223,9 @@ Every `loadQueue` path passes **`networkStatus`**; confirm offline filtering via
 
 ## Phase 6b: Google Cast
 
--   **Rule reference:** Cursor rule § Google Cast: `useControl` and `playback-queries` branch on `PlayerEngine.GOOGLE_CAST` and `react-native-google-cast`.
--   **Migration work:** After queue APIs unify on `loadQueue` / engine hooks, smoke-test: start local playback, connect Cast, load/play queue changes from device, disconnect.
--   **Files to touch when auditing:** `engine/hooks/useControl.ts`, `engine/queries/playback-queries.ts`, any UI that starts Cast sessions (search `GOOGLE_CAST`, `CastButton`, `useCast`).
+- **Rule reference:** Cursor rule § Google Cast: `useControl` and `playback-queries` branch on `PlayerEngine.GOOGLE_CAST` and `react-native-google-cast`.
+- **Migration work:** After queue APIs unify on `loadQueue` / engine hooks, smoke-test: start local playback, connect Cast, load/play queue changes from device, disconnect.
+- **Files to touch when auditing:** `engine/hooks/useControl.ts`, `engine/queries/playback-queries.ts`, any UI that starts Cast sessions (search `GOOGLE_CAST`, `CastButton`, `useCast`).
 
 ---
 
@@ -365,18 +365,18 @@ Tune patterns for `require()` or barrel files; run in CI after tests.
 
 ## Execution checklist
 
--   [ ] **No backward compatibility** – [Policy](#policy-no-backward-compatibility): single player package after cutover, no dual v4/v5 APIs, no deprecated env/config fallbacks for the same value
--   [ ] `attachEnginePlaybackListeners` after successful bootstrap in `_layout` (once)
--   [ ] `startPlayerService` + foreground handling in `_layout`
--   [ ] `Initialize()` after successful setup
--   [ ] Remove direct player API from app screens (use engine hooks)
--   [ ] Remove / replace `hooks/useTrackPlayer.tsx`
--   [ ] Unify queue / now-playing state with engine + store
--   [ ] `useUpdateOptions` / `setCommands` outside cold setup
--   [ ] Background module: `MediaItemTransition` + `RemotePrevious` + `PlaybackError`
--   [ ] Offline `networkStatus` on all queue loads
--   [ ] Google Cast paths smoke-tested with new queue APIs
--   [ ] Test matrix signed off
+- [ ] **No backward compatibility** – [Policy](#policy-no-backward-compatibility): single player package after cutover, no dual v4/v5 APIs, no deprecated env/config fallbacks for the same value
+- [ ] `attachEnginePlaybackListeners` after successful bootstrap in `_layout` (once)
+- [ ] `startPlayerService` + foreground handling in `_layout`
+- [ ] `Initialize()` after successful setup
+- [ ] Remove direct player API from app screens (use engine hooks)
+- [ ] Remove / replace `hooks/useTrackPlayer.tsx`
+- [ ] Unify queue / now-playing state with engine + store
+- [ ] `useUpdateOptions` / `setCommands` outside cold setup
+- [ ] Background module: `MediaItemTransition` + `RemotePrevious` + `PlaybackError`
+- [ ] Offline `networkStatus` on all queue loads
+- [ ] Google Cast paths smoke-tested with new queue APIs
+- [ ] Test matrix signed off
 
 ---
 

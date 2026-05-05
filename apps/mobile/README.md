@@ -10,35 +10,35 @@ With troott, users can listen to old and new sermons from their favorite ministe
 
 Christian content lovers often struggle to:
 
--   Access messages from their favorite ministers.
--   Discover old sermons without knowing exact titles.
--   Organize downloaded sermon files on their devices.
+- Access messages from their favorite ministers.
+- Discover old sermons without knowing exact titles.
+- Organize downloaded sermon files on their devices.
 
 Troott solves these problems with a clean, mobile-first interface that provides:
 
--   Powerful sermon search and discovery.
--   Offline streaming options.
--   Playlist-style sermon management.
--   Quick sharing tools for a shared spiritual experience.
+- Powerful sermon search and discovery.
+- Offline streaming options.
+- Playlist-style sermon management.
+- Quick sharing tools for a shared spiritual experience.
 
 We’re answering key questions to improve user experience:
 
--   How can users find and listen to sermons effortlessly on the go?
--   How do we help users stay organized and avoid local storage clutter?
--   How can sermons empower users to improve their spiritual lifestyle?
--   How can we make sharing sermons as easy as sending a voice note?
+- How can users find and listen to sermons effortlessly on the go?
+- How do we help users stay organized and avoid local storage clutter?
+- How can sermons empower users to improve their spiritual lifestyle?
+- How can we make sharing sermons as easy as sending a voice note?
 
 ## Technologies
 
--   **React Native** (Bare or Expo)
--   **TypeScript**
--   **TanStack Query**
--   **React Navigation**
--   **React-native-track-player**
--   **React-native-video**
--   **EAS (Expo Application Services)**
--   **AsyncStorage / MMKV**
--   **SVG animations**
+- **React Native** (Bare or Expo)
+- **TypeScript**
+- **TanStack Query**
+- **React Navigation**
+- **React-native-track-player**
+- **React-native-video**
+- **EAS (Expo Application Services)**
+- **AsyncStorage / MMKV**
+- **SVG animations**
 
 ## Monorepo (troott workspace)
 
@@ -50,17 +50,17 @@ Generated native trees live **only** under this package: **`apps/mobile/android`
 
 **No backward compatibility:** the monorepo does **not** support repository-root **`android/`** or **`ios/`** for this app. Do not reintroduce them, symlink them, or document workflows that expect native projects outside **`apps/mobile`**.
 
--   **Expo SDK 55** (React 19.2, React Native 0.83). The previous **`@expo/cli` pnpm patch** (simulator open-URL noise) has been **removed**; if the iOS Simulator logs **`LSApplicationWorkspaceErrorDomain` code `115`** after a dev-client deep link, it is usually **harmless**—bring the app to the foreground manually if needed.
--   From repo root: **`pnpm prebuild:mobile`** or **`pnpm prebuild:mobile:clean`** (runs `expo prebuild` with **`pnpm --dir apps/mobile`**, so the Expo project root and asset paths are this package).
--   From **`apps/mobile`**: **`pnpm prebuild`** / **`pnpm prebuild:clean`** (same output, `expo prebuild .`).
+- **Expo SDK 55** (React 19.2, React Native 0.83). The previous **`@expo/cli` pnpm patch** (simulator open-URL noise) has been **removed**; if the iOS Simulator logs **`LSApplicationWorkspaceErrorDomain` code `115`** after a dev-client deep link, it is usually **harmless**—bring the app to the foreground manually if needed.
+- From repo root: **`pnpm prebuild:mobile`** or **`pnpm prebuild:mobile:clean`** (runs `expo prebuild` with **`pnpm --dir apps/mobile`**, so the Expo project root and asset paths are this package).
+- From **`apps/mobile`**: **`pnpm prebuild`** / **`pnpm prebuild:clean`** (same output, `expo prebuild .`).
 
 Open **`apps/mobile/ios/*.xcworkspace`** in Xcode and the **`apps/mobile/android`** folder in Android Studio.
 
 **EAS:** `eas.json` lives in this package; run EAS commands with **`apps/mobile`** as the project directory (for example `cd apps/mobile` before `eas build`, or pass your CLI’s equivalent of `--project-dir apps/mobile` from the repo root).
 
--   **Metro (port 8177, matches `expo run:ios`):** `pnpm start:mobile` or `pnpm dev:mobile`, or `pnpm expo:mobile:start`. For ad-hoc Expo CLI subcommands use `pnpm expo:mobile -- <args>` (if you run `start` this way, pass `--port 8177`).
--   **iOS native build + install:** `pnpm ios` from the repo root (uses the same Metro port).
--   **Use your development build** (bundle id `com.dmlscript.troottclient`), not Expo Go, when the project depends on `expo-dev-client` and custom native modules.
+- **Metro (port 8177, matches `expo run:ios`):** `pnpm start:mobile` or `pnpm dev:mobile`, or `pnpm expo:mobile:start`. For ad-hoc Expo CLI subcommands use `pnpm expo:mobile -- <args>` (if you run `start` this way, pass `--port 8177`).
+- **iOS native build + install:** `pnpm ios` from the repo root (uses the same Metro port).
+- **Use your development build** (bundle id `com.dmlscript.troottclient`), not Expo Go, when the project depends on `expo-dev-client` and custom native modules.
 
 Metro is configured to resolve `react`, `react-native`, and `scheduler` from this package so the bundler does not pick duplicate copies from the hoisted workspace tree. Nested `react-native` pulled in under `react-native-is-edge-to-edge` is rewritten to the app’s canonical `react-native` install (fixes Android parse errors on newer nested sources).
 
@@ -240,7 +240,7 @@ If you discover a bug or have a suggestion, raise an issue via the GitHub Issues
 
 ## Pull Request Notes
 
--   PRs should target the `staging` branch.
--   Reference issues using `Closes #issue-number`.
--   Add context and screenshots/logs when helpful.
--   Request reviewers before merging.
+- PRs should target the `staging` branch.
+- Reference issues using `Closes #issue-number`.
+- Add context and screenshots/logs when helpful.
+- Request reviewers before merging.

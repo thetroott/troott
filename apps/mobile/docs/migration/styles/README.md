@@ -40,10 +40,10 @@ Avoid reintroducing **ad-hoc margin/gap StyleSheet dictionaries**; use Tailwind 
 
 ### 4. Anti-patterns in the old file (do not replicate)
 
--   **Fixed horizontal padding on buttons** (`paddingHorizontal: 130`) – breaks on narrow/wide devices; use `w-full` + consistent height.
--   **Percentage widths** (`width: '95%'`) on inputs – prefer full width inside padded parent (`w-full`).
--   **Absolute “Or” divider** with magic `left: 165.5` – not responsive; use flex-based dividers.
--   **Duplicate button definitions** – primary teal appears in both `button` and `buttonPrimary`; single `Button` variant avoids drift.
+- **Fixed horizontal padding on buttons** (`paddingHorizontal: 130`) – breaks on narrow/wide devices; use `w-full` + consistent height.
+- **Percentage widths** (`width: '95%'`) on inputs – prefer full width inside padded parent (`w-full`).
+- **Absolute “Or” divider** with magic `left: 165.5` – not responsive; use flex-based dividers.
+- **Duplicate button definitions** – primary teal appears in both `button` and `buttonPrimary`; single `Button` variant avoids drift.
 
 ### 5. Welcome / splash semantics
 
@@ -57,7 +57,7 @@ Old auth assumed **white** titles on dark greys. Today the shell is **dark-only*
 
 ## Related docs
 
--   [NativeWind migration plan](../nativewind-migration.md) – phased migration and rules
--   [Figma / shell alignment](../../figma-troott-ui.md)
+- [NativeWind migration plan](../nativewind-migration.md) – phased migration and rules
+- [Figma / shell alignment](../../figma-troott-ui.md)
 
 When migrating a remaining screen, grep this folder for a **similar name** (e.g. `termsSubText`), then implement the same **intent** with `Text` + `className` and shared layout, not by copying `StyleSheet.create` blocks.

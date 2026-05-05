@@ -44,9 +44,8 @@ export default async function Initialize() {
     ) {
         console.debug('Initializing play queue from storage');
 
-        const restoredQueue = await resolvePlaybackUrisForTrackPlayer(
-            storedPlayQueue,
-        );
+        const restoredQueue =
+            await resolvePlaybackUrisForTrackPlayer(storedPlayQueue);
         const playable = restoredQueue.filter(isPlayableTrackForPlayer);
 
         if (playable.length === 0) {

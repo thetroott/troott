@@ -6,7 +6,9 @@
         "baseUrl": ".",
         "moduleResolution": "bundler",
         "paths": {
-            "@/*": ["./*"]
+            "@/*": [
+                "./*"
+            ]
         }
     },
     "include": [
@@ -43,6 +45,8 @@
         "hooks/platform/use-theme-color.ts",
         "hooks/use-user-profile.tsx",
         "stores/app/device-profile.ts",
-        "utils/errorBoundary.util.tsx"
+        "hooks/app/**",
+        "hooks/useUser.ts",
+        "hooks/useWorkspace.ts"
     ]
 }
