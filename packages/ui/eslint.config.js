@@ -1,4 +1,4 @@
-import { config } from "@troott/configs/eslint/react-internal"
+import { config } from '@troott/configs/eslint/react-internal';
 
 /** @type {import("eslint").Linter.Config} */
-export default config
+export default config;

@@ -1,4 +1,3 @@
-
 import User from '@/dtos/user.dto';
 
 export interface Sermon {
@@ -9,7 +8,6 @@ export interface Sermon {
 
     createdBy: User; // owner of Sermon
 
-   
     // time stamps
     createdAt: Date;
     updatedAt: Date;
@@ -19,37 +17,35 @@ export interface Sermon {
 }
 
 export interface CreateSermonDTO {
-  name: string;
-  description: string;
-  index?: number;
-  createdBy?: string;
-  user?: User;
+    name: string;
+    description: string;
+    index?: number;
+    createdBy?: string;
+    user?: User;
 }
 
 export interface UpdateSermonDTO extends CreateSermonDTO {
-  id: string;
+    id: string;
 }
 
-
 export interface GetSermonDTO {
-  id: string;
-
+    id: string;
 }
 
 /** Workspace API payloads (historically mixed into sermon DTO file). */
 export interface CreateWorkspaceDTO {
-  name: string;
-  description?: string;
-  index?: number;
-  createdBy?: string;
+    name: string;
+    description?: string;
+    index?: number;
+    createdBy?: string;
 }
 
 export interface GetWorkspaceDTO {
-  id: string;
+    id: string;
 }
 
 export interface UpdateWorkspaceDTO extends CreateWorkspaceDTO {
-  id: string;
+    id: string;
 }
 
 export type Workspace = Sermon;

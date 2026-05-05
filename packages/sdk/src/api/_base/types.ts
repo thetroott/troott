@@ -14,10 +14,9 @@ export interface IAPIResponse {
     status: number;
 }
 
-
 export interface AxiosConfig {
     baseUrl: string;
-  //  storage: IStorageAdapter;
+    //  storage: IStorageAdapter;
     tokenKey?: string;
     refreshPath?: string;
     onUnauthorized?: () => void | Promise<void>;

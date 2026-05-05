@@ -19,6 +19,7 @@ This package contains a comprehensive collection of reusable UI components built
 ## 🎨 Available Components
 
 ### Navigation & Layout
+
 - **Sidebar** - Collapsible sidebar navigation
 - **App Sidebar** - Application-specific sidebar with user menu
 - **Navigation Menu** - Multi-level navigation menus
@@ -28,6 +29,7 @@ This package contains a comprehensive collection of reusable UI components built
 - **Page Content** - Content wrapper with consistent spacing
 
 ### Interactive Components
+
 - **Button** - Various button styles and sizes
 - **Input** - Text inputs with validation states
 - **Textarea** - Multi-line text inputs
@@ -38,6 +40,7 @@ This package contains a comprehensive collection of reusable UI components built
 - **Slider** - Range input sliders
 
 ### Overlay Components
+
 - **Dialog** - Modal dialogs with backdrop
 - **Sheet** - Sliding panels from edges
 - **Popover** - Floating content containers
@@ -48,6 +51,7 @@ This package contains a comprehensive collection of reusable UI components built
 - **Dropdown Menu** - Action menus with keyboard support
 
 ### Display Components
+
 - **Card** - Content containers with headers and footers
 - **Badge** - Status indicators and labels
 - **Avatar** - User profile images with fallbacks
@@ -58,12 +62,14 @@ This package contains a comprehensive collection of reusable UI components built
 - **Accordion** - Collapsible content sections
 
 ### Feedback Components
+
 - **Alert** - Informational messages
 - **Alert Dialog** - Confirmation dialogs
 - **Toast** (via Sonner) - Notification messages
 - **Empty State** - Empty state illustrations with actions
 
 ### Form Components
+
 - **Form** - Form validation and error handling
 - **Label** - Accessible form labels
 - **Input OTP** - One-time password inputs
@@ -71,10 +77,12 @@ This package contains a comprehensive collection of reusable UI components built
 - **Date Picker** - Date selection component
 
 ### Data Display
+
 - **Data Table** - Feature-rich data tables with sorting, filtering, and pagination
 - **Chart** - Data visualization components (via Recharts)
 
 ### Specialized Components
+
 - **Not Found** - 404 error pages with actions
 - **Drawer** (via Vaul) - Mobile-optimized drawers
 
@@ -83,26 +91,35 @@ This package contains a comprehensive collection of reusable UI components built
 ### Importing Components
 
 ```tsx
-import { Button } from "@troott/ui/components/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@troott/ui/components/card"
-import { Input } from "@troott/ui/components/input"
-import { Label } from "@troott/ui/components/label"
+import { Button } from '@troott/ui/components/button';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@troott/ui/components/card';
+import { Input } from '@troott/ui/components/input';
+import { Label } from '@troott/ui/components/label';
 
 export function MyComponent() {
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>Sign In</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="Enter your email" />
-        </div>
-        <Button className="w-full">Sign In</Button>
-      </CardContent>
-    </Card>
-  )
+    return (
+        <Card className="w-full max-w-md">
+            <CardHeader>
+                <CardTitle>Sign In</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        placeholder="Enter your email"
+                    />
+                </div>
+                <Button className="w-full">Sign In</Button>
+            </CardContent>
+        </Card>
+    );
 }
 ```
 
@@ -111,35 +128,35 @@ export function MyComponent() {
 Many components support variants for different styles and sizes:
 
 ```tsx
-import { Button } from "@troott/ui/components/button"
-import { Badge } from "@troott/ui/components/badge"
+import { Button } from '@troott/ui/components/button';
+import { Badge } from '@troott/ui/components/badge';
 
 export function VariantExample() {
-  return (
-    <div className="space-x-2">
-      {/* Button variants */}
-      <Button variant="default">Default</Button>
-      <Button variant="destructive">Destructive</Button>
-      <Button variant="outline">Outline</Button>
-      <Button variant="secondary">Secondary</Button>
-      <Button variant="ghost">Ghost</Button>
-      <Button variant="link">Link</Button>
-      
-      {/* Button sizes */}
-      <Button size="sm">Small</Button>
-      <Button size="default">Default</Button>
-      <Button size="lg">Large</Button>
-      <Button size="icon">
-        <PlusIcon className="h-4 w-4" />
-      </Button>
-      
-      {/* Badge variants */}
-      <Badge variant="default">Default</Badge>
-      <Badge variant="secondary">Secondary</Badge>
-      <Badge variant="destructive">Destructive</Badge>
-      <Badge variant="outline">Outline</Badge>
-    </div>
-  )
+    return (
+        <div className="space-x-2">
+            {/* Button variants */}
+            <Button variant="default">Default</Button>
+            <Button variant="destructive">Destructive</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="link">Link</Button>
+
+            {/* Button sizes */}
+            <Button size="sm">Small</Button>
+            <Button size="default">Default</Button>
+            <Button size="lg">Large</Button>
+            <Button size="icon">
+                <PlusIcon className="h-4 w-4" />
+            </Button>
+
+            {/* Badge variants */}
+            <Badge variant="default">Default</Badge>
+            <Badge variant="secondary">Secondary</Badge>
+            <Badge variant="destructive">Destructive</Badge>
+            <Badge variant="outline">Outline</Badge>
+        </div>
+    );
 }
 ```
 
@@ -148,116 +165,127 @@ export function VariantExample() {
 #### Data Table with Actions
 
 ```tsx
-import { DataTable } from "@troott/ui/components/data-table"
-import { Button } from "@troott/ui/components/button"
-import { Badge } from "@troott/ui/components/badge"
+import { DataTable } from '@troott/ui/components/data-table';
+import { Button } from '@troott/ui/components/button';
+import { Badge } from '@troott/ui/components/badge';
 
 const columns = [
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <Badge variant={row.original.status === "active" ? "default" : "secondary"}>
-        {row.original.status}
-      </Badge>
-    ),
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => (
-      <Button variant="ghost" size="sm">
-        Edit
-      </Button>
-    ),
-  },
-]
+    {
+        accessorKey: 'name',
+        header: 'Name',
+    },
+    {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => (
+            <Badge
+                variant={
+                    row.original.status === 'active' ? 'default' : 'secondary'
+                }
+            >
+                {row.original.status}
+            </Badge>
+        ),
+    },
+    {
+        id: 'actions',
+        cell: ({ row }) => (
+            <Button variant="ghost" size="sm">
+                Edit
+            </Button>
+        ),
+    },
+];
 
 export function UsersTable({ users }) {
-  return (
-    <DataTable 
-      columns={columns} 
-      data={users}
-      searchKey="name"
-      searchPlaceholder="Search users..."
-    />
-  )
+    return (
+        <DataTable
+            columns={columns}
+            data={users}
+            searchKey="name"
+            searchPlaceholder="Search users..."
+        />
+    );
 }
 ```
 
 #### Form with Validation
 
 ```tsx
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@troott/ui/components/form"
-import { Input } from "@troott/ui/components/input"
-import { Button } from "@troott/ui/components/button"
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@troott/ui/components/form';
+import { Input } from '@troott/ui/components/input';
+import { Button } from '@troott/ui/components/button';
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-})
+    email: z.string().email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+});
 
 export function SignInForm() {
-  const form = useForm({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  })
+    const form = useForm({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+        },
+    });
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter your email" {...field} />
-              </FormControl>
-              <FormDescription>
-                We'll never share your email with anyone else.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="Enter your password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full">
-          Sign In
-        </Button>
-      </form>
-    </Form>
-  )
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                                <Input
+                                    placeholder="Enter your email"
+                                    {...field}
+                                />
+                            </FormControl>
+                            <FormDescription>
+                                We'll never share your email with anyone else.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="password"
+                                    placeholder="Enter your password"
+                                    {...field}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button type="submit" className="w-full">
+                    Sign In
+                </Button>
+            </form>
+        </Form>
+    );
 }
 ```
 
@@ -269,32 +297,32 @@ The component library uses CSS variables for theming:
 
 ```css
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 10% 3.9%;
-  --radius: 0.5rem;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --radius: 0.5rem;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  /* ... dark theme variables */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    /* ... dark theme variables */
 }
 ```
 
@@ -338,17 +366,18 @@ src/components/
 All components are fully typed with TypeScript:
 
 ```tsx
-interface ButtonProps 
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+interface ButtonProps
+    extends
+        React.ButtonHTMLAttributes<HTMLButtonElement>,
+        VariantProps<typeof buttonVariants> {
+    asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    // Component implementation
-  }
-)
+    ({ className, variant, size, asChild = false, ...props }, ref) => {
+        // Component implementation
+    },
+);
 ```
 
 ### Testing
@@ -375,7 +404,7 @@ All components follow accessibility best practices:
 
 Key dependencies include:
 
-- **@radix-ui/react-*** - Primitive components
+- **@radix-ui/react-\*** - Primitive components
 - **class-variance-authority** - Component variants
 - **clsx** - Conditional class names
 - **tailwind-merge** - Tailwind class merging

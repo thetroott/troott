@@ -26,9 +26,8 @@ import {
 } from '../../utils/path';
 
 class AuthAPI {
-
     constructor(private axiosService: AxiosService) {}
-  
+
     /**
      * @name registerUser
      * @description Register a new user account.

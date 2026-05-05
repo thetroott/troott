@@ -175,119 +175,120 @@ export interface ICellData {
     onClick?(e: MouseEvent<any>): void;
 }
 
-
 export interface IUserPermission {
-  entity: string,
-  actions: Array<string>
+    entity: string;
+    actions: Array<string>;
 }
 
 export interface IAPIKey {
-  secret: string,
-  public: string,
-  token: string,
-  publicToken: string,
-  domain: string,
-  isActive: boolean,
-  updatedAt: string
+    secret: string;
+    public: string;
+    token: string;
+    publicToken: string;
+    domain: string;
+    isActive: boolean;
+    updatedAt: string;
 }
 
 export interface IToastState {
-  show: boolean,
-  title?: string,
-  error?: string,
-  message: string,
-  type: SemanticType,
-  position: PositionType
+    show: boolean;
+    title?: string;
+    error?: string;
+    message: string;
+    type: SemanticType;
+    position: PositionType;
 }
-
 
 export interface IPagination {
     next: { page: number; limit: number };
     prev: { page: number; limit: number };
 }
 
-
 export interface IDivider {
-    show?: boolean,
-    bg?: string,
+    show?: boolean;
+    bg?: string;
     padding?: {
-        enable?: boolean,
-        top?: string,
-        bottom?: string
-    }
+        enable?: boolean;
+        top?: string;
+        bottom?: string;
+    };
 }
 
 export interface IPlaceholder {
-    className: string,
-    height: string,
-    bgColor: string,
-    width: string,
-    minWidth: string,
-    minHeight: string,
-    animate: boolean,
-    radius: string | number,
-    marginTop: string
-    marginBottom: string,
-    top: string
-    left: string
-    right: string,
-    flex: boolean
+    className: string;
+    height: string;
+    bgColor: string;
+    width: string;
+    minWidth: string;
+    minHeight: string;
+    animate: boolean;
+    radius: string | number;
+    marginTop: string;
+    marginBottom: string;
+    top: string;
+    left: string;
+    right: string;
+    flex: boolean;
 }
 
 export interface IPageSearch {
-    key: string,
-    hasResult: boolean,
-    refine?: RefineType,
-    payload?: any,
-    type: PagesearchType,
-    filters?: any,
-    resource?: ResourceType,
-    resourceId?: string
+    key: string;
+    hasResult: boolean;
+    refine?: RefineType;
+    payload?: any;
+    type: PagesearchType;
+    filters?: any;
+    resource?: ResourceType;
+    resourceId?: string;
 }
 
-
 export interface IAppMetrics {
-    loading: boolean,
-    message: string,
-    type: ResourceType,
-    resource?: ResourceType,
+    loading: boolean;
+    message: string;
+    type: ResourceType;
+    resource?: ResourceType;
     question?: {
-        total: number,
-        enabled: number,
-        disabled: number,
+        total: number;
+        enabled: number;
+        disabled: number;
         resource: {
-            total: number,
-            enabled: number,
-            disabled: number,
-        }
-    }
+            total: number;
+            enabled: number;
+            disabled: number;
+        };
+    };
 }
 
 export interface IListQuery {
-    limit?: number,
-    paginate?: string,
-    page?: number,
-    select?: string,
-    order?: QueryOrderType,
-    type?: string,
-    admin?: boolean,
-    mapped?: boolean,
-    from?: string,
-    to?: string,
-    resource?: ResourceType,
-    resourceId?: string,
-    key?: string,
-    payload?: any,
-    report?: boolean
+    limit?: number;
+    paginate?: string;
+    page?: number;
+    select?: string;
+    order?: QueryOrderType;
+    type?: string;
+    admin?: boolean;
+    mapped?: boolean;
+    from?: string;
+    to?: string;
+    resource?: ResourceType;
+    resourceId?: string;
+    key?: string;
+    payload?: any;
+    report?: boolean;
 }
 
-
-
 export interface IRoutil {
-    computeAppRoute(route: IRoute): string,
-    computePath(route: string): string,
-    computeSubPath(route: IRoute, subroute: IRouteItem): string,
-    computeInPath(inroute: IInRoute): string,
-    inRoute(payload: { route: string, name: string, params?: Array<IRouteParam> }): string,
-    resolveRouteParams(params: Array<IRouteParam>, stickTo: 'app' | 'page'): string
+    computeAppRoute(route: IRoute): string;
+    computePath(route: string): string;
+    computeSubPath(route: IRoute, subroute: IRouteItem): string;
+    computeInPath(inroute: IInRoute): string;
+    inRoute(payload: {
+        route: string;
+        name: string;
+        params?: Array<IRouteParam>;
+    }): string;
+    resolveRouteParams(
+        params: Array<IRouteParam>,
+        stickTo: 'app' | 'page',
+    ): string;
 }

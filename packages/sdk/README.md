@@ -9,11 +9,11 @@ This package is part of the Troott monorepo and is automatically available to al
 ## Usage
 
 ```typescript
-import { 
-  cookieService, 
-  idempotentService, 
-  QueryProvider,
-  CookieKeyType 
+import {
+    cookieService,
+    idempotentService,
+    QueryProvider,
+    CookieKeyType,
 } from '@troott/sdk';
 ```
 
@@ -28,10 +28,10 @@ import { cookieService } from '@troott/sdk';
 
 // Set a cookie
 cookieService.setData({
-  key: 'token',
-  payload: 'your-token-value',
-  maxAge: 3600,
-  path: '/'
+    key: 'token',
+    payload: 'your-token-value',
+    maxAge: 3600,
+    path: '/',
 });
 
 // Get a cookie
@@ -78,11 +78,11 @@ function App() {
 ### Types
 
 ```typescript
-import { 
-  CookieKeyType,
-  ISetCookie,
-  IGetCookie,
-  IRemoveCookie 
+import {
+    CookieKeyType,
+    ISetCookie,
+    IGetCookie,
+    IRemoveCookie,
 } from '@troott/sdk';
 ```
 

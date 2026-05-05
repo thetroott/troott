@@ -1,4 +1,4 @@
-export const GET_LOGGEDIN_USER = 'GET_LOGGEDIN_USER'
+export const GET_LOGGEDIN_USER = 'GET_LOGGEDIN_USER';
 export const GET_USER = 'GET_USER';
 export const GET_USERS = 'GET_USERS';
 export const GET_COUNTRIES = 'GET_COUNTRIES';
@@ -33,15 +33,12 @@ export const GET_ENTRY = 'GET_ENTRY';
 export const GET_SQUADS = 'GET_SQUADS';
 export const GET_SQUAD = 'GET_SQUAD';
 
-
 export const GET_PROJECTS = 'GET_PROJECTS';
 export const GET_PROJECT = 'GET_PROJECT';
 export const GET_TEAMS = 'GET_TEAMS';
 export const GET_TEAM = 'GET_TEAM';
 export const GET_TASKS = 'GET_TASKS';
 export const GET_TASK = 'GET_TASK';
-
-
 
 export const GET_SUBSCRIPTION = 'GET_SUBSCRIPTION';
 export const GET_PLANS = 'GET_PLANS';
@@ -54,9 +51,6 @@ export const GET_TICKETS = 'GET_TICKETS';
 export const GET_TICKET = 'GET_TICKET';
 export const GET_AUDITS = 'GET_AUDITS';
 export const GET_AUDIT = 'GET_AUDIT';
-
-
-
 
 export const GET_INDUSTRIES = 'GET_INDUSTRIES';
 export const GET_INDUSTRY = 'GET_INDUSTRY';
@@ -77,7 +71,6 @@ export const GET_ASSESSMENTS = 'GET_ASSESSMENTS';
 export const GET_ASSESSMENT = 'GET_ASSESSMENT';
 export const GET_GROWTH_METRICS = 'GET_GROWTH_METRICS';
 
-
 // generics
 export const SET_PAGINATION = 'SET_PAGINATION';
 export const SET_NOTIFICATIONS = 'SET_NOTIFICATIONS';
@@ -87,8 +80,6 @@ export const SET_COUNT = 'SET_COUNT';
 export const SET_LOADING = 'SET_LOADING';
 export const SET_TOAST = 'SET_TOAST';
 export const UNSET_LOADING = 'UNSET_LOADING';
-
-
 
 export const SET_RESPONSE = 'SET_RESPONSE';
 export const SET_IS_SUPER = 'SET_IS_SUPER';

@@ -23,10 +23,10 @@ export { default as Troott, troottAPIClient } from './api/_base/troott';
 
 // Types
 export * from './types/types';
-export * from './utils/enums'
-export * from './utils/interfaces'
-export * from './utils/helpers'
-export * as baseTypes from './utils/types'
+export * from './utils/enums';
+export * from './utils/interfaces';
+export * from './utils/helpers';
+export * as baseTypes from './utils/types';
 
 // Routes
 export { default as routes } from './routes/routes';

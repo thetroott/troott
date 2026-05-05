@@ -54,8 +54,6 @@ import {
     UNSET_LOADING,
 } from '../helpers/types';
 
-
-
 const appReducer = (state: any, action: any) => {
     switch (action.type) {
         case GET_BUSINESSES:
@@ -154,7 +152,7 @@ const appReducer = (state: any, action: any) => {
                 hackathon: action.payload,
             };
         case GET_ENTRY:
-            return {    
+            return {
                 ...state,
                 entry: action.payload,
             };

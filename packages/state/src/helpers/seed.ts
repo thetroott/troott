@@ -1,13 +1,18 @@
-import { IAppMetrics, IPagination, ISidebarProps, IToast } from "@/utils/interfaces";
-import { ICoreResource, IHackDomain, IProjectDomain } from "./interface";
-import { ICollection } from "./interface";
-import sidebarRoutes from "../../routes/sidebar.route";
-import { IAPIResponse } from "@/api/types";
+import {
+    IAppMetrics,
+    IPagination,
+    ISidebarProps,
+    IToast,
+} from '@/utils/interfaces';
+import { ICoreResource, IHackDomain, IProjectDomain } from './interface';
+import { ICollection } from './interface';
+import sidebarRoutes from '../../routes/sidebar.route';
+import { IAPIResponse } from '@/api/types';
 
 const pagination: IPagination = {
     next: { page: 1, limit: 25 },
     prev: { page: 1, limit: 25 },
-}
+};
 
 const collection: ICollection = {
     data: [],
@@ -15,16 +20,16 @@ const collection: ICollection = {
     total: 0,
     pagination: pagination,
     loading: false,
-    message: 'There are no data currently'
-}
+    message: 'There are no data currently',
+};
 
 const sidebar: ISidebarProps = {
     collapsed: false,
     route: sidebarRoutes[0]!,
     isOpen: false,
     subroutes: [],
-    inroutes: []
-}
+    inroutes: [],
+};
 
 const toast: IToast = {
     type: 'success',
@@ -32,8 +37,8 @@ const toast: IToast = {
     message: '',
     title: 'Feedback',
     position: 'top-right',
-    close: () => { }
-}
+    close: () => {},
+};
 
 const metrics: IAppMetrics = {
     loading: false,
@@ -41,31 +46,32 @@ const metrics: IAppMetrics = {
     type: 'default',
     resource: 'default',
     question: {
-        total: 0, disabled: 0, enabled: 0,
-        resource: { total: 0, disabled: 0, enabled: 0 }
-    }
-}
+        total: 0,
+        disabled: 0,
+        enabled: 0,
+        resource: { total: 0, disabled: 0, enabled: 0 },
+    },
+};
 
 const coreResoruce: ICoreResource = {
     forms: [],
     blocks: [],
     questions: [],
-    responses: []
-}
+    responses: [],
+};
 
 const hackResource: IHackDomain = {
     hackathons: [],
     submissions: [],
     entries: [],
-    squad: []
-}
+    squad: [],
+};
 
 const projectResource: IProjectDomain = {
     projects: [],
     Teams: [],
-    tasks: []
-}
-
+    tasks: [],
+};
 
 const apiresponse: IAPIResponse = {
     error: false,
@@ -74,7 +80,7 @@ const apiresponse: IAPIResponse = {
         format: '',
         csv: '',
         pdf: '',
-        xml: ''
+        xml: '',
     },
     count: 0,
     total: 0,
@@ -82,20 +88,17 @@ const apiresponse: IAPIResponse = {
     data: null,
     message: '',
     token: '',
-    status: 200
-}
+    status: 200,
+};
 
-
-
-export { 
-    
-    pagination, 
-    collection, 
+export {
+    pagination,
+    collection,
     sidebar,
     apiresponse,
     metrics,
-    toast, 
+    toast,
     coreResoruce,
     hackResource,
-    projectResource
-}
+    projectResource,
+};

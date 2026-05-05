@@ -5,38 +5,38 @@ interface User {
 
     firstName: string;
     lastName: string;
-    middleName: string,
+    middleName: string;
     phoneNumber: string;
     phoneCode: string;
-    countryPhone: string,
-    altPhone: string,
-    
+    countryPhone: string;
+    altPhone: string;
+
     email: string;
     passwordType: string;
     userType: string;
-    businessName: string,
-    businessType: string,
+    businessName: string;
+    businessType: string;
 
-    avatar: string,
-    coverImage: string,
-    timezone: string,
-    location: ILocation
-    
+    avatar: string;
+    coverImage: string;
+    timezone: string;
+    location: ILocation;
+
     login: {
-        last: string,
-        method: string
-    },
+        last: string;
+        method: string;
+    };
     onboard: {
-        step: number,
-        status: string,
-    },
+        step: number;
+        status: string;
+    };
     status: {
-        profile: string
+        profile: string;
     };
     inviteStatus: string;
     // apiKey: IAPIKey
     // keys: Array<IAPIKey>
-    devices: Array<any>
+    devices: Array<any>;
 
     isSuper: boolean;
     isAdmin: boolean;
@@ -63,9 +63,7 @@ interface User {
     _version: number;
     _id: any;
     id: any;
-
 }
-
 
 interface ILocation {
     phoneCode: string;
@@ -77,8 +75,6 @@ interface ILocation {
     postalCode: string;
 }
 
-interface IDevice {
-
-}
+interface IDevice {}
 
 export default User;

@@ -1,4 +1,3 @@
-
 import AxiosService from '@/api/_base/axios';
 import { IAPIResponse } from '@/api/_base/types';
 import { IListQuery } from '@/utils/interfaces';

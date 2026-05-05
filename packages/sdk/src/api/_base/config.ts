@@ -1,41 +1,40 @@
-import AxiosService from './axios'
-import AuthAPI from '../authentication/auth'
-import UserAPI from '../users/guest/user'
-
+import AxiosService from './axios';
+import AuthAPI from '../authentication/auth';
+import UserAPI from '../users/guest/user';
 
 /**
  * Internal API client
  * Holds all feature modules
  */
 class TroottAPIClient {
-  public auth: AuthAPI
-  public user: UserAPI
+    public auth: AuthAPI;
+    public user: UserAPI;
 
-  constructor(axiosService: AxiosService) {
-    this.auth = new AuthAPI(axiosService)
-    this.user = new UserAPI(axiosService)
-  }
+    constructor(axiosService: AxiosService) {
+        this.auth = new AuthAPI(axiosService);
+        this.user = new UserAPI(axiosService);
+    }
 }
 
 /**
  * Global instance for internal SDK use
  */
-let globalInstance: TroottAPIClient | null = null
+let globalInstance: TroottAPIClient | null = null;
 
 function setGlobalInstance(instance: TroottAPIClient): void {
-  globalInstance = instance
+    globalInstance = instance;
 }
 
 /**
  * Accessor used by hooks and internal helpers
  */
 export function troottAPIClient(): TroottAPIClient {
-  if (!globalInstance) {
-    throw new Error(
-      'Troott SDK not initialized. Create an instance first with new Troott(baseUrl)'
-    )
-  }
-  return globalInstance
+    if (!globalInstance) {
+        throw new Error(
+            'Troott SDK not initialized. Create an instance first with new Troott(baseUrl)',
+        );
+    }
+    return globalInstance;
 }
 
 /**
@@ -46,11 +45,11 @@ export function troottAPIClient(): TroottAPIClient {
  * await Troott.auth.loginUser(...)
  */
 class Troott extends TroottAPIClient {
-  constructor(baseUrl: string) {
-    const axiosService = new AxiosService(baseUrl)
-    super(axiosService)
-    setGlobalInstance(this)
-  }
+    constructor(baseUrl: string) {
+        const axiosService = new AxiosService(baseUrl);
+        super(axiosService);
+        setGlobalInstance(this);
+    }
 }
 
-export default Troott
+export default Troott;

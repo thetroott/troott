@@ -122,16 +122,15 @@ const UserState = (props: any) => {
     };
 
     /**
- * @name setBusinessType
- * @param type - BusinessType string
- */
-const setBusinessType = (type: string) => {
-    dispatch({
-        type: SET_BUSINESSTYPE, // You'll need to add this action type
-        payload: type,
-    });
-};
-
+     * @name setBusinessType
+     * @param type - BusinessType string
+     */
+    const setBusinessType = (type: string) => {
+        dispatch({
+            type: SET_BUSINESSTYPE, // You'll need to add this action type
+            payload: type,
+        });
+    };
 
     /**
      * @name setResponse
@@ -160,7 +159,9 @@ const setBusinessType = (type: string) => {
         const route = sidebarRoutes.find((x) => x.name === name);
 
         if (route && route.subroutes && route.subroutes.length > 0) {
-            const subroute = route.subroutes.find((m: IRouteItem) => m.name === sub);
+            const subroute = route.subroutes.find(
+                (m: IRouteItem) => m.name === sub,
+            );
 
             if (subroute) {
                 result = {

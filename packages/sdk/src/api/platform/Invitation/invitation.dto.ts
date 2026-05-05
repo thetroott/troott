@@ -1,4 +1,3 @@
-
 export interface CreateInvitationDTO {
     invitedBy: string;
     inviteeEmail: string;
@@ -25,8 +24,6 @@ export interface CreateBulkInvitationDTO {
     expiresAt?: Date;
     metadata?: Record<string, unknown>;
 }
-
-
 
 export enum InvitationType {
     TEAM = 'teamInvite',

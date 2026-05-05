@@ -1,7 +1,6 @@
 export enum CookieKeyType {
-    XHIT = 'x-hit'
+    XHIT = 'x-hit',
 }
-
 
 export interface ISetCookie {
     key: string;
@@ -9,15 +8,14 @@ export interface ISetCookie {
     expireAt?: Date;
     maxAge?: number;
     path?: string;
-  }
-  
-  export interface IGetCookie {
+}
+
+export interface IGetCookie {
     key: string;
     parse?: boolean;
-  }
-  
-  export interface IRemoveCookie {
+}
+
+export interface IRemoveCookie {
     key: string;
     parse?: boolean;
-  }
-  
+}

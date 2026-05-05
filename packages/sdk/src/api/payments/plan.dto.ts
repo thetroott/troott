@@ -1,5 +1,4 @@
 interface Plan {
-    
     code: string;
 
     label: string;

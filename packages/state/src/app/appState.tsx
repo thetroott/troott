@@ -1,5 +1,10 @@
 import { useMemo, useReducer } from 'react';
-import { collection, coreResoruce, hackResource, projectResource } from '../helpers/seed';
+import {
+    collection,
+    coreResoruce,
+    hackResource,
+    projectResource,
+} from '../helpers/seed';
 import appReducer from './appReducer';
 import { SET_LOADING, UNSET_LOADING } from '../helpers/types';
 import { ISetLoading, IUnsetLoading } from '@/utils/interfaces';
@@ -22,16 +27,16 @@ const AppState = (props: any) => {
 
         workspaces: collection,
         workspace: {},
-        
+
         members: collection,
         member: {},
-        
+
         invites: collection,
         invite: {},
 
         forms: collection,
         form: {},
-        
+
         responses: collection,
         response: {},
 

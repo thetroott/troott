@@ -1,10 +1,6 @@
 import AxiosService from '@/api/core/axios';
 import { IAPIResponse } from '@/api/_base/types';
-import {
-    CreatDTO,
-    GetCatDTO,
-    UpdateCatDTO,
-} from '@/dtos/sermon.dto';
+import { CreatDTO, GetCatDTO, UpdateCatDTO } from '@/dtos/sermon.dto';
 import { IListQuery } from '@/utils/interfaces';
 import { URL_CATALOG, URL_CATALOGS } from '@/utils/path';
 
