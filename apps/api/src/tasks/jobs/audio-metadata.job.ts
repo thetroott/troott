@@ -7,6 +7,7 @@ import type {
     IAudioMetadata,
     IAudioMetadataJobDTO,
 } from '../../modules/core/sermon/sermon.interface';
+import { ContentStatus } from '../../utils/enums.util';
 
 /**
  * @name audioMetadataProcessor
@@ -49,13 +50,13 @@ const audioMetadataProcessor = async (
         const query = sermonId
             ? { _id: sermonId }
             : { 'uploadSummary.uploadId': uploadId };
-            
+
         const updateSermon = await Sermon.findOneAndUpdate(
             query,
             {
                 $set: {
                     'uploadSummary.metadata': metadata,
-                    status: 'DRAFT',
+                    status: ContentStatus.DRAFT,
                 },
             },
             { new: true },
@@ -72,7 +73,7 @@ const audioMetadataProcessor = async (
         }
 
         logger.log({
-            data: `Metadata extracted and Sermon updated successfully for job ID: ${job.id}`,
+            data: `Metadata extracted uploadId=${uploadId} job=${job.id}`,
             label: 'audio-metadata-processor',
             type: 'success',
         });

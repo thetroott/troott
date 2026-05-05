@@ -3,7 +3,9 @@ import { Types } from 'mongoose';
 import type { IUserPreferencesDoc } from '@/modules/core/preference/preference.interface';
 import preferenceMapper from '@/modules/core/preference/preference.mapper';
 
-function mockDoc(overrides: Partial<IUserPreferencesDoc> = {}): IUserPreferencesDoc {
+function mockDoc(
+    overrides: Partial<IUserPreferencesDoc> = {},
+): IUserPreferencesDoc {
     const user = new Types.ObjectId();
     const minister = new Types.ObjectId();
     const doc = {

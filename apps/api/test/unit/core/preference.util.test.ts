@@ -11,7 +11,12 @@ import {
 import type { PreferenceSectionState } from '@/modules/core/preference/preference.merge';
 
 function mockDoc(
-    overrides: Partial<Pick<IUserPreferencesDoc, 'taste' | 'notifications' | 'playback' | 'downloads' | 'privacy'>> & {
+    overrides: Partial<
+        Pick<
+            IUserPreferencesDoc,
+            'taste' | 'notifications' | 'playback' | 'downloads' | 'privacy'
+        >
+    > & {
         user?: Types.ObjectId;
     } = {},
 ): IUserPreferencesDoc {

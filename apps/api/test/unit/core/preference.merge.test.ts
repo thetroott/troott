@@ -3,7 +3,8 @@ import { Types } from 'mongoose';
 import { mergePreferencePatch } from '@/modules/core/preference/preference.merge';
 
 describe('Preference merge (mergePreferencePatch)', () => {
-    const oid = (s: string) => new Types.ObjectId(s.padEnd(24, '0').slice(0, 24));
+    const oid = (s: string) =>
+        new Types.ObjectId(s.padEnd(24, '0').slice(0, 24));
 
     const base = {
         taste: {

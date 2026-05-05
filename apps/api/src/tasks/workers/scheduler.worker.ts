@@ -97,7 +97,6 @@ export const startSchedulerWorkers = async (): Promise<void> => {
             marketingQueue,
             invitationQueue,
         };
-        
     } catch (error) {
         logger.log({
             data: `Failed to start scheduler workers: ${

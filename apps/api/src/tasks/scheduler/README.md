@@ -7,37 +7,31 @@ This directory contains the scheduler system implementation using Bull and node-
 The scheduler system consists of:
 
 1. **Bull Queue Manager** (`../../queues/queue.ts`)
-
     - Manages Bull queues and workers
     - Handles Redis connections
     - Provides queue and worker lifecycle management
     - Uses the existing Bull implementation
 
 2. **Scheduler Service** (`scheduler.service.ts`)
-
     - Manages cron-based job scheduling
     - Validates cron patterns
     - Adds jobs to Bull queues based on cron schedules
 
 3. **Cron Patterns Utility** (`cron.patterns.ts`)
-
     - Pre-defined reusable cron patterns
     - Helper functions to build custom patterns
     - Clear documentation of cron format structure
     - Day of week and month constants
 
 4. **Scheduled Job Definitions**
-
     - `reminder.ts` - Reminder-related scheduled jobs
     - `tmp-cleanup.ts` - Cleanup-related scheduled jobs
 
 5. **Job Processors** (`jobs/`)
-
     - `reminder.job.ts` - Processes reminder jobs (uses Bull Job and DoneCallback pattern)
     - `cleanup.job.ts` - Processes cleanup jobs (uses Bull Job and DoneCallback pattern)
 
 6. **Workers** (`scheduler.worker.ts`)
-
     - Creates and manages workers for scheduled job queues using `BullQueue.addProcessor`
     - Follows the same pattern as existing workers (e.g., `email.worker.ts`)
 

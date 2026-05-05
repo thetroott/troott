@@ -11,11 +11,17 @@ function parseStableTargetFromUrl(url: string) {
     }
     const playlist = url.match(/\/playlists?\/([^/?#]+)/i);
     if (playlist?.[1]) {
-        return { kind: 'playlist' as const, id: decodeURIComponent(playlist[1]) };
+        return {
+            kind: 'playlist' as const,
+            id: decodeURIComponent(playlist[1]),
+        };
     }
     const minister = url.match(/\/ministers?\/([^/?#]+)/i);
     if (minister?.[1]) {
-        return { kind: 'minister' as const, id: decodeURIComponent(minister[1]) };
+        return {
+            kind: 'minister' as const,
+            id: decodeURIComponent(minister[1]),
+        };
     }
     return null;
 }
@@ -52,9 +58,9 @@ describe('parseStableTargetFromUrl (contract)', () => {
     });
 
     it('parses playlist', () => {
-        expect(
-            parseStableTargetFromUrl('https://x.test/playlist/abc'),
-        ).toEqual({ kind: 'playlist', id: 'abc' });
+        expect(parseStableTargetFromUrl('https://x.test/playlist/abc')).toEqual(
+            { kind: 'playlist', id: 'abc' },
+        );
     });
 
     it('parses minister with query string', () => {
