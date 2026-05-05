@@ -100,8 +100,6 @@ class SeriesMapper {
 
         return result;
     }
-
-
 }
 
 export default new SeriesMapper();

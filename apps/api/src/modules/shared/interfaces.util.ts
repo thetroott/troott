@@ -61,10 +61,7 @@ export type {
 export type { IListenerDoc } from '../users/listener/listener.interface';
 export type { IMinisterDoc } from '../users/minister/minister.interface';
 export type { ICreatorDoc } from '../users/creator/creator.interface';
-export type {
-    ISeries,
-    ISeriesDoc,
-} from '../core/series/series.interface';
+export type { ISeries, ISeriesDoc } from '../core/series/series.interface';
 export type { ILibraryDoc } from '../core/library/library.interface';
 export type { IPlaylistDoc } from '../core/playlist/playlist.interface';
 export type { IDebitCard } from './card.interface';

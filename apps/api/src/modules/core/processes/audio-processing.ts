@@ -14,7 +14,6 @@ import {
 } from '@/modules/core/sermon/sermon.interface';
 
 class AudioProcessing {
-    
     public async MeasureLoudness(data: MeasureLoudnessDTO): Promise<IResult> {
         const { stream } = data;
         const result: IResult = {
@@ -93,7 +92,6 @@ class AudioProcessing {
             return result;
         }
     }
-    
 
     public async EncodeMultiBitrate(data: MultiBitrateDTO): Promise<IResult> {
         const { inputStream, renditions, outputDir } = data;
@@ -104,7 +102,11 @@ class AudioProcessing {
             data: {},
         };
 
+        const inputFile = path.join(outputDir, '_mb_spool');
         try {
+            fs.mkdirSync(outputDir, { recursive: true });
+            await pipeline(inputStream, fs.createWriteStream(inputFile));
+
             const outputs: any[] = [];
 
             for (const preset of renditions) {
@@ -113,7 +115,7 @@ class AudioProcessing {
 
                 const args = [
                     '-i',
-                    'pipe:0',
+                    inputFile,
                     '-c:a',
                     'aac',
                     '-b:a',
@@ -133,11 +135,9 @@ class AudioProcessing {
                     path.join(renditionDir, 'playlist.m3u8'),
                 ];
 
-                const dummyStream = new PassThrough();
                 const ffOptions: FFmpegOptionsDTO = {
                     args,
-                    inputStream,
-                    outputStream: dummyStream,
+                    inputFilePath: inputFile,
                 };
                 await this.spawnFFmpeg(ffOptions);
 
@@ -151,12 +151,19 @@ class AudioProcessing {
             result.code = 500;
             result.message = err.message;
             return result;
+        } finally {
+            try {
+                if (fs.existsSync(inputFile)) fs.unlinkSync(inputFile);
+            } catch {
+                // ignore
+            }
         }
     }
 
     public async ProcessHLS(data: HLSDTO): Promise<IResult> {
         const {
             inputStream,
+            inputFilePath,
             renditions,
             outputDir,
             segmentDuration = 6,
@@ -168,7 +175,10 @@ class AudioProcessing {
             data: {},
         };
 
-        const inputFile = path.join(outputDir, '_ingest');
+        const spooledIngest = path.join(outputDir, '_ingest');
+        const externalInput = !!inputFilePath;
+        const inputFile = externalInput ? inputFilePath : spooledIngest;
+        let deleteSpoolAfter = !externalInput;
         try {
             if (!renditions.length) {
                 result.error = true;
@@ -177,15 +187,21 @@ class AudioProcessing {
                 return result;
             }
             fs.mkdirSync(outputDir, { recursive: true });
-            /** Spool upload once: multiple HLS runs must not reuse the same readable stream. */
-            await pipeline(
-                inputStream,
-                fs.createWriteStream(inputFile),
-            );
+            if (!externalInput) {
+                if (!inputStream) {
+                    result.error = true;
+                    result.code = 400;
+                    result.message =
+                        'ProcessHLS requires inputStream or inputFilePath';
+                    return result;
+                }
+                /** Spool upload once: multiple encodes must not reuse the same readable stream. */
+                await pipeline(inputStream, fs.createWriteStream(spooledIngest));
+            }
             if (!fs.existsSync(inputFile)) {
                 result.error = true;
                 result.code = 500;
-                result.message = 'Input spool file missing after copy';
+                result.message = 'HLS input file missing';
                 return result;
             }
             const outputs: { name: string; path: string }[] = [];
@@ -230,8 +246,8 @@ class AudioProcessing {
             return result;
         } finally {
             try {
-                if (fs.existsSync(inputFile)) {
-                    fs.unlinkSync(inputFile);
+                if (deleteSpoolAfter && fs.existsSync(spooledIngest)) {
+                    fs.unlinkSync(spooledIngest);
                 }
             } catch {
                 // ignore
@@ -307,6 +323,31 @@ class AudioProcessing {
             result.message = err.message;
             return result;
         }
+    }
+
+    /**
+     * FFmpeg invocation for fully specified CLI-style argument tails (e.g. loudnorm file → WAV).
+     * Inputs/outputs must appear in `args`; no stdin/stdout piping from Node streams.
+     */
+    public async runCli(args: string[]): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const ff = spawn('ffmpeg', [
+                '-hide_banner',
+                '-loglevel',
+                'error',
+                ...args,
+            ]);
+            let err = '';
+            ff.stderr.on('data', (chunk) => {
+                err += chunk.toString();
+            });
+            ff.stdout.resume();
+            ff.on('close', (code) => {
+                if (code === 0) resolve();
+                else reject(new Error(err || `FFmpeg exited with code ${code}`));
+            });
+            ff.on('error', reject);
+        });
     }
 
     private async spawnFFmpeg(options: FFmpegOptionsDTO): Promise<void> {

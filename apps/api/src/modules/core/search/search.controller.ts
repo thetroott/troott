@@ -13,7 +13,7 @@ function parseScope(raw: unknown): SearchScope {
 
 /**
  * @route GET /api/v1/search?q=&scope=sermon|minister|all&limit=&skip=
- * @access Private (signed-in catalogue; aligns with mobile-flow no-guest bar)
+ * @access Public (catalogue only; no user context required)
  */
 export const searchCatalog = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
