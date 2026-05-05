@@ -70,7 +70,8 @@ const RootLayout = () => {
         pathOnly === '/user/edit-profile' ||
         pathOnly === '/user/photo-picker' ||
         pathOnly === '/user/edit-profile-saved' ||
-        pathOnly === '/playlist/create-playlist';
+        pathOnly === '/playlist/create-playlist' ||
+        pathOnly.startsWith('/see-more');
 
     const buildShareUrl = useCallback(() => {
         if (track.id != null && String(track.id).length > 0) {

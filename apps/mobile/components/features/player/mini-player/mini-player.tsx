@@ -28,6 +28,7 @@ import { useTrackStore } from '@/stores/player-store';
 import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
 import { useResumeLastPlayed } from '@/hooks/player/use-resume-last-played';
 import { useCanSkipNext } from '@/hooks/player/use-can-skip-next';
+import { MINI_PLAYER_BOTTOM_OFFSET_BASE } from '@/components/features/player/mini-player/mini-player-layout';
 
 const FALLBACK_ART = require('@/assets/images/liked.png');
 
@@ -35,8 +36,6 @@ const ARTWORK = 35;
 const BAR_MIN_HEIGHT = 54;
 const PROGRESS_HEIGHT = 2;
 const ICON_SIZE = 24;
-/** Tab row + custom tab bar bottom safe padding (see `TabBar`). */
-const TAB_BAR_CONTENT = 72;
 
 const MAIN_TAB_NAMES = new Set([
     'home',
@@ -86,6 +85,8 @@ function useAllowMiniPlayerForCurrentRoute(): boolean {
     // Root index / welcome (Expo may report segment `index` without tabs)
     if (segments.length === 1 && segments[0] === 'index') return false;
     if (base === '/playlist/create-playlist') return false;
+    /** Full-screen lists from home “See more” — mini player would crowd the layout */
+    if (base.startsWith('/see-more')) return false;
 
     return true;
 }
@@ -187,7 +188,8 @@ const MiniPlayer = () => {
         useShouldHideMiniPlayer() || showFullPlayer || nowPlayingRouteFocused;
     const allowInAppShell = useAllowMiniPlayerForCurrentRoute();
     const aboveMainTabs = useIsMainTabsShell();
-    const bottomOffset = (aboveMainTabs ? TAB_BAR_CONTENT : 0) + insets.bottom;
+    const bottomOffset =
+        (aboveMainTabs ? MINI_PLAYER_BOTTOM_OFFSET_BASE : 0) + insets.bottom;
 
     const queueFallback =
         currentIndex != null && currentIndex >= 0 && currentIndex < queue.length
