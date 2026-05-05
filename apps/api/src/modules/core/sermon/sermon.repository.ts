@@ -339,10 +339,7 @@ class SermonRepository {
             data: {},
         };
 
-        const filter = this.buildMinisterSermonListFilter(
-            ministerId,
-            options,
-        );
+        const filter = this.buildMinisterSermonListFilter(ministerId, options);
 
         const sort = options.sort || '-updatedAt';
         const skip = options.skip || 0;

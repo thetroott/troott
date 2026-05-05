@@ -5,6 +5,21 @@ import {
     UploadDTO,
 } from './sermon.dto';
 import type { ISermonDoc } from './sermon.interface';
+import type { IMinisterDoc, ISeriesDoc } from '@/utils/interfaces.util';
+
+function ministerPayload(minister: unknown): Partial<IMinisterDoc> {
+    if (minister == null) return {};
+    const m = minister as {
+        _id?: unknown;
+        id?: unknown;
+        ministerialName?: string;
+    };
+    const id = m._id ?? m.id;
+    return {
+        id: id as Partial<IMinisterDoc>['id'],
+        ministerialName: m.ministerialName,
+    };
+}
 
 class SermonMapper {
     constructor() {}
@@ -18,11 +33,12 @@ class SermonMapper {
     public async mapSermonPlayback(
         sermon: ISermonDoc,
     ): Promise<SermonPlaybackDTO> {
+        const audio = sermon.sermon;
         const result: SermonPlaybackDTO = {
-            id: sermon.id.toString(),
+            id: String(sermon.id ?? sermon._id),
             sermon: {
-                cdnUrl: sermon.sermon.cdnUrl,
-                originalUrl: sermon.sermon.originalUrl,
+                cdnUrl: audio?.cdnUrl ?? '',
+                originalUrl: audio?.originalUrl ?? '',
             },
         };
 
@@ -36,11 +52,13 @@ class SermonMapper {
      * @description Converts a sermon document into a DTO for API responses.
      */
     public async mapUploadSermonImage(sermon: ISermonDoc): Promise<UploadDTO> {
+        const img = sermon.image;
         const result: UploadDTO = {
-            id: sermon.image.uploadId,
-            uploadRef: sermon.image.uploadId,
-            uploadedBy: sermon.image.uploadedBy.toString(),
-            file: sermon.image.thumbnailUrl,
+            id: img?.uploadId ?? '',
+            uploadRef: img?.uploadId ?? '',
+            uploadedBy:
+                img?.uploadedBy != null ? String(img.uploadedBy) : '',
+            file: img?.thumbnailUrl ?? '',
         };
 
         return result;
@@ -53,11 +71,22 @@ class SermonMapper {
      * @description Converts a sermon document into a DTO for API responses.
      */
     public async mapUploadSermonFile(sermon: ISermonDoc): Promise<UploadDTO> {
+        const sum = sermon.uploadSummary as
+            | {
+                  uploadId?: string;
+                  uploadedBy?: { toString(): string };
+                  rawFile?: string;
+              }
+            | undefined;
         const result: UploadDTO = {
-            id: sermon.image.uploadId,
-            uploadRef: sermon.image.uploadId,
-            uploadedBy: sermon.image.uploadedBy.toString(),
-            file: sermon.image.thumbnailUrl,
+            id: sum?.uploadId ?? '',
+            uploadRef: sum?.uploadId ?? '',
+            uploadedBy: sum?.uploadedBy?.toString() ?? '',
+            file:
+                sum?.rawFile ??
+                sermon.hlsMasterUrl ??
+                sermon.sermonUrl ??
+                '',
         };
 
         return result;
@@ -65,13 +94,17 @@ class SermonMapper {
 
     //mapSermonUpload
     public async mapSermonUpdate(sermon: ISermonDoc): Promise<UpdateSermonDTO> {
+        const audio = sermon.sermon;
+        const img = sermon.image;
+        const sr = sermon.series as { _id?: unknown; id?: unknown; title?: string } | undefined;
+
         const result: UpdateSermonDTO = {
-            id: sermon.id.toString(),
+            id: String(sermon.id ?? sermon._id),
             title: sermon.title,
             description: sermon.description,
-            shareableUrl: sermon.sermon.shareableUrl,
-            releaseDate: sermon.releaseDate.toISOString(),
-            releaseYear: sermon.releaseYear.toString(),
+            shareableUrl: audio?.shareableUrl ?? sermon.shareableUrl,
+            releaseDate: sermon.releaseDate?.toISOString?.() ?? '',
+            releaseYear: String(sermon.releaseYear ?? ''),
 
             topic: sermon.topic,
             tags: sermon.tags,
@@ -80,28 +113,27 @@ class SermonMapper {
             allowComment: sermon.allowComment,
 
             isSeries: sermon.isSeries,
-            seriesId: {
-                id: sermon.series.id,
-                title: sermon.series.title,
-            },
+            seriesId: sr
+                ? ({
+                      _id: sr._id ?? sr.id,
+                      title: sr.title ?? '',
+                  } as Partial<ISeriesDoc>)
+                : undefined,
 
             sermon: {
-                cdnUrl: sermon.sermon.cdnUrl,
-                originalUrl: sermon.sermon.originalUrl,
+                cdnUrl: audio?.cdnUrl,
+                originalUrl: audio?.originalUrl,
             },
             image: {
-                thumbnailUrl: sermon.image.thumbnailUrl,
-                originalUrl: sermon.image.originalUrl,
+                thumbnailUrl: img?.thumbnailUrl,
+                originalUrl: img?.originalUrl,
             },
-            minister: {
-                id: sermon.minister.id,
-                ministerialName: sermon.minister.ministerialName,
-            },
+            minister: ministerPayload(sermon.minister),
 
             status: sermon.status,
             state: sermon.state,
             isPublished: sermon.isPublished,
-            publishedBy: sermon.publishedBy,
+            publishedBy: sermon.publishedBy as unknown as string,
             publishedAt: sermon.publishedAt,
         };
 
@@ -115,38 +147,28 @@ class SermonMapper {
      * @description Converts a sermon document into a DTO for API responses.
      */
     public async mapSermon(sermon: ISermonDoc): Promise<SermonDTO> {
+        const audio = sermon.sermon;
+        const img = sermon.image;
+
         const result: SermonDTO = {
-            id: sermon._id.toString(),
+            id: String(sermon._id),
 
             title: sermon.title,
             description: sermon.description,
-            duration: sermon.sermon.duration,
+            duration: sermon.duration ?? audio?.duration ?? 0,
 
             image: {
-                thumbnailUrl: sermon.image.thumbnailUrl,
-                originalUrl: sermon.image.originalUrl,
+                thumbnailUrl: img?.thumbnailUrl ?? '',
+                originalUrl: img?.originalUrl ?? '',
             },
-            minister: {
-                id: sermon.minister.id,
-                ministerialName: sermon.minister.ministerialName,
-            },
+            minister: ministerPayload(sermon.minister),
 
             topic: sermon.topic,
             tags: sermon.tags,
             isPublic: sermon.isPublic,
-            releaseDate: sermon.releaseDate.toISOString(),
+            releaseDate: sermon.releaseDate?.toISOString?.() ?? '',
             releaseYear: sermon.releaseYear,
-            shareableUrl: sermon.sermon.shareableUrl,
-
-            // series: {
-            //     id: sermon.series._id.toString(),
-            //     title: sermon.series.title,
-            //     image: {
-            //         thumbnailUrl: sermon.series.imageUrl,
-            //     },
-            //     position: sermon.series.position,
-            // },
-            // seriesId: sermon.series._id.toString(),
+            shareableUrl: audio?.shareableUrl ?? sermon.shareableUrl ?? '',
         };
 
         return result;

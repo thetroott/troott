@@ -1,5 +1,9 @@
 import { IFile, IResult } from '../../../utils/interfaces.util';
-import type { IAudioMetadataJobDTO, ISermonDoc } from './sermon.interface';
+import type {
+    IAudioHLSJobDTO,
+    IAudioMetadataJobDTO,
+    ISermonDoc,
+} from './sermon.interface';
 import StorageService from '../../platform/storage/storage.service';
 import {
     UploadStatus,
@@ -15,8 +19,10 @@ import Sermon from './sermon.model';
 import Minister from '../../users/minister/minister.model';
 import mongoose from 'mongoose';
 import { AWS_BUCKET_NAME, s3 } from '../../../configs/aws.config';
+import { mediaConfig } from '../../../configs/media.config';
 import { addJob } from '../../../tasks/jobs/job';
 import { JobChannel, QueueChannel } from '../../../queues/channel.queue';
+import logger from '../../../utils/logger.util';
 
 class SermonService {
     private s3Client = s3;
@@ -51,7 +57,6 @@ class SermonService {
         }
         return undefined;
     }
-
 
     /**
      * @method handleSermonUpload
@@ -106,6 +111,24 @@ class SermonService {
             return result;
         }
 
+        const mime = mimeType.toLowerCase();
+        if (!mediaConfig.sermonAudioMimeAllowlist.has(mime)) {
+            result.error = true;
+            result.code = 400;
+            result.message = 'Unsupported audio format for sermon upload.';
+            return result;
+        }
+
+        if (
+            typeof size === 'number' &&
+            size > mediaConfig.sermonAudioMaxBytes
+        ) {
+            result.error = true;
+            result.code = 413;
+            result.message = `Audio exceeds maximum size (${mediaConfig.sermonAudioMaxBytes} bytes).`;
+            return result;
+        }
+
         const folder = await this.getS3Folder(mimeType);
         const s3Key = `${folder}/${uploadId}`;
 
@@ -123,8 +146,16 @@ class SermonService {
 
             const s3Response = await s3Upload.done();
 
+            const ministerDoc = data.uploadedBy
+                ? await Minister.findOne({
+                      user: data.uploadedBy,
+                  })
+                      .select('_id')
+                      .lean()
+                : null;
+
             // Prepare the upload summary for Sermon model
-            const uploadPayload = {
+            const uploadSummary = {
                 fileId: uploadId,
                 fileName: info.filename,
                 fileSize: size,
@@ -139,13 +170,13 @@ class SermonService {
 
             // Save upload session in DB
             const SermonUpload: Partial<ISermonDoc> = await Sermon.create({
-                uploadPayload,
+                uploadSummary,
+                minister: ministerDoc?._id,
                 status: ContentStatus.PROCESSING,
                 uploadState: UploadStepType.AUDIO_METADATA_PROCESSING,
             });
 
-            //enqueue the audio-metadata processing
-            const audioJobData: IAudioMetadataJobDTO = {
+            const metaPayload: IAudioMetadataJobDTO = {
                 streamForMetadata: metadataStream,
                 mimeType: mimeType,
                 uploadId: uploadId as string,
@@ -153,31 +184,37 @@ class SermonService {
 
             addJob({
                 queueName: JobChannel.extractAudioMetadata,
-                jobName: QueueChannel.AudioMetadata,
-                data: audioJobData,
+                jobName: QueueChannel.AUDIOMETADATA,
+                data: metaPayload,
                 options: {
                     jobId: `audio-meta-${uploadId}`,
+                    attempts: 5,
+                    delay: 0,
                 },
             });
 
-            // enqueue the audio processing
-            const audioJobData: IAudioProcessingJobDTO = {
-                streamForProcessing: stream,
-                mimeType: mimeType,
+            const hlsPayload: IAudioHLSJobDTO = {
                 uploadId: uploadId as string,
+                sourceS3Key: s3Key,
+                mimeType,
             };
-            
-            
+
             addJob({
-                queueName: JobChannel.extractAudioMetadata,
-                jobName: QueueChannel.AudioMetadata,
-                data: audioJobData,
+                queueName: JobChannel.processAudio,
+                jobName: QueueChannel.AUDIOPROCESSING,
+                data: hlsPayload,
                 options: {
-                    jobId: `audio-meta-${uploadId}`,
+                    jobId: `hls-package-${uploadId}`,
+                    attempts: 3,
+                    delay: 2000,
                 },
             });
 
-            
+            logger.log({
+                data: `Queued audio-meta + HLS jobs uploadId=${uploadId} s3Key=${s3Key}`,
+                label: 'sermon-upload',
+                type: 'success',
+            });
 
             result.message = 'Sermon uploaded successfully';
             result.data = SermonUpload;
@@ -190,7 +227,7 @@ class SermonService {
             metadataStream.destroy();
 
             // Cleanup S3 file on failure
-            await this.storageService.deleteFile(uploadId as string);
+            await this.storageService.deleteFile(s3Key);
 
             result.error = true;
             result.code = 500;
@@ -503,23 +540,29 @@ class SermonService {
         await sermon.save();
     }
 
-
-
     private isAdminRole(role: unknown): boolean {
         const normalized = String(role ?? '').toLowerCase();
-        return normalized === UserType.ADMIN || normalized === UserType.SUPERADMIN;
+        return (
+            normalized === UserType.ADMIN || normalized === UserType.SUPERADMIN
+        );
     }
 
     private parseBooleanFlag(value: unknown): boolean {
         if (typeof value === 'boolean') return value;
         if (typeof value !== 'string') return false;
         const normalized = value.trim().toLowerCase();
-        return normalized === 'true' || normalized === '1' || normalized === 'yes';
+        return (
+            normalized === 'true' || normalized === '1' || normalized === 'yes'
+        );
     }
 
     private ministerIdFromDoc(minister: unknown): string {
         if (minister == null) return '';
-        if (typeof minister === 'object' && minister !== null && '_id' in minister) {
+        if (
+            typeof minister === 'object' &&
+            minister !== null &&
+            '_id' in minister
+        ) {
             return String((minister as { _id: unknown })._id);
         }
         return String(minister);

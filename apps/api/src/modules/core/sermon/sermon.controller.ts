@@ -4,12 +4,9 @@ import ErrorResponse from '../../../utils/error.util';
 import { pathParam } from '../../../utils/route-params.util';
 import { getAuthUserId } from '../../../utils/auth-request.util';
 import sermonRepository from './sermon.repository';
-import {
-    DeleteSermonDTO,
-    PublishSermonDTO,
-    UpdateSermonDTO,
-} from './sermon.dto';
+import { DeleteSermonDTO, UpdateSermonDTO } from './sermon.dto';
 import { IFile } from '../../../utils/interfaces.util';
+import { mediaConfig } from '../../../configs/media.config';
 import type { ISermonDoc } from './sermon.interface';
 import { ContentState, ContentStatus } from '../../../utils/enums.util';
 import sermonService from './sermon.service';
@@ -35,6 +32,18 @@ export const uploadSermon = asyncHandler(
 
         if (!file) {
             return next(new ErrorResponse('No file found in request', 400, []));
+        }
+
+        const mime = (file.mimeType || '').toLowerCase();
+        if (!mediaConfig.sermonAudioMimeAllowlist.has(mime)) {
+            return next(
+                new ErrorResponse('Unsupported sermon audio type', 400, []),
+            );
+        }
+
+        const uid = getAuthUserId(req);
+        if (uid) {
+            file.uploadedBy = uid;
         }
 
         const upload = await sermonService.handleUploadSermon(file);

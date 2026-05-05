@@ -4,9 +4,9 @@ import {
     DbModels,
     ContentState,
     ContentStatus,
-    ProcessingState,
     UploadStepType,
 } from '../../../utils/enums.util';
+import { ProcessingState } from '../../platform/storage/upload.enums';
 
 const SermonSchema = new Schema<ISermonDoc>(
     {
@@ -75,6 +75,16 @@ const SermonSchema = new Schema<ISermonDoc>(
             index: true,
         },
 
+        hlsMasterUrl: { type: String },
+        processingStatus: {
+            type: String,
+            enum: Object.values(ProcessingState),
+            index: true,
+        },
+        processingError: { type: String },
+        failedStage: { type: String },
+        derivativesReadyAt: { type: Date },
+
         //upload data
         uploadSummary: {
             fileId: { type: String },
@@ -130,9 +140,10 @@ const SermonSchema = new Schema<ISermonDoc>(
         timestamps: true,
         versionKey: '_version',
         toJSON: {
-            transform(doc, ret) {
-                ret.id = ret._id;
-                if ('__v' in ret) delete (ret as any).__v;
+            transform(_doc, ret) {
+                const o = ret as Record<string, unknown> & { __v?: number };
+                o.id = o._id;
+                if ('__v' in o) delete o.__v;
             },
         },
     },

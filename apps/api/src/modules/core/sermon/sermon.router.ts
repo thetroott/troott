@@ -27,11 +27,24 @@ import {
     getFavoriteMinisterSermons,
 } from './sermon.controller';
 import uploadHandler from '../../../middlewares/upload.mdw';
+import {
+    sermonAudioUploadSizeLimit,
+    sermonUploadRateLimiter,
+} from '../../../middlewares/sermon-upload.security.mdw';
+import { requireMinisterProfile } from '../../../middlewares/require-minister.mdw';
 
 const sermonRouter = Router({ mergeParams: true });
 
 // Creator / editor mutations (authenticated)
-sermonRouter.post('/start-upload', Protect, uploadHandler, uploadSermon);
+sermonRouter.post(
+    '/start-upload',
+    Protect,
+    sermonUploadRateLimiter,
+    requireMinisterProfile,
+    sermonAudioUploadSizeLimit,
+    uploadHandler,
+    uploadSermon,
+);
 sermonRouter.post('/image-upload', Protect, uploadHandler, uploadSermonCover);
 sermonRouter.post('/publish/:id', Protect, publishSermon);
 
@@ -67,9 +80,17 @@ sermonRouter.get('/stats/recently-published', getSermonsRecentlyPublished);
 
 // Personalized rails (signed-in)
 sermonRouter.get('/user/recently-added', Protect, getRecentlyAddedSermons);
-sermonRouter.get('/user/recently-played', Protect, getUserRecentlyPlayedSermons);
+sermonRouter.get(
+    '/user/recently-played',
+    Protect,
+    getUserRecentlyPlayedSermons,
+);
 sermonRouter.get('/user/popular', Protect, getPopularSermonsRecentlyPlayed);
-sermonRouter.get('/user/favorite-ministers', Protect, getFavoriteMinisterSermons);
+sermonRouter.get(
+    '/user/favorite-ministers',
+    Protect,
+    getFavoriteMinisterSermons,
+);
 sermonRouter.get('/user/interests', Protect, getSermonsByUserInterests);
 
 sermonRouter.get('/', getAllSermons);

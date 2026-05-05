@@ -3,6 +3,7 @@ import { Document, Types } from 'mongoose';
 import { ContentState, ContentStatus } from '../../../utils/content.enums';
 import { FileMimeType, FileType } from '../../shared/file.enums';
 import {
+    ProcessingState,
     UploadStatus,
     UploadStepType,
 } from '../../platform/storage/upload.enums';
@@ -14,11 +15,17 @@ type ObjectId = Types.ObjectId;
 export interface ISermonDoc extends Document {
     title: string;
     description: string;
+    duration?: number;
     releaseDate: Date;
     releaseYear: number;
 
-    sermon: SermonSource;
-    image: ImageSource;
+    sermon?: SermonSource;
+    image?: ImageSource;
+    sermonUrl?: string;
+    imageUrl?: string;
+    size?: number;
+    slug?: string;
+    shareableUrl?: string;
 
     topic: string; // sermon topic or category
     tags: Array<string>;
@@ -36,6 +43,17 @@ export interface ISermonDoc extends Document {
     state: ContentState;
     status: ContentStatus;
     uploadState: UploadStepType;
+
+    /** Multivariant HLS manifest URL (CDN or HTTPS). Set after packaging completes. */
+    hlsMasterUrl?: string;
+    /** Derivative packaging lifecycle for adaptive playback. */
+    processingStatus?: ProcessingState;
+    processingError?: string;
+    failedStage?: string;
+    derivativesReadyAt?: Date;
+
+    uploadSummary?: Record<string, unknown>;
+    imageSummary?: Record<string, unknown>;
 
     versionId?: ObjectId;
     changesSummary: string;
@@ -154,55 +172,55 @@ export interface AudioRenditionDTO {
     bitrate: number;
     sampleRate: number;
     channels: number;
-  }
-  export interface FFmpegRenditionDTO {
-    name?: string;        // e.g., "64k", "128k"
-    codec?: string;           // e.g., 'aac'
-    bitrate?: number;         // e.g., 128 (kbps)
-    sampleRate?: number;      // e.g., 48000 Hz
-    channels?: number;        // 1 for mono, 2 for stereo
-    extraArgs?: string[];     // any extra CLI args
-  }
-  
-  export interface IAudioHLSJobDTO {
-    uploadId: string;
-    /** Default/fallback; each uploaded segment uses a MIME from file extension. */
-    mimeType?: string;
-    inputStream: PassThrough;
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-  }
-  
-  export interface IAudioDASHJobDTO {
-    uploadId: string;
-    mimeType?: string;
-    inputStream: PassThrough;
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-  }
+}
+export interface FFmpegRenditionDTO {
+    name?: string; // e.g., "64k", "128k"
+    codec?: string; // e.g., 'aac'
+    bitrate?: number; // e.g., 128 (kbps)
+    sampleRate?: number; // e.g., 48000 Hz
+    channels?: number; // 1 for mono, 2 for stereo
+    extraArgs?: string[]; // any extra CLI args
+}
 
-  export interface HLSDTO {
+export interface IAudioHLSJobDTO {
+    uploadId: string;
+    /** Original object key in S3 (stream-first: worker reads via GetObject). */
+    sourceS3Key: string;
+    mimeType?: string;
+    renditions?: AudioRenditionDTO[];
+    segmentDuration?: number;
+}
+
+export interface IAudioDASHJobDTO {
+    uploadId: string;
+    mimeType?: string;
     inputStream: PassThrough;
+    outputStream: PassThrough
+    renditions: AudioRenditionDTO[];
+    segmentDuration?: number;
+}
+
+export interface HLSDTO {
+    /** Prefer after upload completes — mutually preferred vs inputStream. */
+    inputFilePath?: string;
+    /** Legacy path: spool from stream into outputDir/_ingest when inputFilePath omitted. */
+    inputStream?: import('stream').Readable;
     /** Temp output root; HLS segment files and playlists are written per rendition under this path. */
     outputDir: string;
     renditions: AudioRenditionDTO[];
     segmentDuration?: number;
-  }
-  
-  export interface DASHDTO {
+}
+
+export interface DASHDTO {
     inputStream: PassThrough;
     outputDir: string;
     renditions: AudioRenditionDTO[];
     segmentDuration?: number;
-  }
-  
-  
-  
-  
-  
+}
+
 export interface MeasureLoudnessDTO {
     stream: PassThrough;
-  }
+}
 
 /** Pipe loudness-normalized PCM/WAV to `outputStream` (FFmpeg `pipe:1` -> consumer). */
 export interface NormaliseAudioDTO {
@@ -239,7 +257,6 @@ export interface IAudioMetadata {
     duration?: number;
     bitrate?: number;
     year?: number;
-   
 }
 
 /** Bull job payload for `audio:metadata` extraction workers. */

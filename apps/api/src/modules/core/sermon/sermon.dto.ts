@@ -80,32 +80,42 @@ export interface SermonPlaybackDTO {
  * @returns {UpdateSermonDTO}
  */
 export interface UpdateSermonDTO {
-    id: string;
+    id?: string;
 
-    title: string;
-    description: string;
-    shareableUrl: string;
-    releaseDate: string;
-    releaseYear: string;
+    title?: string;
+    description?: string;
+    duration?: number;
+    shareableUrl?: string;
+    sermonUrl?: string;
+    imageUrl?: string;
+    size?: number;
+    releaseDate?: string | Date;
+    releaseYear?: string | number;
 
-    topic: string; // sermon topic or category
-    tags: Array<string>; // sermon tags
-    isPublic: boolean;
-    allowDownload: boolean;
-    allowComment: boolean;
+    topic?: string;
+    tags?: Array<string>;
+    isPublic?: boolean;
+    allowDownload?: boolean;
+    allowComment?: boolean;
 
-    isSeries: boolean;
-    seriesId: Partial<ISeriesDoc>;
+    isSeries?: boolean;
+    seriesId?: Partial<ISeriesDoc>;
+    series?: Partial<ISeriesDoc> | unknown;
 
-    sermon: Partial<SermonSource>; // sermon file upload
-    image: Partial<ImageSource>; // sermon image upload
-    minister: Partial<IMinisterDoc>;
+    sermon?: Partial<SermonSource>;
+    image?: Partial<ImageSource>;
+    minister?: Partial<IMinisterDoc>;
+    playlist?: unknown;
 
-    status: ContentStatus;
-    state: ContentState;
-    isPublished: boolean;
-    publishedBy: string;
-    publishedAt: Date;
+    status?: ContentStatus;
+    state?: ContentState;
+    isPublished?: boolean;
+    publishedBy?: string;
+    publishedAt?: Date;
+    versionId?: unknown;
+    changesSummary?: string;
+    uploadRef?: string;
+    uploadSummary?: unknown;
 }
 
 /**
@@ -116,13 +126,31 @@ export interface UpdateSermonDTO {
  * @access Public
  * @returns {PublishSermonDTO}
  */
+/**
+ * Payload for {@link SermonService.handlePublishSermon} / {@link SermonService.validateSermonPublish}.
+ * `sermon` is the audio **upload id** used to resolve the draft sermon document.
+ */
 export interface PublishSermonDTO {
-    id: string;
-    status: ContentStatus;
-    state: ContentState;
-    isPublished: boolean;
+    title: string;
+    description: string;
+    duration: number;
+    /** Audio upload id (matches `uploadSummary.uploadId`) */
+    sermon: string;
+    image: Partial<ImageSource> | string | unknown;
+    size: number;
+    releaseDate: Date | string;
+    releaseYear: number;
+    topic: string;
+    tags: Array<string> | string;
+    isPublic: boolean;
+    isSeries: boolean;
     publishedBy: string | string;
-    publishedAt: Date;
+
+    id?: string;
+    status?: ContentStatus;
+    state?: ContentState;
+    isPublished?: boolean;
+    publishedAt?: Date;
 }
 
 /**

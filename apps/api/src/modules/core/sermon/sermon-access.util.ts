@@ -8,7 +8,11 @@ function ministerIdFromDoc(minister: unknown): string {
     if (minister == null) {
         return '';
     }
-    if (typeof minister === 'object' && minister !== null && '_id' in minister) {
+    if (
+        typeof minister === 'object' &&
+        minister !== null &&
+        '_id' in minister
+    ) {
         return String((minister as { _id: unknown })._id);
     }
     return String(minister);
