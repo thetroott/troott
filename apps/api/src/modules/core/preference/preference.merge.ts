@@ -14,7 +14,9 @@ export type PreferenceSectionState = {
 };
 
 function toObjectIds(ids: string[]): Types.ObjectId[] {
-    return ids.filter(Types.ObjectId.isValid).map((id) => new Types.ObjectId(id));
+    return ids
+        .filter(Types.ObjectId.isValid)
+        .map((id) => new Types.ObjectId(id));
 }
 
 /**

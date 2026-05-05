@@ -7,10 +7,7 @@ import { getAuthUserId } from '../../../utils/auth-request.util';
 import { userIsStaff } from '../../users/user/user.staff.util';
 import type { IPlaylistDoc } from './playlist.interface';
 
-function playlistOwnerId(p: {
-    user?: unknown;
-    createdBy?: unknown;
-}): string {
+function playlistOwnerId(p: { user?: unknown; createdBy?: unknown }): string {
     const idFrom = (u: unknown): string => {
         if (u == null) return '';
         if (typeof u === 'object' && u !== null && '_id' in u) {

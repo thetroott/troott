@@ -81,7 +81,7 @@ class LibraryRepository {
         const library = await this.model
             .findOne({ user: userId })
             .populate(
-                'likedSermons savedBtes playlists favouriteministers mostPlayed',
+                'likedSermons savedBtes playlists favouriteMinisters mostPlayed',
             );
 
         if (!library) {

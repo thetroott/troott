@@ -22,9 +22,8 @@ export const getPublicSermonTeaser = asyncHandler(
             return next(new ErrorResponse('id is required', 400, []));
         }
 
-        const result = await sermonRepository.findSermonWithMinisterForTeaser(
-            id,
-        );
+        const result =
+            await sermonRepository.findSermonWithMinisterForTeaser(id);
         if (result.error) {
             logger.log({
                 label: 'deep_link_open',

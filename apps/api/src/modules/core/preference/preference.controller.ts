@@ -4,7 +4,10 @@ import preferenceService from './preference.service';
 import ErrorResponse from '../../../utils/error.util';
 import { getAuthUserId } from '../../../utils/auth-request.util';
 import { pathParam } from '../../../utils/route-params.util';
-import type { CreatePreferencesDTO, PreferencePatchDTO } from './preference.dto';
+import type {
+    CreatePreferencesDTO,
+    PreferencePatchDTO,
+} from './preference.dto';
 
 /**
  * @name createPreferences

@@ -1,7 +1,9 @@
 import { ContentState, ContentStatus } from '../../../utils/enums.util';
 
 /** Raw sermon-like object (lean / JSON) for teaser eligibility checks. */
-export function isSermonPublicTeaserEligible(doc: Record<string, unknown>): boolean {
+export function isSermonPublicTeaserEligible(
+    doc: Record<string, unknown>,
+): boolean {
     if (doc.isPublic === false) {
         return false;
     }

@@ -189,10 +189,7 @@ class PreferenceService {
                 data: {},
             };
         }
-        const merged = mergePreferencePatch(
-            docToPreferenceState(doc),
-            patch,
-        );
+        const merged = mergePreferencePatch(docToPreferenceState(doc), patch);
         applyPreferenceStateToDoc(doc, merged);
         await preferenceRepository.save(doc);
         return {

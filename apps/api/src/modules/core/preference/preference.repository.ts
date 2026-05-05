@@ -10,7 +10,9 @@ class PreferenceRepository {
         if (!Types.ObjectId.isValid(userId)) {
             return null;
         }
-        return UserPreferences.findOne({ user: new Types.ObjectId(userId) }).exec();
+        return UserPreferences.findOne({
+            user: new Types.ObjectId(userId),
+        }).exec();
     }
 
     public async create(
@@ -29,7 +31,12 @@ class PreferenceRepository {
 
     public defaultSections(): Pick<
         IUserPreferencesDoc,
-        'schemaVersion' | 'taste' | 'notifications' | 'playback' | 'downloads' | 'privacy'
+        | 'schemaVersion'
+        | 'taste'
+        | 'notifications'
+        | 'playback'
+        | 'downloads'
+        | 'privacy'
     > {
         return {
             schemaVersion: USER_PREFERENCES_SCHEMA_VERSION,

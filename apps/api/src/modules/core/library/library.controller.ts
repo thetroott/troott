@@ -143,7 +143,9 @@ export const getLibraryById = asyncHandler(
 
         const lib = library.data as ILibraryDoc;
         const ownerId =
-            lib.user != null && typeof (lib.user as { toString?: () => string }).toString === 'function'
+            lib.user != null &&
+            typeof (lib.user as { toString?: () => string }).toString ===
+                'function'
                 ? (lib.user as { toString: () => string }).toString()
                 : String(lib.user);
 

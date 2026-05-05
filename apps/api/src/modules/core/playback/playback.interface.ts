@@ -13,16 +13,16 @@ export interface IPlaybackProgressDoc extends Document {
 
     queue: string[];
     currentIndex: number;
-  
+
     isPlaying: boolean;
-  
+
     shuffle: boolean;
-  
+
     repeatMode: RepeatMode;
-  
+
     progress: number;
     duration: number;
     _id: ObjectId;
 }
 
-export type RepeatMode = "off" | "all" | "one";
+export type RepeatMode = 'off' | 'all' | 'one';
