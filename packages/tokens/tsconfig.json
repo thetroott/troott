@@ -1,13 +1,12 @@
 {
-  "extends": "../../configs/typescript/react-library.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@troott/tokens": ["./src"],
-      "@troott/tokens/*": ["./src/*"]
-    }
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist"]
+    "extends": "../../configs/typescript/react-library.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@troott/tokens": ["./src"],
+            "@troott/tokens/*": ["./src/*"]
+        }
+    },
+    "include": ["src"],
+    "exclude": ["node_modules", "dist"]
 }
-

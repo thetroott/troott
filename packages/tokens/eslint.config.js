@@ -1,5 +1,4 @@
-import { config } from "@troott/configs/eslint/base"
+import { config } from '@troott/configs/eslint/base';
 
 /** @type {import("eslint").Linter.Config} */
-export default config
-
+export default config;
