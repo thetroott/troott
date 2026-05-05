@@ -1,8 +1,8 @@
-import { nextJsConfig } from '@troott/configs/eslint/next.js'
+import { nextJsConfig } from '@troott/configs/eslint/next.js';
 
 export default [
-  {
-    ignores: ['node_modules/**', '.next/**'],
-  },
-  ...nextJsConfig,
-]
+    {
+        ignores: ['node_modules/**', '.next/**'],
+    },
+    ...nextJsConfig,
+];

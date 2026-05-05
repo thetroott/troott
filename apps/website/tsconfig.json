@@ -1,12 +1,18 @@
 {
-  "extends": "../../configs/typescript/nextjs.json",
-  "compilerOptions": {
-    "typeRoots": ["./node_modules/@types", "./global.d.ts"],
-    "plugins": [{ "name": "next" }],
-    "paths": {
-      "@/*": ["./*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "global.d.ts"],
-  "exclude": ["node_modules"]
+    "extends": "../../configs/typescript/nextjs.json",
+    "compilerOptions": {
+        "typeRoots": ["./node_modules/@types", "./global.d.ts"],
+        "plugins": [{ "name": "next" }],
+        "paths": {
+            "@/*": ["./*"]
+        }
+    },
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        ".next/types/**/*.ts",
+        "global.d.ts"
+    ],
+    "exclude": ["node_modules"]
 }
