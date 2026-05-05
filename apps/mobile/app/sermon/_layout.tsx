@@ -1,14 +1,15 @@
 import { Platform, StyleSheet } from 'react-native';
 import React from 'react';
 import { Stack } from 'expo-router';
+import { theme } from '@/constants/theme';
 
 const TrackLayout = () => {
     return (
         <Stack
             screenOptions={{
-                headerShown: false,
+                headerShown: true,
                 contentStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: theme.colors.grey[900],
                     flex: 1,
                     marginTop: Platform.select({
                         ios: 80,

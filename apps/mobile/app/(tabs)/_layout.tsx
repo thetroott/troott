@@ -34,6 +34,10 @@ const TabsLayout = () => {
                     name="search"
                     options={{ tabBarShowLabel: true, title: 'Search' }}
                 />
+                {/* <Tabs.Screen
+                    name="explore"
+                    options={{ tabBarShowLabel: true, title: 'Explore' }}
+                /> */}
                 <Tabs.Screen
                     name="library"
                     options={{ tabBarShowLabel: true, title: 'Library' }}

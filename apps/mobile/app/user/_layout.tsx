@@ -13,6 +13,7 @@ export default function UserLayout() {
             />
             <Stack.Screen name="edit-profile-saved" />
             <Stack.Screen name="about-troott" />
+            <Stack.Screen name="notifications" />
         </Stack>
     );
 }

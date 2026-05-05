@@ -37,7 +37,12 @@ const DEFAULT_SOCIAL_LINKS = [
         iconText: 'IG',
     },
     { id: 'x', label: 'X', handle: '@KoinoniaMinistry', iconText: 'X' },
-    { id: 'tiktok', label: 'TikTok', handle: '@KoinoniaMinistry', iconText: 'TT' },
+    {
+        id: 'tiktok',
+        label: 'TikTok',
+        handle: '@KoinoniaMinistry',
+        iconText: 'TT',
+    },
 ];
 
 export default function MinisterAboutScreen() {

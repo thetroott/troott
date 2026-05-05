@@ -1,10 +1,14 @@
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import React, { useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import React from 'react';
 import ScreenView from '@/components/ui/screenview';
 import { theme } from '@/constants/theme';
 import UserHighlights from '@/components/features/home/user-highlight';
 import LikedByUser from '@/components/features/home/liked-by-user';
-import { MoreFromPreacher, SimilarMinisters, TrendingPlaylist } from '@/components/features/home';
+import {
+    MoreFromPreacher,
+    SimilarMinisters,
+    TrendingPlaylist,
+} from '@/components/features/home';
 import UserWelcome from '@/components/features/home/UserWelcome';
 import SermonsForYou from '@/components/features/home/sermons-for-you';
 
@@ -37,7 +41,7 @@ const Home = () => {
                 <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
                 <TrendingPlaylist />
                 <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
-                <SimilarMinisters/>
+                <SimilarMinisters />
             </ScrollView>
         </ScreenView>
     );
