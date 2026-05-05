@@ -28,6 +28,10 @@ To build this enhanced product experience, we asking the following questions:
 - **SendGrid**
 - **fluent-ffmpeg**
 
+## Documentation
+
+- **[Audio pipeline (upload, workers, S3, CDN)](docs/audio-pipeline-flow.md)** – sermon multipart upload through metadata + HLS jobs to playback URLs.
+
 ## Getting Started
 
 To get the backend up and running on your local machine, follow these steps:

@@ -10,7 +10,8 @@ import { IFile, IFIleUpload } from '@/modules/shared/interfaces.util';
 import { determineFileType, genFileName } from '@/utils/helpers.util';
 
 const acceptedMimeType = Object.values(FileMimeType);
-const expectedSize = 100 * 1024 * 1024;
+/** Default max file size per field (bytes); sermon audio may be capped separately via route middleware. */
+const expectedSize = Number(process.env.MULTIPART_MAX_FILE_BYTES) || 100 * 1024 * 1024;
 
 /**
  * @name uploadHandler

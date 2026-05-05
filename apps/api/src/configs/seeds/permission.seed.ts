@@ -44,9 +44,8 @@ const seedPermissions = async (): Promise<void> => {
         });
 
         // Import rolePermissionMap from permission.util
-        const { rolePermissionMap } = await import(
-            '@/modules/authentication/permission/permission.util'
-        );
+        const { rolePermissionMap } =
+            await import('@/modules/authentication/permission/permission.util');
 
         // If a rolePermissionMap is available, map role names to actions
         if (rolePermissionMap && typeof rolePermissionMap === 'object') {
