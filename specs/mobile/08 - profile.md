@@ -8,29 +8,29 @@
 
 ## Profile overview
 
-- **Avatar:** tap to change (picker, crop rules, progress, error).  
+- **Avatar:** tap to change (picker, crop rules, progress, error).
 - **Display name** and bio: inline edit or **Edit profile** screen; **Save** disabled until dirty; **Discard** confirm if leaving with unsaved changes.
 
 ---
 
 ## Taste and discovery preferences
 
-- User can reopen **favorite ministers / topics** from Settings (same interaction patterns as onboarding: search, multi-select, save).  
-- **Success** toast or inline “Preferences saved”.  
+- User can reopen **favorite ministers / topics** from Settings (same interaction patterns as onboarding: search, multi-select, save).
+- **Success** toast or inline “Preferences saved”.
 - **Failure:** retry; do not silently revert without message.
 
 ---
 
 ## Notifications (preference toggles)
 
-- **Email / push / SMS** toggles if product supports them.  
+- **Email / push / SMS** toggles if product supports them.
 - **OS push permission:** timing aligned with `06 - nofications.md` and master §11 item 10.
 
 ---
 
 ## Account and security
 
-- **Change password** → flow in `00 - security.md`.  
+- **Change password** → flow in `00 - security.md`.
 - **Sign out** → confirm modal, then auth stack.
 
 ---
@@ -43,7 +43,7 @@
 
 ## Support and legal
 
-- **Help / FAQ** web or in-app.  
+- **Help / FAQ** web or in-app.
 - **Terms / Privacy** links; open in in-app browser or Safari/Chrome per platform policy.
 
 ---

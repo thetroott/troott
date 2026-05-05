@@ -8,54 +8,54 @@
 
 ## Search field
 
-- **Focus:** keyboard opens; placeholder clear (“Search sermons, speakers…”).  
-- **Clear (X):** clears query and **results**; restores default landing (trending, recent searches, or empty).  
+- **Focus:** keyboard opens; placeholder clear (“Search sermons, speakers…”).
+- **Clear (X):** clears query and **results**; restores default landing (trending, recent searches, or empty).
 - **Submit:** on keyboard Go or search icon; **loading** state on results list.
 
 ---
 
 ## Suggestions and recent
 
-- **Suggestions** while typing: tap replaces query or appends — **one** rule globally.  
-- **Recent searches:** list with timestamps optional; tap runs search again.  
+- **Suggestions** while typing: tap replaces query or appends — **one** rule globally.
+- **Recent searches:** list with timestamps optional; tap runs search again.
 - **Clear all recents:** confirmation **Clear all recent searches?**
 
 ---
 
 ## Results list
 
-- **Skeleton** on first load; **pagination** or infinite scroll with footer loader.  
-- **End:** “You’re up to date” or natural list end.  
+- **Skeleton** on first load; **pagination** or infinite scroll with footer loader.
+- **End:** “You’re up to date” or natural list end.
 - **No results:** supportive illustration + **Try different words** + **popular topic chips**; if filters active, prominent **Clear filters**.
 
 ---
 
 ## Filters
 
-- Opened as **bottom sheet** or full screen.  
-- **Apply:** closes sheet, applies chips, results refresh with skeleton.  
-- **Reset:** clears all filters, refreshes.  
+- Opened as **bottom sheet** or full screen.
+- **Apply:** closes sheet, applies chips, results refresh with skeleton.
+- **Reset:** clears all filters, refreshes.
 - **Active filter count** badge on search bar when filters on.
 
 ---
 
 ## Category / topic browse
 
-- Grid or list of categories → tap pushes **topic rail**; **Back** returns to grid.  
+- Grid or list of categories → tap pushes **topic rail**; **Back** returns to grid.
 - Same loading/empty/error pattern as search results.
 
 ---
 
 ## From search to play and save
 
-- **Tap result:** sermon detail or immediate play per product consistency with Home.  
+- **Tap result:** sermon detail or immediate play per product consistency with Home.
 - **Save / playlist / share:** identical overflow and sheets as elsewhere (master §6).
 
 ---
 
 ## Offline search
 
-- If search requires network: **banner** + disabled field or tap shows “Search needs internet”.  
+- If search requires network: **banner** + disabled field or tap shows “Search needs internet”.
 - If offline index exists (advanced): show scope in UI (“Offline library only”).
 
 ---

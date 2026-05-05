@@ -4,10 +4,10 @@ This file is the **entry point for web** experience documentation in `specs/api/
 
 ## What lives here
 
-| Document | Audience | Focus |
-|----------|----------|--------|
+| Document                                   | Audience                        | Focus                                                                                                                                                                        |
+| ------------------------------------------ | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **[minister-flow.md](./minister-flow.md)** | Ministers (creators) on **web** | Full **user interaction** spec: creator mode, upload, draft, review, publish, manage sermons, bulk actions, interruptions—**no backend detail**. YouTube Studio–style depth. |
-| **[mobile-flow.md](./mobile-flow.md)** | Listeners on **mobile** | Registration, taste onboarding, discovery, playback, library, playlists—aligned with the mobile app. |
+| **[mobile-flow.md](./mobile-flow.md)**     | Listeners on **mobile**         | Registration, taste onboarding, discovery, playback, library, playlists—aligned with the mobile app.                                                                         |
 
 ## Web vs mobile
 

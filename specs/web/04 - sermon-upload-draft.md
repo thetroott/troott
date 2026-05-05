@@ -14,29 +14,25 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 ## Shared definitions
 
-
-| Term              | Meaning                                                                                                                                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **System**        | Troott **Studio** (`studio.troott.com`) + APIs; upload/draft/publish UI is a **modal** over [My Sermon (View)](./05%20-%20%20sermon-view-trash.md#uc-v1). |
-| **Primary actor** | Authenticated **minister** (or delegated **staff** where product allows).                                                                                                                                                       |
-| **Sermon asset**  | The uploaded audio file plus derived fields (duration, size, processing state).                                                                                                                                                 |
-| **Draft**         | Any sermon that is **not published** yet. This includes: (1) **in-progress upload** — user is in the upload flow (file selected and/or audio **currently uploading** to the server); (2) **upload complete, unpublished** — audio has finished uploading but the user has not clicked **Publish**. Drafts are not live for listeners per visibility/publish rules. |
-| **Upload modal**  | Multi-step dialog for file → progress → details → settings → review. The user **may close it at any time**, including **while upload is still in progress** (see [Draft states and closing the modal](#draft-states-and-closing-the-modal)). |
-| **Published**     | Sermon is live per visibility (public / unlisted / private) and appears on [My Sermon (View)](./05%20-%20%20sermon-view-trash.md#uc-v1) for that minister. |
-| **My Sermon (View)** | Full-page list under `/minister/:ministerId/audio` (see [routing](./05%20-%20%20sermon-view-trash.md#studio-routing)). After **publish** or **save as draft**, closing the **modal** must leave the new row visible on View (refetch / invalidate). |
-
+| Term                 | Meaning                                                                                                                                                                                                                                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **System**           | Troott **Studio** (`studio.troott.com`) + APIs; upload/draft/publish UI is a **modal** over [My Sermon (View)](./05%20-%20%20sermon-view-trash.md#uc-v1).                                                                                                                                                                                                          |
+| **Primary actor**    | Authenticated **minister** (or delegated **staff** where product allows).                                                                                                                                                                                                                                                                                          |
+| **Sermon asset**     | The uploaded audio file plus derived fields (duration, size, processing state).                                                                                                                                                                                                                                                                                    |
+| **Draft**            | Any sermon that is **not published** yet. This includes: (1) **in-progress upload** — user is in the upload flow (file selected and/or audio **currently uploading** to the server); (2) **upload complete, unpublished** — audio has finished uploading but the user has not clicked **Publish**. Drafts are not live for listeners per visibility/publish rules. |
+| **Upload modal**     | Multi-step dialog for file → progress → details → settings → review. The user **may close it at any time**, including **while upload is still in progress** (see [Draft states and closing the modal](#draft-states-and-closing-the-modal)).                                                                                                                       |
+| **Published**        | Sermon is live per visibility (public / unlisted / private) and appears on [My Sermon (View)](./05%20-%20%20sermon-view-trash.md#uc-v1) for that minister.                                                                                                                                                                                                         |
+| **My Sermon (View)** | Full-page list under `/minister/:ministerId/audio` (see [routing](./05%20-%20%20sermon-view-trash.md#studio-routing)). After **publish** or **save as draft**, closing the **modal** must leave the new row visible on View (refetch / invalidate).                                                                                                                |
 
 **Cross-links (this file to companion)**
 
-
-| Topic                                 | In companion spec                                                                                                                                       |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| After **publish**, row on View        | [UC-V1](./05%20-%20%20sermon-view-trash.md#uc-v1)                                                                                                       |
-| **Update / resume** (modal)           | [UC-V2](./05%20-%20%20sermon-view-trash.md#uc-v2), [UC-V3](./05%20-%20%20sermon-view-trash.md#uc-v3)                                                    |
-| **Replace audio** after publish       | [UC-V4](./05%20-%20%20sermon-view-trash.md#uc-v4)                                                                                                       |
+| Topic                                | In companion spec                                                                                                                                                                |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| After **publish**, row on View       | [UC-V1](./05%20-%20%20sermon-view-trash.md#uc-v1)                                                                                                                                |
+| **Update / resume** (modal)          | [UC-V2](./05%20-%20%20sermon-view-trash.md#uc-v2), [UC-V3](./05%20-%20%20sermon-view-trash.md#uc-v3)                                                                             |
+| **Replace audio** after publish      | [UC-V4](./05%20-%20%20sermon-view-trash.md#uc-v4)                                                                                                                                |
 | **Trash** (full **page**, not modal) | [UC-V6](./05%20-%20%20sermon-view-trash.md#uc-v6) from modal; [UC-V7](./05%20-%20%20sermon-view-trash.md#uc-v7), [UC-V8](./05%20-%20%20sermon-view-trash.md#uc-v8) on Trash page |
-| Studio URL pattern                    | [Studio routing](./05%20-%20%20sermon-view-trash.md#studio-routing) |
-
+| Studio URL pattern                   | [Studio routing](./05%20-%20%20sermon-view-trash.md#studio-routing)                                                                                                              |
 
 <a id="draft-modal"></a>
 
@@ -44,8 +40,8 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 - **Draft** always means **not published**, covering both “still uploading” and “upload done, editing metadata / not published.”
 - **Close while uploading:** When the user dismisses the upload modal during `start-upload`:
-  - **Client:** Abort the in-flight request when the stack allows (e.g. `AbortController`); stop showing progress; reset or preserve local wizard state per product (e.g. clear `File` object, keep title draft in `localStorage` if you already do that).
-  - **Server:** If the API has already created a sermon document mid-stream, define whether the row stays as **draft** (partial file / failed upload), is deleted, or is marked **failed** so **My Sermon (View)** can show a resumable or deletable row—this must match backend behavior.
+    - **Client:** Abort the in-flight request when the stack allows (e.g. `AbortController`); stop showing progress; reset or preserve local wizard state per product (e.g. clear `File` object, keep title draft in `localStorage` if you already do that).
+    - **Server:** If the API has already created a sermon document mid-stream, define whether the row stays as **draft** (partial file / failed upload), is deleted, or is marked **failed** so **My Sermon (View)** can show a resumable or deletable row—this must match backend behavior.
 - **Close after upload completes, before publish:** Same as today: optional **Save as draft** ([UC-U2](#uc-u2)); if the user only closes without saving, rely on persisted server draft + local draft rules already in the app.
 - **My Sermon (View):** List shows a **draft** row once the backend has a sermon id tied to the minister and status is unpublished—even if the user closed the **upload modal** mid-upload and the server kept an incomplete draft (filter or badge for “incomplete” if needed).
 
@@ -57,24 +53,21 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 - **After first successful upload:** As soon as `start-upload` completes (or the server exposes `uploadSummary.fileName` / equivalent), the **draft automatically shows the file** (name, and duration/size when available) on **My Sermon (View)** and inside the **modal**—no separate “attach file” confirmation step beyond the upload itself.
 - **Subsequent uploads ([UC-U4](#uc-u4)):** Replacing audio updates the same draft row in place; the **new** file name (and metadata) appears **automatically** after the new upload succeeds, same as the first upload.
 
-
 ---
 
 ## UC-U1: Upload audio and complete studio steps
 
 **Background**
 
-
-| Field                | Description                                                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Field                | Description                                                                                                                                                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **System**           | **Upload modal** on Studio: file picker, upload progress, steps (progress, details, listener settings, review). Opened from **Upload** (empty first-time View) or **Create sermon** (returning user), or deep link e.g. `.../audio/upload`. |
-| **Primary actor**    | Minister.                                                                                                        |
-| **Secondary actors** | Storage/CDN pipeline, API (`start-upload`, optional cover upload, `publish` / metadata save).                    |
-| **Goals**            | Get a valid audio sermon uploaded and ready to publish or save as draft.                                         |
-| **Stakeholders**     | Product, listeners (downstream consumption on other surfaces) which is the mobile app.                           |
-| **Preconditions**    | User is logged in with role allowing `sermon:create`; network available; file within allowed formats/size.       |
-| **Triggers**         | User opened upload **modal** from [My Sermon (View)](./05%20-%20%20sermon-view-trash.md#uc-v1) or landed on `/audio/upload`; then selects or drops an audio file. |
-
+| **Primary actor**    | Minister.                                                                                                                                                                                                                                   |
+| **Secondary actors** | Storage/CDN pipeline, API (`start-upload`, optional cover upload, `publish` / metadata save).                                                                                                                                               |
+| **Goals**            | Get a valid audio sermon uploaded and ready to publish or save as draft.                                                                                                                                                                    |
+| **Stakeholders**     | Product, listeners (downstream consumption on other surfaces) which is the mobile app.                                                                                                                                                      |
+| **Preconditions**    | User is logged in with role allowing `sermon:create`; network available; file within allowed formats/size.                                                                                                                                  |
+| **Triggers**         | User opened upload **modal** from [My Sermon (View)](./05%20-%20%20sermon-view-trash.md#uc-v1) or landed on `/audio/upload`; then selects or drops an audio file.                                                                           |
 
 **Basic flow**
 
@@ -107,15 +100,13 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 **Background**
 
-
-| Field             | Description                                                                                                                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **System**        | Same as UC-U1.                                                                                                                                                                                        |
-| **Primary actor** | Minister.                                                                                                                                                                                             |
-| **Goals**         | Persist work without making the sermon live.                                                                                                                                                          |
+| Field             | Description                                                                                                                                                                                                                                                                                                                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **System**        | Same as UC-U1.                                                                                                                                                                                                                                                                                                               |
+| **Primary actor** | Minister.                                                                                                                                                                                                                                                                                                                    |
+| **Goals**         | Persist work without making the sermon live.                                                                                                                                                                                                                                                                                 |
 | **Preconditions** | A sermon record exists on the server with **upload complete** (or product allows saving metadata-only drafts—if not, require finished `start-upload`). “Draft” in the product sense can still include in-progress upload before this API call—see [Draft states and closing the modal](#draft-states-and-closing-the-modal). |
-| **Triggers**      | User clicks **Save as draft** on the review step (explicit save). Closing the modal without publish does **not** have to hit this endpoint unless product chooses auto-save-on-close after upload completes. |
-
+| **Triggers**      | User clicks **Save as draft** on the review step (explicit save). Closing the modal without publish does **not** have to hit this endpoint unless product chooses auto-save-on-close after upload completes.                                                                                                                 |
 
 **Basic flow**
 
@@ -139,14 +130,12 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 **Background**
 
-
 | Field             | Description                                                                                                                        |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | **Primary actor** | Minister.                                                                                                                          |
 | **Goals**         | Continue editing metadata or replace audio for an existing draft.                                                                  |
 | **Preconditions** | Draft sermon exists and user has permission.                                                                                       |
 | **Triggers**      | User opens a draft row on **My Sermon (View)**; **update/resume modal** opens ([UC-V2](./05%20-%20%20sermon-view-trash.md#uc-v2)). |
-
 
 **Basic flow**
 
@@ -164,12 +153,10 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 **Background**
 
-
 | Field        | Description                                                                 |
 | ------------ | --------------------------------------------------------------------------- |
 | **Goals**    | Fix wrong file before going live.                                           |
 | **Triggers** | User chooses **Change file** / **Remove audio** on progress or review step. |
-
 
 **Basic flow**
 
@@ -186,12 +173,10 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 **Background**
 
-
 | Field        | Description                                                                             |
 | ------------ | --------------------------------------------------------------------------------------- |
 | **Goals**    | Match YouTube-like controls: title, description, tags, thumbnail, visibility, schedule. |
 | **Triggers** | User completes details and listener settings steps.                                     |
-
 
 **Basic flow**
 
@@ -214,13 +199,11 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 **Background**
 
-
 | Field             | Description                                                                 |
 | ----------------- | --------------------------------------------------------------------------- |
 | **Goals**         | Make sermon live per visibility rules.                                      |
 | **Preconditions** | Upload complete; required metadata valid; API allows publish for sermon id. |
 | **Triggers**      | User clicks **Publish** (modal footer or review primary action).            |
-
 
 **Basic flow**
 
@@ -247,16 +230,13 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 
 ## Document map
 
-
-| ID    | Anchor   | Name                                   |
-| ----- | -------- | -------------------------------------- |
-| UC-U1 | `#uc-u1` | Upload audio and complete studio steps |
-| UC-U2 | `#uc-u2` | Save as draft                          |
-| UC-U3 | `#uc-u3` | Resume draft                           |
-| UC-U4 | `#uc-u4` | Replace/remove audio pre-publish       |
-| UC-U5 | `#uc-u5` | Metadata and visibility                |
-| UC-U6 | `#uc-u6` | Publish                                |
-| — | `#draft-modal` | Draft states and closing the modal     |
-| — | `#draft-audio-display` | Draft audio in the UI (empty vs auto file) |
-
-
+| ID    | Anchor                 | Name                                       |
+| ----- | ---------------------- | ------------------------------------------ |
+| UC-U1 | `#uc-u1`               | Upload audio and complete studio steps     |
+| UC-U2 | `#uc-u2`               | Save as draft                              |
+| UC-U3 | `#uc-u3`               | Resume draft                               |
+| UC-U4 | `#uc-u4`               | Replace/remove audio pre-publish           |
+| UC-U5 | `#uc-u5`               | Metadata and visibility                    |
+| UC-U6 | `#uc-u6`               | Publish                                    |
+| —     | `#draft-modal`         | Draft states and closing the modal         |
+| —     | `#draft-audio-display` | Draft audio in the UI (empty vs auto file) |

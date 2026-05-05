@@ -17,16 +17,16 @@ This document specifies the authentication-related **implementation** in `apps/m
 
 ### Route inventory (`app/auth/`)
 
-| Route file | Purpose |
-|------------|---------|
-| `login.tsx` | Email/password login; terms; login form. |
-| `register.tsx` | Create account (name, email, password); leads to verify email. |
-| `verify-email.tsx` | Post-signup email OTP. |
-| `activate-user-account.tsx` | Account activation placeholder. |
-| `enter-email.tsx` | Collect email; continues to `register` (stores email in register store). |
-| `request-password-otp.tsx` | Password reset OTP request (minimal / stub). |
-| `reset-password-otp-request.tsx` | Alternate OTP request shell (stub). |
-| `reset-password.tsx` | New password shell (stub). |
+| Route file                       | Purpose                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| `login.tsx`                      | Email/password login; terms; login form.                                 |
+| `register.tsx`                   | Create account (name, email, password); leads to verify email.           |
+| `verify-email.tsx`               | Post-signup email OTP.                                                   |
+| `activate-user-account.tsx`      | Account activation placeholder.                                          |
+| `enter-email.tsx`                | Collect email; continues to `register` (stores email in register store). |
+| `request-password-otp.tsx`       | Password reset OTP request (minimal / stub).                             |
+| `reset-password-otp-request.tsx` | Alternate OTP request shell (stub).                                      |
+| `reset-password.tsx`             | New password shell (stub).                                               |
 
 ### Layering
 
@@ -40,31 +40,31 @@ This document specifies the authentication-related **implementation** in `apps/m
 
 ### Layout and chrome
 
-| Component | Path | Role |
-|-----------|------|------|
-| `ScreenView` | `components/layouts/screenview.tsx` | `SafeAreaView` wrapper; `paddingHorizontal: theme.sizes.spacing.md`, vertical `gap: theme.sizes.spacing.lg`, `flex: 1`. |
-| `SharedHeader` | `components/containers/shared/headers.tsx` | Centered title; optional `variant` (`auth` \| `home` \| `playlist`); bottom border `grey[800]`. |
-| `TermsAndConditions` | `components/containers/auth/TermsConditions.tsx` | Legal copy / links where required on auth steps. |
+| Component            | Path                                             | Role                                                                                                                    |
+| -------------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `ScreenView`         | `components/layouts/screenview.tsx`              | `SafeAreaView` wrapper; `paddingHorizontal: theme.sizes.spacing.md`, vertical `gap: theme.sizes.spacing.lg`, `flex: 1`. |
+| `SharedHeader`       | `components/containers/shared/headers.tsx`       | Centered title; optional `variant` (`auth` \| `home` \| `playlist`); bottom border `grey[800]`.                         |
+| `TermsAndConditions` | `components/containers/auth/TermsConditions.tsx` | Legal copy / links where required on auth steps.                                                                        |
 
 ### Forms and inputs
 
-| Component | Used on |
-|-----------|---------|
-| `LoginForm` | Login |
-| `SignUpform` (`register-form.tsx`) | Register |
-| `VerifyEmailForm` | Verify email |
-| `EnterEmailForm` | Enter email |
-| `FormInput` | Text fields with optional left icon (Iconsax). |
-| `OTPFormInput` | Single-field OTP on verify screen. |
-| `Button` | Primary actions; supports loading and variants. |
+| Component                          | Used on                                         |
+| ---------------------------------- | ----------------------------------------------- |
+| `LoginForm`                        | Login                                           |
+| `SignUpform` (`register-form.tsx`) | Register                                        |
+| `VerifyEmailForm`                  | Verify email                                    |
+| `EnterEmailForm`                   | Enter email                                     |
+| `FormInput`                        | Text fields with optional left icon (Iconsax).  |
+| `OTPFormInput`                     | Single-field OTP on verify screen.              |
+| `Button`                           | Primary actions; supports loading and variants. |
 
 ### Optional / partial
 
-| Component | Notes |
-|-----------|--------|
-| `OAuth` | Apple / Google placeholders (`TODO` in handlers); divider (“or”) layout. |
-| `ChangeData` | Copy + “(Change)” for email; not wired to live store in all screens. |
-| `AuthHeader` | Legacy/alternate header in `components/containers/auth/`. |
+| Component       | Notes                                                                         |
+| --------------- | ----------------------------------------------------------------------------- |
+| `OAuth`         | Apple / Google placeholders (`TODO` in handlers); divider (“or”) layout.      |
+| `ChangeData`    | Copy + “(Change)” for email; not wired to live store in all screens.          |
+| `AuthHeader`    | Legacy/alternate header in `components/containers/auth/`.                     |
 | `WelcomeScreen` | Exists under `screens/Auth/`; root welcome is implemented in `app/index.tsx`. |
 
 ---
@@ -174,21 +174,21 @@ This document specifies the authentication-related **implementation** in `apps/m
 
 Document each user-visible action with **trigger**, **preconditions**, **system effect**, and **destination**.
 
-| Action | Preconditions | Effect | Navigation / output |
-|--------|---------------|--------|---------------------|
-| Open app (welcome) | Cold start | Fonts/splash from root layout; optional delay | Stay on index or auto-route per product rules |
-| Create Account (welcome) | None | Should start signup | **Current:** `router.push('/auth/enter-email')` after a short delay. **Target:** same path with real loading from mutation if needed. |
-| Login (welcome) | None | Should open login | **Current:** `router.push('/home')` after delay (bypasses `/auth/login`). **Target:** `/auth/login` unless session restore sends user to home. |
-| Submit login | Valid email/password schema | Call login API; persist user/session; clear player UI flags in form | Success: `/home`; errors: toast; special statuses: activate/register |
-| Submit register | Valid signup schema | Persist email in register store; advance flow | Current: `/auth/verify-email` (API may be separate step) |
-| Submit email (enter-email) | Valid email | Send or store for next step | Per `EnterEmailForm` implementation |
-| Submit email OTP | Valid OTP schema | Verify with API | Target: onboarding (e.g. `/onboarding/select-ministers`) when wired |
-| Resend OTP | Cooldown elapsed | Mutation resend | Reset inputs; restart countdown |
-| Forgot password | Email known | Send OTP | Step `otp` in forgot-password store |
-| Reset password | OTP + new password | `ResetPasswordMutation` | Success: `/login` |
-| Logout | Authenticated | Clear user, token, secure storage; invalidate queries | `/login` |
-| Change email (verify) | OTP screen | Return to email entry with state cleared | Router back + store update |
-| **Upload an image (optional / future)** | Auth or onboarding policy | Pick from library/camera; validate MIME/size; optional crop; upload to storage; show progress/error | Updated avatar URL in user profile — **not in current auth screens**; specify when adding |
+| Action                                  | Preconditions               | Effect                                                                                              | Navigation / output                                                                                                                            |
+| --------------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Open app (welcome)                      | Cold start                  | Fonts/splash from root layout; optional delay                                                       | Stay on index or auto-route per product rules                                                                                                  |
+| Create Account (welcome)                | None                        | Should start signup                                                                                 | **Current:** `router.push('/auth/enter-email')` after a short delay. **Target:** same path with real loading from mutation if needed.          |
+| Login (welcome)                         | None                        | Should open login                                                                                   | **Current:** `router.push('/home')` after delay (bypasses `/auth/login`). **Target:** `/auth/login` unless session restore sends user to home. |
+| Submit login                            | Valid email/password schema | Call login API; persist user/session; clear player UI flags in form                                 | Success: `/home`; errors: toast; special statuses: activate/register                                                                           |
+| Submit register                         | Valid signup schema         | Persist email in register store; advance flow                                                       | Current: `/auth/verify-email` (API may be separate step)                                                                                       |
+| Submit email (enter-email)              | Valid email                 | Send or store for next step                                                                         | Per `EnterEmailForm` implementation                                                                                                            |
+| Submit email OTP                        | Valid OTP schema            | Verify with API                                                                                     | Target: onboarding (e.g. `/onboarding/select-ministers`) when wired                                                                            |
+| Resend OTP                              | Cooldown elapsed            | Mutation resend                                                                                     | Reset inputs; restart countdown                                                                                                                |
+| Forgot password                         | Email known                 | Send OTP                                                                                            | Step `otp` in forgot-password store                                                                                                            |
+| Reset password                          | OTP + new password          | `ResetPasswordMutation`                                                                             | Success: `/login`                                                                                                                              |
+| Logout                                  | Authenticated               | Clear user, token, secure storage; invalidate queries                                               | `/login`                                                                                                                                       |
+| Change email (verify)                   | OTP screen                  | Return to email entry with state cleared                                                            | Router back + store update                                                                                                                     |
+| **Upload an image (optional / future)** | Auth or onboarding policy   | Pick from library/camera; validate MIME/size; optional crop; upload to storage; show progress/error | Updated avatar URL in user profile — **not in current auth screens**; specify when adding                                                      |
 
 ---
 

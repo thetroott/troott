@@ -7,27 +7,27 @@ This document is the **canonical contract** for Troott listener sharing and univ
 - **Scheme:** `https` only for universal links.
 - **Host:** Use the same host configured as `CLIENT_APP_URL` (or a dedicated marketing host that redirects consistently). Avoid mixing `www` and apex; pick one and redirect the other.
 - **Path style (primary):**
-  - Sermon: **`/sermon/{idOrSlug}`** (matches Expo Router in `apps/mobile/app/sermon/[id].tsx` and API teaser route below).
-  - Playlist: **`/playlist/{id}`** (matches `apps/mobile/app/playlist/[id].tsx`).
-  - Minister: **`/minister/{idOrSlug}`** (matches `apps/mobile/app/minister/[id].tsx`).
+    - Sermon: **`/sermon/{idOrSlug}`** (matches Expo Router in `apps/mobile/app/sermon/[id].tsx` and API teaser route below).
+    - Playlist: **`/playlist/{id}`** (matches `apps/mobile/app/playlist/[id].tsx`).
+    - Minister: **`/minister/{idOrSlug}`** (matches `apps/mobile/app/minister/[id].tsx`).
 - **Trailing slash:** Omit trailing slashes on share URLs (single canonical form).
 - **Optional query:** `?t=` seconds for seek position (reserved; clients may ignore until supported).
 - **Optional analytics:** `utm_source=share` (and related UTM params); servers should **preserve** them when redirecting.
 
 ## Primary vs secondary share mechanisms
 
-| Mechanism | When to use | Typical lifetime |
-|-----------|-------------|------------------|
-| **Stable URL** (`https://…/sermon/{id}`) | Default “Copy link”, OS share sheet, email, push deep links to catalog content | Permanent while resource exists and visibility allows |
-| **Token link** (`GET /api/v1/share/resolve?token=…`) | Campaigns, partner windows, revocable access without changing resource id, optional **non-public** playlist share | Short TTL; see shareable-link service |
+| Mechanism                                            | When to use                                                                                                       | Typical lifetime                                      |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **Stable URL** (`https://…/sermon/{id}`)             | Default “Copy link”, OS share sheet, email, push deep links to catalog content                                    | Permanent while resource exists and visibility allows |
+| **Token link** (`GET /api/v1/share/resolve?token=…`) | Campaigns, partner windows, revocable access without changing resource id, optional **non-public** playlist share | Short TTL; see shareable-link service                 |
 
 ## Auth, onboarding, and teaser matrix
 
-| User state | Stable link opened in app | Full sermon API (`GET /api/v1/sermon/:id`) | Public teaser (`GET /api/v1/open/sermon/:id`) |
-|------------|----------------------------|--------------------------------------------|-----------------------------------------------|
-| Signed out | App stores **pending** target (see mobile impl); show Sign in / Sign up | Not required for first paint; use teaser or skip | **200** only for `isPublic` + published-safe sermon; minimal fields |
-| Signed in, not onboarded | Product policy A or B (document in mobile-flow): block Home vs allow one-off listen | Per existing API auth rules | Same as signed out |
-| Signed in, onboarded | `router` to `/sermon/[id]` | **200** full document when public or entitled | Same teaser available for marketing embeds |
+| User state               | Stable link opened in app                                                           | Full sermon API (`GET /api/v1/sermon/:id`)       | Public teaser (`GET /api/v1/open/sermon/:id`)                       |
+| ------------------------ | ----------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------- |
+| Signed out               | App stores **pending** target (see mobile impl); show Sign in / Sign up             | Not required for first paint; use teaser or skip | **200** only for `isPublic` + published-safe sermon; minimal fields |
+| Signed in, not onboarded | Product policy A or B (document in mobile-flow): block Home vs allow one-off listen | Per existing API auth rules                      | Same as signed out                                                  |
+| Signed in, onboarded     | `router` to `/sermon/[id]`                                                          | **200** full document when public or entitled    | Same teaser available for marketing embeds                          |
 
 **Note:** [`mobile-flow.md`](./mobile-flow.md) requires no guest **account**; teaser responses must not create anonymous users.
 
@@ -44,11 +44,11 @@ Example templates live in [`apps/mobile/docs/universal-link-host-files.md`](../a
 
 ## API surfaces
 
-| Route | Purpose |
-|-------|---------|
-| `GET /api/v1/sermon/:id` | Full sermon by Mongo id or **slug** (when slug exists); public read for catalog per current router |
+| Route                         | Purpose                                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `GET /api/v1/sermon/:id`      | Full sermon by Mongo id or **slug** (when slug exists); public read for catalog per current router           |
 | `GET /api/v1/open/sermon/:id` | **Public teaser** only: safe subset of fields; **404** if not public / not suitable for teaser; rate limited |
-| `GET /api/v1/share/resolve` | Token-based resolve + optional `resourceId` for legacy links |
+| `GET /api/v1/share/resolve`   | Token-based resolve + optional `resourceId` for legacy links                                                 |
 
 ## Paywall and region (future)
 

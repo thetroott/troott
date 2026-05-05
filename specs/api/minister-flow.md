@@ -8,16 +8,16 @@ This document describes **every user-visible interaction** for ministers using t
 
 All flows below assume the UI adapts to one or more of these **states**:
 
-| State | Meaning for the UI |
-|--------|----------------------|
-| **First-time creator** | No sermons yet; strong empty states; “Upload your first sermon” is primary; no drafts or published rows. |
-| **Creator with drafts** | At least one draft exists; drafts tab has rows; resume and delete paths are common. |
-| **Creator with published sermons** | At least one published sermon; published tab populated; edit / unpublish / share available. |
+| State                              | Meaning for the UI                                                                                                                      |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **First-time creator**             | No sermons yet; strong empty states; “Upload your first sermon” is primary; no drafts or published rows.                                |
+| **Creator with drafts**            | At least one draft exists; drafts tab has rows; resume and delete paths are common.                                                     |
+| **Creator with published sermons** | At least one published sermon; published tab populated; edit / unpublish / share available.                                             |
 | **Creator with scheduled sermons** | At least one sermon scheduled for a future go-live time; scheduled tab populated; edit schedule and cancel schedule interactions apply. |
-| **Upload in progress** | A file is actively uploading; progress visible; cancel / replace rules apply; other actions may be limited. |
-| **Upload failed** | Last upload attempt failed; retry and replace are prominent; draft may exist without playable audio until fixed. |
-| **Draft incomplete (dirty)** | User changed something not yet persisted, or required fields missing; save / leave flows show warnings. |
-| **Published but editable** | Sermon is live; user can open editor; changes may require review / republish rules per product (see cross-flow). |
+| **Upload in progress**             | A file is actively uploading; progress visible; cancel / replace rules apply; other actions may be limited.                             |
+| **Upload failed**                  | Last upload attempt failed; retry and replace are prominent; draft may exist without playable audio until fixed.                        |
+| **Draft incomplete (dirty)**       | User changed something not yet persisted, or required fields missing; save / leave flows show warnings.                                 |
+| **Published but editable**         | Sermon is live; user can open editor; changes may require review / republish rules per product (see cross-flow).                        |
 
 Copy, empty states, disabled buttons, and warnings **must** change based on these states.
 
@@ -73,7 +73,7 @@ Each path below: **what the user sees** and **what state the flow starts in**.
 
 - **Sees:** Either in-browser recorder UI or “Record” tab inside upload wizard.
 - **First time only:** Browser asks **microphone permission** → user **Allow** or **Block**.
-  - **Block:** inline error “Microphone access needed to record” + **Try again** (re-triggers permission) or “Upload file instead.”
+    - **Block:** inline error “Microphone access needed to record” + **Try again** (re-triggers permission) or “Upload file instead.”
 - **During record:** **Record** button toggles to **Pause** / **Stop** per product; elapsed timer visible; optional **Discard** (confirm).
 - **Muted system mic:** optional warning icon “No input detected” with link to OS settings.
 - **Completes:** Stop recording → optional **Play preview** / **Re-record** / **Use this recording** → “Continue.”
@@ -145,12 +145,12 @@ Each path below: **what the user sees** and **what state the flow starts in**.
 
 1. User arrives at upload entry (any from section 2).
 2. **Choice screen** (if product uses it):
-   - **Record audio** → click opens recorder (permission prompt first time).
-   - **Upload from device** → click opens OS file picker.
+    - **Record audio** → click opens recorder (permission prompt first time).
+    - **Upload from device** → click opens OS file picker.
 3. **Drag and drop** (web): user drags file onto drop zone.
-   - **Hover:** Drop zone highlights (“Drop to upload”).
-   - **Drop valid file:** Picker equivalent—file attaches, validation runs.
-   - **Drop invalid:** Inline message on drop zone: invalid type; file not attached.
+    - **Hover:** Drop zone highlights (“Drop to upload”).
+    - **Drop valid file:** Picker equivalent—file attaches, validation runs.
+    - **Drop invalid:** Inline message on drop zone: invalid type; file not attached.
 4. **File picker:** user selects one or more files (if multi-file supported).
 5. **Cancel selection:** user closes picker without file → remain on choice screen; no partial file.
 6. **Invalid file type:** message under control or toast: allowed types listed; “Choose another file.”
@@ -172,14 +172,14 @@ Each path below: **what the user sees** and **what state the flow starts in**.
 
 **Fields (every interaction):**
 
-| Field | User actions |
-|--------|----------------|
-| **Title** | Click field, type, cut/copy/paste, clear with keyboard; optional character count. |
-| **Description** | Multiline; resize handle if applicable; same typing actions. |
-| **Speaker** | Free text or picker: open list, search, select, clear selection. |
-| **Tags / topics** | Add chip: type comma or Enter; remove chip X click; suggestion dropdown on focus if product has it. |
-| **Category** | Single-select dropdown or card grid; open, hover option, click to select; change selection updates value. |
-| **Thumbnail** | Click upload area → image picker; drag-drop image; **Remove image** resets to placeholder; optional crop modal. |
+| Field             | User actions                                                                                                    |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Title**         | Click field, type, cut/copy/paste, clear with keyboard; optional character count.                               |
+| **Description**   | Multiline; resize handle if applicable; same typing actions.                                                    |
+| **Speaker**       | Free text or picker: open list, search, select, clear selection.                                                |
+| **Tags / topics** | Add chip: type comma or Enter; remove chip X click; suggestion dropdown on focus if product has it.             |
+| **Category**      | Single-select dropdown or card grid; open, hover option, click to select; change selection updates value.       |
+| **Thumbnail**     | Click upload area → image picker; drag-drop image; **Remove image** resets to placeholder; optional crop modal. |
 
 **Thumbnail crop modal (if product includes):**
 
@@ -225,15 +225,15 @@ Each path below: **what the user sees** and **what state the flow starts in**.
 ### F. Review before publish (deep)
 
 1. **Review screen layout:** user scrolls a single page (or accordion) of read-only **cards** / rows:
-   - **Audio:** waveform or duration text + filename; **Replace** shortcut if product allows from review.
-   - **Title** (single line, truncated with “Show more” if long).
-   - **Description** (expand/collapse for long text).
-   - **Speaker** line.
-   - **Tags** as read-only chips.
-   - **Category** as text.
-   - **Thumbnail** image or “None—optional” placeholder.
-   - **Visibility** (e.g. Public / Unlisted) if product includes.
-   - **Schedule** line if scheduled (section 4.H).
+    - **Audio:** waveform or duration text + filename; **Replace** shortcut if product allows from review.
+    - **Title** (single line, truncated with “Show more” if long).
+    - **Description** (expand/collapse for long text).
+    - **Speaker** line.
+    - **Tags** as read-only chips.
+    - **Category** as text.
+    - **Thumbnail** image or “None—optional” placeholder.
+    - **Visibility** (e.g. Public / Unlisted) if product includes.
+    - **Schedule** line if scheduled (section 4.H).
 2. **Edit from review:** each card has **Edit** or pencil → click jumps to editor **anchor** for that section; user changes field → **Back to review** control returns to review with updated read-only values (unsaved changes follow dirty rules).
 3. **Missing fields:** card shows dashed border + inline **Add …** button that jumps to the right editor control.
 4. **Blocking errors:** **Publish** / **Schedule** disabled; sticky summary “Fix 2 issues” with each item as link (click scrolls editor when navigated).
@@ -323,37 +323,37 @@ If sermons can be **scheduled** instead of immediate publish:
 
 ## 6. Cross-flow interactions
 
-| Scenario | User interactions |
-|----------|-------------------|
-| **Edit after publish** | Open from published tab → edit → save may open **mini review** or “Changes are live” / “Submit for review” per policy. |
-| **Re-upload audio** | In editor, “Replace audio” → same as start upload B; old audio replaced after confirm if live. |
-| **Duplicate sermon** | From menu → confirm optional → new draft opened. |
-| **Continue after interruption** | Dashboard banner “Upload interrupted” on affected draft → Resume / Retry. |
+| Scenario                        | User interactions                                                                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Edit after publish**          | Open from published tab → edit → save may open **mini review** or “Changes are live” / “Submit for review” per policy. |
+| **Re-upload audio**             | In editor, “Replace audio” → same as start upload B; old audio replaced after confirm if live.                         |
+| **Duplicate sermon**            | From menu → confirm optional → new draft opened.                                                                       |
+| **Continue after interruption** | Dashboard banner “Upload interrupted” on affected draft → Resume / Retry.                                              |
 
 ---
 
 ## 7. Interruption and resume (web)
 
-| Event | User-visible outcome |
-|--------|----------------------|
-| **Tab closed during upload** | Reopen app: draft exists with failed or partial state; **Retry** prominent. |
-| **Page refresh mid-edit** | If saved: restored. If dirty: browser warning; if user forces reload, lose unsaved unless auto-save had run. |
-| **Navigation away mid-edit** | Unsaved modal (section 3.5). |
-| **On return** | Same draft row; editor opens to last saved step; banners for failed upload or save. |
+| Event                        | User-visible outcome                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Tab closed during upload** | Reopen app: draft exists with failed or partial state; **Retry** prominent.                                  |
+| **Page refresh mid-edit**    | If saved: restored. If dirty: browser warning; if user forces reload, lose unsaved unless auto-save had run. |
+| **Navigation away mid-edit** | Unsaved modal (section 3.5).                                                                                 |
+| **On return**                | Same draft row; editor opens to last saved step; banners for failed upload or save.                          |
 
 ---
 
 ## 8. Edge case interactions (user perspective)
 
-| Situation | What the user sees / does |
-|-----------|---------------------------|
-| **No internet** | Inline/offline banner; saves queue or fail with “You’re offline—retry when connected”; publish disabled. |
-| **Upload stuck** | After timeout, “Taking too long—Cancel or Retry”; support link optional. |
-| **File corrupted** | Error after processing: “This file couldn’t be read—try another file.” |
-| **Duplicate upload attempt** | Same file dropped twice: second replaces first after confirm or ignored with message. |
-| **Missing required fields** | Cannot publish; review lists them; inline on fields. |
-| **Save fails** | Toast “Couldn’t save”; **Retry**; draft not updated until success. |
-| **Publish fails** | Error on review; **Try again**; draft unchanged or rolled back with message. |
+| Situation                    | What the user sees / does                                                                                |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **No internet**              | Inline/offline banner; saves queue or fail with “You’re offline—retry when connected”; publish disabled. |
+| **Upload stuck**             | After timeout, “Taking too long—Cancel or Retry”; support link optional.                                 |
+| **File corrupted**           | Error after processing: “This file couldn’t be read—try another file.”                                   |
+| **Duplicate upload attempt** | Same file dropped twice: second replaces first after confirm or ignored with message.                    |
+| **Missing required fields**  | Cannot publish; review lists them; inline on fields.                                                     |
+| **Save fails**               | Toast “Couldn’t save”; **Retry**; draft not updated until success.                                       |
+| **Publish fails**            | Error on review; **Try again**; draft unchanged or rolled back with message.                             |
 
 ---
 

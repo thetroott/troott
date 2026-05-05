@@ -22,12 +22,12 @@ This document specifies **My Sermon (View)**—the minister’s audio sermon hub
 
 ### Page vs modal
 
-| Surface | What it is | Typical route (under `/minister/:id/audio`) |
-|--------|------------|-----------------------------------------------|
-| **My Sermon (View)** | Full page: grid/list of sermons, filters, primary actions | e.g. `/` or `/view` (product picks one canonical list URL) |
-| **Upload** | **Modal** over View (first-time **empty** chrome vs returning user **Create sermon**) | Deep link e.g. `/upload` **opens the same View shell** with upload **modal** open |
+| Surface                     | What it is                                                                                                  | Typical route (under `/minister/:id/audio`)                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **My Sermon (View)**        | Full page: grid/list of sermons, filters, primary actions                                                   | e.g. `/` or `/view` (product picks one canonical list URL)                        |
+| **Upload**                  | **Modal** over View (first-time **empty** chrome vs returning user **Create sermon**)                       | Deep link e.g. `/upload` **opens the same View shell** with upload **modal** open |
 | **Draft / Update (resume)** | **Modal** — pick up a draft where the user left off; edit unpublished or published metadata/audio per rules | Opened from View row actions or deep link; remains **modal**, not a separate page |
-| **Trash** | **Own full page** — browse trashed sermons, restore, delete forever | e.g. `/trash` — **not** a modal |
+| **Trash**                   | **Own full page** — browse trashed sermons, restore, delete forever                                         | e.g. `/trash` — **not** a modal                                                   |
 
 **Actions on My Sermon (View)**
 
@@ -43,26 +43,26 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 ## Shared definitions
 
-| Term | Meaning |
-|------|---------|
-| **System** | Troott **Studio** web app + APIs for sermon lifecycle under `/minister/:ministerId/audio`. |
-| **Primary actor** | Authenticated **minister** (and **staff** if permitted). |
-| **My Sermon (View)** | The **full-page** sermon library: grid/list, filters, empty vs populated states, toolbar actions above. Same as former “library” concept; see [UC-V1](#uc-v1). |
-| **Draft** | **Unpublished** sermon: includes **upload in progress** and **upload done but not published**. Modal may close mid-upload; see companion [Draft states and closing the modal](./04%20-%20sermon-upload-draft.md#draft-modal). |
-| **Trash (page)** | **Full-page** destination for soft-deleted sermons—not a modal. Restore and permanent delete occur here. |
+| Term                 | Meaning                                                                                                                                                                                                                       |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **System**           | Troott **Studio** web app + APIs for sermon lifecycle under `/minister/:ministerId/audio`.                                                                                                                                    |
+| **Primary actor**    | Authenticated **minister** (and **staff** if permitted).                                                                                                                                                                      |
+| **My Sermon (View)** | The **full-page** sermon library: grid/list, filters, empty vs populated states, toolbar actions above. Same as former “library” concept; see [UC-V1](#uc-v1).                                                                |
+| **Draft**            | **Unpublished** sermon: includes **upload in progress** and **upload done but not published**. Modal may close mid-upload; see companion [Draft states and closing the modal](./04%20-%20sermon-upload-draft.md#draft-modal). |
+| **Trash (page)**     | **Full-page** destination for soft-deleted sermons—not a modal. Restore and permanent delete occur here.                                                                                                                      |
 
 **Cross-links (this file to companion)**
 
-| Topic | In upload spec |
-|------|----------------|
-| **New** sermon (upload flow) | [UC-U1](./04%20-%20sermon-upload-draft.md#uc-u1) |
-| **Draft** save / resume | [UC-U2](./04%20-%20sermon-upload-draft.md#uc-u2), [UC-U3](./04%20-%20sermon-upload-draft.md#uc-u3) |
-| **Publish** first time | [UC-U6](./04%20-%20sermon-upload-draft.md#uc-u6) |
-| Metadata / visibility rules | [UC-U5](./04%20-%20sermon-upload-draft.md#uc-u5) |
-| Replace audio **before** publish | [UC-U4](./04%20-%20sermon-upload-draft.md#uc-u4) |
-| Draft definition, close modal while uploading | [Draft states and closing the modal](./04%20-%20sermon-upload-draft.md#draft-modal) |
-| Empty draft vs auto-shown audio file | [Draft audio in the UI](./04%20-%20sermon-upload-draft.md#draft-audio-display) |
-| Studio URL pattern | [Troott Studio: host, URLs, and layout](#studio-routing) |
+| Topic                                         | In upload spec                                                                                     |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **New** sermon (upload flow)                  | [UC-U1](./04%20-%20sermon-upload-draft.md#uc-u1)                                                   |
+| **Draft** save / resume                       | [UC-U2](./04%20-%20sermon-upload-draft.md#uc-u2), [UC-U3](./04%20-%20sermon-upload-draft.md#uc-u3) |
+| **Publish** first time                        | [UC-U6](./04%20-%20sermon-upload-draft.md#uc-u6)                                                   |
+| Metadata / visibility rules                   | [UC-U5](./04%20-%20sermon-upload-draft.md#uc-u5)                                                   |
+| Replace audio **before** publish              | [UC-U4](./04%20-%20sermon-upload-draft.md#uc-u4)                                                   |
+| Draft definition, close modal while uploading | [Draft states and closing the modal](./04%20-%20sermon-upload-draft.md#draft-modal)                |
+| Empty draft vs auto-shown audio file          | [Draft audio in the UI](./04%20-%20sermon-upload-draft.md#draft-audio-display)                     |
+| Studio URL pattern                            | [Troott Studio: host, URLs, and layout](#studio-routing)                                           |
 
 ---
 
@@ -72,14 +72,14 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **System** | **Full-page** Studio route under [`/minister/:ministerId/audio`](#studio-routing): table/grid, filters, sort, search, toolbar (**Upload**, **Create sermon**, draft filters, link to **Trash** page). |
-| **Primary actor** | Minister. |
-| **Goals** | Find sermons quickly; see status (draft / published / processing); start upload/create or resume draft via **modals**. |
-| **Stakeholders** | Ministers, moderators. |
-| **Preconditions** | Authenticated; URL `ministerId` matches session (or user can access that minister scope). |
-| **Triggers** | User opens **My Sermon (View)** (canonical list URL) or lands on `/audio/upload` (opens View + upload **modal**). |
+| Field             | Description                                                                                                                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **System**        | **Full-page** Studio route under [`/minister/:ministerId/audio`](#studio-routing): table/grid, filters, sort, search, toolbar (**Upload**, **Create sermon**, draft filters, link to **Trash** page). |
+| **Primary actor** | Minister.                                                                                                                                                                                             |
+| **Goals**         | Find sermons quickly; see status (draft / published / processing); start upload/create or resume draft via **modals**.                                                                                |
+| **Stakeholders**  | Ministers, moderators.                                                                                                                                                                                |
+| **Preconditions** | Authenticated; URL `ministerId` matches session (or user can access that minister scope).                                                                                                             |
+| **Triggers**      | User opens **My Sermon (View)** (canonical list URL) or lands on `/audio/upload` (opens View + upload **modal**).                                                                                     |
 
 **Integration note**
 
@@ -111,11 +111,11 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **System** | **Modal** over My Sermon (View)—not a separate detail page (unless product later adds optional full-page detail). |
-| **Goals** | Inspect one sermon; **resume draft** or **update** published sermon; **move to trash** (then user may go to Trash page). |
-| **Triggers** | User selects a row on [UC-V1](#uc-v1). |
+| Field        | Description                                                                                                              |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------ |
+| **System**   | **Modal** over My Sermon (View)—not a separate detail page (unless product later adds optional full-page detail).        |
+| **Goals**    | Inspect one sermon; **resume draft** or **update** published sermon; **move to trash** (then user may go to Trash page). |
+| **Triggers** | User selects a row on [UC-V1](#uc-v1).                                                                                   |
 
 **Basic flow**
 
@@ -136,11 +136,11 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **Goals** | Change title, description, tags, topic/category, thumbnail without replacing audio. |
+| Field             | Description                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| **Goals**         | Change title, description, tags, topic/category, thumbnail without replacing audio.        |
 | **Preconditions** | Sermon not in **trash** (default); or product allows edits while trashed—state explicitly. |
-| **Triggers** | User edits inside [UC-V2](#uc-v2) **modal** or inline edit on View (if offered). |
+| **Triggers**      | User edits inside [UC-V2](#uc-v2) **modal** or inline edit on View (if offered).           |
 
 **Basic flow**
 
@@ -161,11 +161,11 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **Goals** | Swap audio file for a correction or remaster; keep same sermon id if product allows. |
-| **Preconditions** | User has `sermon:update`; sermon state allows replace (not mid-processing—or define behavior). |
-| **Triggers** | User chooses **Replace audio** inside [UC-V2](#uc-v2) **modal** (or published-sermon edit surface). |
+| Field             | Description                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------- |
+| **Goals**         | Swap audio file for a correction or remaster; keep same sermon id if product allows.                |
+| **Preconditions** | User has `sermon:update`; sermon state allows replace (not mid-processing—or define behavior).      |
+| **Triggers**      | User chooses **Replace audio** inside [UC-V2](#uc-v2) **modal** (or published-sermon edit surface). |
 
 **Basic flow**
 
@@ -190,10 +190,10 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **Goals** | Toggle public / unlisted / private; change scheduled publish time if supported post-publish. |
-| **Triggers** | User edits from [UC-V2](#uc-v2) **modal** or bulk action ([UC-V9](#uc-v9)) on View. |
+| Field        | Description                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| **Goals**    | Toggle public / unlisted / private; change scheduled publish time if supported post-publish. |
+| **Triggers** | User edits from [UC-V2](#uc-v2) **modal** or bulk action ([UC-V9](#uc-v9)) on View.          |
 
 **Basic flow**
 
@@ -216,9 +216,9 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **Goals** | Soft-delete; remove from default View list. |
+| Field        | Description                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------------------- |
+| **Goals**    | Soft-delete; remove from default View list.                                                          |
 | **Triggers** | User clicks **Move to trash** in [UC-V2](#uc-v2) **modal** or bulk action on View ([UC-V9](#uc-v9)). |
 
 **Basic flow**
@@ -239,11 +239,11 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **System** | **Full page** at e.g. `/minister/:ministerId/audio/trash` — not a modal. |
-| **Goals** | List trashed sermons; restore to previous status (draft vs published per backend). |
-| **Triggers** | User clicks **Trash** in Studio nav from My Sermon (View) or bookmarks Trash URL. |
+| Field        | Description                                                                        |
+| ------------ | ---------------------------------------------------------------------------------- |
+| **System**   | **Full page** at e.g. `/minister/:ministerId/audio/trash` — not a modal.           |
+| **Goals**    | List trashed sermons; restore to previous status (draft vs published per backend). |
+| **Triggers** | User clicks **Trash** in Studio nav from My Sermon (View) or bookmarks Trash URL.  |
 
 **Basic flow**
 
@@ -263,12 +263,12 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **System** | Same **Trash page** as [UC-V7](#uc-v7) (full page). |
-| **Goals** | Irreversible removal of asset and metadata (retention / GDPR aware). |
-| **Preconditions** | Item is in trash; user has `sermon:destroy` or equivalent. |
-| **Triggers** | User clicks **Delete forever** on Trash page. |
+| Field             | Description                                                          |
+| ----------------- | -------------------------------------------------------------------- |
+| **System**        | Same **Trash page** as [UC-V7](#uc-v7) (full page).                  |
+| **Goals**         | Irreversible removal of asset and metadata (retention / GDPR aware). |
+| **Preconditions** | Item is in trash; user has `sermon:destroy` or equivalent.           |
+| **Triggers**      | User clicks **Delete forever** on Trash page.                        |
 
 **Basic flow**
 
@@ -288,10 +288,10 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 **Background**
 
-| Field | Description |
-|-------|-------------|
-| **Goals** | Multi-select for trash, visibility, or export (future). |
-| **Triggers** | User enables selection mode in [UC-V1](#uc-v1). |
+| Field        | Description                                             |
+| ------------ | ------------------------------------------------------- |
+| **Goals**    | Multi-select for trash, visibility, or export (future). |
+| **Triggers** | User enables selection mode in [UC-V1](#uc-v1).         |
 
 **Basic flow**
 
@@ -314,15 +314,15 @@ Legacy app routes (e.g. `/get-sermons`) should **redirect or alias** to the Stud
 
 ## Document map
 
-| ID | Anchor | Name |
-|----|--------|------|
-| UC-V1 | `#uc-v1` | My Sermon (View) — grid / list |
-| UC-V2 | `#uc-v2` | Open sermon — update / resume (modal) |
-| — | `#studio-routing` | Troott Studio host and URL pattern |
-| UC-V3 | `#uc-v3` | Update metadata |
-| UC-V4 | `#uc-v4` | Replace audio |
-| UC-V5 | `#uc-v5` | Change visibility / schedule |
-| UC-V6 | `#uc-v6` | Move to trash |
-| UC-V7 | `#uc-v7` | Trash page — view and restore |
-| UC-V8 | `#uc-v8` | Permanent delete on Trash page |
-| UC-V9 | `#uc-v9` | Bulk selection (optional) |
+| ID    | Anchor            | Name                                  |
+| ----- | ----------------- | ------------------------------------- |
+| UC-V1 | `#uc-v1`          | My Sermon (View) — grid / list        |
+| UC-V2 | `#uc-v2`          | Open sermon — update / resume (modal) |
+| —     | `#studio-routing` | Troott Studio host and URL pattern    |
+| UC-V3 | `#uc-v3`          | Update metadata                       |
+| UC-V4 | `#uc-v4`          | Replace audio                         |
+| UC-V5 | `#uc-v5`          | Change visibility / schedule          |
+| UC-V6 | `#uc-v6`          | Move to trash                         |
+| UC-V7 | `#uc-v7`          | Trash page — view and restore         |
+| UC-V8 | `#uc-v8`          | Permanent delete on Trash page        |
+| UC-V9 | `#uc-v9`          | Bulk selection (optional)             |

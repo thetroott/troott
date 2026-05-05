@@ -57,23 +57,23 @@ flowchart TD
 type OutputFormat = 'hls' | 'dash' | 'both';
 
 interface RenditionPresetDTO {
-  bitrateKbps: number;        // e.g. 32, 64, 96, 128
-  sampleRate?: number;        // default 48000
-  channels?: number;          // default 2
+    bitrateKbps: number; // e.g. 32, 64, 96, 128
+    sampleRate?: number; // default 48000
+    channels?: number; // default 2
 }
 
 interface AudioProcessingJobDTO {
-  sermonId: string;
-  uploadId: string;
-  sourceS3Key: string;
-  sourceMimeType: string;
-  outputBasePrefix: string;   // e.g. sermons/{sermonId}/adaptive
-  segmentDurationSec: number; // default 5 or 6
-  formats: OutputFormat;      // usually 'both'
-  renditions: RenditionPresetDTO[];
-  normalizeTargetLufs?: number; // default -14
-  normalizeTruePeakDb?: number; // default -1
-  requestedBy?: string;
+    sermonId: string;
+    uploadId: string;
+    sourceS3Key: string;
+    sourceMimeType: string;
+    outputBasePrefix: string; // e.g. sermons/{sermonId}/adaptive
+    segmentDurationSec: number; // default 5 or 6
+    formats: OutputFormat; // usually 'both'
+    renditions: RenditionPresetDTO[];
+    normalizeTargetLufs?: number; // default -14
+    normalizeTruePeakDb?: number; // default -1
+    requestedBy?: string;
 }
 ```
 
@@ -90,40 +90,40 @@ Store URLs/keys, not manifest file text:
 ## Processing algorithm
 
 1. **Fetch source**
-   - Download or stream source audio from `sourceS3Key`.
-   - Verify readability and supported input codec/container.
+    - Download or stream source audio from `sourceS3Key`.
+    - Verify readability and supported input codec/container.
 
 2. **Metadata extraction**
-   - Keep existing `music-metadata` step in `audio-metadata.job.ts`.
-   - Save codec/container/duration/bitrate/year.
+    - Keep existing `music-metadata` step in `audio-metadata.job.ts`.
+    - Save codec/container/duration/bitrate/year.
 
 3. **Loudness normalization**
-   - Target ~`-14 LUFS` integrated, `<= -1 dBTP`.
-   - Use FFmpeg loudnorm filter (2-pass recommended for accuracy).
+    - Target ~`-14 LUFS` integrated, `<= -1 dBTP`.
+    - Use FFmpeg loudnorm filter (2-pass recommended for accuracy).
 
 4. **Generate adaptive renditions**
-   - Rendition ladder initial: `32k`, `64k`, `96k`, `128k`.
-   - Encode audio tracks for each rendition.
+    - Rendition ladder initial: `32k`, `64k`, `96k`, `128k`.
+    - Encode audio tracks for each rendition.
 
 5. **Build manifests**
-   - HLS:
-     - per-rendition playlist (`{bitrate}.m3u8`)
-     - master playlist (`master.m3u8`) referencing all renditions
-   - DASH:
-     - single `manifest.mpd` with adaptation set for audio streams
+    - HLS:
+        - per-rendition playlist (`{bitrate}.m3u8`)
+        - master playlist (`master.m3u8`) referencing all renditions
+    - DASH:
+        - single `manifest.mpd` with adaptation set for audio streams
 
 6. **Upload outputs**
-   - Upload all segments/playlists to `s3://.../{outputBasePrefix}`.
-   - Return deterministic object keys.
+    - Upload all segments/playlists to `s3://.../{outputBasePrefix}`.
+    - Return deterministic object keys.
 
 7. **Update sermon document**
-   - Persist hls/dash URLs and processing status = `ready`.
-   - Leave draft/publish business status unchanged unless product requires.
+    - Persist hls/dash URLs and processing status = `ready`.
+    - Leave draft/publish business status unchanged unless product requires.
 
 8. **Failure/retry**
-   - Log ffmpeg stderr and pipeline stage.
-   - Mark processing status `failed`.
-   - Bull retry with backoff (max 3 attempts).
+    - Log ffmpeg stderr and pipeline stage.
+    - Mark processing status `failed`.
+    - Bull retry with backoff (max 3 attempts).
 
 ## FFmpeg command strategy
 
@@ -190,9 +190,9 @@ Use a builder utility to convert DTO options -> CLI args.
 3. Upload output bundle to S3
 4. Update sermon playback URLs and mark `ready`
 5. On error:
-   - capture error message
-   - mark `failed`
-   - throw for Bull retry
+    - capture error message
+    - mark `failed`
+    - throw for Bull retry
 
 ### Retry/backoff policy
 
@@ -219,12 +219,12 @@ sermons/{sermonId}/adaptive/
 ## Observability and ops
 
 - Structured logs with labels:
-  - `audio-processing-start`
-  - `audio-processing-progress`
-  - `audio-processing-upload-complete`
-  - `audio-processing-failed`
+    - `audio-processing-start`
+    - `audio-processing-progress`
+    - `audio-processing-upload-complete`
+    - `audio-processing-failed`
 - Store elapsed time per stage:
-  - metadata, normalize, encode, upload, db-update
+    - metadata, normalize, encode, upload, db-update
 - Add cleanup job for temporary local files
 
 ## Security and correctness

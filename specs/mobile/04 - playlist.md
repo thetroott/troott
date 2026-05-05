@@ -8,10 +8,10 @@
 
 ## Default vs user playlists
 
-| Type | UX notes |
-|------|-----------|
+| Type                                   | UX notes                                                                |
+| -------------------------------------- | ----------------------------------------------------------------------- |
 | **System / default** (e.g. Favourites) | May be non-deletable; explain in subtitle; same add/remove sermon rules |
-| **User-created** | Full rename, reorder, delete |
+| **User-created**                       | Full rename, reorder, delete                                            |
 
 ---
 
@@ -19,14 +19,14 @@
 
 ### Path A — From Library tab
 
-- **FAB** or header **Create**: opens **name** screen (full screen or modal).  
-- **Name validation:** empty, max length, profanity policy — inline errors.  
-- **Cancel:** if text entered, **Discard changes?** modal.  
+- **FAB** or header **Create**: opens **name** screen (full screen or modal).
+- **Name validation:** empty, max length, profanity policy — inline errors.
+- **Cancel:** if text entered, **Discard changes?** modal.
 - **Create:** navigate to **empty playlist detail** with primary CTA **Add sermons**.
 
 ### Path B — From sermon (detail or card)
 
-- **Add to playlist** → **New playlist** → same naming UI.  
+- **Add to playlist** → **New playlist** → same naming UI.
 - On success: either **new sermon is first item** or empty list with add flow pre-filled — **one** product rule.
 
 ### Path C — From player overflow
@@ -37,24 +37,24 @@
 
 ## Add sermons to playlist
 
-- **Picker:** search, multi-select, **Add (N)** button.  
-- **Cancel:** dismiss without changes.  
+- **Picker:** search, multi-select, **Add (N)** button.
+- **Cancel:** dismiss without changes.
 - **Partial failure:** “3 of 4 added” expandable detail (master §8).
 
 ---
 
 ## Playlist detail
 
-- **Header:** name (tap to rename), overflow (share, delete).  
-- **Reorder:** drag handle; optional haptic; optional **undo** after remove row.  
-- **Empty playlist:** illustration + **Add sermons** + optional **Browse topics**.  
+- **Header:** name (tap to rename), overflow (share, delete).
+- **Reorder:** drag handle; optional haptic; optional **undo** after remove row.
+- **Empty playlist:** illustration + **Add sermons** + optional **Browse topics**.
 - **Play:** starts queue from this list; show mini-player.
 
 ---
 
 ## Delete playlist
 
-- **Confirmation modal** with playlist **name** repeated; **Delete** destructive; **Cancel** safe.  
+- **Confirmation modal** with playlist **name** repeated; **Delete** destructive; **Cancel** safe.
 - After delete: navigate to Library list with **toast** “Playlist deleted” optional.
 
 ---
@@ -75,7 +75,7 @@
 
 These can appear as smart playlists or Library sections; each needs the same empty/loading/error pattern:
 
-- Favourites (default)  
+- Favourites (default)
 - Favourite ministers (quick jump to minister catalog)
 
 ---

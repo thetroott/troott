@@ -1,5 +1,3 @@
-
-
 [License: MIT](https://opensource.org/licenses/MIT)
 [Node.js Version](https://nodejs.org/)
 [Package Manager](https://pnpm.io/)
@@ -98,18 +96,18 @@ troott/
 Workspace apps and packages use the `@troott/*` namespace (examples):
 
 - **Apps:**
-  - `@troott/website` - Next.js site (marketing/docs)
-  - `@troott/web` - Vite/React SPA
-  - `@troott/api` - API server
-  - `@troott/mobile` - Expo (React Native)
+    - `@troott/website` - Next.js site (marketing/docs)
+    - `@troott/web` - Vite/React SPA
+    - `@troott/api` - API server
+    - `@troott/mobile` - Expo (React Native)
 - **Packages:**
-  - `@troott/ui` - Web UI / shadcn-style components
-  - `@troott/sdk` - Shared client utilities and hooks
-  - `@troott/tokens` - Design tokens
-  - `@troott/native-ui` - React Native UI primitives
+    - `@troott/ui` - Web UI / shadcn-style components
+    - `@troott/sdk` - Shared client utilities and hooks
+    - `@troott/tokens` - Design tokens
+    - `@troott/native-ui` - React Native UI primitives
 - **Configs:**
-  - `@troott/configs/eslint` - Shared ESLint configuration
-  - `@troott/configs-typescript` - Shared TypeScript configuration
+    - `@troott/configs/eslint` - Shared ESLint configuration
+    - `@troott/configs-typescript` - Shared TypeScript configuration
 
 ---
 
@@ -125,7 +123,7 @@ For a single terminal view of builds and tasks:
 pnpm dev
 ```
 
-OR 
+OR
 
 The default `pnpm dev` script enables Turbo UI (`TURBO_UI=tui`).
 
@@ -198,10 +196,10 @@ To use a workspace package in another package, reference it in `package.json`:
 
 ```json
 {
-  "dependencies": {
-    "@troott/ui": "workspace:*",
-    "@troott/sdk": "workspace:*"
-  }
+    "dependencies": {
+        "@troott/ui": "workspace:*",
+        "@troott/sdk": "workspace:*"
+    }
 }
 ```
 
@@ -263,15 +261,20 @@ This installs dependencies for:
 Turborepo automatically handles build order based on the `dependsOn: ["^build"]` configuration in `turbo.json`. This ensures:
 
 1. **Config packages** build first when they define build scripts:
-  - `@troott/configs-typescript` – shared TS configs (consumed via `extends`, usually no build)
-  - `@troott/configs/eslint` – shared ESLint config (no build)
+
+- `@troott/configs-typescript` – shared TS configs (consumed via `extends`, usually no build)
+- `@troott/configs/eslint` – shared ESLint config (no build)
+
 2. **Shared libraries** (examples):
-  - `@troott/ui`, `@troott/sdk`, `@troott/tokens`, `@troott/native-ui` – build only if their `package.json` defines `build`
+
+- `@troott/ui`, `@troott/sdk`, `@troott/tokens`, `@troott/native-ui` – build only if their `package.json` defines `build`
+
 3. **Applications** build last (depend on packages):
-  - `@troott/website` - Next.js site
-  - `@troott/web` - Vite/React SPA
-  - `@troott/api` - API server
-  - `@troott/mobile` - Expo app
+
+- `@troott/website` - Next.js site
+- `@troott/web` - Vite/React SPA
+- `@troott/api` - API server
+- `@troott/mobile` - Expo app
 
 #### Step 4: Build Workspace Packages (Optional)
 
@@ -338,10 +341,10 @@ Each package and application has specific build configurations. Here's what happ
 - **Output**: `.next/` directory (Next.js production build)
 - **Dependencies**: (see app `package.json`)
 - **Build Details**:
-  - Compiles Next.js application
-  - Generates optimized production bundle
-  - Outputs static pages where applicable
-  - Creates server-side rendering artifacts
+    - Compiles Next.js application
+    - Generates optimized production bundle
+    - Outputs static pages where applicable
+    - Creates server-side rendering artifacts
 
 ##### @troott/api (API Server)
 
@@ -350,11 +353,11 @@ Each package and application has specific build configurations. Here's what happ
 - **Output**: `dist/` directory (compiled JavaScript)
 - **Dependencies**: see `apps/api/package.json` (often `@troott/configs-typescript` as a dev tool)
 - **Build Details**:
-  1. Compiles TypeScript to JavaScript (`tsc`)
-  2. Resolves TypeScript path aliases (`tsc-alias`)
-  3. Copies static files from `src/_data/` to `dist/`
-  4. Copies template files from `src/views/` to `dist/`
-  - Environment variable `PORT` affects build (configured in `turbo.json`)
+    1. Compiles TypeScript to JavaScript (`tsc`)
+    2. Resolves TypeScript path aliases (`tsc-alias`)
+    3. Copies static files from `src/_data/` to `dist/`
+    4. Copies template files from `src/views/` to `dist/`
+    - Environment variable `PORT` affects build (configured in `turbo.json`)
 
 ##### @troott/web (Vite/React SPA)
 
@@ -363,10 +366,10 @@ Each package and application has specific build configurations. Here's what happ
 - **Output**: `dist/` directory (optimized production build)
 - **Dependencies**: (see `apps/web/package.json`)
 - **Build Details**:
-  1. Type-checks and compiles TypeScript (`tsc -b`)
-  2. Builds production bundle with Vite
-  3. Generates optimized static assets
-  - Uses Vite for fast builds and code splitting
+    1. Type-checks and compiles TypeScript (`tsc -b`)
+    2. Builds production bundle with Vite
+    3. Generates optimized static assets
+    - Uses Vite for fast builds and code splitting
 
 #### Shared packages
 
@@ -404,11 +407,11 @@ The build process is configured in `turbo.json`:
 
 ```json
 {
-  "build": {
-    "dependsOn": ["^build"],
-    "inputs": ["$TURBO_DEFAULT$", ".env*"],
-    "outputs": [".next/**", "dist/**"]
-  }
+    "build": {
+        "dependsOn": ["^build"],
+        "inputs": ["$TURBO_DEFAULT$", ".env*"],
+        "outputs": [".next/**", "dist/**"]
+    }
 }
 ```
 
@@ -472,10 +475,10 @@ pnpm add -D tsc-alias copyfiles -w
 
 ```json
 {
-  "dependencies": {
-    "@troott/ui": "workspace:*",
-    "@troott/sdk": "workspace:*"
-  }
+    "dependencies": {
+        "@troott/ui": "workspace:*",
+        "@troott/sdk": "workspace:*"
+    }
 }
 ```
 
@@ -504,24 +507,22 @@ This monorepo does not ship a single container layout under `apps/*`. Deploy eac
 
 ### Root Scripts
 
-
-| Script | Description |
-| ------ | ----------- |
-| `pnpm dev` | All workspace `dev` tasks (Turbo UI) |
-| `pnpm dev:fe` | `apps/website` + `apps/web` |
-| `pnpm dev:website` | Next.js site |
-| `pnpm dev:web` | Vite app |
-| `pnpm dev:api` | API |
-| `pnpm dev:mobile` | Expo |
-| `pnpm build` | All workspace `build` tasks |
-| `pnpm build:fe` | Website + Vite app builds |
-| `pnpm build:website` / `build:web` / `build:api` / `build:mobile` | Single app |
-| `pnpm lint` | Lint |
-| `pnpm test` | Tests |
-| `pnpm expo:mobile` / `expo:mobile:start` | Expo CLI via workspace |
-| `pnpm android` / `ios` / `start:mobile` | Mobile shortcuts |
-| `pnpm prebuild:mobile` / `prebuild:mobile:clean` | Expo prebuild |
-
+| Script                                                            | Description                          |
+| ----------------------------------------------------------------- | ------------------------------------ |
+| `pnpm dev`                                                        | All workspace `dev` tasks (Turbo UI) |
+| `pnpm dev:fe`                                                     | `apps/website` + `apps/web`          |
+| `pnpm dev:website`                                                | Next.js site                         |
+| `pnpm dev:web`                                                    | Vite app                             |
+| `pnpm dev:api`                                                    | API                                  |
+| `pnpm dev:mobile`                                                 | Expo                                 |
+| `pnpm build`                                                      | All workspace `build` tasks          |
+| `pnpm build:fe`                                                   | Website + Vite app builds            |
+| `pnpm build:website` / `build:web` / `build:api` / `build:mobile` | Single app                           |
+| `pnpm lint`                                                       | Lint                                 |
+| `pnpm test`                                                       | Tests                                |
+| `pnpm expo:mobile` / `expo:mobile:start`                          | Expo CLI via workspace               |
+| `pnpm android` / `ios` / `start:mobile`                           | Mobile shortcuts                     |
+| `pnpm prebuild:mobile` / `prebuild:mobile:clean`                  | Expo prebuild                        |
 
 ### Package-Specific Scripts
 
@@ -591,7 +592,6 @@ chore: maintenance tasks
 
 Most teams follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-
 | Type       | Description                                        |
 | ---------- | -------------------------------------------------- |
 | `feat`     | New feature                                        |
@@ -604,7 +604,6 @@ Most teams follow [Conventional Commits](https://www.conventionalcommits.org/).
 | `perf`     | Performance improvement                            |
 | `ci`       | CI or pipeline changes                             |
 | `build`    | Build system or dependencies                       |
-
 
 ### 7. Keep Your Branch Up to Date
 
@@ -676,7 +675,7 @@ If you discover a bug or have a suggestion, raise an issue via the GitHub Issues
 - **TypeScript**: All code should be properly typed
 - **Testing**: Add tests for new features when possible
 - **Documentation**: Update README and code comments as needed
-- **Workspace Packages**: Use workspace protocol (`workspace:`*) for internal dependencies
+- **Workspace Packages**: Use workspace protocol (`workspace:`\*) for internal dependencies
 
 ### Project-Specific Guidelines
 
