@@ -1,6 +1,7 @@
 import {
     TextInput,
     TextInputProps,
+    TextStyle,
     ViewStyle,
     StyleSheet,
     Pressable,
@@ -22,7 +23,8 @@ interface InputProps extends TextInputProps {
     containerstyle?: ViewStyle;
     label?: string;
     leftIcon?: React.ReactNode;
-    inputcontainerstyles?: ViewStyle;
+    /** Applied to the inner `TextInput` (font/color/padding). */
+    inputcontainerstyles?: TextStyle;
     disabled?: boolean;
 }
 
@@ -80,10 +82,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
         }
         return (
             <AnimatedPressable
-                style={[
-                    { ...styles.container, ...containerstyle },
-                    animatedStyles,
-                ]}
+                style={[styles.container, containerstyle, animatedStyles]}
             >
                 {leftIcon && leftIcon}
                 <TextInput

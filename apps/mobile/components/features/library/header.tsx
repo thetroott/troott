@@ -1,6 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import React from 'react';
-import { Notification, SearchNormal, Sms } from 'iconsax-react-nativejs';
+import { Notification, SearchNormal } from 'iconsax-react-nativejs';
+import { router } from 'expo-router';
+
 import { theme } from '@/constants/theme';
 import Text from '@/components/ui/text';
 
@@ -11,10 +13,20 @@ const LibraryHeader = () => {
                 Library
             </Text>
             <View style={styles.iconContainer}>
-                <Pressable>
+                <Pressable
+                    onPress={() => router.push('/search')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Search"
+                    hitSlop={8}
+                >
                     <SearchNormal color={theme.colors.white[50]} size={20} />
                 </Pressable>
-                <Pressable>
+                <Pressable
+                    onPress={() => router.push('/user/notifications')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Notifications"
+                    hitSlop={8}
+                >
                     <Notification
                         color={theme.colors.white[50]}
                         variant="Bold"

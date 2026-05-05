@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 import { router } from 'expo-router';
 
 import BrowseTopicTile from '@/components/features/search/browse-topic-tile';
@@ -7,13 +7,21 @@ import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
 import type { BrowseTopic } from '@/constants/browse-topics';
 
-/** Figma `Browse-Categories` (4995:35775): 16 screen inset, 16 between tiles, 12 under heading. */
-const TILE_WIDTH = 163.5;
+/**
+ * Figma `Browse-Categories` / `Categories` (4995:35775, 4995:35778): 16 screen inset
+ * (`ScreenView` padding), 16 between columns, 12 under heading; tile 163.5 x ~120 at 375pt.
+ */
 const TILE_GAP = theme.sizes.spacing.md;
 const HEADING_TO_GRID = theme.sizes.spacing.base;
+const HORIZONTAL_INSET = theme.sizes.spacing.md;
 
 function BrowseTopicsGrid({ topics }: { topics: BrowseTopic[] }) {
-    const tileWidth = useMemo(() => TILE_WIDTH, []);
+    const { width: windowWidth } = useWindowDimensions();
+
+    const tileWidth = useMemo(() => {
+        const contentW = windowWidth - HORIZONTAL_INSET * 2;
+        return (contentW - TILE_GAP) / 2;
+    }, [windowWidth]);
 
     return (
         <View style={styles.wrap}>
@@ -28,7 +36,10 @@ function BrowseTopicsGrid({ topics }: { topics: BrowseTopic[] }) {
             <View style={styles.grid}>
                 {topics.map((item) => {
                     return (
-                        <View key={item.slug} style={styles.tileItem}>
+                        <View
+                            key={item.slug}
+                            style={[styles.tileItem, { width: tileWidth }]}
+                        >
                             <BrowseTopicTile
                                 topic={item}
                                 tileWidth={tileWidth}
@@ -51,6 +62,7 @@ export default BrowseTopicsGrid;
 const styles = StyleSheet.create({
     wrap: {
         gap: HEADING_TO_GRID,
+        width: '100%',
     },
     headingText: {
         lineHeight: 27,
@@ -59,9 +71,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
+        width: '100%',
     },
     tileItem: {
         marginBottom: TILE_GAP,
-        width: TILE_WIDTH,
     },
 });

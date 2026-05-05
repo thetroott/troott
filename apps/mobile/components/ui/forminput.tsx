@@ -1,4 +1,4 @@
-import { View, ViewStyle } from 'react-native';
+import { View, ViewStyle, TextStyle } from 'react-native';
 import React from 'react';
 import {
     Control,
@@ -29,7 +29,7 @@ interface FormInputProps<T extends FieldValues> {
     leftIcon?: React.ReactNode;
     containerStyle?: ViewStyle;
     multiline?: boolean;
-    inputContainerStyle?: ViewStyle;
+    inputContainerStyle?: TextStyle;
 }
 
 const AnimatedText = Animated.createAnimatedComponent(Text);

@@ -12,7 +12,7 @@ const SeeMore = ({ onPress }: { onPress?: () => void }) => {
             onPress={onPress}
         >
             <Text size="xs" color={theme.colors.white[50]}>
-                See more
+                See More
             </Text>
         </Button>
     );
@@ -27,6 +27,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: theme.sizes.spacing.base,
         height: 'auto',
         paddingVertical: theme.sizes.spacing.xs,
-        borderColor: theme.colors.grey[400],
+        borderColor: theme.colors.grey[300],
     },
 });

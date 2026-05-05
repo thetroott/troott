@@ -197,10 +197,7 @@ const BottomSheetModalRoot = forwardRef<BottomSheetRef, BottomSheetRootProps>(
                         accessibilityRole="button"
                         accessibilityLabel="Dismiss"
                     />
-                    <View
-                        style={styles.sheetLayer}
-                        pointerEvents="box-none"
-                    >
+                    <View style={styles.sheetLayer} pointerEvents="box-none">
                         <GestureDetector gesture={gesture}>
                             <Animated.View
                                 style={[

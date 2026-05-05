@@ -8,6 +8,7 @@ import {
     Notepad,
     ProfileCircle,
     SearchNormal,
+    Video,
 } from 'iconsax-react-nativejs';
 import { theme } from '@/constants/theme';
 import Animated, {
@@ -36,6 +37,10 @@ const TabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
         search: {
             icon: SearchNormal,
             label: 'Search',
+        },
+        explore: {
+            icon: Video,
+            label: 'Explore',
         },
         library: {
             icon: Notepad,

@@ -8,42 +8,68 @@ import SermonCard from './sermon-card';
 import { tracks } from '@/_data/_mock/tracks';
 import type { ISermonTrack } from '@/dtos/sermon.dto';
 import type { SermonItemDTO } from '@/types/sermon';
+import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
+import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
 
-function mockRowToSermonItem(
-    row: Partial<ISermonTrack>,
-    fallbackIndex: number,
-): SermonItemDTO {
-    const id = row.id != null ? String(row.id) : `demo-${fallbackIndex}`;
-    const url =
-        row.url ??
-        (typeof row.sermon === 'number' || typeof row.sermon === 'string'
-            ? row.sermon
-            : null);
+const ROWS_PER_SWIPE = 2;
 
-    return {
-        id,
-        title: row.title ?? 'Untitled',
-        minister: row.minister ?? row.artist ?? null,
-        duration:
-            typeof row.duration === 'number' && Number.isFinite(row.duration)
-                ? row.duration
-                : null,
-        image: row.image ?? row.artwork ?? null,
-        artwork: row.artwork ?? row.image ?? null,
-        url,
-        sourceType: row.sourceType ?? 'stream',
-    };
-}
-
+/**
+ * Search landing carousel — same catalog source and mapping as home {@link SermonsForYou}.
+ */
 const RecentlyAdded = () => {
-    const demoTracks = useMemo(() => {
-        return tracks.slice(0, 8).map((row, i) => mockRowToSermonItem(row, i));
-    }, []);
+    const { data: sermons, isLoading, error } = useSermonsCatalog();
+
+    const sermonsData =
+        sermons && sermons.length > 0 ? sermons : (tracks as ISermonTrack[]);
+
+    const tracklistDtos: SermonItemDTO[] = useMemo(
+        () =>
+            sermonsData.map((r, i) =>
+                catalogRowToSermonItem({
+                    ...r,
+                    id: r.id != null ? String(r.id) : `recent-added-${i}`,
+                }),
+            ),
+        [sermonsData],
+    );
 
     const rows = useMemo(
-        () => TransformArray(demoTracks, 2) as SermonItemDTO[][],
-        [demoTracks],
+        () => TransformArray(sermonsData, ROWS_PER_SWIPE) as ISermonTrack[][],
+        [sermonsData],
     );
+
+    if (isLoading && sermonsData.length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text color={theme.colors.white[50]}>Recently Added</Text>
+                <Text size="sm" color={theme.colors.grey[300]} style={styles.message}>
+                    Loading sermons...
+                </Text>
+            </View>
+        );
+    }
+
+    if (error && sermonsData.length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text color={theme.colors.white[50]}>Recently Added</Text>
+                <Text size="sm" color={theme.colors.grey[300]} style={styles.message}>
+                    Could not load sermons.
+                </Text>
+            </View>
+        );
+    }
+
+    if (!sermonsData.length) {
+        return (
+            <View style={styles.container}>
+                <Text color={theme.colors.white[50]}>Recently Added</Text>
+                <Text size="sm" color={theme.colors.grey[300]} style={styles.message}>
+                    No sermons available at the moment.
+                </Text>
+            </View>
+        );
+    }
 
     return (
         <View style={styles.container}>
@@ -57,14 +83,17 @@ const RecentlyAdded = () => {
                 decelerationRate={-1}
                 renderItem={({ item: group, index: groupIndex }) => (
                     <View style={{ gap: 10, marginRight: 10 }}>
-                        {group.map((track, slotIndex) => {
-                            const flatIndex = groupIndex * 2 + slotIndex;
+                        {group.map((row, slotIndex) => {
+                            const flatIndex =
+                                groupIndex * ROWS_PER_SWIPE + slotIndex;
+                            const track = tracklistDtos[flatIndex];
+                            if (!track) return null;
                             return (
                                 <SermonCard
-                                    key={track.id ?? `slot-${flatIndex}`}
+                                    key={row.id ?? `slot-${flatIndex}`}
                                     track={track}
                                     index={flatIndex}
-                                    tracklist={demoTracks}
+                                    tracklist={tracklistDtos}
                                     queue="Search"
                                     variant="small"
                                 />
@@ -82,5 +111,8 @@ export default RecentlyAdded;
 const styles = StyleSheet.create({
     container: {
         gap: theme.sizes.spacing.md,
+    },
+    message: {
+        paddingVertical: theme.sizes.spacing.md,
     },
 });

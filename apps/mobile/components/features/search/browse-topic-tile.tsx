@@ -1,15 +1,14 @@
 import React from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Image, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
 import type { BrowseTopic } from '@/constants/browse-topics';
 
 /**
- * Figma `HEALING` reference card (4995:41277): 163.5 x 119.5, r 8,
- * label inset L 17 / bottom ~10, illustration Group 12 at top 12.5, size 80 x 87.5 (right).
+ * Figma reference frames: 4995:41277 (Healing), 4995:41266 (Faith), corner 8,
+ * label L 17 / T 83, 18/27 Matter SemiBold, #fff.
  */
-const TILE_HEIGHT = 119.5;
 const TILE_WIDTH = 163.5;
 const TILE_RADIUS = 8;
 const LABEL_LEFT = 17;
@@ -27,7 +26,35 @@ export default function BrowseTopicTile({
     onPress,
 }: BrowseTopicTileProps) {
     const scale = tileWidth / TILE_WIDTH;
-    const tileHeight = TILE_HEIGHT * scale;
+    const tileHeight = topic.figmaHeight * scale;
+
+    if (topic.fullTile) {
+        return (
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={topic.label}
+                onPress={onPress}
+                style={({ pressed }) => [
+                    styles.tile,
+                    {
+                        width: tileWidth,
+                        height: tileHeight,
+                        opacity: pressed ? 0.88 : 1,
+                    },
+                ]}
+            >
+                <Image
+                    source={topic.fullTile.source}
+                    style={{
+                        width: tileWidth,
+                        height: tileHeight,
+                    }}
+                    resizeMode="cover"
+                />
+            </Pressable>
+        );
+    }
+
     const iconBox = topic.iconBox;
 
     return (
@@ -66,7 +93,12 @@ export default function BrowseTopicTile({
                 weight="semiBold"
                 size="md"
                 color={theme.colors.white[50]}
-                textStyle={styles.labelText}
+                textStyle={{
+                    lineHeight: 27,
+                    ...(Platform.OS === 'android'
+                        ? { includeFontPadding: false as const }
+                        : {}),
+                }}
                 style={[
                     styles.label,
                     { left: LABEL_LEFT * scale, top: LABEL_TOP * scale },
@@ -87,8 +119,5 @@ const styles = StyleSheet.create({
     label: {
         position: 'absolute',
         maxWidth: '60%',
-    },
-    labelText: {
-        lineHeight: 27,
     },
 });

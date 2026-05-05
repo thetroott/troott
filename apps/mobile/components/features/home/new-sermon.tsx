@@ -18,6 +18,10 @@ import type { SermonItemDTO } from '@/types/sermon';
 export type NewSermonProps = {
     sermons?: SermonItemDTO[];
     label?: string;
+    /** Per-card teal label (e.g. NEW SERMON / NEW PLAYLIST). Overrides `label` when set. */
+    labelForItem?: (item: SermonItemDTO, index: number) => string;
+    /** Bottom meta line under minister (default: topic uppercased). */
+    formatFooter?: (item: SermonItemDTO, index: number) => string;
     onPressCard?: (item: SermonItemDTO, index: number) => void;
     onPressPlay?: (item: SermonItemDTO, index: number) => void;
     containerStyle?: StyleProp<ViewStyle>;
@@ -64,6 +68,8 @@ const DEFAULT_SERMONS: SermonItemDTO[] = [
 export default function NewSermon({
     sermons = DEFAULT_SERMONS,
     label = 'NEW SERMON',
+    labelForItem,
+    formatFooter,
     onPressCard,
     onPressPlay,
     containerStyle,
@@ -92,7 +98,9 @@ export default function NewSermon({
                             color={theme.colors.teal[500]}
                             textStyle={styles.label}
                         >
-                            {label}
+                            {labelForItem
+                                ? labelForItem(item, index)
+                                : label}
                         </Text>
                         <Text
                             size="lg"
@@ -114,7 +122,9 @@ export default function NewSermon({
                             color={theme.colors.grey[200]}
                             numberOfLines={1}
                         >
-                            {(item.topic ?? 'INSPIRATIONAL').toUpperCase()}
+                            {formatFooter
+                                ? formatFooter(item, index)
+                                : (item.topic ?? 'INSPIRATIONAL').toUpperCase()}
                         </Text>
                     </View>
 

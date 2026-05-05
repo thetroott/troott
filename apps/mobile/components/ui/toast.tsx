@@ -127,12 +127,12 @@ export function Toaster() {
                     t.type === 'success'
                         ? '#16a34a'
                         : t.type === 'error'
-                        ? '#dc2626'
-                        : t.type === 'info'
-                        ? '#2563eb'
-                        : t.type === 'loading'
-                        ? '#ca8a04' // New color for loading state
-                        : '#27272a';
+                          ? '#dc2626'
+                          : t.type === 'info'
+                            ? '#2563eb'
+                            : t.type === 'loading'
+                              ? '#ca8a04' // New color for loading state
+                              : '#27272a';
 
                 return (
                     <Animated.View

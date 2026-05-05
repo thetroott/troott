@@ -8,12 +8,14 @@ interface ScreenViewProps extends ViewProps {
     screenStyle?: ViewStyle;
 }
 
-const ScreenView = ({ children, screenStyle, style, ...props }: ScreenViewProps) => {
+const ScreenView = ({
+    children,
+    screenStyle,
+    style,
+    ...props
+}: ScreenViewProps) => {
     return (
-        <View
-            {...props}
-            style={[styles.container, style, screenStyle]}
-        >
+        <View {...props} style={[styles.container, style, screenStyle]}>
             {children}
         </View>
     );

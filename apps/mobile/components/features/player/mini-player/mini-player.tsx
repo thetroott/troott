@@ -38,7 +38,13 @@ const ICON_SIZE = 24;
 /** Tab row + custom tab bar bottom safe padding (see `TabBar`). */
 const TAB_BAR_CONTENT = 72;
 
-const MAIN_TAB_NAMES = new Set(['home', 'search', 'library', 'profile']);
+const MAIN_TAB_NAMES = new Set([
+    'home',
+    'search',
+    'explore',
+    'library',
+    'profile',
+]);
 
 /** Spotify-style: hide mini player while full-screen / modal now-playing is presented. */
 function useShouldHideMiniPlayer(): boolean {
@@ -101,7 +107,7 @@ function useIsMainTabsShell(): boolean {
     if (MAIN_TAB_NAMES.has(p.replace(/^\//, '').split('/').pop() ?? ''))
         return true;
 
-    return /\(tabs\)\/(home|search|library|profile)(\/|$)/.test(p);
+    return /\(tabs\)\/(home|search|explore|library|profile)(\/|$)/.test(p);
 }
 
 function miniPlayerArtSource(

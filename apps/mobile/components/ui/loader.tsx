@@ -19,7 +19,13 @@ const DOT_COUNT = 3;
  * worklet-safe) inside `useAnimatedStyle`; see
  * https://github.com/software-mansion/react-native-reanimated/issues/8739
  */
-function LoaderDot({ staggerMs }: { staggerMs: number }) {
+function LoaderDot({
+    staggerMs,
+    dotColor,
+}: {
+    staggerMs: number;
+    dotColor: string;
+}) {
     const loaderProgress = useSharedValue(0);
 
     const loaderStyle = useAnimatedStyle(() => ({
@@ -27,7 +33,7 @@ function LoaderDot({ staggerMs }: { staggerMs: number }) {
         width: theme.sizes.spacing.sm,
         height: theme.sizes.spacing.sm,
         borderRadius: theme.sizes.radius.full,
-        backgroundColor: theme.colors.grey[300],
+        backgroundColor: dotColor,
         transform: [
             {
                 scale: interpolate(loaderProgress.value, [0, 1], [0.7, 1]),
@@ -49,11 +55,23 @@ function LoaderDot({ staggerMs }: { staggerMs: number }) {
     return <Animated.View style={loaderStyle} />;
 }
 
-const Loader = () => {
+export type LoaderProps = {
+    /** Grey pulse (default) or brand teal for prominent loading moments */
+    tone?: 'muted' | 'brand';
+};
+
+const Loader = ({ tone = 'muted' }: LoaderProps) => {
+    const dotColor =
+        tone === 'brand' ? theme.colors.teal[400] : theme.colors.grey[300];
+
     return (
         <View style={styles.container}>
             {Array.from({ length: DOT_COUNT }, (_, index) => (
-                <LoaderDot key={index} staggerMs={index * 120} />
+                <LoaderDot
+                    key={index}
+                    staggerMs={index * 120}
+                    dotColor={dotColor}
+                />
             ))}
         </View>
     );
