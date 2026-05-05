@@ -99,26 +99,22 @@ hackathon:manage      # Manage hackathons
 ### Available Roles
 
 1. **SUPERADMIN** (`super-admin`)
-
     - Full system access including system restart
     - Can manage all users, roles, and permissions
     - Only one superadmin can exist at a time
 
 2. **ADMIN** (`admin`)
-
     - Platform administration (no system restart)
     - Can manage users, projects, hackathons
     - Full access to analytics and reporting
 
 3. **BUSINESS** (`business`)
-
     - Create and manage workspaces
     - Create projects and hackathons
     - Manage teams and tasks
     - View analytics for own resources
 
 4. **TALENT** (`talent`)
-
     - Participate in hackathons
     - Join projects and teams
     - Manage own portfolio

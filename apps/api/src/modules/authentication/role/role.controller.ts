@@ -3,11 +3,7 @@ import asyncHandler from '../../../middlewares/async.mdw';
 import ErrorResponse from '../../../utils/error.util';
 import roleService from './role.service';
 import roleRepository from './role.repository';
-import {
-    CreateRoleDTO,
-    UpdateRoleDTO,
-    AttachRoleDTO,
-} from './role.dto';
+import { CreateRoleDTO, UpdateRoleDTO, AttachRoleDTO } from './role.dto';
 import redisWrapper from '../../../middlewares/redis.mdw';
 import userRepository from '../../users/user/user.repository';
 import { IUserDoc, UserType } from '../../users/user/user.interface';
