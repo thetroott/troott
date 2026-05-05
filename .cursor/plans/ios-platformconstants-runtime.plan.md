@@ -10,12 +10,12 @@ It is **not** a guarantee: if the root cause is something else (below), rebuild 
 
 ## What the plan is most confident about (high prior)
 
-| Cause | Why rebuild / align fixes it |
-|-------|------------------------------|
-| Stale dev client after `pnpm` / RN / Expo bumps | Native TurboModules registry must match JS `react-native` version. |
-| Never ran `prebuild` / `ios/` missing or from another machine | iOS project must be generated for current `newArchEnabled` and SDK. |
-| Simulator still running an **old** install while Metro serves **new** JS | Deleting the app + reinstall clears the mismatch. |
-| Metro from wrong project root / wrong app opened | Ensures the bundle matches the binary you built. |
+| Cause                                                                    | Why rebuild / align fixes it                                        |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| Stale dev client after `pnpm` / RN / Expo bumps                          | Native TurboModules registry must match JS `react-native` version.  |
+| Never ran `prebuild` / `ios/` missing or from another machine            | iOS project must be generated for current `newArchEnabled` and SDK. |
+| Simulator still running an **old** install while Metro serves **new** JS | Deleting the app + reinstall clears the mismatch.                   |
+| Metro from wrong project root / wrong app opened                         | Ensures the bundle matches the binary you built.                    |
 
 ---
 

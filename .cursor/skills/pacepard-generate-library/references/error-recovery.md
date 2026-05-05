@@ -22,7 +22,7 @@ The recovery sequence for a failed script:
 5. PERSIST — Update the state ledger with the outcome.
 ```
 
-For **abandoned multi-step workflows** (where you need to roll back nodes from previous *successful* calls), use the cleanup protocol in Section 2.
+For **abandoned multi-step workflows** (where you need to roll back nodes from previous _successful_ calls), use the cleanup protocol in Section 2.
 
 ---
 
@@ -40,12 +40,12 @@ Furthermore, variant names (`Size=Medium, Style=Primary, State=Default`) do not 
 
 ```javascript
 node.setSharedPluginData('dsb', 'run_id', 'ds-build-2024-001'); // identifies the build run
-node.setSharedPluginData('dsb', 'phase',  'phase3');             // which phase created this node
-node.setSharedPluginData('dsb', 'key',    'componentset/button');// unique logical key
+node.setSharedPluginData('dsb', 'phase', 'phase3'); // which phase created this node
+node.setSharedPluginData('dsb', 'key', 'componentset/button'); // unique logical key
 
 // Reading:
 const runId = node.getSharedPluginData('dsb', 'run_id'); // returns '' if never set
-const key   = node.getSharedPluginData('dsb', 'key');
+const key = node.getSharedPluginData('dsb', 'key');
 ```
 
 `getSharedPluginData` returns `''` (empty string, not null) for unset keys. Always check for `!== ''`.
@@ -54,8 +54,8 @@ const key   = node.getSharedPluginData('dsb', 'key');
 
 ```javascript
 const comp = figma.createComponent();
-comp.setSharedPluginData('dsb', 'run_id', RUN_ID);  // tag immediately
-comp.setSharedPluginData('dsb', 'key', key);         // tag immediately
+comp.setSharedPluginData('dsb', 'run_id', RUN_ID); // tag immediately
+comp.setSharedPluginData('dsb', 'key', key); // tag immediately
 // ... then do the rest of the setup
 ```
 
@@ -65,44 +65,61 @@ This script finds all nodes tagged with a given `run_id` and optionally a `phase
 
 ```javascript
 const TARGET_RUN_ID = 'ds-build-2024-001'; // run ID to clean
-const TARGET_PHASE  = 'phase3';            // optionally filter by phase ('' = all phases)
-const PAGE_NAME     = 'Button';            // page to clean (or null for all pages)
+const TARGET_PHASE = 'phase3'; // optionally filter by phase ('' = all phases)
+const PAGE_NAME = 'Button'; // page to clean (or null for all pages)
 
 const pagesToSearch = PAGE_NAME
-  ? [figma.root.children.find(p => p.name === PAGE_NAME)].filter(Boolean)
-  : figma.root.children;
+    ? [figma.root.children.find((p) => p.name === PAGE_NAME)].filter(Boolean)
+    : figma.root.children;
 
 const removed = [];
 const skipped = [];
 
 for (const page of pagesToSearch) {
-  await figma.setCurrentPageAsync(page);
+    await figma.setCurrentPageAsync(page);
 
-  const orphans = page.findAll(node => {
-    const runId = node.getSharedPluginData('dsb', 'run_id');
-    if (runId !== TARGET_RUN_ID) return false;
-    if (TARGET_PHASE && node.getSharedPluginData('dsb', 'phase') !== TARGET_PHASE) return false;
-    return true;
-  });
+    const orphans = page.findAll((node) => {
+        const runId = node.getSharedPluginData('dsb', 'run_id');
+        if (runId !== TARGET_RUN_ID) return false;
+        if (
+            TARGET_PHASE &&
+            node.getSharedPluginData('dsb', 'phase') !== TARGET_PHASE
+        )
+            return false;
+        return true;
+    });
 
-  // Remove leaf-first to avoid removing parents before children
-  // Sort by depth (deepest first) to avoid double-remove errors
-  const sorted = orphans.slice().sort((a, b) => {
-    let depthA = 0, depthB = 0;
-    let n = a; while (n.parent) { depthA++; n = n.parent; }
-    n = b; while (n.parent) { depthB++; n = n.parent; }
-    return depthB - depthA;
-  });
+    // Remove leaf-first to avoid removing parents before children
+    // Sort by depth (deepest first) to avoid double-remove errors
+    const sorted = orphans.slice().sort((a, b) => {
+        let depthA = 0,
+            depthB = 0;
+        let n = a;
+        while (n.parent) {
+            depthA++;
+            n = n.parent;
+        }
+        n = b;
+        while (n.parent) {
+            depthB++;
+            n = n.parent;
+        }
+        return depthB - depthA;
+    });
 
-  for (const node of sorted) {
-    try {
-      if (node.removed) continue; // already removed (was a child of removed parent)
-      node.remove();
-      removed.push({ id: node.id, name: node.name, key: node.getSharedPluginData('dsb', 'key') });
-    } catch (e) {
-      skipped.push({ id: node.id, name: node.name, error: e.message });
+    for (const node of sorted) {
+        try {
+            if (node.removed) continue; // already removed (was a child of removed parent)
+            node.remove();
+            removed.push({
+                id: node.id,
+                name: node.name,
+                key: node.getSharedPluginData('dsb', 'key'),
+            });
+        } catch (e) {
+            skipped.push({ id: node.id, name: node.name, error: e.message });
+        }
     }
-  }
 }
 
 return { removed: removed.length, skipped: skipped.length, details: removed };
@@ -127,16 +144,16 @@ const COLLECTION_NAME = 'Color';
 const allCollections = await figma.variables.getLocalVariableCollectionsAsync();
 // Variables/collections support sharedPluginData too — check by name as fallback
 // Note: VariableCollection sharedPluginData is set via collection.setSharedPluginData(...)
-const existing = allCollections.find(c =>
-  c.getSharedPluginData('dsb', 'key') === KEY
+const existing = allCollections.find(
+    (c) => c.getSharedPluginData('dsb', 'key') === KEY,
 );
 
 if (existing) {
-  return {
-    collectionId: existing.id,
-    modeIds: existing.modes.map(m => ({ name: m.name, id: m.modeId })),
-    alreadyExisted: true,
-  };
+    return {
+        collectionId: existing.id,
+        modeIds: existing.modes.map((m) => ({ name: m.name, id: m.modeId })),
+        alreadyExisted: true,
+    };
 }
 
 // Create fresh
@@ -149,11 +166,11 @@ collection.renameMode(collection.modes[0].modeId, 'Light');
 const darkModeId = collection.addMode('Dark');
 
 return {
-  collectionId: collection.id,
-  modeIds: [
-    { name: 'Light', id: collection.modes[0].modeId },
-    { name: 'Dark',  id: darkModeId },
-  ],
+    collectionId: collection.id,
+    modeIds: [
+        { name: 'Light', id: collection.modes[0].modeId },
+        { name: 'Dark', id: darkModeId },
+    ],
 };
 ```
 
@@ -165,18 +182,20 @@ const PAGE_NAME = 'Button';
 const RUN_ID = 'ds-build-2024-001';
 
 // Check by sharedPluginData key first, then by name as fallback
-let page = figma.root.children.find(p => p.getSharedPluginData('dsb', 'key') === KEY);
+let page = figma.root.children.find(
+    (p) => p.getSharedPluginData('dsb', 'key') === KEY,
+);
 if (!page) {
-  page = figma.root.children.find(p => p.name === PAGE_NAME);
+    page = figma.root.children.find((p) => p.name === PAGE_NAME);
 }
 
 if (page) {
-  // Ensure it's tagged if it was found by name only
-  if (!page.getSharedPluginData('dsb', 'key')) {
-    page.setSharedPluginData('dsb', 'run_id', RUN_ID);
-    page.setSharedPluginData('dsb', 'key', KEY);
-  }
-  return { pageId: page.id, alreadyExisted: true };
+    // Ensure it's tagged if it was found by name only
+    if (!page.getSharedPluginData('dsb', 'key')) {
+        page.setSharedPluginData('dsb', 'run_id', RUN_ID);
+        page.setSharedPluginData('dsb', 'key', KEY);
+    }
+    return { pageId: page.id, alreadyExisted: true };
 }
 
 page = figma.createPage();
@@ -197,15 +216,17 @@ const RUN_ID = 'ds-build-2024-001';
 const page = await figma.getNodeByIdAsync(PAGE_ID);
 await figma.setCurrentPageAsync(page);
 
-const existing = page.findAll(n =>
-  n.type === 'COMPONENT_SET' && n.getSharedPluginData('dsb', 'key') === KEY
+const existing = page.findAll(
+    (n) =>
+        n.type === 'COMPONENT_SET' &&
+        n.getSharedPluginData('dsb', 'key') === KEY,
 );
 
 if (existing.length > 0) {
-  return {
-    componentSetId: existing[0].id,
-    alreadyExisted: true,
-  };
+    return {
+        componentSetId: existing[0].id,
+        alreadyExisted: true,
+    };
 }
 
 // ... proceed with creation
@@ -222,71 +243,69 @@ Maintain a state ledger in your context (not in the Figma file) across calls. Th
 
 ```json
 {
-  "runId": "ds-build-2024-001",
-  "phase": "phase3",
-  "step": "component-button/combine-variants",
-  "completedSteps": [
-    "phase0",
-    "phase1/collections",
-    "phase1/primitives",
-    "phase1/semantics",
-    "phase2/pages",
-    "phase2/foundations-docs",
-    "phase3/component-avatar",
-    "phase3/component-icon"
-  ],
-  "entities": {
-    "collections": {
-      "primitives": "VariableCollectionId:1234:5678",
-      "color":      "VariableCollectionId:1234:5679",
-      "spacing":    "VariableCollectionId:1234:5680"
+    "runId": "ds-build-2024-001",
+    "phase": "phase3",
+    "step": "component-button/combine-variants",
+    "completedSteps": [
+        "phase0",
+        "phase1/collections",
+        "phase1/primitives",
+        "phase1/semantics",
+        "phase2/pages",
+        "phase2/foundations-docs",
+        "phase3/component-avatar",
+        "phase3/component-icon"
+    ],
+    "entities": {
+        "collections": {
+            "primitives": "VariableCollectionId:1234:5678",
+            "color": "VariableCollectionId:1234:5679",
+            "spacing": "VariableCollectionId:1234:5680"
+        },
+        "variables": {
+            "color/bg/primary": "VariableId:2345:1",
+            "color/bg/secondary": "VariableId:2345:2",
+            "color/bg/disabled": "VariableId:2345:3",
+            "color/text/on-primary": "VariableId:2345:4",
+            "color/text/on-secondary": "VariableId:2345:5",
+            "color/text/disabled": "VariableId:2345:6",
+            "spacing/sm": "VariableId:2345:7",
+            "spacing/md": "VariableId:2345:8",
+            "spacing/lg": "VariableId:2345:9",
+            "radius/md": "VariableId:2345:10"
+        },
+        "modes": {
+            "color/light": "2345:1",
+            "color/dark": "2345:2"
+        },
+        "pages": {
+            "Cover": "0:1",
+            "Foundations": "0:2",
+            "Button": "0:3"
+        },
+        "components": {
+            "Icon": "3456:1",
+            "Avatar": "3456:2",
+            "Button": "3456:3"
+        },
+        "componentSets": {
+            "Button": "4567:1"
+        }
     },
-    "variables": {
-      "color/bg/primary":         "VariableId:2345:1",
-      "color/bg/secondary":       "VariableId:2345:2",
-      "color/bg/disabled":        "VariableId:2345:3",
-      "color/text/on-primary":    "VariableId:2345:4",
-      "color/text/on-secondary":  "VariableId:2345:5",
-      "color/text/disabled":      "VariableId:2345:6",
-      "spacing/sm":               "VariableId:2345:7",
-      "spacing/md":               "VariableId:2345:8",
-      "spacing/lg":               "VariableId:2345:9",
-      "radius/md":                "VariableId:2345:10"
-    },
-    "modes": {
-      "color/light": "2345:1",
-      "color/dark":  "2345:2"
-    },
-    "pages": {
-      "Cover":       "0:1",
-      "Foundations": "0:2",
-      "Button":      "0:3"
-    },
-    "components": {
-      "Icon":        "3456:1",
-      "Avatar":      "3456:2",
-      "Button":      "3456:3"
-    },
-    "componentSets": {
-      "Button": "4567:1"
+    "pendingValidations": ["Button:metadata", "Button:screenshot"],
+    "userCheckpoints": {
+        "phase0": "approved-2024-01-15",
+        "phase1": "approved-2024-01-15",
+        "phase2": "approved-2024-01-15",
+        "component-avatar": "approved-2024-01-15"
     }
-  },
-  "pendingValidations": [
-    "Button:metadata",
-    "Button:screenshot"
-  ],
-  "userCheckpoints": {
-    "phase0": "approved-2024-01-15",
-    "phase1": "approved-2024-01-15",
-    "phase2": "approved-2024-01-15",
-    "component-avatar": "approved-2024-01-15"
-  }
 }
 ```
 
 ### Persisting between calls
 
 After every successful `use_figma` call:
+
 1. Extract all IDs from the return value
 2. Add them to the appropriate `entities` section of the ledger
 3. Add the completed step to `completedSteps`
@@ -300,16 +319,15 @@ If a conversation is interrupted and resumed, read the state ledger and verify k
 ```javascript
 // Verify that critical nodes from the ledger still exist
 const toVerify = {
-  'color-collection':  'VariableCollectionId:1234:5679',
-  'button-page':       '0:3',
-  'button-componentset': '4567:1',
+    'color-collection': 'VariableCollectionId:1234:5679',
+    'button-page': '0:3',
+    'button-componentset': '4567:1',
 };
 
 const results = {};
 for (const [label, id] of Object.entries(toVerify)) {
-  const node = await figma.getNodeByIdAsync(id)
-    .catch(() => null);
-  results[label] = node ? { found: true, name: node.name } : { found: false };
+    const node = await figma.getNodeByIdAsync(id).catch(() => null);
+    results[label] = node ? { found: true, name: node.name } : { found: false };
 }
 
 return results;
@@ -329,30 +347,48 @@ const inventory = { pages: [], variables: [], componentSets: [], frames: [] };
 
 // Scan pages
 for (const page of figma.root.children) {
-  if (page.getSharedPluginData('dsb', 'run_id') === TARGET_RUN_ID) {
-    inventory.pages.push({ id: page.id, name: page.name, key: page.getSharedPluginData('dsb', 'key') });
-  }
+    if (page.getSharedPluginData('dsb', 'run_id') === TARGET_RUN_ID) {
+        inventory.pages.push({
+            id: page.id,
+            name: page.name,
+            key: page.getSharedPluginData('dsb', 'key'),
+        });
+    }
 }
 
 // Scan variables
 const allVars = await figma.variables.getLocalVariablesAsync();
 for (const v of allVars) {
-  if (v.getSharedPluginData('dsb', 'run_id') === TARGET_RUN_ID) {
-    inventory.variables.push({ id: v.id, name: v.name, key: v.getSharedPluginData('dsb', 'key') });
-  }
+    if (v.getSharedPluginData('dsb', 'run_id') === TARGET_RUN_ID) {
+        inventory.variables.push({
+            id: v.id,
+            name: v.name,
+            key: v.getSharedPluginData('dsb', 'key'),
+        });
+    }
 }
 
 // Scan all component sets and frames on each page
 for (const page of figma.root.children) {
-  await figma.setCurrentPageAsync(page);
-  const nodes = page.findAll(n => n.getSharedPluginData('dsb', 'run_id') === TARGET_RUN_ID);
-  for (const n of nodes) {
-    if (n.type === 'COMPONENT_SET') {
-      inventory.componentSets.push({ id: n.id, name: n.name, key: n.getSharedPluginData('dsb', 'key') });
-    } else if (n.type === 'FRAME') {
-      inventory.frames.push({ id: n.id, name: n.name, key: n.getSharedPluginData('dsb', 'key') });
+    await figma.setCurrentPageAsync(page);
+    const nodes = page.findAll(
+        (n) => n.getSharedPluginData('dsb', 'run_id') === TARGET_RUN_ID,
+    );
+    for (const n of nodes) {
+        if (n.type === 'COMPONENT_SET') {
+            inventory.componentSets.push({
+                id: n.id,
+                name: n.name,
+                key: n.getSharedPluginData('dsb', 'key'),
+            });
+        } else if (n.type === 'FRAME') {
+            inventory.frames.push({
+                id: n.id,
+                name: n.name,
+                key: n.getSharedPluginData('dsb', 'key'),
+            });
+        }
     }
-  }
 }
 
 return inventory;
@@ -363,6 +399,7 @@ return inventory;
 Map the inventory keys back to the state ledger schema. For each entity found with a `key`, add its ID to the appropriate section. Mark the corresponding step as `completedSteps`.
 
 Example mapping:
+
 ```
 key: 'collection/color'        → entities.collections.color
 key: 'variable/color/bg/primary' → entities.variables['color/bg/primary']
@@ -391,27 +428,27 @@ Phase 3 complete (per component): componentSet exists + no pending validations +
 
 These can be fixed and retried without affecting already-created entities:
 
-| Category | Examples | Recovery |
-|---|---|---|
-| Layout errors | Variants stacked at (0,0), wrong padding values | Re-run the positioning step only |
-| Naming issues | Typo in variant name, wrong casing | Find nodes by `dsb_key`, update `name` property |
-| Missing property wiring | `componentPropertyReferences` not set | Find component set by ID, re-run the property wiring step |
-| Variable binding omission | A fill was hardcoded instead of bound | Find nodes by `dsb_key`, re-bind the fill |
-| Wrong variable bound | Bound to wrong variable ID | Re-bind with correct variable ID |
-| Text not visible | Font not loaded before text write | Call `listAvailableFontsAsync()` to verify the font exists, then re-run text creation with `loadFontAsync` |
-| Script timeout | Script exceeded time limit before completing | Script is atomic — nothing was created. Reduce scope (fewer nodes per call) and retry |
+| Category                  | Examples                                        | Recovery                                                                                                   |
+| ------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Layout errors             | Variants stacked at (0,0), wrong padding values | Re-run the positioning step only                                                                           |
+| Naming issues             | Typo in variant name, wrong casing              | Find nodes by `dsb_key`, update `name` property                                                            |
+| Missing property wiring   | `componentPropertyReferences` not set           | Find component set by ID, re-run the property wiring step                                                  |
+| Variable binding omission | A fill was hardcoded instead of bound           | Find nodes by `dsb_key`, re-bind the fill                                                                  |
+| Wrong variable bound      | Bound to wrong variable ID                      | Re-bind with correct variable ID                                                                           |
+| Text not visible          | Font not loaded before text write               | Call `listAvailableFontsAsync()` to verify the font exists, then re-run text creation with `loadFontAsync` |
+| Script timeout            | Script exceeded time limit before completing    | Script is atomic — nothing was created. Reduce scope (fewer nodes per call) and retry                      |
 
 ### Structural Corruption (Requires Rollback or Restart)
 
 These errors leave the file in a state where continuing forward is unreliable:
 
-| Category | Examples | Recovery |
-|---|---|---|
-| Component cycle | A component instance was accidentally nested inside itself | Full cleanup of the affected component, restart that component from Call 1 |
-| combineAsVariants with non-components | Mixed node types passed to combineAsVariants, causing unexpected merges | Remove the malformed component set, re-run from variant creation |
-| Variable collection ID drift | Collection was deleted and re-created, old IDs in state ledger are stale | Re-run Phase 1 completely; update all IDs in state ledger |
-| Page deletion | A page was deleted after component sets were created on it | Treat as Phase 2 incomplete; re-create the page + re-run affected component creations |
-| Mode limit exceeded | `addMode` threw because the plan is Starter or Professional | Redesign variable collection architecture to fit mode limits, restart Phase 1 |
+| Category                              | Examples                                                                 | Recovery                                                                              |
+| ------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Component cycle                       | A component instance was accidentally nested inside itself               | Full cleanup of the affected component, restart that component from Call 1            |
+| combineAsVariants with non-components | Mixed node types passed to combineAsVariants, causing unexpected merges  | Remove the malformed component set, re-run from variant creation                      |
+| Variable collection ID drift          | Collection was deleted and re-created, old IDs in state ledger are stale | Re-run Phase 1 completely; update all IDs in state ledger                             |
+| Page deletion                         | A page was deleted after component sets were created on it               | Treat as Phase 2 incomplete; re-create the page + re-run affected component creations |
+| Mode limit exceeded                   | `addMode` threw because the plan is Starter or Professional              | Redesign variable collection architecture to fit mode limits, restart Phase 1         |
 
 **Recovery from structural corruption**: run `cleanupOrphans` for the entire run ID, then restart from the affected phase. Do NOT attempt to patch corrupted structure in-place.
 
@@ -419,22 +456,22 @@ These errors leave the file in a state where continuing forward is unreliable:
 
 ## 7. Common Error Table
 
-| Error message | Likely cause | Fix |
-|---|---|---|
-| `"Cannot create component from node"` | Tried to call `createComponentFromNode` on a node inside a component | Create a fresh component instead: `figma.createComponent()` |
-| `"in addMode: Limited to N modes only"` | Plan mode limit hit (Starter=1, Professional=4) | Redesign to use fewer modes or upgrade plan |
-| `"setCurrentPageAsync: page does not exist"` | Page was deleted or wrong ID | Re-create the page using the idempotency pattern |
-| `"Cannot read properties of null"` | `getNodeByIdAsync` returned null — node was deleted | Run the resume protocol to find what exists, update state ledger |
-| `"Expected nodes to be component nodes"` | Passed a non-ComponentNode to `combineAsVariants` | Filter the array: `nodes.filter(n => n.type === 'COMPONENT')` |
-| `"in createVariable: Cannot create variable"` | Collection was deleted or ID is wrong | Verify collection exists with `getVariableCollectionByIdAsync` |
-| `"font not loaded"` | Called a text property setter without `loadFontAsync` first | Call `await figma.listAvailableFontsAsync()` to discover available fonts and verify the font name, then `await figma.loadFontAsync({ family, style })` before the text operation |
-| `"Cannot set properties of a read-only array"` | Tried to mutate fills/strokes in-place | Clone first: `const fills = JSON.parse(JSON.stringify(node.fills))` |
-| `"Expected RGBA color"` | Color value out of 0–1 range | Divide RGB 0–255 values by 255: `{ r: 65/255, g: 85/255, b: 143/255 }` |
-| `"Cannot add children to a non-parent node"` | Tried to append a child to a leaf node (text, rect) | Ensure the parent is a FrameNode, ComponentNode, or GroupNode |
-| `"in combineAsVariants: nodes must be in the same parent"` | Components are on different pages | Move all components to the same page before combining |
-| `"Script exceeded time limit"` | Loop creating too many nodes in one call | Split the work: create N/2 variants per call |
-| Component set deletes itself | Tried to create a component set with no children | `combineAsVariants` requires at least 1 node — always pass 1+ |
-| `addComponentProperty` returns unexpected name | This is normal — `BOOLEAN`/`TEXT`/`INSTANCE_SWAP` get `#id:id` suffix | Save the returned key immediately and use that, not the input name |
+| Error message                                              | Likely cause                                                          | Fix                                                                                                                                                                              |
+| ---------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `"Cannot create component from node"`                      | Tried to call `createComponentFromNode` on a node inside a component  | Create a fresh component instead: `figma.createComponent()`                                                                                                                      |
+| `"in addMode: Limited to N modes only"`                    | Plan mode limit hit (Starter=1, Professional=4)                       | Redesign to use fewer modes or upgrade plan                                                                                                                                      |
+| `"setCurrentPageAsync: page does not exist"`               | Page was deleted or wrong ID                                          | Re-create the page using the idempotency pattern                                                                                                                                 |
+| `"Cannot read properties of null"`                         | `getNodeByIdAsync` returned null — node was deleted                   | Run the resume protocol to find what exists, update state ledger                                                                                                                 |
+| `"Expected nodes to be component nodes"`                   | Passed a non-ComponentNode to `combineAsVariants`                     | Filter the array: `nodes.filter(n => n.type === 'COMPONENT')`                                                                                                                    |
+| `"in createVariable: Cannot create variable"`              | Collection was deleted or ID is wrong                                 | Verify collection exists with `getVariableCollectionByIdAsync`                                                                                                                   |
+| `"font not loaded"`                                        | Called a text property setter without `loadFontAsync` first           | Call `await figma.listAvailableFontsAsync()` to discover available fonts and verify the font name, then `await figma.loadFontAsync({ family, style })` before the text operation |
+| `"Cannot set properties of a read-only array"`             | Tried to mutate fills/strokes in-place                                | Clone first: `const fills = JSON.parse(JSON.stringify(node.fills))`                                                                                                              |
+| `"Expected RGBA color"`                                    | Color value out of 0–1 range                                          | Divide RGB 0–255 values by 255: `{ r: 65/255, g: 85/255, b: 143/255 }`                                                                                                           |
+| `"Cannot add children to a non-parent node"`               | Tried to append a child to a leaf node (text, rect)                   | Ensure the parent is a FrameNode, ComponentNode, or GroupNode                                                                                                                    |
+| `"in combineAsVariants: nodes must be in the same parent"` | Components are on different pages                                     | Move all components to the same page before combining                                                                                                                            |
+| `"Script exceeded time limit"`                             | Loop creating too many nodes in one call                              | Split the work: create N/2 variants per call                                                                                                                                     |
+| Component set deletes itself                               | Tried to create a component set with no children                      | `combineAsVariants` requires at least 1 node — always pass 1+                                                                                                                    |
+| `addComponentProperty` returns unexpected name             | This is normal — `BOOLEAN`/`TEXT`/`INSTANCE_SWAP` get `#id:id` suffix | Save the returned key immediately and use that, not the input name                                                                                                               |
 
 ---
 
@@ -445,6 +482,7 @@ These errors leave the file in a state where continuing forward is unreliable:
 Since `use_figma` is atomic, a failed call creates nothing. The most common scenario is that some calls in Phase 1 succeeded (creating some variables) while a later call failed.
 
 Recovery steps:
+
 1. Run inspection script to find all variables tagged with your `run_id`
 2. Compare against the plan to identify which variables were successfully created and which are still missing
 3. If a successfully created variable has wrong values, call `variable.remove()` and recreate it
@@ -458,6 +496,7 @@ Recovery steps:
 Symptoms: some pages exist, others are missing; foundations doc frames are incomplete.
 
 Recovery steps:
+
 1. Identify which pages were successfully created (check for `key` tags)
 2. Mark remaining pages as pending and create them in subsequent calls
 3. If a foundations doc frame is malformed, run `cleanupOrphans` for `dsb_phase: 'phase2'` on that page, then recreate
@@ -501,8 +540,8 @@ If failure in Call 6 (component properties):
 ```javascript
 const existingDefs = cs.componentPropertyDefinitions;
 const labelKey = existingDefs['Label']
-  ? Object.keys(existingDefs).find(k => k.startsWith('Label'))
-  : cs.addComponentProperty('Label', 'TEXT', 'Button');
+    ? Object.keys(existingDefs).find((k) => k.startsWith('Label'))
+    : cs.addComponentProperty('Label', 'TEXT', 'Button');
 ```
 
 ### Phase 4 fails mid-execution (QA / Code Connect)

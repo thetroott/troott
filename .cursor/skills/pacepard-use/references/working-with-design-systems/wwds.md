@@ -20,14 +20,14 @@ The Figma paradigms you will need to understand when working with design systems
 Things you might be asked to do with respect to design systems:
 
 - Create patterns in Figma that match patterns in code
-  - Likely (but not exclusively) to get up to speed so that visual riffing can be done in Figma
-  - Create variables based on a stylesheet, JSON format, some other theme definition
-  - Create Figma text styles that match a type hierarchy defined somewhere
-  - Create components based on existing code components
+    - Likely (but not exclusively) to get up to speed so that visual riffing can be done in Figma
+    - Create variables based on a stylesheet, JSON format, some other theme definition
+    - Create Figma text styles that match a type hierarchy defined somewhere
+    - Create components based on existing code components
 - Sync between code and design forms
-  - Making sure that Figma's concepts match a production form
+    - Making sure that Figma's concepts match a production form
 - Use an existing Figma design library to create something
-  - This something could be matching an existing code form, an image, or just a prompt
+    - This something could be matching an existing code form, an image, or just a prompt
 - Clean up a design to match some code pattern
 
 ## Things to remember

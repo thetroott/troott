@@ -21,11 +21,11 @@ Measure before optimizing. Performance work without measurement is guessing — 
 
 ## Core Web Vitals Targets
 
-| Metric | Good | Needs Improvement | Poor |
-|--------|------|-------------------|------|
-| **LCP** (Largest Contentful Paint) | ≤ 2.5s | ≤ 4.0s | > 4.0s |
-| **INP** (Interaction to Next Paint) | ≤ 200ms | ≤ 500ms | > 500ms |
-| **CLS** (Cumulative Layout Shift) | ≤ 0.1 | ≤ 0.25 | > 0.25 |
+| Metric                              | Good    | Needs Improvement | Poor    |
+| ----------------------------------- | ------- | ----------------- | ------- |
+| **LCP** (Largest Contentful Paint)  | ≤ 2.5s  | ≤ 4.0s            | > 4.0s  |
+| **INP** (Interaction to Next Paint) | ≤ 200ms | ≤ 500ms           | > 500ms |
+| **CLS** (Cumulative Layout Shift)   | ≤ 0.1   | ≤ 0.25            | > 0.25  |
 
 ## The Optimization Workflow
 
@@ -45,6 +45,7 @@ Two complementary approaches — use both:
 - **RUM (web-vitals library, CrUX):** Real user data in real conditions. Required to validate that a fix actually improved user experience.
 
 **Frontend:**
+
 ```bash
 # Synthetic: Lighthouse in Chrome DevTools (or CI)
 # Chrome DevTools → Performance tab → Record
@@ -59,6 +60,7 @@ onCLS(console.log);
 ```
 
 **Backend:**
+
 ```bash
 # Response time logging
 # Application Performance Monitoring (APM)
@@ -102,21 +104,21 @@ Common bottlenecks by category:
 
 **Frontend:**
 
-| Symptom | Likely Cause | Investigation |
-|---------|-------------|---------------|
-| Slow LCP | Large images, render-blocking resources, slow server | Check network waterfall, image sizes |
-| High CLS | Images without dimensions, late-loading content, font shifts | Check layout shift attribution |
-| Poor INP | Heavy JavaScript on main thread, large DOM updates | Check long tasks in Performance trace |
-| Slow initial load | Large bundle, many network requests | Check bundle size, code splitting |
+| Symptom           | Likely Cause                                                 | Investigation                         |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------- |
+| Slow LCP          | Large images, render-blocking resources, slow server         | Check network waterfall, image sizes  |
+| High CLS          | Images without dimensions, late-loading content, font shifts | Check layout shift attribution        |
+| Poor INP          | Heavy JavaScript on main thread, large DOM updates           | Check long tasks in Performance trace |
+| Slow initial load | Large bundle, many network requests                          | Check bundle size, code splitting     |
 
 **Backend:**
 
-| Symptom | Likely Cause | Investigation |
-|---------|-------------|---------------|
-| Slow API responses | N+1 queries, missing indexes, unoptimized queries | Check database query log |
-| Memory growth | Leaked references, unbounded caches, large payloads | Heap snapshot analysis |
-| CPU spikes | Synchronous heavy computation, regex backtracking | CPU profiling |
-| High latency | Missing caching, redundant computation, network hops | Trace requests through the stack |
+| Symptom            | Likely Cause                                         | Investigation                    |
+| ------------------ | ---------------------------------------------------- | -------------------------------- |
+| Slow API responses | N+1 queries, missing indexes, unoptimized queries    | Check database query log         |
+| Memory growth      | Leaked references, unbounded caches, large payloads  | Heap snapshot analysis           |
+| CPU spikes         | Synchronous heavy computation, regex backtracking    | CPU profiling                    |
+| High latency       | Missing caching, redundant computation, network hops | Trace requests through the stack |
 
 ### Step 3: Fix Common Anti-Patterns
 
@@ -126,12 +128,12 @@ Common bottlenecks by category:
 // BAD: N+1 — one query per task for the owner
 const tasks = await db.tasks.findMany();
 for (const task of tasks) {
-  task.owner = await db.users.findUnique({ where: { id: task.ownerId } });
+    task.owner = await db.users.findUnique({ where: { id: task.ownerId } });
 }
 
 // GOOD: Single query with join/include
 const tasks = await db.tasks.findMany({
-  include: { owner: true },
+    include: { owner: true },
 });
 ```
 
@@ -143,9 +145,9 @@ const allTasks = await db.tasks.findMany();
 
 // GOOD: Paginated with limits
 const tasks = await db.tasks.findMany({
-  take: 20,
-  skip: (page - 1) * 20,
-  orderBy: { createdAt: 'desc' },
+    take: 20,
+    skip: (page - 1) * 20,
+    orderBy: { createdAt: 'desc' },
 });
 ```
 
@@ -162,55 +164,63 @@ const tasks = await db.tasks.findMany({
   - Resolution switching (srcset + sizes): right file size per screen density
 -->
 <picture>
-  <!-- Mobile: portrait crop (8:10) -->
-  <source
-    media="(max-width: 767px)"
-    srcset="/hero-mobile-400.avif 400w, /hero-mobile-800.avif 800w"
-    sizes="100vw"
-    width="800"
-    height="1000"
-    type="image/avif"
-  />
-  <source
-    media="(max-width: 767px)"
-    srcset="/hero-mobile-400.webp 400w, /hero-mobile-800.webp 800w"
-    sizes="100vw"
-    width="800"
-    height="1000"
-    type="image/webp"
-  />
-  <!-- Desktop: landscape crop (2:1) -->
-  <source
-    srcset="/hero-800.avif 800w, /hero-1200.avif 1200w, /hero-1600.avif 1600w"
-    sizes="(max-width: 1200px) 100vw, 1200px"
-    width="1200"
-    height="600"
-    type="image/avif"
-  />
-  <source
-    srcset="/hero-800.webp 800w, /hero-1200.webp 1200w, /hero-1600.webp 1600w"
-    sizes="(max-width: 1200px) 100vw, 1200px"
-    width="1200"
-    height="600"
-    type="image/webp"
-  />
-  <img
-    src="/hero-desktop.jpg"
-    width="1200"
-    height="600"
-    fetchpriority="high"
-    alt="Hero image description"
-  />
+    <!-- Mobile: portrait crop (8:10) -->
+    <source
+        media="(max-width: 767px)"
+        srcset="/hero-mobile-400.avif 400w, /hero-mobile-800.avif 800w"
+        sizes="100vw"
+        width="800"
+        height="1000"
+        type="image/avif"
+    />
+    <source
+        media="(max-width: 767px)"
+        srcset="/hero-mobile-400.webp 400w, /hero-mobile-800.webp 800w"
+        sizes="100vw"
+        width="800"
+        height="1000"
+        type="image/webp"
+    />
+    <!-- Desktop: landscape crop (2:1) -->
+    <source
+        srcset="
+            /hero-800.avif   800w,
+            /hero-1200.avif 1200w,
+            /hero-1600.avif 1600w
+        "
+        sizes="(max-width: 1200px) 100vw, 1200px"
+        width="1200"
+        height="600"
+        type="image/avif"
+    />
+    <source
+        srcset="
+            /hero-800.webp   800w,
+            /hero-1200.webp 1200w,
+            /hero-1600.webp 1600w
+        "
+        sizes="(max-width: 1200px) 100vw, 1200px"
+        width="1200"
+        height="600"
+        type="image/webp"
+    />
+    <img
+        src="/hero-desktop.jpg"
+        width="1200"
+        height="600"
+        fetchpriority="high"
+        alt="Hero image description"
+    />
 </picture>
 
 <!-- GOOD: Below-the-fold image — lazy loaded + async decoding -->
 <img
-  src="/content.webp"
-  width="800"
-  height="400"
-  loading="lazy"
-  decoding="async"
-  alt="Content image description"
+    src="/content.webp"
+    width="800"
+    height="400"
+    loading="lazy"
+    decoding="async"
+    alt="Content image description"
 />
 ```
 
@@ -219,24 +229,28 @@ const tasks = await db.tasks.findMany({
 ```tsx
 // BAD: Creates new object on every render, causing children to re-render
 function TaskList() {
-  return <TaskFilters options={{ sortBy: 'date', order: 'desc' }} />;
+    return <TaskFilters options={{ sortBy: 'date', order: 'desc' }} />;
 }
 
 // GOOD: Stable reference
 const DEFAULT_OPTIONS = { sortBy: 'date', order: 'desc' } as const;
 function TaskList() {
-  return <TaskFilters options={DEFAULT_OPTIONS} />;
+    return <TaskFilters options={DEFAULT_OPTIONS} />;
 }
 
 // Use React.memo for expensive components
 const TaskItem = React.memo(function TaskItem({ task }: Props) {
-  return <div>{/* expensive render */}</div>;
+    return <div>{/* expensive render */}</div>;
 });
 
 // Use useMemo for expensive computations
 function TaskStats({ tasks }: Props) {
-  const stats = useMemo(() => calculateStats(tasks), [tasks]);
-  return <div>{stats.completed} / {stats.total}</div>;
+    const stats = useMemo(() => calculateStats(tasks), [tasks]);
+    return (
+        <div>
+            {stats.completed} / {stats.total}
+        </div>
+    );
 }
 ```
 
@@ -271,19 +285,22 @@ let cachedConfig: AppConfig | null = null;
 let cacheExpiry = 0;
 
 async function getAppConfig(): Promise<AppConfig> {
-  if (cachedConfig && Date.now() < cacheExpiry) {
+    if (cachedConfig && Date.now() < cacheExpiry) {
+        return cachedConfig;
+    }
+    cachedConfig = await db.config.findFirst();
+    cacheExpiry = Date.now() + CACHE_TTL;
     return cachedConfig;
-  }
-  cachedConfig = await db.config.findFirst();
-  cacheExpiry = Date.now() + CACHE_TTL;
-  return cachedConfig;
 }
 
 // HTTP caching headers for static assets
-app.use('/static', express.static('public', {
-  maxAge: '1y',           // Cache for 1 year
-  immutable: true,        // Never revalidate (use content hashing in filenames)
-}));
+app.use(
+    '/static',
+    express.static('public', {
+        maxAge: '1y', // Cache for 1 year
+        immutable: true, // Never revalidate (use content hashing in filenames)
+    }),
+);
 
 // Cache-Control for API responses
 res.set('Cache-Control', 'public, max-age=300'); // 5 minutes
@@ -304,6 +321,7 @@ Lighthouse Performance score: ≥ 90
 ```
 
 **Enforce in CI:**
+
 ```bash
 # Bundle size check
 npx bundlesize --config bundlesize.config.json
@@ -316,16 +334,15 @@ npx lhci autorun
 
 For detailed performance checklists, optimization commands, and anti-pattern reference, see `references/performance-checklist.md`.
 
-
 ## Common Rationalizations
 
-| Rationalization | Reality |
-|---|---|
-| "We'll optimize later" | Performance debt compounds. Fix obvious anti-patterns now, defer micro-optimizations. |
-| "It's fast on my machine" | Your machine isn't the user's. Profile on representative hardware and networks. |
-| "This optimization is obvious" | If you didn't measure, you don't know. Profile first. |
-| "Users won't notice 100ms" | Research shows 100ms delays impact conversion rates. Users notice more than you think. |
-| "The framework handles performance" | Frameworks prevent some issues but can't fix N+1 queries or oversized bundles. |
+| Rationalization                     | Reality                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------- |
+| "We'll optimize later"              | Performance debt compounds. Fix obvious anti-patterns now, defer micro-optimizations.  |
+| "It's fast on my machine"           | Your machine isn't the user's. Profile on representative hardware and networks.        |
+| "This optimization is obvious"      | If you didn't measure, you don't know. Profile first.                                  |
+| "Users won't notice 100ms"          | Research shows 100ms delays impact conversion rates. Users notice more than you think. |
+| "The framework handles performance" | Frameworks prevent some issues but can't fix N+1 queries or oversized bundles.         |
 
 ## Red Flags
 

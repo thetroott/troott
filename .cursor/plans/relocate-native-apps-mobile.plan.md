@@ -27,10 +27,10 @@ Apply these when **executing** the plan; they supersede ad hoc choices unless th
 
 Once native folders live under **`apps/mobile`**, every future prebuild must use **that** project root:
 
-| Command | Effect |
-|--------|--------|
-| From repo root: **`pnpm prebuild:mobile`** | Should run prebuild with project dir **`apps/mobile`** (see scripts below). |
-| From repo root: **`pnpm prebuild:mobile:clean`** | Same with **`--clean`**. |
+| Command                                                         | Effect                                                                                           |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| From repo root: **`pnpm prebuild:mobile`**                      | Should run prebuild with project dir **`apps/mobile`** (see scripts below).                      |
+| From repo root: **`pnpm prebuild:mobile:clean`**                | Same with **`--clean`**.                                                                         |
 | From **`apps/mobile`**: `pnpm prebuild` / `pnpm prebuild:clean` | **`expo prebuild .`** / **`expo prebuild . --clean`** — output is always this package directory. |
 
 **Do not** run bare `expo prebuild` with **no directory** from the **monorepo root** — that treats the repo root as the project and regenerates **`/android`** and **`/ios`** at the root again.
@@ -100,16 +100,16 @@ A reference **`package.json` scripts** block (from another Expo app) can still b
 
 These are the **gaps between the intended end state and the current workspace**; nothing here is done until someone executes the relocation.
 
-| Item | Current state | Plan / target |
-|------|----------------|---------------|
-| Native location | **[`android/`](android)** and **`ios/`** at **repo root** only | Only **`apps/mobile/android`** and **`apps/mobile/ios`** |
-| **`apps/mobile` native dirs** | **Absent** (no `apps/mobile/android`) | Created by **`expo prebuild apps/mobile --clean`** (after removing root native) |
-| Root **`prebuild:mobile*`** scripts | Still **`pnpm --filter @troott/mobile run prebuild`** | Prefer **`pnpm exec expo prebuild apps/mobile --pnpm`** (explicit path + `--pnpm`) |
-| Mobile **`prebuild*`** scripts | **`expo prebuild`** / **`expo prebuild --clean`** | Optional **`expo prebuild .`** / **`expo prebuild . --clean`** for clarity |
-| **`.gitignore`** | Comments reference `apps/mobile/android` / `ios`; policy not locked | Decide **commit vs ignore** `apps/mobile` native dirs and align ignore rules |
-| **CI** | No **`.github`** in repo (or elsewhere) | Any future workflow must **`cd apps/mobile`** or use **`expo prebuild apps/mobile`** / EAS **`--project-dir`** |
-| **EAS** | [`apps/mobile/eas.json`](apps/mobile/eas.json) exists | Confirm EAS project root is **`apps/mobile`** (default when `eas.json` lives there) |
-| **Docs** | Plan file only | Short **README** note: never prebuild at monorepo root; use root **`pnpm prebuild:mobile:clean`** or explicit path |
-| **Optional scripts** (from reference snippet) | Not in [`apps/mobile/package.json`](apps/mobile/package.json) | **`expo export --output-dir ./build`**, **`eas-build-post-install`**, **`lint`/`test`** — add only if you need them |
+| Item                                          | Current state                                                       | Plan / target                                                                                                       |
+| --------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Native location                               | **[`android/`](android)** and **`ios/`** at **repo root** only      | Only **`apps/mobile/android`** and **`apps/mobile/ios`**                                                            |
+| **`apps/mobile` native dirs**                 | **Absent** (no `apps/mobile/android`)                               | Created by **`expo prebuild apps/mobile --clean`** (after removing root native)                                     |
+| Root **`prebuild:mobile*`** scripts           | Still **`pnpm --filter @troott/mobile run prebuild`**               | Prefer **`pnpm exec expo prebuild apps/mobile --pnpm`** (explicit path + `--pnpm`)                                  |
+| Mobile **`prebuild*`** scripts                | **`expo prebuild`** / **`expo prebuild --clean`**                   | Optional **`expo prebuild .`** / **`expo prebuild . --clean`** for clarity                                          |
+| **`.gitignore`**                              | Comments reference `apps/mobile/android` / `ios`; policy not locked | Decide **commit vs ignore** `apps/mobile` native dirs and align ignore rules                                        |
+| **CI**                                        | No **`.github`** in repo (or elsewhere)                             | Any future workflow must **`cd apps/mobile`** or use **`expo prebuild apps/mobile`** / EAS **`--project-dir`**      |
+| **EAS**                                       | [`apps/mobile/eas.json`](apps/mobile/eas.json) exists               | Confirm EAS project root is **`apps/mobile`** (default when `eas.json` lives there)                                 |
+| **Docs**                                      | Plan file only                                                      | Short **README** note: never prebuild at monorepo root; use root **`pnpm prebuild:mobile:clean`** or explicit path  |
+| **Optional scripts** (from reference snippet) | Not in [`apps/mobile/package.json`](apps/mobile/package.json)       | **`expo export --output-dir ./build`**, **`eas-build-post-install`**, **`lint`/`test`** — add only if you need them |
 
 **Operational note:** While **`android`/`ios` exist only at the root** and **`pnpm ios` / `pnpm android`** run with cwd **`apps/mobile`**, Expo may still be inconsistent or confusing (wrong tree opened in Android Studio / Xcode). Completing the move removes that ambiguity.

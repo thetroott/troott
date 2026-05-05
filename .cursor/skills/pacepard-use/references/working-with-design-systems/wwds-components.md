@@ -7,16 +7,16 @@ Properties can vary from code in different ways, but alignment to code can still
 Figma has four property types, which can be inspected in the component definition's `componentPropertyDefinitions`. To fully understand the component, its descendants must be traversed. Property types include:
 
 - Variant
-  - This is reflected as permutations of the component in a Component Set on the canvas. Each variant is explicitly visualized, including an redundant permutations ("Small + Primary + Disabled" may look the same as "Small Secondary Sisabled"). These permutations create different variants implicitly in Figma and it is handled through layer naming (`Variant=Primary,Size=Small,State=Disabled`).
+    - This is reflected as permutations of the component in a Component Set on the canvas. Each variant is explicitly visualized, including an redundant permutations ("Small + Primary + Disabled" may look the same as "Small Secondary Sisabled"). These permutations create different variants implicitly in Figma and it is handled through layer naming (`Variant=Primary,Size=Small,State=Disabled`).
 - Text/String
-  - Text properties are stored on the component parent, but can be mapped to Text node descendants.
-  - `node.componentPropertyReferences.characters` on a descendant text node are how you determine where the text property is referenced (can be multiple, though unlikely).
+    - Text properties are stored on the component parent, but can be mapped to Text node descendants.
+    - `node.componentPropertyReferences.characters` on a descendant text node are how you determine where the text property is referenced (can be multiple, though unlikely).
 - Boolean
-  - Boolean properties are stored on the component parent, but can be mapped to any node descendant that can have its visibility toggled.
-  - `node.componentPropertyReferences.visible` on a descendant node are how you determine where the boolean property is referenced.
+    - Boolean properties are stored on the component parent, but can be mapped to any node descendant that can have its visibility toggled.
+    - `node.componentPropertyReferences.visible` on a descendant node are how you determine where the boolean property is referenced.
 - Instance Swap
-  - Instance swap properties are stored on the component parent, but can be mapped to Instance node descendants.
-  - `node.componentPropertyReferences.mainComponent` on a descendant instance node are how you determine where the instance property is referenced. A classic example of this is an icon property.
+    - Instance swap properties are stored on the component parent, but can be mapped to Instance node descendants.
+    - `node.componentPropertyReferences.mainComponent` on a descendant instance node are how you determine where the instance property is referenced. A classic example of this is an icon property.
 
 ## Descriptions
 
@@ -26,7 +26,7 @@ Descriptions should explain the component's intent and any non-obvious usage con
 
 ```js
 component.description =
-  "Primary action button. Use for the single most important action on a page.";
+    'Primary action button. Use for the single most important action on a page.';
 ```
 
 Variant components (children of a component set) also have a `description` field, but in practice the component set description is what users see. Set it on the component set, not on individual variant nodes.
@@ -36,8 +36,8 @@ To read descriptions when auditing:
 ```js
 // Get all component sets and their descriptions
 figma.root
-  .findAllWithCriteria({ types: ["COMPONENT_SET"] })
-  .map((n) => ({ name: n.name, description: n.description }));
+    .findAllWithCriteria({ types: ['COMPONENT_SET'] })
+    .map((n) => ({ name: n.name, description: n.description }));
 ```
 
 ## Usage guidelines

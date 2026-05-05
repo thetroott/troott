@@ -1,11 +1,12 @@
 # Code Connect Examples
 
 ## Contents
+
 - [Basic component property retrieval](#basic-component-property-retrieval)
 - [Descendants and recursive templating](#descendants-and-recursive-templating)
-  - [instance.metadata](#instancemetadata)
-  - [instance.example](#instanceexample)
-  - [Descendant methods](#descendant-methods)
+    - [instance.metadata](#instancemetadata)
+    - [instance.example](#instanceexample)
+    - [Descendant methods](#descendant-methods)
 
 ## Basic component property retrieval
 
@@ -19,27 +20,27 @@
 Both of these are valid, but depending on required outcome, one or the other would be preferred.
 
 ```js
-const variantMapping = instance.getEnum("Variant", {
-  Primary: "primary",
-  Secondary: "secondary",
+const variantMapping = instance.getEnum('Variant', {
+    Primary: 'primary',
+    Secondary: 'secondary',
 });
-const variantTransform = instance.getString("Variant").toLowerCase();
+const variantTransform = instance.getString('Variant').toLowerCase();
 ```
 
 Booleans can also be handled similarly. These aren't the best example, but either approach may be preferred depending on the logic of the snippet.
 
 ```js
-const booleanMapping = instance.getBoolean("Is Highlighted", {
-  true: "is-highlighted",
-  false: undefined,
+const booleanMapping = instance.getBoolean('Is Highlighted', {
+    true: 'is-highlighted',
+    false: undefined,
 });
-const boolean = instance.getString("Is Highlighted") === "true";
+const boolean = instance.getString('Is Highlighted') === 'true';
 ```
 
 Text properties are always getString()
 
 ```js
-const label = instance.getString("Label");
+const label = instance.getString('Label');
 ```
 
 ## Descendants and recursive templating
@@ -60,20 +61,20 @@ Any string value can be stored in props. This is additional information to the e
 
 ```js
 export default {
-  example: figma.html`<ds-child>normal stuff</ds-child>`,
-  id: "child",
-  metadata: { nestable: true, props: { special: "Special Stuff!!! 🤩" } },
+    example: figma.html`<ds-child>normal stuff</ds-child>`,
+    id: 'child',
+    metadata: { nestable: true, props: { special: 'Special Stuff!!! 🤩' } },
 };
 ```
 
 ```js
-const child = instance.findConnectedInstance("child");
+const child = instance.findConnectedInstance('child');
 
 if (child && child.type === 'INSTANCE') {
-  export default {
-    example: figma.html`<ds-parent>${child.executeTemplate().metadata?.props?.special}</ds-parent>`,
-    id: "parent",
-  };
+    export default {
+        example: figma.html`<ds-parent>${child.executeTemplate().metadata?.props?.special}</ds-parent>`,
+        id: 'parent',
+    };
 }
 ```
 
@@ -100,7 +101,7 @@ const thing = `<span>${node.executeTemplate().example}</span>`; // Will not work
 const thing = figma.html`<span>${node.executeTemplate().example}</span>`; // WILL work downstream
 
 return {
-  example: figma.html`${thing}`,
+    example: figma.html`${thing}`,
 };
 ```
 
@@ -111,8 +112,8 @@ const thing = [];
 thing.push(figma.html`<span>${node.executeTemplate().example}</span>`);
 
 return {
-  example: figma.html`${thing.join("\n")}`, // BAD: Will not work
-  example: figma.html`${thing[0]}`, // Will work...but defeats the purpose of an array and we should use a variable instead.
+    example: figma.html`${thing.join('\n')}`, // BAD: Will not work
+    example: figma.html`${thing[0]}`, // Will work...but defeats the purpose of an array and we should use a variable instead.
 };
 ```
 
@@ -120,7 +121,7 @@ Therefore, If you have multiple children examples, set each in a variable.
 
 ```js
 return {
-  example: figma.html`${thingStart}${thing}${thingEnd}`,
+    example: figma.html`${thingStart}${thing}${thingEnd}`,
 };
 ```
 
@@ -130,12 +131,12 @@ Digging into the example to get to the snippet string can be useful in rare case
 
 ```js
 const example = node.executeTemplate()?.example[0];
-if (example?.type === "CODE") {
-  // do something with snippet string
-  thing = example.code.replace("abc", "123");
+if (example?.type === 'CODE') {
+    // do something with snippet string
+    thing = example.code.replace('abc', '123');
 } else {
-  // handle error
-  thing = `ERROR: ${example?.message}`;
+    // handle error
+    thing = `ERROR: ${example?.message}`;
 }
 ```
 
@@ -162,14 +163,18 @@ Text nodes only have a single value available in the API:
 #### findInstance versus getInstanceSwap
 
 ```js
-const hasIcon = instance.getBoolean("Has Icon");
+const hasIcon = instance.getBoolean('Has Icon');
 let icon = null;
 if (hasIcon) {
-  const iconInstance = instance.findInstance("Star Icon"); // INCORRECT: Will be null when icons with other names are in this slot.
-  const iconInstance = instance.getInstanceSwap("Icon"); // CORRECT: Will refer to any instance in this slot.
-  if (iconInstance && iconInstance.type === 'INSTANCE' && iconInstance.hasCodeConnect()) {
-    icon = iconInstance.executeTemplate().example;
-  }
+    const iconInstance = instance.findInstance('Star Icon'); // INCORRECT: Will be null when icons with other names are in this slot.
+    const iconInstance = instance.getInstanceSwap('Icon'); // CORRECT: Will refer to any instance in this slot.
+    if (
+        iconInstance &&
+        iconInstance.type === 'INSTANCE' &&
+        iconInstance.hasCodeConnect()
+    ) {
+        icon = iconInstance.executeTemplate().example;
+    }
 }
 ```
 
@@ -178,9 +183,9 @@ if (hasIcon) {
 ```js
 const items = [];
 instance.findLayers((node) => {
-  if (node.type === "TEXT") {
-    items.push(`<li>${node.textContent}</li>`);
-  }
+    if (node.type === 'TEXT') {
+        items.push(`<li>${node.textContent}</li>`);
+    }
 });
 ```
 
@@ -190,14 +195,14 @@ instance.findLayers((node) => {
 const items = [];
 let i = 0;
 instance.findConnectedInstances((node) => {
-  if (node.codeConnectId() === "button") {
-    items.push(
-      figma.code`<span slot="child-${i}">${
-        node.executeTemplate().metadata.props.label
-      }</span>`,
-    );
-    i++;
-  }
+    if (node.codeConnectId() === 'button') {
+        items.push(
+            figma.code`<span slot="child-${i}">${
+                node.executeTemplate().metadata.props.label
+            }</span>`,
+        );
+        i++;
+    }
 });
 ```
 
@@ -208,23 +213,24 @@ instance.findConnectedInstances((node) => {
 // source=src/components/Grandparent.js
 // component=Grandparent
 
-const figma = require("figma");
+const figma = require('figma');
 const instance = figma.selectedInstance;
 
 const parents = instance.findConnectedInstances(
-  (node) => node.codeConnectId() === "parent",
+    (node) => node.codeConnectId() === 'parent',
 );
 
 export default {
-  example: figma.html`<ds-grandparent>
+    example: figma.html`<ds-grandparent>
 ${parents
-  .map(
-    (node, i) => node.executeTemplate().metadata.props.special + " index: " + i,
-  )
-  .join("\n")}
+    .map(
+        (node, i) =>
+            node.executeTemplate().metadata.props.special + ' index: ' + i,
+    )
+    .join('\n')}
 </ds-grandparent>`,
-  id: "grandparent",
-  metadata: { nestable: true },
+    id: 'grandparent',
+    metadata: { nestable: true },
 };
 ```
 
@@ -233,24 +239,24 @@ ${parents
 // source=src/components/Parent.js
 // component=Parent
 
-const figma = require("figma");
+const figma = require('figma');
 const instance = figma.selectedInstance;
 
 let childCode;
 let special;
-const node = instance.findConnectedInstance("child");
+const node = instance.findConnectedInstance('child');
 if (node && node.type === 'INSTANCE') {
-  const { metadata, example } = node.executeTemplate();
-  childCode = example;
-  special = `<wow-special>${metadata.props.special}</wow-special>`;
+    const { metadata, example } = node.executeTemplate();
+    childCode = example;
+    special = `<wow-special>${metadata.props.special}</wow-special>`;
 }
 
 export default {
-  example: figma.html`<ds-parent>
+    example: figma.html`<ds-parent>
 ${childCode}
 </ds-parent>`,
-  id: "parent",
-  metadata: { nestable: true, props: { special } },
+    id: 'parent',
+    metadata: { nestable: true, props: { special } },
 };
 ```
 
@@ -259,12 +265,12 @@ ${childCode}
 // source=src/components/Child.js
 // component=Child
 
-const figma = require("figma");
+const figma = require('figma');
 
 export default {
-  example: figma.html`<ds-child>normal stuff</ds-child>`,
-  id: "child",
-  metadata: { nestable: true, props: { special: "Special Stuff!!! 🤩" } },
+    example: figma.html`<ds-child>normal stuff</ds-child>`,
+    id: 'child',
+    metadata: { nestable: true, props: { special: 'Special Stuff!!! 🤩' } },
 };
 ```
 
@@ -274,13 +280,13 @@ export default {
 
 <!-- Parent snippet: -->
 <ds-parent>
-  <ds-child>normal stuff</ds-child>
+    <ds-child>normal stuff</ds-child>
 </ds-parent>
 
 <!-- Grandparent snippet: -->
 <ds-grandparent>
-  <wow-special>Special Stuff!!! 🤩</wow-special> index: 0
-  <wow-special>Special Stuff!!! 🤩</wow-special> index: 1
-  <wow-special>Special Stuff!!! 🤩</wow-special> index: 2
+    <wow-special>Special Stuff!!! 🤩</wow-special> index: 0
+    <wow-special>Special Stuff!!! 🤩</wow-special> index: 1
+    <wow-special>Special Stuff!!! 🤩</wow-special> index: 2
 </ds-grandparent>
 ```

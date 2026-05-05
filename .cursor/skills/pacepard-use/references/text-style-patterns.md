@@ -22,16 +22,16 @@
  * @returns {Promise<Array<{id: string, name: string, key: string, fontSize: number, fontName: FontName, lineHeight: LineHeight, letterSpacing: LetterSpacing}>>}
  */
 async function listTextStyles() {
-  const styles = await figma.getLocalTextStylesAsync();
-  return styles.map(s => ({
-    id: s.id,
-    name: s.name,
-    key: s.key,
-    fontSize: s.fontSize,
-    fontName: s.fontName,
-    lineHeight: s.lineHeight,
-    letterSpacing: s.letterSpacing
-  }));
+    const styles = await figma.getLocalTextStylesAsync();
+    return styles.map((s) => ({
+        id: s.id,
+        name: s.name,
+        key: s.key,
+        fontSize: s.fontSize,
+        fontName: s.fontName,
+        lineHeight: s.lineHeight,
+        letterSpacing: s.letterSpacing,
+    }));
 }
 ```
 
@@ -59,15 +59,22 @@ Font **MUST** be loaded before setting `fontName`. `lineHeight` and `letterSpaci
  * @param {string} [description] - e.g. the CSS variable name "CSS: var(--font-body-base)"
  * @returns {TextStyle}
  */
-function createTextStyleFull(name, fontName, fontSize, lineHeight, letterSpacing, description) {
-  const style = figma.createTextStyle();
-  style.name = name;
-  style.fontName = fontName;
-  style.fontSize = fontSize;
-  style.lineHeight = lineHeight; // { unit: 'AUTO' } | { value, unit: 'PIXELS'|'PERCENT' }
-  if (letterSpacing) style.letterSpacing = letterSpacing;
-  if (description) style.description = description;
-  return style;
+function createTextStyleFull(
+    name,
+    fontName,
+    fontSize,
+    lineHeight,
+    letterSpacing,
+    description,
+) {
+    const style = figma.createTextStyle();
+    style.name = name;
+    style.fontName = fontName;
+    style.fontSize = fontSize;
+    style.lineHeight = lineHeight; // { unit: 'AUTO' } | { value, unit: 'PIXELS'|'PERCENT' }
+    if (letterSpacing) style.letterSpacing = letterSpacing;
+    if (description) style.description = description;
+    return style;
 }
 ```
 
@@ -83,10 +90,10 @@ Font style names vary per provider and per file (`"SemiBold"` vs `"Semi Bold"`).
  * @returns {Promise<string[]>} - All available style names for the family
  */
 async function getAvailableFontStyles(family) {
-  const allFonts = await figma.listAvailableFontsAsync();
-  return allFonts
-    .filter(f => f.fontName.family === family)
-    .map(f => f.fontName.style);
+    const allFonts = await figma.listAvailableFontsAsync();
+    return allFonts
+        .filter((f) => f.fontName.family === family)
+        .map((f) => f.fontName.style);
 }
 
 /**
@@ -97,29 +104,35 @@ async function getAvailableFontStyles(family) {
  * @param {string} [fallbackStyle="Regular"] - Fallback if preferred is unavailable
  * @returns {Promise<FontName>} - The FontName that was actually loaded
  */
-async function loadFontWithFallback(family, preferredStyle, fallbackStyle = "Regular") {
-  const allFonts = await figma.listAvailableFontsAsync();
-  const familyFonts = allFonts.filter(f => f.fontName.family === family);
+async function loadFontWithFallback(
+    family,
+    preferredStyle,
+    fallbackStyle = 'Regular',
+) {
+    const allFonts = await figma.listAvailableFontsAsync();
+    const familyFonts = allFonts.filter((f) => f.fontName.family === family);
 
-  const match = familyFonts.find(f => f.fontName.style === preferredStyle);
-  if (match) {
-    await figma.loadFontAsync(match.fontName);
-    return match.fontName;
-  }
+    const match = familyFonts.find((f) => f.fontName.style === preferredStyle);
+    if (match) {
+        await figma.loadFontAsync(match.fontName);
+        return match.fontName;
+    }
 
-  const fallback = familyFonts.find(f => f.fontName.style === fallbackStyle);
-  if (fallback) {
-    await figma.loadFontAsync(fallback.fontName);
-    return fallback.fontName;
-  }
+    const fallback = familyFonts.find(
+        (f) => f.fontName.style === fallbackStyle,
+    );
+    if (fallback) {
+        await figma.loadFontAsync(fallback.fontName);
+        return fallback.fontName;
+    }
 
-  // Last resort: load the first available style in the family
-  if (familyFonts.length > 0) {
-    await figma.loadFontAsync(familyFonts[0].fontName);
-    return familyFonts[0].fontName;
-  }
+    // Last resort: load the first available style in the family
+    if (familyFonts.length > 0) {
+        await figma.loadFontAsync(familyFonts[0].fontName);
+        return familyFonts[0].fontName;
+    }
 
-  throw new Error(`Font family "${family}" not available in this file`);
+    throw new Error(`Font family "${family}" not available in this file`);
 }
 ```
 
@@ -139,36 +152,36 @@ Handles font loading, deduplication, and idempotency. Each entry: `[name, fontFa
  * @returns {Promise<{ created: string[], skipped: string[] }>}
  */
 async function createTypeRamp(defs) {
-  const uniqueFonts = new Set();
-  for (const [, family, style] of defs) {
-    uniqueFonts.add(JSON.stringify({ family, style }));
-  }
-  await Promise.all(
-    [...uniqueFonts].map(f => figma.loadFontAsync(JSON.parse(f)))
-  );
-
-  const existing = new Set(
-    (await figma.getLocalTextStylesAsync()).map(s => s.name)
-  );
-
-  const created = [];
-  const skipped = [];
-
-  for (const [name, family, style, fontSize, lineHeight, cssVar] of defs) {
-    if (existing.has(name)) {
-      skipped.push(name);
-      continue;
+    const uniqueFonts = new Set();
+    for (const [, family, style] of defs) {
+        uniqueFonts.add(JSON.stringify({ family, style }));
     }
-    const ts = figma.createTextStyle();
-    ts.name = name;
-    ts.fontName = { family, style };
-    ts.fontSize = fontSize;
-    ts.lineHeight = lineHeight ?? { unit: 'AUTO' };
-    if (cssVar) ts.description = `CSS: var(${cssVar})`;
-    created.push(name);
-  }
+    await Promise.all(
+        [...uniqueFonts].map((f) => figma.loadFontAsync(JSON.parse(f))),
+    );
 
-  return { created, skipped };
+    const existing = new Set(
+        (await figma.getLocalTextStylesAsync()).map((s) => s.name),
+    );
+
+    const created = [];
+    const skipped = [];
+
+    for (const [name, family, style, fontSize, lineHeight, cssVar] of defs) {
+        if (existing.has(name)) {
+            skipped.push(name);
+            continue;
+        }
+        const ts = figma.createTextStyle();
+        ts.name = name;
+        ts.fontName = { family, style };
+        ts.fontSize = fontSize;
+        ts.lineHeight = lineHeight ?? { unit: 'AUTO' };
+        if (cssVar) ts.description = `CSS: var(${cssVar})`;
+        created.push(name);
+    }
+
+    return { created, skipped };
 }
 ```
 
@@ -176,11 +189,32 @@ Full runnable script:
 
 ```javascript
 const defs = [
-  ['heading/xl', 'Inter', 'Bold',      48, { unit: 'PIXELS', value: 56 }, '--font-heading-xl'],
-  ['heading/lg', 'Inter', 'Bold',      36, { unit: 'PIXELS', value: 44 }, '--font-heading-lg'],
-  ['body/base',  'Inter', 'Regular',   16, { unit: 'AUTO' },              '--font-body-base'],
-  ['body/sm',    'Inter', 'Regular',   14, { unit: 'AUTO' },              '--font-body-sm'],
-  ['code/base',  'Roboto Mono', 'Regular', 14, { unit: 'AUTO' },          '--font-code-base'],
+    [
+        'heading/xl',
+        'Inter',
+        'Bold',
+        48,
+        { unit: 'PIXELS', value: 56 },
+        '--font-heading-xl',
+    ],
+    [
+        'heading/lg',
+        'Inter',
+        'Bold',
+        36,
+        { unit: 'PIXELS', value: 44 },
+        '--font-heading-lg',
+    ],
+    ['body/base', 'Inter', 'Regular', 16, { unit: 'AUTO' }, '--font-body-base'],
+    ['body/sm', 'Inter', 'Regular', 14, { unit: 'AUTO' }, '--font-body-sm'],
+    [
+        'code/base',
+        'Roboto Mono',
+        'Regular',
+        14,
+        { unit: 'AUTO' },
+        '--font-code-base',
+    ],
 ];
 const result = await createTypeRamp(defs);
 return result;
@@ -192,7 +226,7 @@ For text styles from **team libraries**, use `importStyleByKeyAsync`:
 
 ```javascript
 // Import a library text style by key
-const headingStyle = await figma.importStyleByKeyAsync("TEXT_STYLE_KEY");
+const headingStyle = await figma.importStyleByKeyAsync('TEXT_STYLE_KEY');
 // Apply to a text node
 await textNode.setTextStyleIdAsync(headingStyle.id);
 ```
@@ -210,15 +244,17 @@ await textNode.setTextStyleIdAsync(headingStyle.id);
  * @returns {Promise<number>} - Number of nodes the style was applied to.
  */
 async function applyTextStyleToMatchingNodes(styleId, nodeNamePattern) {
-  const textNodes = figma.currentPage.findAllWithCriteria({ types: ['TEXT'] });
-  let applied = 0;
-  for (const node of textNodes) {
-    if (node.name.includes(nodeNamePattern)) {
-      await node.setTextStyleIdAsync(styleId);
-      applied++;
+    const textNodes = figma.currentPage.findAllWithCriteria({
+        types: ['TEXT'],
+    });
+    let applied = 0;
+    for (const node of textNodes) {
+        if (node.name.includes(nodeNamePattern)) {
+            await node.setTextStyleIdAsync(styleId);
+            applied++;
+        }
     }
-  }
-  return applied;
+    return applied;
 }
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: pacepard-create-new-file
-description: "HOSTED MCP ONLY — Create a new blank Figma file via Figma hosted MCP (create_new_file, whoami). NOT available on pacepard-ui-agent. Use when the user has Figma hosted MCP and wants a new design/FigJam file before use_figma."
+description: 'HOSTED MCP ONLY — Create a new blank Figma file via Figma hosted MCP (create_new_file, whoami). NOT available on pacepard-ui-agent. Use when the user has Figma hosted MCP and wants a new design/FigJam file before use_figma.'
 disable-model-invocation: true
 ---
 
@@ -20,6 +20,7 @@ This skill accepts optional arguments: `/figma-create-new-file [editorType] [fil
 - **fileName**: Name for the new file (defaults to "Untitled")
 
 Examples:
+
 - `/figma-create-new-file` — creates a design file named "Untitled"
 - `/figma-create-new-file figjam My Whiteboard` — creates a FigJam file named "My Whiteboard"
 - `/figma-create-new-file design My New Design` — creates a design file named "My New Design"
@@ -35,32 +36,33 @@ The `create_new_file` tool requires a `planKey` parameter. Follow this decision 
 1. **User already provided a planKey** (e.g. from a previous `whoami` call or in their prompt) → use it directly, skip to Step 2.
 
 2. **No planKey available** → call the `whoami` tool. The response contains a `plans` array. Each plan has a `key`, `name`, `seat`, and `tier`.
-
-   - **Single plan**: use its `key` field automatically.
-   - **Multiple plans**: ask the user which team or organization they want to create the file in, then use the corresponding plan's `key`.
+    - **Single plan**: use its `key` field automatically.
+    - **Multiple plans**: ask the user which team or organization they want to create the file in, then use the corresponding plan's `key`.
 
 ### Step 2: Call create_new_file
 
 Call the `create_new_file` tool with:
 
-| Parameter    | Required | Description |
-|-------------|----------|-------------|
-| `planKey`   | Yes      | The plan key from Step 1 |
-| `fileName`  | Yes      | Name for the new file |
-| `editorType`| Yes      | `"design"` or `"figjam"` |
+| Parameter    | Required | Description              |
+| ------------ | -------- | ------------------------ |
+| `planKey`    | Yes      | The plan key from Step 1 |
+| `fileName`   | Yes      | Name for the new file    |
+| `editorType` | Yes      | `"design"` or `"figjam"` |
 
 Example:
+
 ```json
 {
-  "planKey": "team:123456",
-  "fileName": "My New Design",
-  "editorType": "design"
+    "planKey": "team:123456",
+    "fileName": "My New Design",
+    "editorType": "design"
 }
 ```
 
 ### Step 3: Use the result
 
 The tool returns:
+
 - `file_key` — the key of the newly created file
 - `file_url` — a direct URL to open the file in Figma
 

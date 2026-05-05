@@ -77,17 +77,19 @@ const hashedPassword = await hash(plaintext, SALT_ROUNDS);
 const isValid = await compare(plaintext, hashedPassword);
 
 // Session management
-app.use(session({
-  secret: process.env.SESSION_SECRET,  // From environment, not code
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,     // Not accessible via JavaScript
-    secure: true,       // HTTPS only
-    sameSite: 'lax',    // CSRF protection
-    maxAge: 24 * 60 * 60 * 1000,  // 24 hours
-  },
-}));
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET, // From environment, not code
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true, // Not accessible via JavaScript
+            secure: true, // HTTPS only
+            sameSite: 'lax', // CSRF protection
+            maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        },
+    }),
+);
 ```
 
 ### 3. Cross-Site Scripting (XSS)
@@ -109,18 +111,21 @@ const clean = DOMPurify.sanitize(userInput);
 ```typescript
 // Always check authorization, not just authentication
 app.patch('/api/tasks/:id', authenticate, async (req, res) => {
-  const task = await taskService.findById(req.params.id);
+    const task = await taskService.findById(req.params.id);
 
-  // Check that the authenticated user owns this resource
-  if (task.ownerId !== req.user.id) {
-    return res.status(403).json({
-      error: { code: 'FORBIDDEN', message: 'Not authorized to modify this task' }
-    });
-  }
+    // Check that the authenticated user owns this resource
+    if (task.ownerId !== req.user.id) {
+        return res.status(403).json({
+            error: {
+                code: 'FORBIDDEN',
+                message: 'Not authorized to modify this task',
+            },
+        });
+    }
 
-  // Proceed with update
-  const updated = await taskService.update(req.params.id, req.body);
-  return res.json(updated);
+    // Proceed with update
+    const updated = await taskService.update(req.params.id, req.body);
+    return res.json(updated);
 });
 ```
 
@@ -132,21 +137,26 @@ import helmet from 'helmet';
 app.use(helmet());
 
 // Content Security Policy
-app.use(helmet.contentSecurityPolicy({
-  directives: {
-    defaultSrc: ["'self'"],
-    scriptSrc: ["'self'"],
-    styleSrc: ["'self'", "'unsafe-inline'"],  // Tighten if possible
-    imgSrc: ["'self'", 'data:', 'https:'],
-    connectSrc: ["'self'"],
-  },
-}));
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"], // Tighten if possible
+            imgSrc: ["'self'", 'data:', 'https:'],
+            connectSrc: ["'self'"],
+        },
+    }),
+);
 
 // CORS — restrict to known origins
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(
+    cors({
+        origin:
+            process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
+        credentials: true,
+    }),
+);
 ```
 
 ### 6. Sensitive Data Exposure
@@ -154,8 +164,8 @@ app.use(cors({
 ```typescript
 // Never return sensitive fields in API responses
 function sanitizeUser(user: UserRecord): PublicUser {
-  const { passwordHash, resetToken, ...publicFields } = user;
-  return publicFields;
+    const { passwordHash, resetToken, ...publicFields } = user;
+    return publicFields;
 }
 
 // Use environment variables for secrets
@@ -171,27 +181,27 @@ if (!API_KEY) throw new Error('STRIPE_API_KEY not configured');
 import { z } from 'zod';
 
 const CreateTaskSchema = z.object({
-  title: z.string().min(1).max(200).trim(),
-  description: z.string().max(2000).optional(),
-  priority: z.enum(['low', 'medium', 'high']).default('medium'),
-  dueDate: z.string().datetime().optional(),
+    title: z.string().min(1).max(200).trim(),
+    description: z.string().max(2000).optional(),
+    priority: z.enum(['low', 'medium', 'high']).default('medium'),
+    dueDate: z.string().datetime().optional(),
 });
 
 // Validate at the route handler
 app.post('/api/tasks', async (req, res) => {
-  const result = CreateTaskSchema.safeParse(req.body);
-  if (!result.success) {
-    return res.status(422).json({
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid input',
-        details: result.error.flatten(),
-      },
-    });
-  }
-  // result.data is now typed and validated
-  const task = await taskService.create(result.data);
-  return res.status(201).json(task);
+    const result = CreateTaskSchema.safeParse(req.body);
+    if (!result.success) {
+        return res.status(422).json({
+            error: {
+                code: 'VALIDATION_ERROR',
+                message: 'Invalid input',
+                details: result.error.flatten(),
+            },
+        });
+    }
+    // result.data is now typed and validated
+    const task = await taskService.create(result.data);
+    return res.status(201).json(task);
 });
 ```
 
@@ -203,13 +213,13 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
 function validateUpload(file: UploadedFile) {
-  if (!ALLOWED_TYPES.includes(file.mimetype)) {
-    throw new ValidationError('File type not allowed');
-  }
-  if (file.size > MAX_SIZE) {
-    throw new ValidationError('File too large (max 5MB)');
-  }
-  // Don't trust the file extension — check magic bytes if critical
+    if (!ALLOWED_TYPES.includes(file.mimetype)) {
+        throw new ValidationError('File type not allowed');
+    }
+    if (file.size > MAX_SIZE) {
+        throw new ValidationError('File too large (max 5MB)');
+    }
+    // Don't trust the file extension — check magic bytes if critical
 }
 ```
 
@@ -234,6 +244,7 @@ npm audit reports a vulnerability
 ```
 
 **Key questions:**
+
 - Is the vulnerable function actually called in your code path?
 - Is the dependency a runtime dependency or dev-only?
 - Is the vulnerability exploitable given your deployment context (e.g., a server-side vulnerability in a client-only app)?
@@ -246,18 +257,24 @@ When you defer a fix, document the reason and set a review date.
 import rateLimit from 'express-rate-limit';
 
 // General API rate limit
-app.use('/api/', rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,                   // 100 requests per window
-  standardHeaders: true,
-  legacyHeaders: false,
-}));
+app.use(
+    '/api/',
+    rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 100, // 100 requests per window
+        standardHeaders: true,
+        legacyHeaders: false,
+    }),
+);
 
 // Stricter limit for auth endpoints
-app.use('/api/auth/', rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,  // 10 attempts per 15 minutes
-}));
+app.use(
+    '/api/auth/',
+    rateLimit({
+        windowMs: 15 * 60 * 1000,
+        max: 10, // 10 attempts per 15 minutes
+    }),
+);
 ```
 
 ## Secrets Management
@@ -277,6 +294,7 @@ app.use('/api/auth/', rateLimit({
 ```
 
 **Always check before committing:**
+
 ```bash
 # Check for accidentally staged secrets
 git diff --cached | grep -i "password\|secret\|api_key\|token"
@@ -286,45 +304,51 @@ git diff --cached | grep -i "password\|secret\|api_key\|token"
 
 ```markdown
 ### Authentication
+
 - [ ] Passwords hashed with bcrypt/scrypt/argon2 (salt rounds ≥ 12)
 - [ ] Session tokens are httpOnly, secure, sameSite
 - [ ] Login has rate limiting
 - [ ] Password reset tokens expire
 
 ### Authorization
+
 - [ ] Every endpoint checks user permissions
 - [ ] Users can only access their own resources
 - [ ] Admin actions require admin role verification
 
 ### Input
+
 - [ ] All user input validated at the boundary
 - [ ] SQL queries are parameterized
 - [ ] HTML output is encoded/escaped
 
 ### Data
+
 - [ ] No secrets in code or version control
 - [ ] Sensitive fields excluded from API responses
 - [ ] PII encrypted at rest (if applicable)
 
 ### Infrastructure
+
 - [ ] Security headers configured (CSP, HSTS, etc.)
 - [ ] CORS restricted to known origins
 - [ ] Dependencies audited for vulnerabilities
 - [ ] Error messages don't expose internals
 ```
+
 ## See Also
 
 For detailed security checklists and pre-commit verification steps, see `references/security-checklist.md`.
 
 ## Common Rationalizations
 
-| Rationalization | Reality |
-|---|---|
-| "This is an internal tool, security doesn't matter" | Internal tools get compromised. Attackers target the weakest link. |
-| "We'll add security later" | Security retrofitting is 10x harder than building it in. Add it now. |
-| "No one would try to exploit this" | Automated scanners will find it. Security by obscurity is not security. |
-| "The framework handles security" | Frameworks provide tools, not guarantees. You still need to use them correctly. |
-| "It's just a prototype" | Prototypes become production. Security habits from day one. |
+| Rationalization                                     | Reality                                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| "This is an internal tool, security doesn't matter" | Internal tools get compromised. Attackers target the weakest link.              |
+| "We'll add security later"                          | Security retrofitting is 10x harder than building it in. Add it now.            |
+| "No one would try to exploit this"                  | Automated scanners will find it. Security by obscurity is not security.         |
+| "The framework handles security"                    | Frameworks provide tools, not guarantees. You still need to use them correctly. |
+| "It's just a prototype"                             | Prototypes become production. Security habits from day one.                     |
 
 ## Red Flags
 

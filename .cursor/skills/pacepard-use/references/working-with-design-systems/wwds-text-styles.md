@@ -31,13 +31,13 @@ style.lineHeight = 1.5;
 style.letterSpacing = 0;
 
 // CORRECT
-style.lineHeight = { unit: "AUTO" }; // auto line height
-style.lineHeight = { value: 24, unit: "PIXELS" }; // fixed pixel height
-style.lineHeight = { value: 150, unit: "PERCENT" }; // 150% line height
+style.lineHeight = { unit: 'AUTO' }; // auto line height
+style.lineHeight = { value: 24, unit: 'PIXELS' }; // fixed pixel height
+style.lineHeight = { value: 150, unit: 'PERCENT' }; // 150% line height
 
-style.letterSpacing = { value: 0, unit: "PIXELS" }; // zero tracking
-style.letterSpacing = { value: -2, unit: "PIXELS" }; // tight tracking
-style.letterSpacing = { value: 5, unit: "PERCENT" }; // percent-based tracking
+style.letterSpacing = { value: 0, unit: 'PIXELS' }; // zero tracking
+style.letterSpacing = { value: -2, unit: 'PIXELS' }; // tight tracking
+style.letterSpacing = { value: 5, unit: 'PERCENT' }; // percent-based tracking
 ```
 
 When reading a `lineHeight` back, always check `unit` first — `{ unit: 'AUTO' }` has no `value` key.
@@ -57,7 +57,7 @@ const ts = figma.createTextStyle();
 ts.fontSize = 24; // set directly; not bound to a variable
 
 const ts = figma.createTextStyle();
-ts.setBoundVariable("fontSize", fontSizeVariable); // preferred if the variable exists.
+ts.setBoundVariable('fontSize', fontSizeVariable); // preferred if the variable exists.
 ```
 
 ### Applying a text style to a node

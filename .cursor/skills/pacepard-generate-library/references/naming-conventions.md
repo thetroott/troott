@@ -83,13 +83,14 @@ color/border/default     → alias: primitives/gray/200 (light), primitives/gray
 **Default:** Use **lowercase** with forward slashes: `color/bg/primary`, `spacing/2xl`.
 
 **When to deviate:**
+
 - If the existing file uses PascalCase (e.g., Material 3 uses `Schemes/Primary`) — match it.
 - If the design team prefers PascalCase for readability in the Variables panel — acceptable as long as the code syntax is separately defined and uses the platform-correct case.
 - Mode names can use spaces and mixed case (e.g., `SDS Light`, `Mode 1 → Light`) — these are labels, not identifiers.
 
 **Never:** camelCase inside variable names (`colorBgPrimary` as a Figma name is wrong — that belongs in Android code syntax only). Never use spaces inside a path segment: `color/bg primary` is wrong; `color/bg/primary` is correct.
 
-**Key distinction:** The casing rule applies to *Figma variable names*. Code syntax names follow *platform conventions* regardless of the Figma name case — see §9 for the full picture.
+**Key distinction:** The casing rule applies to _Figma variable names_. Code syntax names follow _platform conventions_ regardless of the Figma name case — see §9 for the full picture.
 
 ---
 
@@ -127,6 +128,7 @@ _Slider/Handle         (UI3 pattern: _{ParentName}/{SubPart})
 ```
 
 Pattern rules:
+
 - Use `_` prefix for ALL internal sub-components — no exceptions.
 - Use slash namespacing to group sub-components under their parent: `_Button/IconSlot`.
 - For sub-components shared by multiple parents, use `_Parts/{ComponentName}.{SubPart}`.
@@ -179,13 +181,14 @@ The most expressive pattern. The page name encodes asset type, design status, an
 
 Anatomy: `[Asset Type Emoji] [Optional FPL Label] [Status Circle] Component Name [Code Status Bracket]`
 
-| Segment | Values |
-|---------|--------|
-| Asset type | Component pages use the C-flag emoji; pattern pages use the P-flag emoji |
-| Design status | Green circle = Ready, Yellow circle = WIP, Red circle = Do not use |
-| Code status | (none) = Ready in code, `[beta]` = Beta, `[future]` = Not yet built |
+| Segment       | Values                                                                   |
+| ------------- | ------------------------------------------------------------------------ |
+| Asset type    | Component pages use the C-flag emoji; pattern pages use the P-flag emoji |
+| Design status | Green circle = Ready, Yellow circle = WIP, Red circle = Do not use       |
+| Code status   | (none) = Ready in code, `[beta]` = Beta, `[future]` = Not yet built      |
 
 Examples:
+
 ```
 Overview
 Status Key
@@ -251,27 +254,27 @@ Size=Large, Style=Ghost, State=Disabled
 
 Actual property names match code prop names where possible:
 
-| Figma Property | Code Prop Equivalent |
-|---------------|---------------------|
-| `Size` | `size` |
-| `Style` / `Variant` | `variant` |
-| `State` | Typically controlled by `:hover`, `:focus`, `:disabled` in CSS, but `state` in some systems |
-| `Type` | `type` |
-| `Disabled` | `disabled` (boolean) |
-| `Icon` | `icon` (boolean or instance swap) |
+| Figma Property      | Code Prop Equivalent                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `Size`              | `size`                                                                                      |
+| `Style` / `Variant` | `variant`                                                                                   |
+| `State`             | Typically controlled by `:hover`, `:focus`, `:disabled` in CSS, but `state` in some systems |
+| `Type`              | `type`                                                                                      |
+| `Disabled`          | `disabled` (boolean)                                                                        |
+| `Icon`              | `icon` (boolean or instance swap)                                                           |
 
 ### Property value casing
 
 Property values use **Title Case** in Figma (to be readable in the Variants panel), mapping to lowercase in code:
 
-| Figma value | Code value |
-|-------------|-----------|
-| `Small` | `"small"` / `"sm"` |
-| `Medium` | `"medium"` / `"md"` |
-| `Large` | `"large"` / `"lg"` |
-| `Primary` | `"primary"` |
-| `Disabled` | `disabled` (boolean prop) |
-| `Default` | *(typically the absent/unset case)* |
+| Figma value | Code value                          |
+| ----------- | ----------------------------------- |
+| `Small`     | `"small"` / `"sm"`                  |
+| `Medium`    | `"medium"` / `"md"`                 |
+| `Large`     | `"large"` / `"lg"`                  |
+| `Primary`   | `"primary"`                         |
+| `Disabled`  | `disabled` (boolean prop)           |
+| `Default`   | _(typically the absent/unset case)_ |
 
 ### Boolean properties
 
@@ -324,10 +327,10 @@ Use `Shadow/` for named semantic shadows. Use `Elevation/N` for Material Design-
 
 Separator pages are empty pages whose sole purpose is to create visual breaks in the Figma page panel. Two conventions:
 
-| Convention | Example | Used by |
-|------------|---------|---------|
-| Three dashes | `---` | Simple DS, UI3, Polaris, Material 3 |
-| Decorated text | `——— COMPONENTS ———` | Shop Minis |
+| Convention     | Example              | Used by                             |
+| -------------- | -------------------- | ----------------------------------- |
+| Three dashes   | `---`                | Simple DS, UI3, Polaris, Material 3 |
+| Decorated text | `——— COMPONENTS ———` | Shop Minis                          |
 
 The three-dash convention (`---`) is the most common and the default for new files. Use it unless the target file uses the decorated-text style.
 
@@ -350,19 +353,19 @@ Utilities
 
 The UI3 Library uses colored circle emojis in page names to communicate design readiness at a glance. This system is optional but powerful for large teams.
 
-| Emoji | Meaning | When to use |
-|-------|---------|-------------|
-| Green circle | Ready / Approved | Design is stable, reviewed, and safe to use |
+| Emoji         | Meaning           | When to use                                    |
+| ------------- | ----------------- | ---------------------------------------------- |
+| Green circle  | Ready / Approved  | Design is stable, reviewed, and safe to use    |
 | Yellow circle | WIP / In Progress | Design is being actively worked on, may change |
-| Red circle | Do not use | Not ready, do not reference; may be deprecated |
+| Red circle    | Do not use        | Not ready, do not reference; may be deprecated |
 
 Code readiness is communicated via brackets appended to the component name:
 
-| Bracket | Meaning |
-|---------|---------|
-| (none) | Component is implemented in code and stable |
-| `[beta]` | Component is in code but not yet stable (~3 weeks from ready) |
-| `[future]` | Not yet implemented in code |
+| Bracket    | Meaning                                                       |
+| ---------- | ------------------------------------------------------------- |
+| (none)     | Component is implemented in code and stable                   |
+| `[beta]`   | Component is in code but not yet stable (~3 weeks from ready) |
+| `[future]` | Not yet implemented in code                                   |
 
 **Documentation status (within component pages):**
 
@@ -398,6 +401,7 @@ This system is only recommended for large, multi-team systems where lifecycle tr
 ### When code and Figma disagree:
 
 If the codebase uses `button-primary` but Figma has a component named `Button`, do not rename the Figma component. Instead:
+
 - Keep the Figma name as `Button` (PascalCase, human-readable).
 - Set variable code syntax to match the exact CSS token name from the codebase.
 - Set Code Connect source path to the actual code file and use the exact code component name.
@@ -412,13 +416,13 @@ This is one of the most misunderstood areas. Figma names and code names follow *
 
 ### Why they differ
 
-| | Figma variable name | Code syntax (WEB) |
-|---|---|---|
-| **Audience** | Designers in the Variables panel | Developers in CSS/Swift/Kotlin |
+|               | Figma variable name                               | Code syntax (WEB)                                     |
+| ------------- | ------------------------------------------------- | ----------------------------------------------------- |
+| **Audience**  | Designers in the Variables panel                  | Developers in CSS/Swift/Kotlin                        |
 | **Separator** | `/` (slash) — creates visual grouping in Figma UI | `-` (hyphen) — required by CSS custom property syntax |
-| **Case** | lowercase (or PascalCase for display — see below) | kebab-case for CSS; camelCase for JS/Android |
-| **Depth** | 2–4 levels | Flat for CSS; dot-notation for JS |
-| **Namespace** | Implicit (by collection) | Explicit prefix (`--p-`, `--md-`, `--cds-`) |
+| **Case**      | lowercase (or PascalCase for display — see below) | kebab-case for CSS; camelCase for JS/Android          |
+| **Depth**     | 2–4 levels                                        | Flat for CSS; dot-notation for JS                     |
+| **Namespace** | Implicit (by collection)                          | Explicit prefix (`--p-`, `--md-`, `--cds-`)           |
 
 ### The transformation
 
@@ -457,13 +461,13 @@ Pattern: first segment becomes class name, remainder becomes property (camelCase
 
 ### Real-world examples from the 5 reference files
 
-| File | Figma variable name | WEB code syntax | ANDROID code syntax |
-|------|--------------------|-----------------|--------------------|
-| Simple DS | `color/bg/primary` | `var(--color-bg-primary)` | `colorBgPrimary` |
-| Simple DS | `spacing/sm` | `var(--spacing-sm)` | `spacingSm` |
-| Material 3 | `Schemes/Primary` | `var(--md-sys-color-primary)` | `colorPrimary` |
+| File       | Figma variable name  | WEB code syntax                          | ANDROID code syntax     |
+| ---------- | -------------------- | ---------------------------------------- | ----------------------- |
+| Simple DS  | `color/bg/primary`   | `var(--color-bg-primary)`                | `colorBgPrimary`        |
+| Simple DS  | `spacing/sm`         | `var(--spacing-sm)`                      | `spacingSm`             |
+| Material 3 | `Schemes/Primary`    | `var(--md-sys-color-primary)`            | `colorPrimary`          |
 | Material 3 | `Corner/Extra-small` | `var(--md-sys-shape-corner-extra-small)` | `shapeCornerExtraSmall` |
-| Polaris | `color/bg/surface` | `var(--p-color-bg-surface)` | — |
+| Polaris    | `color/bg/surface`   | `var(--p-color-bg-surface)`              | —                       |
 
 **Key observation from Material 3:** The Figma name `Schemes/Primary` uses PascalCase with a space, but the WEB code syntax is `var(--md-sys-color-primary)` — entirely kebab-case with a vendor prefix `md-sys-`. The Figma name and the code syntax bear almost no resemblance. This is intentional and common in mature design systems.
 
@@ -471,11 +475,11 @@ Pattern: first segment becomes class name, remainder becomes property (camelCase
 
 The guideline to use lowercase is a default, not a universal rule. Evidence from real files:
 
-| File | Figma case | Code output case | Why |
-|------|-----------|------------------|-----|
-| Simple DS | `color/bg/primary` (lowercase) | `var(--color-bg-primary)` | Direct mapping — simple |
+| File       | Figma case                     | Code output case              | Why                                                                            |
+| ---------- | ------------------------------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| Simple DS  | `color/bg/primary` (lowercase) | `var(--color-bg-primary)`     | Direct mapping — simple                                                        |
 | Material 3 | `Schemes/Primary` (PascalCase) | `var(--md-sys-color-primary)` | PascalCase reads better in Variables panel; code name is independently defined |
-| Polaris | `color/bg/surface` (lowercase) | `var(--p-color-bg-surface)` | Direct mapping with vendor prefix |
+| Polaris    | `color/bg/surface` (lowercase) | `var(--p-color-bg-surface)`   | Direct mapping with vendor prefix                                              |
 
 **Rule:** Use lowercase when the Figma name will map directly to the CSS name. Use PascalCase (or match existing file) when the design system has human-readable variable names that are distinct from the technical code names.
 
@@ -490,6 +494,7 @@ MUI:       palette.primary.main     →  JS: theme.palette.primary.main
 ```
 
 In these cases, set WEB code syntax to the JS property path rather than a CSS variable:
+
 ```javascript
 // For a JS-object-based system like Chakra:
 v.setVariableCodeSyntax('WEB', 'colors.gray.500');
@@ -502,12 +507,12 @@ v.setVariableCodeSyntax('WEB', 'colorPrimary');
 
 The number of slash levels should mirror the codebase's nesting depth:
 
-| Codebase pattern | Figma depth | Example |
-|-----------------|------------|---------|
-| `--primary` (flat) | 1–2 levels | `color/primary` |
-| `--color-bg-surface` (3-part) | 3 levels | `color/bg/surface` |
-| `--md-sys-color-primary` (vendor + 3-part) | 3 levels (vendor prefix goes in code syntax only) | `color/primary` |
-| `theme.palette.primary.main` (4-part) | 3–4 levels | `color/palette/primary/main` |
+| Codebase pattern                           | Figma depth                                       | Example                      |
+| ------------------------------------------ | ------------------------------------------------- | ---------------------------- |
+| `--primary` (flat)                         | 1–2 levels                                        | `color/primary`              |
+| `--color-bg-surface` (3-part)              | 3 levels                                          | `color/bg/surface`           |
+| `--md-sys-color-primary` (vendor + 3-part) | 3 levels (vendor prefix goes in code syntax only) | `color/primary`              |
+| `theme.palette.primary.main` (4-part)      | 3–4 levels                                        | `color/palette/primary/main` |
 
 **Important:** Vendor prefixes (`--p-`, `--md-sys-`, `--cds-`) belong in the **code syntax**, not the Figma variable name. The Figma name `color/bg/surface` + code syntax `var(--p-color-bg-surface)` is the correct pattern.
 

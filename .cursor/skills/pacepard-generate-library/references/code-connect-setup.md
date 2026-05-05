@@ -24,15 +24,15 @@ Maps one Figma node to one code component.
 
 **Parameters:**
 
-| Parameter | Type | Required | Notes |
-|-----------|------|----------|-------|
-| `nodeId` | string | Yes (remote) / Optional (desktop) | Format `123:456`. Must be a published component or component set. |
-| `fileKey` | string | Yes (remote) | The Figma file key. |
-| `source` | string | Yes | Path in the codebase (e.g. `src/components/Button.tsx`) or a URL. |
-| `componentName` | string | Yes | The code component name (e.g. `Button`). |
-| `label` | enum | Yes | Framework label — see Section 4 for valid values. |
-| `template` | string | Optional | Executable JS template code. Providing this creates a **figmadoc** (template) mapping instead of a simple **component_browser** mapping. Requires the `pixie_mcp_enable_writing_code_connect_templates` feature flag. |
-| `templateDataJson` | string | Optional | JSON string with optional fields: `isParserless`, `imports`, `nestable`, `props`. |
+| Parameter          | Type   | Required                          | Notes                                                                                                                                                                                                                 |
+| ------------------ | ------ | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `nodeId`           | string | Yes (remote) / Optional (desktop) | Format `123:456`. Must be a published component or component set.                                                                                                                                                     |
+| `fileKey`          | string | Yes (remote)                      | The Figma file key.                                                                                                                                                                                                   |
+| `source`           | string | Yes                               | Path in the codebase (e.g. `src/components/Button.tsx`) or a URL.                                                                                                                                                     |
+| `componentName`    | string | Yes                               | The code component name (e.g. `Button`).                                                                                                                                                                              |
+| `label`            | enum   | Yes                               | Framework label — see Section 4 for valid values.                                                                                                                                                                     |
+| `template`         | string | Optional                          | Executable JS template code. Providing this creates a **figmadoc** (template) mapping instead of a simple **component_browser** mapping. Requires the `pixie_mcp_enable_writing_code_connect_templates` feature flag. |
+| `templateDataJson` | string | Optional                          | JSON string with optional fields: `isParserless`, `imports`, `nestable`, `props`.                                                                                                                                     |
 
 **Two mapping tiers:**
 
@@ -42,12 +42,12 @@ Maps one Figma node to one code component.
 
 **Common error codes:**
 
-| Error | Meaning | Fix |
-|-------|---------|-----|
-| `CODE_CONNECT_MAPPING_ALREADY_EXISTS` | Component is already mapped | Disconnect existing mapping in Figma UI first |
-| `CODE_CONNECT_ASSET_NOT_FOUND` | Published component not found | Ensure the component is published to the library |
-| `CODE_CONNECT_INSUFFICIENT_PERMISSIONS` | No edit access | Request edit permission on the file |
-| `CODE_CONNECT_NO_LIBRARY_FOUND` | File is not published as a library | Publish the file as a Figma library first |
+| Error                                   | Meaning                            | Fix                                              |
+| --------------------------------------- | ---------------------------------- | ------------------------------------------------ |
+| `CODE_CONNECT_MAPPING_ALREADY_EXISTS`   | Component is already mapped        | Disconnect existing mapping in Figma UI first    |
+| `CODE_CONNECT_ASSET_NOT_FOUND`          | Published component not found      | Ensure the component is published to the library |
+| `CODE_CONNECT_INSUFFICIENT_PERMISSIONS` | No edit access                     | Request edit permission on the file              |
+| `CODE_CONNECT_NO_LIBRARY_FOUND`         | File is not published as a library | Publish the file as a Figma library first        |
 
 **Usage example:**
 
@@ -70,11 +70,11 @@ Retrieves the current Code Connect mapping for a node. Use this immediately afte
 
 **Parameters:**
 
-| Parameter | Type | Required | Notes |
-|-----------|------|----------|-------|
-| `nodeId` | string | Optional | The node to check. Omit to get all mappings in the file. |
-| `fileKey` | string | Yes (remote) | The Figma file key. |
-| `codeConnectLabel` | string | Optional | Filter results to a specific framework label. |
+| Parameter          | Type   | Required     | Notes                                                    |
+| ------------------ | ------ | ------------ | -------------------------------------------------------- |
+| `nodeId`           | string | Optional     | The node to check. Omit to get all mappings in the file. |
+| `fileKey`          | string | Yes (remote) | The Figma file key.                                      |
+| `codeConnectLabel` | string | Optional     | Filter results to a specific framework label.            |
 
 **Returns:** A map of `nodeId -> { componentName, source, label, snippet, snippetImports }`.
 
@@ -95,22 +95,22 @@ Applies multiple Code Connect mappings in one call. Use after `get_code_connect_
 
 **Parameters:**
 
-| Parameter | Type | Required | Notes |
-|-----------|------|----------|-------|
-| `nodeId` | string | Optional | Context node for design fallback if mappings array is empty. |
-| `fileKey` | string | Yes (remote) | The Figma file key. |
-| `mappings` | array | Yes | Array of mapping objects. |
+| Parameter  | Type   | Required     | Notes                                                        |
+| ---------- | ------ | ------------ | ------------------------------------------------------------ |
+| `nodeId`   | string | Optional     | Context node for design fallback if mappings array is empty. |
+| `fileKey`  | string | Yes (remote) | The Figma file key.                                          |
+| `mappings` | array  | Yes          | Array of mapping objects.                                    |
 
 **Each mapping object:**
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `nodeId` | string | Yes | The Figma node identifier. |
-| `componentName` | string | Yes | Code component name. |
-| `source` | string | Yes | Path in the codebase. |
-| `label` | enum | Yes | Framework label. |
-| `template` | string | Optional | JS template code for figmadoc mapping. |
-| `templateDataJson` | string | Optional | JSON template metadata. |
+| Field              | Type   | Required | Notes                                  |
+| ------------------ | ------ | -------- | -------------------------------------- |
+| `nodeId`           | string | Yes      | The Figma node identifier.             |
+| `componentName`    | string | Yes      | Code component name.                   |
+| `source`           | string | Yes      | Path in the codebase.                  |
+| `label`            | enum   | Yes      | Framework label.                       |
+| `template`         | string | Optional | JS template code for figmadoc mapping. |
+| `templateDataJson` | string | Optional | JSON template metadata.                |
 
 **Behavior:**
 
@@ -150,7 +150,7 @@ variable.setVariableCodeSyntax('iOS', 'Color.bgPrimary');
 
 1. **Best:** Use the exact token name from the codebase. Search the codebase for CSS custom properties (`--`), Swift color extensions, or Kotlin theme references and use those exact strings.
 2. **Good:** Derive from the Figma variable name with a consistent transformation: replace `/` and spaces with `-`, prefix with `var(--` and suffix with `)`.
-   - Example: `color/bg/primary` → `var(--color-bg-primary)`
+    - Example: `color/bg/primary` → `var(--color-bg-primary)`
 3. **Avoid:** Guessing or inventing names that don't exist in the codebase.
 
 **Consistency rule:** The transformation must be uniform. If you use `var(--color-bg-primary)` for one variable, use the same `var(--{path-with-hyphens})` pattern for all variables in that collection.
@@ -161,14 +161,17 @@ variable.setVariableCodeSyntax('iOS', 'Color.bgPrimary');
 // In use_figma — set WEB code syntax on all variables in a collection
 const collections = await figma.variables.getLocalVariableCollectionsAsync();
 for (const coll of collections) {
-  if (coll.name !== 'Color') continue;
-  for (const varId of coll.variableIds) {
-    const v = await figma.variables.getVariableByIdAsync(varId);
-    if (!v) continue;
-    // Derive: "color/bg/primary" → "var(--color-bg-primary)"
-    const cssName = 'var(--' + v.name.toLowerCase().replace(/\//g, '-').replace(/\s+/g, '-') + ')';
-    v.setVariableCodeSyntax('WEB', cssName);
-  }
+    if (coll.name !== 'Color') continue;
+    for (const varId of coll.variableIds) {
+        const v = await figma.variables.getVariableByIdAsync(varId);
+        if (!v) continue;
+        // Derive: "color/bg/primary" → "var(--color-bg-primary)"
+        const cssName =
+            'var(--' +
+            v.name.toLowerCase().replace(/\//g, '-').replace(/\s+/g, '-') +
+            ')';
+        v.setVariableCodeSyntax('WEB', cssName);
+    }
 }
 ```
 
@@ -178,24 +181,24 @@ for (const coll of collections) {
 
 The following labels are valid for all Code Connect MCP operations. Use the label that matches your codebase framework.
 
-| Label | Use for |
-|-------|---------|
-| `React` | React / JSX / TSX components |
-| `Web Components` | Native Web Components, Lit, FAST |
-| `Vue` | Vue 2 and Vue 3 SFCs |
-| `Svelte` | Svelte components |
-| `Storybook` | Storybook stories with Code Connect integration |
-| `Javascript` | Plain JavaScript, framework-agnostic |
-| `Swift` | Swift / UIKit |
-| `Swift UIKit` | UIKit specifically |
-| `Objective-C UIKit` | Objective-C with UIKit |
-| `SwiftUI` | SwiftUI view components |
-| `Compose` | Jetpack Compose (Android) |
-| `Java` | Java Android components |
-| `Kotlin` | Kotlin Android (non-Compose) |
-| `Android XML Layout` | Android XML layout files |
-| `Flutter` | Flutter / Dart widgets |
-| `Markdown` | Documentation or MDX components |
+| Label                | Use for                                         |
+| -------------------- | ----------------------------------------------- |
+| `React`              | React / JSX / TSX components                    |
+| `Web Components`     | Native Web Components, Lit, FAST                |
+| `Vue`                | Vue 2 and Vue 3 SFCs                            |
+| `Svelte`             | Svelte components                               |
+| `Storybook`          | Storybook stories with Code Connect integration |
+| `Javascript`         | Plain JavaScript, framework-agnostic            |
+| `Swift`              | Swift / UIKit                                   |
+| `Swift UIKit`        | UIKit specifically                              |
+| `Objective-C UIKit`  | Objective-C with UIKit                          |
+| `SwiftUI`            | SwiftUI view components                         |
+| `Compose`            | Jetpack Compose (Android)                       |
+| `Java`               | Java Android components                         |
+| `Kotlin`             | Kotlin Android (non-Compose)                    |
+| `Android XML Layout` | Android XML layout files                        |
+| `Flutter`            | Flutter / Dart widgets                          |
+| `Markdown`           | Documentation or MDX components                 |
 
 **HTML note:** The label `HTML` is used by the Code Connect CLI's HTML parser (for Angular, Vue, and Web Components without a framework-specific parser), but the MCP tools use `Web Components` or `Vue` directly. Check the codebase framework before selecting.
 
@@ -208,6 +211,7 @@ The following labels are valid for all Code Connect MCP operations. Use the labe
 Map Code Connect immediately after creating a component, while the context is fresh (Phase 3, step 3h in the SKILL.md workflow):
 
 **Advantages:**
+
 - The node ID is already in hand from the creation script.
 - You know exactly which code component this Figma component corresponds to (you just designed it to match).
 - Errors surface early, before building dependent components.
@@ -219,6 +223,7 @@ Map Code Connect immediately after creating a component, while the context is fr
 Collect all unmapped components and map them in one `send_code_connect_mappings` call:
 
 **Advantages:**
+
 - One bulk call instead of N individual calls.
 - Can use `get_code_connect_suggestions` to discover unmapped components automatically.
 - Better for importing existing Figma files where you didn't control creation.

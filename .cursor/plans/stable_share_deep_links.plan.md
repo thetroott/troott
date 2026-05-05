@@ -2,63 +2,63 @@
 name: Stable share deep links
 overview: Adopt YouTube/Spotify-style stable public identifiers as the primary share and deep-link contract (sermon by id/slug, playlist/minister by id), document it for mobile and web, and relegate the existing expiring `shareable-link` tokens to optional gated flows (campaigns, unlisted-style access, revocation).
 todos:
-  - id: spec-deep-links
-    content: "Author specs/api/deep-links.md: canonical paths, auth/onboarding/teaser matrix, when to use shareable-link vs stable URL, custom scheme + query params (e.g. t=)"
-    status: pending
-  - id: spec-cross-links
-    content: "Cross-link specs: mobile-flow.md §3, relevant specs/mobile/* (share, home), specs/web/*; keep single source of truth with links from deep-links.md"
-    status: pending
-  - id: universal-app-links
-    content: "Platform files and hosting: apple-app-site-association, Android assetlinks.json, chosen HTTPS host (same as CLIENT_APP_URL), redirects https→app or web fallback when app missing"
-    status: pending
-  - id: web-native-deeplink-parity
-    content: "Expo/web + native: matching routes for /sermons/:id (and playlist/minister); behavior when app not installed (web player, store, or marketing page)"
-    status: pending
-  - id: pending-deeplink-auth-storage
-    content: "Post-sign-in continuation: persist pending deep link URL across login/onboarding; resume target sermon/playlist after gates (align mobile-flow §3)"
-    status: pending
-  - id: sermon-slug-schema
-    content: "Verify sermon slug vs findSermon; add slug + unique index + backfill/migration if slugs are required for stable URLs"
-    status: pending
-  - id: audit-get-sermon-public-policy
-    content: "Audit GET /api/v1/sermon/:id (and playlist/minister): public vs Protect, isPublic/status/state, slug errors; document and align with deep-link matrix"
-    status: pending
-  - id: canonical-url-policy
-    content: "Define canonical stable URLs (https, host, trailing slash, www); avoid duplicate routes breaking shares and OG"
-    status: pending
-  - id: api-open-teaser-or-auth
-    content: "Implement chosen policy: public teaser GET (minimal fields) vs auth-only full detail; enforce isPublic and paywall rules on stable open"
-    status: pending
-  - id: paywall-subscription-gate-stable-links
-    content: "Document and implement behavior for premium/region-locked content opened via stable URL (teaser, upsell, 403 after sign-in)"
-    status: pending
-  - id: revoke-private-unlisted-og-cache
-    content: "Revocation story: sermon/playlist made private or deleted; CDN/cache, embeds, Open Graph invalidation or TTL strategy"
-    status: pending
-  - id: align-shareable-url
-    content: "Align CLIENT_APP_URL paths with universal links and mobile router; document attachAppUrl vs marketing API base URL"
-    status: pending
-  - id: shareable-link-scope-ops
-    content: "Document narrow use of shareable-link; inventory callers of generateShareableLink; optional hydrateResource for remaining ShareableLinkType; ops TTL cleanup, metrics on share/resolve, token-link sunset policy if any"
-    status: pending
-  - id: teaser-rate-limits-abuse
-    content: "If public teaser exists: rate limiting, abuse monitoring, note on ObjectId enumeration risk for scrapers"
-    status: pending
-  - id: observability-deeplink-metrics
-    content: "Logging/metrics for deep link open failures (invalid id, private content, wrong host); distinguish stable open vs token resolve"
-    status: pending
-  - id: rollout-feature-flag-comms
-    content: "Rollout: feature flag for Copy link source (stable vs token); coordinate mobile/web release notes and client behavior switch"
-    status: pending
-  - id: mobile-client-parse
-    content: "Mobile: primary parser for path-based ids; fallback to GET /api/v1/share/resolve only for token flows"
-    status: pending
-  - id: analytics-shares-og-seo
-    content: "Optional: increment totalShares or analytics on successful share open; Open Graph / Twitter cards for stable sermon URLs on web"
-    status: pending
-  - id: test-matrix-e2e-deeplinks
-    content: "E2E/contract tests: cold start, signed out, signed in not onboarded, invalid id, private sermon, public playlist, token fallback, post-auth resume"
-    status: pending
+    - id: spec-deep-links
+      content: 'Author specs/api/deep-links.md: canonical paths, auth/onboarding/teaser matrix, when to use shareable-link vs stable URL, custom scheme + query params (e.g. t=)'
+      status: pending
+    - id: spec-cross-links
+      content: 'Cross-link specs: mobile-flow.md §3, relevant specs/mobile/* (share, home), specs/web/*; keep single source of truth with links from deep-links.md'
+      status: pending
+    - id: universal-app-links
+      content: 'Platform files and hosting: apple-app-site-association, Android assetlinks.json, chosen HTTPS host (same as CLIENT_APP_URL), redirects https→app or web fallback when app missing'
+      status: pending
+    - id: web-native-deeplink-parity
+      content: 'Expo/web + native: matching routes for /sermons/:id (and playlist/minister); behavior when app not installed (web player, store, or marketing page)'
+      status: pending
+    - id: pending-deeplink-auth-storage
+      content: 'Post-sign-in continuation: persist pending deep link URL across login/onboarding; resume target sermon/playlist after gates (align mobile-flow §3)'
+      status: pending
+    - id: sermon-slug-schema
+      content: 'Verify sermon slug vs findSermon; add slug + unique index + backfill/migration if slugs are required for stable URLs'
+      status: pending
+    - id: audit-get-sermon-public-policy
+      content: 'Audit GET /api/v1/sermon/:id (and playlist/minister): public vs Protect, isPublic/status/state, slug errors; document and align with deep-link matrix'
+      status: pending
+    - id: canonical-url-policy
+      content: 'Define canonical stable URLs (https, host, trailing slash, www); avoid duplicate routes breaking shares and OG'
+      status: pending
+    - id: api-open-teaser-or-auth
+      content: 'Implement chosen policy: public teaser GET (minimal fields) vs auth-only full detail; enforce isPublic and paywall rules on stable open'
+      status: pending
+    - id: paywall-subscription-gate-stable-links
+      content: 'Document and implement behavior for premium/region-locked content opened via stable URL (teaser, upsell, 403 after sign-in)'
+      status: pending
+    - id: revoke-private-unlisted-og-cache
+      content: 'Revocation story: sermon/playlist made private or deleted; CDN/cache, embeds, Open Graph invalidation or TTL strategy'
+      status: pending
+    - id: align-shareable-url
+      content: 'Align CLIENT_APP_URL paths with universal links and mobile router; document attachAppUrl vs marketing API base URL'
+      status: pending
+    - id: shareable-link-scope-ops
+      content: 'Document narrow use of shareable-link; inventory callers of generateShareableLink; optional hydrateResource for remaining ShareableLinkType; ops TTL cleanup, metrics on share/resolve, token-link sunset policy if any'
+      status: pending
+    - id: teaser-rate-limits-abuse
+      content: 'If public teaser exists: rate limiting, abuse monitoring, note on ObjectId enumeration risk for scrapers'
+      status: pending
+    - id: observability-deeplink-metrics
+      content: 'Logging/metrics for deep link open failures (invalid id, private content, wrong host); distinguish stable open vs token resolve'
+      status: pending
+    - id: rollout-feature-flag-comms
+      content: 'Rollout: feature flag for Copy link source (stable vs token); coordinate mobile/web release notes and client behavior switch'
+      status: pending
+    - id: mobile-client-parse
+      content: 'Mobile: primary parser for path-based ids; fallback to GET /api/v1/share/resolve only for token flows'
+      status: pending
+    - id: analytics-shares-og-seo
+      content: 'Optional: increment totalShares or analytics on successful share open; Open Graph / Twitter cards for stable sermon URLs on web'
+      status: pending
+    - id: test-matrix-e2e-deeplinks
+      content: 'E2E/contract tests: cold start, signed out, signed in not onboarded, invalid id, private sermon, public playlist, token fallback, post-auth resume'
+      status: pending
 isProject: false
 ---
 

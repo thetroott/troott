@@ -20,13 +20,13 @@
  * @returns {Promise<Array<{id: string, name: string, key: string, effectCount: number}>>}
  */
 async function listEffectStyles() {
-  const styles = await figma.getLocalEffectStylesAsync();
-  return styles.map(s => ({
-    id: s.id,
-    name: s.name,
-    key: s.key,
-    effectCount: s.effects.length
-  }));
+    const styles = await figma.getLocalEffectStylesAsync();
+    return styles.map((s) => ({
+        id: s.id,
+        name: s.name,
+        key: s.key,
+        effectCount: s.effects.length,
+    }));
 }
 ```
 
@@ -53,18 +53,20 @@ Colors are **RGBA 0–1 range**. `effects` is a read-only array — always reass
  * @returns {EffectStyle}
  */
 function createDropShadowStyle(name, color, offset, radius, spread) {
-  const style = figma.createEffectStyle();
-  style.name = name;
-  style.effects = [{
-    type: "DROP_SHADOW",
-    color,
-    offset,
-    radius,
-    spread: spread || 0,
-    visible: true,
-    blendMode: "NORMAL"
-  }];
-  return style;
+    const style = figma.createEffectStyle();
+    style.name = name;
+    style.effects = [
+        {
+            type: 'DROP_SHADOW',
+            color,
+            offset,
+            radius,
+            spread: spread || 0,
+            visible: true,
+            blendMode: 'NORMAL',
+        },
+    ];
+    return style;
 }
 ```
 
@@ -72,11 +74,11 @@ Full runnable script:
 
 ```javascript
 const style = createDropShadowStyle(
-  "Elevation/200",
-  { r: 0, g: 0, b: 0, a: 0.15 },
-  { x: 0, y: 4 },
-  12,
-  0
+    'Elevation/200',
+    { r: 0, g: 0, b: 0, a: 0.15 },
+    { x: 0, y: 4 },
+    12,
+    0,
 );
 return { id: style.id, name: style.name };
 ```
@@ -87,7 +89,7 @@ For effect styles from **team libraries**, use `importStyleByKeyAsync`:
 
 ```javascript
 // Import a library effect style by key
-const shadowStyle = await figma.importStyleByKeyAsync("EFFECT_STYLE_KEY");
+const shadowStyle = await figma.importStyleByKeyAsync('EFFECT_STYLE_KEY');
 // Apply to a node
 node.effectStyleId = shadowStyle.id;
 ```
@@ -105,15 +107,17 @@ node.effectStyleId = shadowStyle.id;
  * @returns {number} - Number of nodes the style was applied to.
  */
 function applyEffectStyleToMatchingNodes(styleId, nodeNamePattern) {
-  const nodes = figma.currentPage.findAll(n => n.name.includes(nodeNamePattern));
-  let applied = 0;
-  for (const node of nodes) {
-    if ('effectStyleId' in node) {
-      node.effectStyleId = styleId;
-      applied++;
+    const nodes = figma.currentPage.findAll((n) =>
+        n.name.includes(nodeNamePattern),
+    );
+    let applied = 0;
+    for (const node of nodes) {
+        if ('effectStyleId' in node) {
+            node.effectStyleId = styleId;
+            applied++;
+        }
     }
-  }
-  return applied;
+    return applied;
 }
 ```
 

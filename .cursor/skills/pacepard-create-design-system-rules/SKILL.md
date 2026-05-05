@@ -12,11 +12,11 @@ This skill helps you generate custom design system rules tailored to your projec
 
 ### Supported Rule Files
 
-| Agent | Rule File |
-|-------|-----------|
-| Claude Code | `CLAUDE.md` |
-| Codex CLI | `AGENTS.md` |
-| Cursor | `.cursor/rules/figma-design-system.mdc` |
+| Agent       | Rule File                               |
+| ----------- | --------------------------------------- |
+| Claude Code | `CLAUDE.md`                             |
+| Codex CLI   | `AGENTS.md`                             |
+| Cursor      | `.cursor/rules/figma-design-system.mdc` |
 
 ## What Are Design System Rules?
 
@@ -169,11 +169,11 @@ These rules define how to translate Figma inputs into code for this project and 
 
 Detect which AI coding agent the user is working with and save the generated rules to the corresponding file:
 
-| Agent | Rule File | Notes |
-|-------|-----------|-------|
-| Claude Code | `CLAUDE.md` in project root | Markdown format. Can also use `.claude/rules/figma-design-system.md` for modular organization. |
-| Codex CLI | `AGENTS.md` in project root | Markdown format. Append as a new section if file already exists. 32 KiB combined size limit. |
-| Cursor | `.cursor/rules/figma-design-system.mdc` | Markdown with YAML frontmatter (`description`, `globs`, `alwaysApply`). |
+| Agent       | Rule File                               | Notes                                                                                          |
+| ----------- | --------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Claude Code | `CLAUDE.md` in project root             | Markdown format. Can also use `.claude/rules/figma-design-system.md` for modular organization. |
+| Codex CLI   | `AGENTS.md` in project root             | Markdown format. Append as a new section if file already exists. 32 KiB combined size limit.   |
+| Cursor      | `.cursor/rules/figma-design-system.mdc` | Markdown with YAML frontmatter (`description`, `globs`, `alwaysApply`).                        |
 
 If unsure which agent the user is working with, check for existing rule files in the project or ask the user.
 
@@ -182,7 +182,7 @@ For Cursor, wrap the rules with YAML frontmatter:
 ```markdown
 ---
 description: Rules for implementing Figma designs using pacepard-ui-agent. Covers component organization, styling conventions, design tokens, asset handling, and the required Figma-to-code workflow.
-globs: "src/components/**"
+globs: 'src/components/**'
 alwaysApply: false
 ---
 

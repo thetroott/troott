@@ -1,6 +1,6 @@
 ---
 name: pacepard-ui-agent
-description: "MCP bridge skill for Pacepard UI Agent — Figma Desktop + WebSocket relay. Use when the user works with Figma from Cursor via pacepard-ui-agent, join_channel, get_metadata, get_design_context, get_screenshot, read_ui_power_steering, create_design_system_rules, or discrete canvas tools. Load before other Pacepard Figma skills so tool names and preconditions match this server."
+description: 'MCP bridge skill for Pacepard UI Agent — Figma Desktop + WebSocket relay. Use when the user works with Figma from Cursor via pacepard-ui-agent, join_channel, get_metadata, get_design_context, get_screenshot, read_ui_power_steering, create_design_system_rules, or discrete canvas tools. Load before other Pacepard Figma skills so tool names and preconditions match this server.'
 disable-model-invocation: false
 ---
 

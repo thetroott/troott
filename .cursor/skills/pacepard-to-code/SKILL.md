@@ -14,8 +14,8 @@ User wants **application code** from a Figma design using this repository’s br
 
 1. **[pacepard-ui-agent](../pacepard-ui-agent/SKILL.md)** — relay, plugin, `join_channel`, tool ladder.
 2. Choose one path:
-   - **Direct implementation:** **[pacepard-implement-design](../pacepard-implement-design/SKILL.md)**.
-   - **Spec-first product flow:** **[pacepard-skills README](../../pacepard-skills/README.md)** — extract → UI spec → flow → tasks → code (and optional `.cursor/commands` `/pacepard …`).
+    - **Direct implementation:** **[pacepard-implement-design](../pacepard-implement-design/SKILL.md)**.
+    - **Spec-first product flow:** **[pacepard-skills README](../../pacepard-skills/README.md)** — extract → UI spec → flow → tasks → code (and optional `.cursor/commands` `/pacepard …`).
 3. **Design system rules** for the repo: **[pacepard-create-design-system-rules](../pacepard-create-design-system-rules/SKILL.md)**.
 
 ## Not this skill

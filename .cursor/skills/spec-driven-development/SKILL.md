@@ -46,38 +46,40 @@ ASSUMPTIONS I'M MAKING:
 → Correct me now or I'll proceed with these.
 ```
 
-Don't silently fill in ambiguous requirements. The spec's entire purpose is to surface misunderstandings *before* code gets written — assumptions are the most dangerous form of misunderstanding.
+Don't silently fill in ambiguous requirements. The spec's entire purpose is to surface misunderstandings _before_ code gets written — assumptions are the most dangerous form of misunderstanding.
 
 **Write a spec document covering these six core areas:**
 
 1. **Objective** — What are we building and why? Who is the user? What does success look like?
 
 2. **Commands** — Full executable commands with flags, not just tool names.
-   ```
-   Build: npm run build
-   Test: npm test -- --coverage
-   Lint: npm run lint --fix
-   Dev: npm run dev
-   ```
+
+    ```
+    Build: npm run build
+    Test: npm test -- --coverage
+    Lint: npm run lint --fix
+    Dev: npm run dev
+    ```
 
 3. **Project Structure** — Where source code lives, where tests go, where docs belong.
-   ```
-   src/           → Application source code
-   src/components → React components
-   src/lib        → Shared utilities
-   tests/         → Unit and integration tests
-   e2e/           → End-to-end tests
-   docs/          → Documentation
-   ```
+
+    ```
+    src/           → Application source code
+    src/components → React components
+    src/lib        → Shared utilities
+    tests/         → Unit and integration tests
+    e2e/           → End-to-end tests
+    docs/          → Documentation
+    ```
 
 4. **Code Style** — One real code snippet showing your style beats three paragraphs describing it. Include naming conventions, formatting rules, and examples of good output.
 
 5. **Testing Strategy** — What framework, where tests live, coverage expectations, which test levels for which concerns.
 
 6. **Boundaries** — Three-tier system:
-   - **Always do:** Run tests before commits, follow naming conventions, validate inputs
-   - **Ask first:** Database schema changes, adding dependencies, changing CI config
-   - **Never do:** Commit secrets, edit vendor directories, remove failing tests without approval
+    - **Always do:** Run tests before commits, follow naming conventions, validate inputs
+    - **Ask first:** Database schema changes, adding dependencies, changing CI config
+    - **Never do:** Commit secrets, edit vendor directories, remove failing tests without approval
 
 **Spec template:**
 
@@ -85,32 +87,41 @@ Don't silently fill in ambiguous requirements. The spec's entire purpose is to s
 # Spec: [Project/Feature Name]
 
 ## Objective
+
 [What we're building and why. User stories or acceptance criteria.]
 
 ## Tech Stack
+
 [Framework, language, key dependencies with versions]
 
 ## Commands
+
 [Build, test, lint, dev — full commands]
 
 ## Project Structure
+
 [Directory layout with descriptions]
 
 ## Code Style
+
 [Example snippet + key conventions]
 
 ## Testing Strategy
+
 [Framework, test locations, coverage requirements, test levels]
 
 ## Boundaries
+
 - Always: [...]
 - Ask first: [...]
 - Never: [...]
 
 ## Success Criteria
+
 [How we'll know this is done — specific, testable conditions]
 
 ## Open Questions
+
 [Anything unresolved that needs human input]
 ```
 
@@ -151,11 +162,12 @@ Break the plan into discrete, implementable tasks:
 - No task should require changing more than ~5 files
 
 **Task template:**
+
 ```markdown
 - [ ] Task: [Description]
-  - Acceptance: [What must be true when done]
-  - Verify: [How to confirm — test command, build, manual check]
-  - Files: [Which files will be touched]
+    - Acceptance: [What must be true when done]
+    - Verify: [How to confirm — test command, build, manual check]
+    - Files: [Which files will be touched]
 ```
 
 ### Phase 4: Implement
@@ -173,13 +185,13 @@ The spec is a living document, not a one-time artifact:
 
 ## Common Rationalizations
 
-| Rationalization | Reality |
-|---|---|
-| "This is simple, I don't need a spec" | Simple tasks don't need *long* specs, but they still need acceptance criteria. A two-line spec is fine. |
-| "I'll write the spec after I code it" | That's documentation, not specification. The spec's value is in forcing clarity *before* code. |
-| "The spec will slow us down" | A 15-minute spec prevents hours of rework. Waterfall in 15 minutes beats debugging in 15 hours. |
-| "Requirements will change anyway" | That's why the spec is a living document. An outdated spec is still better than no spec. |
-| "The user knows what they want" | Even clear requests have implicit assumptions. The spec surfaces those assumptions. |
+| Rationalization                       | Reality                                                                                                 |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| "This is simple, I don't need a spec" | Simple tasks don't need _long_ specs, but they still need acceptance criteria. A two-line spec is fine. |
+| "I'll write the spec after I code it" | That's documentation, not specification. The spec's value is in forcing clarity _before_ code.          |
+| "The spec will slow us down"          | A 15-minute spec prevents hours of rework. Waterfall in 15 minutes beats debugging in 15 hours.         |
+| "Requirements will change anyway"     | That's why the spec is a living document. An outdated spec is still better than no spec.                |
+| "The user knows what they want"       | Even clear requests have implicit assumptions. The spec surfaces those assumptions.                     |
 
 ## Red Flags
 

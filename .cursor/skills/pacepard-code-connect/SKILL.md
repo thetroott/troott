@@ -25,22 +25,22 @@ Create Code Connect template files (`.figma.ts`) that map Figma components to co
 - **Organization or Enterprise plan required** — Code Connect is not available on Free or Professional plans.
 - **URL must include `node-id`** — the Figma URL must contain the `node-id` query parameter.
 - **TypeScript types** — for editor autocomplete and type checking in `.figma.ts` files `@figma/code-connect/figma-types` must be added to `types` in `tsconfig.json`:
-  ```json
-  {
-    "compilerOptions": {
-      "types": ["@figma/code-connect/figma-types"]
+    ```json
+    {
+        "compilerOptions": {
+            "types": ["@figma/code-connect/figma-types"]
+        }
     }
-  }
-  ```
+    ```
 
 ## Step 1: Parse the Figma URL
 
 Extract `fileKey` and `nodeId` from the URL:
 
-| URL Format | fileKey | nodeId |
-|---|---|---|
-| `figma.com/design/:fileKey/:name?node-id=X-Y` | `:fileKey` | `X-Y` → `X:Y` |
-| `figma.com/file/:fileKey/:name?node-id=X-Y` | `:fileKey` | `X-Y` → `X:Y` |
+| URL Format                                          | fileKey          | nodeId               |
+| --------------------------------------------------- | ---------------- | -------------------- |
+| `figma.com/design/:fileKey/:name?node-id=X-Y`       | `:fileKey`       | `X-Y` → `X:Y`        |
+| `figma.com/file/:fileKey/:name?node-id=X-Y`         | `:fileKey`       | `X-Y` → `X:Y`        |
 | `figma.com/design/:fileKey/branch/:branchKey/:name` | use `:branchKey` | from `node-id` param |
 
 Always convert `nodeId` hyphens to colons: `1234-5678` → `1234:5678`.
@@ -48,6 +48,7 @@ Always convert `nodeId` hyphens to colons: `1234-5678` → `1234:5678`.
 **Worked example:**
 
 Given: `https://www.figma.com/design/QiEF6w564ggoW8ftcLvdcu/MyDesignSystem?node-id=4185-3778`
+
 - `fileKey` = `QiEF6w564ggoW8ftcLvdcu`
 - `nodeId` = `4185-3778` → `4185:3778`
 
@@ -56,6 +57,7 @@ Given: `https://www.figma.com/design/QiEF6w564ggoW8ftcLvdcu/MyDesignSystem?node-
 **If only pacepard-ui-agent is available:** skip MCP discovery; use **Template-first workflow** (manual `.figma.ts` + CLI) and inspect components with `get_design_context` for context only.
 
 **If Figma hosted MCP is available:** the user may provide a URL pointing to a frame, instance, or variant — not necessarily a component set or standalone component. Call the MCP tool `get_code_connect_suggestions` with:
+
 - `fileKey` — from Step 1
 - `nodeId` — from Step 1 (colons format)
 - `excludeMappingPrompt` — `true` (returns a lightweight list of unmapped components)
@@ -71,6 +73,7 @@ This tool identifies published components in the selection that don't yet have C
 ## Step 3: Fetch Component Properties
 
 Call the MCP tool `get_context_for_code_connect` with:
+
 - `fileKey` — from Step 1
 - `nodeId` — the resolved `mainComponentNodeId` from Step 2
 - `clientFrameworks` — determine from `figma.config.json` `parser` field (e.g. `"react"` → `["react"]`)
@@ -79,6 +82,7 @@ Call the MCP tool `get_context_for_code_connect` with:
 For multiple components, call the tool once per node ID.
 
 The response contains the Figma component's **property definitions** — note each property's name and type:
+
 - **TEXT** — text content (labels, titles, placeholders)
 - **BOOLEAN** — toggles (show/hide icon, disabled state)
 - **VARIANT** — enum options (size, variant, state)
@@ -116,79 +120,85 @@ Every template file follows this structure:
 // url=https://www.figma.com/file/{fileKey}/{fileName}?node-id={nodeId}
 // source={path to code component from Step 4}
 // component={code component name from Step 4}
-import figma from 'figma'
-const instance = figma.selectedInstance
+import figma from 'figma';
+const instance = figma.selectedInstance;
 
 // Extract properties from the Figma component (see property mapping below)
 // ...
 
 export default {
-  example: figma.code`<Component ... />`,       // Required: code snippet
-  imports: ['import { Component } from "..."'], // Optional: import statements
-  id: 'component-name',                         // Required: unique identifier
-  metadata: {                                    // Optional
-    nestable: true,                              // true = inline in parent, false = show as pill
-    props: {}                                    // data accessible to parent templates
-  }
-}
+    example: figma.code`<Component ... />`, // Required: code snippet
+    imports: ['import { Component } from "..."'], // Optional: import statements
+    id: 'component-name', // Required: unique identifier
+    metadata: {
+        // Optional
+        nestable: true, // true = inline in parent, false = show as pill
+        props: {}, // data accessible to parent templates
+    },
+};
 ```
 
 ### Property mapping
 
 Use the property list from Step 3 to extract values. For each Figma property type, use the corresponding method:
 
-| Figma Property Type | Template Method | When to Use |
-|---|---|---|
-| TEXT | `instance.getString('Name')` | Labels, titles, placeholder text |
-| BOOLEAN | `instance.getBoolean('Name', { true: ..., false: ... })` | Toggle visibility, conditional props |
-| VARIANT | `instance.getEnum('Name', { 'FigmaVal': 'codeVal' })` | Size, variant, state enums |
-| INSTANCE_SWAP | `instance.getInstanceSwap('Name')` | Icon slots, swappable children |
-| (child layer) | `instance.findInstance('LayerName')` | Named child instances without a property |
-| (text layer) | `instance.findText('LayerName')` → `.textContent` | Text content from named layers |
+| Figma Property Type | Template Method                                          | When to Use                              |
+| ------------------- | -------------------------------------------------------- | ---------------------------------------- |
+| TEXT                | `instance.getString('Name')`                             | Labels, titles, placeholder text         |
+| BOOLEAN             | `instance.getBoolean('Name', { true: ..., false: ... })` | Toggle visibility, conditional props     |
+| VARIANT             | `instance.getEnum('Name', { 'FigmaVal': 'codeVal' })`    | Size, variant, state enums               |
+| INSTANCE_SWAP       | `instance.getInstanceSwap('Name')`                       | Icon slots, swappable children           |
+| (child layer)       | `instance.findInstance('LayerName')`                     | Named child instances without a property |
+| (text layer)        | `instance.findText('LayerName')` → `.textContent`        | Text content from named layers           |
 
 **TEXT** — get the string value directly:
+
 ```ts
-const label = instance.getString('Label')
+const label = instance.getString('Label');
 ```
 
 **VARIANT** — map Figma enum values to code values:
+
 ```ts
 const variant = instance.getEnum('Variant', {
-  'Primary': 'primary',
-  'Secondary': 'secondary',
-})
+    Primary: 'primary',
+    Secondary: 'secondary',
+});
 
 const size = instance.getEnum('Size', {
-  'Small': 'sm',
-  'Medium': 'md',
-  'Large': 'lg',
-})
+    Small: 'sm',
+    Medium: 'md',
+    Large: 'lg',
+});
 ```
 
 **BOOLEAN** — simple boolean or mapped to values:
+
 ```ts
 // Simple boolean
-const disabled = instance.getBoolean('Disabled')
+const disabled = instance.getBoolean('Disabled');
 
 // Mapped to code values
 const hasIcon = instance.getBoolean('Has Icon', {
-  true: figma.code`<Icon />`,
-  false: undefined,
-})
+    true: figma.code`<Icon />`,
+    false: undefined,
+});
 ```
 
 **INSTANCE_SWAP** — access swappable component instances:
+
 ```ts
-const icon = instance.getInstanceSwap('Icon')
-let iconCode
+const icon = instance.getInstanceSwap('Icon');
+let iconCode;
 if (icon && icon.hasCodeConnect()) {
-  iconCode = icon.executeTemplate().example
+    iconCode = icon.executeTemplate().example;
 }
 ```
 
 ### Interpolation in tagged templates
 
 When interpolating values in tagged templates, use the correct wrapping:
+
 - **String values** (`getString`, `getEnum`, `textContent`): wrap in quotes → `variant="${variant}"`
 - **Instance/section values** (`executeTemplate().example`): wrap in braces → `icon={${iconCode}}`
 - **Boolean bare props**: use conditional → `${disabled ? 'disabled' : ''}`
@@ -197,40 +207,43 @@ When interpolating values in tagged templates, use the correct wrapping:
 
 When you need to access children that aren't exposed as component properties:
 
-| Method | Use when |
-|---|---|
-| `instance.getInstanceSwap('PropName')` | A component property exists for this slot |
-| `instance.findInstance('LayerName')` | You know the child layer name (no component property) |
-| `instance.findText('LayerName')` → `.textContent` | You need text content from a named text layer |
-| `instance.findConnectedInstance('id')` | You know the child's Code Connect `id` |
-| `instance.findConnectedInstances(fn)` | You need multiple connected children matching a filter |
-| `instance.findLayers(fn)` | You need any layers (text + instances) matching a filter |
+| Method                                            | Use when                                                 |
+| ------------------------------------------------- | -------------------------------------------------------- |
+| `instance.getInstanceSwap('PropName')`            | A component property exists for this slot                |
+| `instance.findInstance('LayerName')`              | You know the child layer name (no component property)    |
+| `instance.findText('LayerName')` → `.textContent` | You need text content from a named text layer            |
+| `instance.findConnectedInstance('id')`            | You know the child's Code Connect `id`                   |
+| `instance.findConnectedInstances(fn)`             | You need multiple connected children matching a filter   |
+| `instance.findLayers(fn)`                         | You need any layers (text + instances) matching a filter |
 
 ### Nested component example
 
 For multi-level nested components or metadata prop passing between templates, see [advanced-patterns.md](references/advanced-patterns.md).
 
 ```ts
-const icon = instance.getInstanceSwap('Icon')
-let iconSnippet
+const icon = instance.getInstanceSwap('Icon');
+let iconSnippet;
 if (icon && icon.hasCodeConnect()) {
-  iconSnippet = icon.executeTemplate().example
+    iconSnippet = icon.executeTemplate().example;
 }
 
 export default {
-  example: figma.code`<Button ${iconSnippet ? figma.code`icon={${iconSnippet}}` : ''}>${label}</Button>`,
-  // ...
-}
+    example: figma.code`<Button ${iconSnippet ? figma.code`icon={${iconSnippet}}` : ''}>${label}</Button>`,
+    // ...
+};
 ```
 
 ### Conditional props
 
 ```ts
-const variant = instance.getEnum('Variant', { 'Primary': 'primary', 'Secondary': 'secondary' })
-const disabled = instance.getBoolean('Disabled')
+const variant = instance.getEnum('Variant', {
+    Primary: 'primary',
+    Secondary: 'secondary',
+});
+const disabled = instance.getBoolean('Disabled');
 
 export default {
-  example: figma.code`
+    example: figma.code`
     <Button
       variant="${variant}"
       ${disabled ? 'disabled' : ''}
@@ -238,8 +251,8 @@ export default {
       ${label}
     </Button>
   `,
-  // ...
-}
+    // ...
+};
 ```
 
 ## Step 6: Validate
@@ -256,33 +269,33 @@ If anything looks uncertain, consult [api.md](references/api.md) for API details
 
 ### `instance.*` Methods
 
-| Method | Signature | Returns |
-|---|---|---|
-| `getString` | `(propName: string)` | `string` |
-| `getBoolean` | `(propName: string, mapping?: { true: any, false: any })` | `boolean \| any` |
-| `getEnum` | `(propName: string, mapping: { [figmaVal]: codeVal })` | `any` |
-| `getInstanceSwap` | `(propName: string)` | `InstanceHandle \| null` |
-| `getPropertyValue` | `(propName: string)` | `string \| boolean` |
-| `findInstance` | `(layerName: string, opts?: SelectorOptions)` | `InstanceHandle \| ErrorHandle` |
-| `findText` | `(layerName: string, opts?: SelectorOptions)` | `TextHandle \| ErrorHandle` |
-| `findConnectedInstance` | `(codeConnectId: string, opts?: SelectorOptions)` | `InstanceHandle \| ErrorHandle` |
-| `findConnectedInstances` | `(selector: (node) => boolean, opts?: SelectorOptions)` | `InstanceHandle[]` |
-| `findLayers` | `(selector: (node) => boolean, opts?: SelectorOptions)` | `(InstanceHandle \| TextHandle)[]` |
+| Method                   | Signature                                                 | Returns                            |
+| ------------------------ | --------------------------------------------------------- | ---------------------------------- |
+| `getString`              | `(propName: string)`                                      | `string`                           |
+| `getBoolean`             | `(propName: string, mapping?: { true: any, false: any })` | `boolean \| any`                   |
+| `getEnum`                | `(propName: string, mapping: { [figmaVal]: codeVal })`    | `any`                              |
+| `getInstanceSwap`        | `(propName: string)`                                      | `InstanceHandle \| null`           |
+| `getPropertyValue`       | `(propName: string)`                                      | `string \| boolean`                |
+| `findInstance`           | `(layerName: string, opts?: SelectorOptions)`             | `InstanceHandle \| ErrorHandle`    |
+| `findText`               | `(layerName: string, opts?: SelectorOptions)`             | `TextHandle \| ErrorHandle`        |
+| `findConnectedInstance`  | `(codeConnectId: string, opts?: SelectorOptions)`         | `InstanceHandle \| ErrorHandle`    |
+| `findConnectedInstances` | `(selector: (node) => boolean, opts?: SelectorOptions)`   | `InstanceHandle[]`                 |
+| `findLayers`             | `(selector: (node) => boolean, opts?: SelectorOptions)`   | `(InstanceHandle \| TextHandle)[]` |
 
 ### InstanceHandle Methods
 
-| Method | Returns |
-|---|---|
-| `hasCodeConnect()` | `boolean` |
+| Method              | Returns                                            |
+| ------------------- | -------------------------------------------------- |
+| `hasCodeConnect()`  | `boolean`                                          |
 | `executeTemplate()` | `{ example: ResultSection[], metadata: Metadata }` |
-| `codeConnectId()` | `string \| null` |
+| `codeConnectId()`   | `string \| null`                                   |
 
 ### TextHandle Properties
 
-| Property | Type |
-|---|---|
+| Property       | Type     |
+| -------------- | -------- |
 | `.textContent` | `string` |
-| `.name` | `string` |
+| `.name`        | `string` |
 
 ### SelectorOptions
 
@@ -294,11 +307,11 @@ If anything looks uncertain, consult [api.md](references/api.md) for API details
 
 ```ts
 export default {
-  example: figma.code`...`,                      // Required: ResultSection[]
-  id: 'component-name',                         // Required: string
-  imports: ['import { X } from "..."'],          // Optional: string[]
-  metadata: { nestable: true, props: {} }        // Optional
-}
+    example: figma.code`...`, // Required: ResultSection[]
+    id: 'component-name', // Required: string
+    imports: ['import { X } from "..."'], // Optional: string[]
+    metadata: { nestable: true, props: {} }, // Optional
+};
 ```
 
 ## Rules and Pitfalls
@@ -314,21 +327,23 @@ export default {
 5. **Property names are case-sensitive** and must exactly match what `get_context_for_code_connect` returns.
 
 6. **Handle multiple template arrays correctly.** When iterating over children, set each result in a separate variable and interpolate them individually — do not use `.map().join()`:
-   ```ts
-   // Wrong:
-   items.map(n => n.executeTemplate().example).join('\n')
 
-   // Correct — use separate variables:
-   const child1 = items[0]?.executeTemplate().example
-   const child2 = items[1]?.executeTemplate().example
-   export default { example: figma.code`${child1}${child2}` }
-   ```
+    ```ts
+    // Wrong:
+    items.map((n) => n.executeTemplate().example).join('\n');
+
+    // Correct — use separate variables:
+    const child1 = items[0]?.executeTemplate().example;
+    const child2 = items[1]?.executeTemplate().example;
+    export default { example: figma.code`${child1}${child2}` };
+    ```
 
 ## Complete Worked Example
 
 Given URL: `https://figma.com/design/abc123/MyFile?node-id=42-100`
 
 **Step 1:** Parse the URL.
+
 - `fileKey` = `abc123`
 - `nodeId` = `42-100` → `42:100`
 
@@ -338,6 +353,7 @@ Response returns one component with `mainComponentNodeId: "42:100"`. If the resp
 **Step 3:** Call `get_context_for_code_connect` with `fileKey: "abc123"`, `nodeId: "42:100"` (from Step 2), `clientFrameworks: ["react"]`, `clientLanguages: ["typescript"]`.
 
 Response includes properties:
+
 - Label (TEXT)
 - Variant (VARIANT): Primary, Secondary
 - Size (VARIANT): Small, Medium, Large
@@ -353,29 +369,29 @@ Response includes properties:
 // url=https://figma.com/design/abc123/MyFile?node-id=42-100
 // source=src/components/Button.tsx
 // component=Button
-import figma from 'figma'
-const instance = figma.selectedInstance
+import figma from 'figma';
+const instance = figma.selectedInstance;
 
-const label = instance.getString('Label')
+const label = instance.getString('Label');
 const variant = instance.getEnum('Variant', {
-  'Primary': 'primary',
-  'Secondary': 'secondary',
-})
+    Primary: 'primary',
+    Secondary: 'secondary',
+});
 const size = instance.getEnum('Size', {
-  'Small': 'sm',
-  'Medium': 'md',
-  'Large': 'lg',
-})
-const disabled = instance.getBoolean('Disabled')
-const hasIcon = instance.getBoolean('Has Icon')
-const icon = hasIcon ? instance.getInstanceSwap('Icon') : null
-let iconCode
+    Small: 'sm',
+    Medium: 'md',
+    Large: 'lg',
+});
+const disabled = instance.getBoolean('Disabled');
+const hasIcon = instance.getBoolean('Has Icon');
+const icon = hasIcon ? instance.getInstanceSwap('Icon') : null;
+let iconCode;
 if (icon && icon.hasCodeConnect()) {
-  iconCode = icon.executeTemplate().example
+    iconCode = icon.executeTemplate().example;
 }
 
 export default {
-  example: figma.code`
+    example: figma.code`
     <Button
       variant="${variant}"
       size="${size}"
@@ -385,10 +401,10 @@ export default {
       ${label}
     </Button>
   `,
-  imports: ['import { Button } from "primitives"'],
-  id: 'button',
-  metadata: { nestable: true }
-}
+    imports: ['import { Button } from "primitives"'],
+    id: 'button',
+    metadata: { nestable: true },
+};
 ```
 
 **Step 6:** Read back file to verify syntax.

@@ -13,10 +13,10 @@ See [`src/ui-power/COMPATIBILITY.md`](../src/ui-power/COMPATIBILITY.md).
 
 ## Skills folders in this repo
 
-| Folder | Role |
-|--------|------|
-| **`skills/`** | Agent SKILL.md packs (engineering + Figma Plugin API guides). |
-| **`pacepard-skills/`** | Product-layer markdown (specs, flows, tasks, code workflow). |
+| Folder                 | Role                                                          |
+| ---------------------- | ------------------------------------------------------------- |
+| **`skills/`**          | Agent SKILL.md packs (engineering + Figma Plugin API guides). |
+| **`pacepard-skills/`** | Product-layer markdown (specs, flows, tasks, code workflow).  |
 
 ## Copy / symlink
 
