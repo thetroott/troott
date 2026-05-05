@@ -1,24 +1,21 @@
 {
-  "$schema": "https://turbo.build/schema.json",
-  "dangerouslyDisablePackageManagerCheck": true,
-  "ui": "tui",
-  "tasks": {
-    "lint": {
-      "outputs": []
-    },
-    "test": {
-      "inputs": ["**/*.{ts,tsx,js,jsx}"]
-    },
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [
-        "build/**",
-        "node_modules/.cache/metro/**"
-      ]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
+    "$schema": "https://turbo.build/schema.json",
+    "dangerouslyDisablePackageManagerCheck": true,
+    "ui": "tui",
+    "tasks": {
+        "lint": {
+            "outputs": []
+        },
+        "test": {
+            "inputs": ["**/*.{ts,tsx,js,jsx}"]
+        },
+        "build": {
+            "dependsOn": ["^build"],
+            "outputs": ["build/**", "node_modules/.cache/metro/**"]
+        },
+        "dev": {
+            "cache": false,
+            "persistent": true
+        }
     }
-  }
 }

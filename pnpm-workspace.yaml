@@ -1,9 +1,9 @@
 packages:
-  - 'apps/*'
-  - 'packages/*'
-  - 'configs/*'
+    - 'apps/*'
+    - 'packages/*'
+    - 'configs/*'
 minimumReleaseAge: 1440
 nodeLinker: hoisted
 patchedDependencies:
-  '@rntp/player@5.0.0-beta.4': patches/@rntp__player@5.0.0-beta.4.patch
-  react-native-css-interop@0.2.2: patches/react-native-css-interop@0.2.2.patch
+    '@rntp/player@5.0.0-beta.4': patches/@rntp__player@5.0.0-beta.4.patch
+    react-native-css-interop@0.2.2: patches/react-native-css-interop@0.2.2.patch

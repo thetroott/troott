@@ -1,3 +1,22 @@
+# Dependencies and caches
+node_modules
+.turbo
+dist
+build
+coverage
+.next
+.expo
+
+# Lockfile (large; leave machine-generated)
+pnpm-lock.yaml
+
+# Native build outputs / CocoaPods (generated)
+**/Pods/**
+apps/mobile/android/app/build
+
+# Minified vendored assets
+**/*.min.css
+
 # Not JSON (pseudo-schema); Prettier cannot parse.
 apps/mobile/_data/ministers.json
 apps/mobile/_data/series.json

@@ -28,11 +28,14 @@
         "prebuild:mobile:clean": "pnpm --dir apps/mobile exec expo prebuild --clean --pnpm",
         "start:mobile": "pnpm --filter @troott/mobile run start",
         "start:mobile:clear": "pnpm --filter @troott/mobile run start:clear",
-        "typecheck:workspace": "tsc -b tsconfig.workspace.json"
+        "typecheck:workspace": "tsc -b tsconfig.workspace.json",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
     },
     "devDependencies": {
         "@types/node": "^22.15.21",
         "patch-package": "^8.0.1",
+        "prettier": "^3.5.3",
         "turbo": "^2.5.6",
         "typescript": "~5.9.2"
     },
