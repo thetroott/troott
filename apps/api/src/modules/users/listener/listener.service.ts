@@ -62,7 +62,7 @@ class ListenerService {
             avatar:
                 typeof user.avatar === 'string'
                     ? user.avatar
-                    : (user.avatar as { s3Key?: string })?.s3Key ?? '',
+                    : ((user.avatar as { s3Key?: string })?.s3Key ?? ''),
             slug: rest.slug ?? nameSlug,
             playlists: [],
             listeningHistory: [],
@@ -81,9 +81,8 @@ class ListenerService {
             createdBy: (rest.createdBy as any) || userKey,
         };
 
-        const createResult = await listenerRepository.createListener(
-            listenerData,
-        );
+        const createResult =
+            await listenerRepository.createListener(listenerData);
         if (createResult.error || !createResult.data) {
             result.error = true;
             result.code = 500;
@@ -267,8 +266,8 @@ class ListenerService {
 
         const existingListener = findResult.data as IListenerDoc;
         const id = String(existingListener._id || existingListener.id);
-        const likedIds = (existingListener.likedSermons as unknown[]).map(
-            (x) => String(x),
+        const likedIds = (existingListener.likedSermons as unknown[]).map((x) =>
+            String(x),
         );
         const hasLiked = likedIds.includes(String(sermonId));
 

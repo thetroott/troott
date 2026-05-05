@@ -127,7 +127,9 @@ export const createCreator: RequestHandler = asyncHandler(
 
         const result = await creatorService.createCreator(data);
         if (result.error) {
-            return next(new ErrorResponse(result.message, result.code || 500, []));
+            return next(
+                new ErrorResponse(result.message, result.code || 500, []),
+            );
         }
 
         res.status(201).json({
@@ -142,8 +144,7 @@ export const createCreator: RequestHandler = asyncHandler(
 
 export const acceptCreatorInvitation: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { token, email, password }: AcceptCreatorInvitationDTO =
-            req.body;
+        const { token, email, password }: AcceptCreatorInvitationDTO = req.body;
 
         if (!token || !email || !password) {
             return next(
@@ -343,8 +344,9 @@ export const getCreators: RequestHandler = asyncHandler(
             );
         }
 
-        const pag = (result as { pagination?: { count: number; total: number } })
-            .pagination;
+        const pag = (
+            result as { pagination?: { count: number; total: number } }
+        ).pagination;
 
         const responseData = {
             data: result.data,

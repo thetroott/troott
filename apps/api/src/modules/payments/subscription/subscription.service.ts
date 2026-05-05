@@ -393,9 +393,7 @@ class SubscriptionService {
      * @param userProfile user profile we're checking against
      * @returns {IResult}
      */
-    private async hasActiveSubscription(
-        userProfile: IUserDoc,
-    ) {
+    private async hasActiveSubscription(userProfile: IUserDoc) {
         let result: IResult = {
             error: false,
             message: '',

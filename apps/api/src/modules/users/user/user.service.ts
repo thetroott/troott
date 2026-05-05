@@ -597,7 +597,9 @@ class UserService {
         const ministerIds = preferences.minister?.map((m: unknown) =>
             typeof m === 'string'
                 ? m
-                : m && typeof (m as { toString?: () => string }).toString === 'function'
+                : m &&
+                    typeof (m as { toString?: () => string }).toString ===
+                        'function'
                   ? (m as { toString: () => string }).toString()
                   : '',
         );

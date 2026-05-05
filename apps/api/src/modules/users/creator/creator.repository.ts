@@ -32,9 +32,7 @@ class CreatorRepository extends RepositoryService<ICreatorDoc> {
         return this.findAll(filter);
     }
 
-    public async createCreator(
-        data: Partial<ICreatorDoc>,
-    ): Promise<IResult> {
+    public async createCreator(data: Partial<ICreatorDoc>): Promise<IResult> {
         return this.create(data);
     }
 

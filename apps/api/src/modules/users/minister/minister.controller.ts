@@ -306,8 +306,9 @@ export const getMinisters: RequestHandler = asyncHandler(
             );
         }
 
-        const pag = (result as { pagination?: { count: number; total: number } })
-            .pagination;
+        const pag = (
+            result as { pagination?: { count: number; total: number } }
+        ).pagination;
 
         const responseData = {
             data: result.data,
@@ -513,7 +514,9 @@ export const updateMinisterVerificationStatus: RequestHandler = asyncHandler(
                 status as VerificationStatus,
             )
         ) {
-            return next(new ErrorResponse('Invalid verification status', 400, []));
+            return next(
+                new ErrorResponse('Invalid verification status', 400, []),
+            );
         }
 
         const result = await ministerService.updateVerificationStatus(

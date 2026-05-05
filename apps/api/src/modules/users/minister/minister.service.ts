@@ -62,7 +62,7 @@ class MinisterService {
             avatar:
                 typeof user.avatar === 'string'
                     ? user.avatar
-                    : (user.avatar as { s3Key?: string })?.s3Key ?? '',
+                    : ((user.avatar as { s3Key?: string })?.s3Key ?? ''),
             slug: data.slug ?? nameSlug,
             description: data.description ?? '',
             ministry: data.ministry ?? '',
@@ -94,9 +94,8 @@ class MinisterService {
             createdBy: (data.createdBy as any) || userKey,
         };
 
-        const createResult = await ministerRepository.createMinister(
-            ministerData,
-        );
+        const createResult =
+            await ministerRepository.createMinister(ministerData);
         if (createResult.error || !createResult.data) {
             result.error = true;
             result.code = 500;

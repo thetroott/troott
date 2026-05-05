@@ -206,9 +206,10 @@ class ShareableLinkService {
         }
 
         // Find the link
-        const link = await shareableLinkRepository.findShareableLinkByToken(
-            encryptedToken,
-        );
+        const link =
+            await shareableLinkRepository.findShareableLinkByToken(
+                encryptedToken,
+            );
 
         if (!link) {
             result.error = true;

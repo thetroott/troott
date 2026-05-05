@@ -1,5 +1,3 @@
-
-
 export enum UploadStepType {
     IMAGE_UPLOADING = 'image-uploading',
     IMAGE_PROCESSED = 'image-processed',

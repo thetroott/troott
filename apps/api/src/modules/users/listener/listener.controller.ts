@@ -322,8 +322,9 @@ export const getListeners: RequestHandler = asyncHandler(
             );
         }
 
-        const pag = (result as { pagination?: { count: number; total: number } })
-            .pagination;
+        const pag = (
+            result as { pagination?: { count: number; total: number } }
+        ).pagination;
 
         const responseData = {
             data: result.data,
@@ -362,7 +363,10 @@ export const updateListener: RequestHandler = asyncHandler(
 
         const data: UpdateListenerDTO = req.body;
 
-        const result = await listenerService.updateListener(String(userId), data);
+        const result = await listenerService.updateListener(
+            String(userId),
+            data,
+        );
 
         if (result.error) {
             return next(

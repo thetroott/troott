@@ -50,19 +50,14 @@ class CreatorService {
         const firstName = data.firstName ?? user.firstName ?? '';
         const lastName = data.lastName ?? user.lastName ?? '';
         const email = (data.email ?? user.email).toLowerCase().trim();
-        const nameSlug = genSlug(
-            `${firstName} ${lastName}`.trim() || email,
-        );
+        const nameSlug = genSlug(`${firstName} ${lastName}`.trim() || email);
 
         const phoneNumber = data.phoneNumber ?? user.phoneNumber ?? '';
         const phoneCode = data.phoneCode ?? user.phoneCode ?? '+234';
-        const country =
-            data.country ?? user.location?.country ?? 'Unknown';
+        const country = data.country ?? user.location?.country ?? 'Unknown';
         const countryPhone =
-            data.countryPhone ?? `${phoneCode}${phoneNumber}`.replace(
-                /^\++/,
-                '',
-            );
+            data.countryPhone ??
+            `${phoneCode}${phoneNumber}`.replace(/^\++/, '');
 
         const creatorData: Partial<ICreatorDoc> = {
             firstName,
@@ -76,8 +71,7 @@ class CreatorService {
                 data.avatar ??
                 (typeof user.avatar === 'string'
                     ? user.avatar
-                    : (user.avatar as { s3Key?: string })?.s3Key ??
-                      ''),
+                    : ((user.avatar as { s3Key?: string })?.s3Key ?? '')),
             dateOfBirth: data.dateOfBirth ?? defaultDob(),
             gender: data.gender ?? 'other',
             slug: data.slug ?? nameSlug,
@@ -180,10 +174,9 @@ class CreatorService {
             updatePayload.email = updatePayload.email.toLowerCase().trim();
         }
 
-        const updateResult = await creatorRepository.updateCreator(
-            creatorId,
-            { $set: { ...updatePayload } } as any,
-        );
+        const updateResult = await creatorRepository.updateCreator(creatorId, {
+            $set: { ...updatePayload },
+        } as any);
         if (updateResult.error) {
             result.error = true;
             result.code = updateResult.code;
@@ -297,19 +290,14 @@ class CreatorService {
             };
         }
 
-        const updateResult = await creatorRepository.updateCreator(
-            creatorId,
-            {
-                $set: {
-                    verificationStatus: status,
-                    isVerified: status === VerificationStatus.APPROVED,
-                    verifiedAt:
-                        status === VerificationStatus.APPROVED
-                            ? new Date()
-                            : null,
-                },
-            } as any,
-        );
+        const updateResult = await creatorRepository.updateCreator(creatorId, {
+            $set: {
+                verificationStatus: status,
+                isVerified: status === VerificationStatus.APPROVED,
+                verifiedAt:
+                    status === VerificationStatus.APPROVED ? new Date() : null,
+            },
+        } as any);
         if (updateResult.error) {
             return {
                 error: true,

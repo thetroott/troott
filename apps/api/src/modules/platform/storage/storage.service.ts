@@ -1,9 +1,12 @@
 import {
     DeleteObjectCommand,
+    DeleteObjectsCommand,
     GetObjectCommand,
     HeadObjectCommand,
+    ListObjectsV2Command,
     S3Client,
 } from '@aws-sdk/client-s3';
+import type { Readable } from 'stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, AWS_BUCKET_NAME } from '../../../configs/aws.config';
 import { IFile, IResult } from '@/modules/shared/interfaces.util';
@@ -196,6 +199,96 @@ class StorageService {
             };
         }
         return result;
+    }
+
+    /**
+     * Stream an object from S3 (for workers reading originals before transcoding).
+     */
+    public async getObjectStream(key: string): Promise<IResult & { stream?: Readable }> {
+        let result: IResult & { stream?: Readable } = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+        try {
+            const out = await this.s3Client.send(
+                new GetObjectCommand({
+                    Bucket: this.bucket,
+                    Key: key,
+                }),
+            );
+            if (!out.Body || !(out.Body as Readable).read) {
+                result = {
+                    error: true,
+                    message: 'Empty S3 body',
+                    code: 500,
+                    data: {},
+                };
+                return result;
+            }
+            result.data = { key };
+            result.stream = out.Body as Readable;
+            return result;
+        } catch (error: any) {
+            return {
+                error: true,
+                message: error.message,
+                code: 500,
+                data: {},
+            };
+        }
+    }
+
+    /**
+     * Delete all objects under a prefix (best-effort cleanup after failed transcode).
+     */
+    public async deleteObjectsByPrefix(prefix: string): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+        try {
+            const keys: string[] = [];
+            let token: string | undefined;
+            do {
+                const list = await this.s3Client.send(
+                    new ListObjectsV2Command({
+                        Bucket: this.bucket,
+                        Prefix: prefix,
+                        ContinuationToken: token,
+                    }),
+                );
+                for (const o of list.Contents ?? []) {
+                    if (o.Key) keys.push(o.Key);
+                }
+                token = list.IsTruncated
+                    ? list.NextContinuationToken
+                    : undefined;
+            } while (token);
+
+            while (keys.length) {
+                const batch = keys.splice(0, 1000);
+                await this.s3Client.send(
+                    new DeleteObjectsCommand({
+                        Bucket: this.bucket,
+                        Delete: {
+                            Objects: batch.map((Key) => ({ Key })),
+                            Quiet: true,
+                        },
+                    }),
+                );
+            }
+            result.message = `Deleted prefix ${prefix}`;
+            return result;
+        } catch (error: any) {
+            result.error = true;
+            result.code = 500;
+            result.message = error.message;
+            return result;
+        }
     }
 
     /**

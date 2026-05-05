@@ -5,7 +5,6 @@ import { IRoleDoc } from '../../authentication/role/role.interface';
 import { IPermissionDoc } from '../../authentication/permission/permission.interface';
 import { INotificationDoc } from '../../notifications/push/push.interface';
 
-
 type ObjectId = Types.ObjectId;
 
 export interface IUserDoc extends Document {
@@ -21,12 +20,12 @@ export interface IUserDoc extends Document {
     phoneCode: string;
     phoneNumber: string;
 
-    avatar: Upload
-    coverImage: Upload
+    avatar: Upload;
+    coverImage: Upload;
 
     location: ILocation;
     timeZone: string;
-    
+
     login: {
         last: string;
         method: LoginMethod;
@@ -105,7 +104,6 @@ export interface Upload {
     s3Key: string;
 }
 
-
 export enum OtpType {
     REGISTER = 'register',
     LOGIN = 'login',
@@ -151,5 +149,5 @@ export enum DeviceType {
     ANDROID = 'android',
     IOS = 'ios',
     MAC = 'macbook',
-    WINDOWS = 'windows'
+    WINDOWS = 'windows',
 }

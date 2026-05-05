@@ -287,8 +287,9 @@ export const getAdmins: RequestHandler = asyncHandler(
             );
         }
 
-        const pag = (result as { pagination?: { count: number; total: number } })
-            .pagination;
+        const pag = (
+            result as { pagination?: { count: number; total: number } }
+        ).pagination;
 
         const responseData = {
             data: result.data,
@@ -397,9 +398,7 @@ export const updateCurrentAdmin: RequestHandler = asyncHandler(
             await redisWrapper.deleteData(`admin:profile:${userId}`);
             const admin = result.data as { _id?: { toString: () => string } };
             if (admin?._id) {
-                await redisWrapper.deleteData(
-                    `admin:${String(admin._id)}`,
-                );
+                await redisWrapper.deleteData(`admin:${String(admin._id)}`);
             }
         } catch (cacheError) {
             console.error('Cache invalidation failed:', cacheError);
