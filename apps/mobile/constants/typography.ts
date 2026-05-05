@@ -22,9 +22,8 @@ function createTypography(
 
     (Object.keys(weights) as FontWeight[]).forEach((weight) => {
         styles[weight] = `${family}-${weights[weight]}`;
-        styles[
-            `${weight}Italic` as FontKey
-        ] = `${family}-${weights[weight]}Italic`;
+        styles[`${weight}Italic` as FontKey] =
+            `${family}-${weights[weight]}Italic`;
     });
 
     return styles;
