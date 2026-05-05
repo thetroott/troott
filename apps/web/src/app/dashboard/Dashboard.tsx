@@ -63,7 +63,9 @@ const UploadContent: React.FC = () => {
             ?.draftData;
         if (draftData) {
             dispatch(
-                uploadActions.loadFromDraft(draftData as Partial<ISermonUpload>),
+                uploadActions.loadFromDraft(
+                    draftData as Partial<ISermonUpload>,
+                ),
             );
             window.history.replaceState({}, document.title);
         }

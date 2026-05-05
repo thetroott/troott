@@ -3,7 +3,6 @@ import { useUpload, uploadActions } from '@/context/upload/upload.context';
 import { cn } from '@/lib/utils';
 import { UPLOAD_OPTIONS_BAR } from '@/components/shared/upload/upload-studio-ui';
 
-
 const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
     <img
         src="/images/assets/upload-icon.svg"

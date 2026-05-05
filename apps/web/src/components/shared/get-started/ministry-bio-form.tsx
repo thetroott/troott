@@ -1,7 +1,5 @@
 function MinistryBio() {
-  return (
-    <div>MinistryBio</div>
-  )
+    return <div>MinistryBio</div>;
 }
 
-export default MinistryBio
+export default MinistryBio;

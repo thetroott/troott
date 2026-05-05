@@ -1,7 +1,6 @@
-import { IRoute } from "@/utils/interfaces";
+import { IRoute } from '@/utils/interfaces';
 
 const sidebarRoutes: Array<IRoute> = [
-
     {
         name: 'dashboard',
         title: 'Dashboard',
@@ -20,9 +19,9 @@ const sidebarRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: false,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
-        ]
+        ],
     },
     {
         name: 'settings',
@@ -43,7 +42,7 @@ const sidebarRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: false,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'notifications',
@@ -53,11 +52,10 @@ const sidebarRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: false,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
-            
-        ]
+        ],
     },
-]
+];
 
 export default sidebarRoutes;

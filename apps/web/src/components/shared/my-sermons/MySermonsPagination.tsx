@@ -20,7 +20,10 @@ const MySermonsPagination = ({
     const end = Math.min(safePage * pageSize, total);
 
     return (
-        <footer className={MY_SERMONS_PAGE.paginationBar} aria-label="Pagination">
+        <footer
+            className={MY_SERMONS_PAGE.paginationBar}
+            aria-label="Pagination"
+        >
             <div className={MY_SERMONS_PAGE.paginationCluster}>
                 <button
                     type="button"

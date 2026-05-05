@@ -12,4 +12,8 @@ export type { DocumentType, FinalStepProps } from './types/document-types';
 
 // Legacy components (for backward compatibility)
 export { default as UploadDocumentWrapper } from './UploadDocumentWrapper';
-export { FileUploadDialog, type UploadConfig, type UploadField } from './file-upload';
+export {
+    FileUploadDialog,
+    type UploadConfig,
+    type UploadField,
+} from './file-upload';

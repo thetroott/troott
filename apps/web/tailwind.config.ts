@@ -1,44 +1,43 @@
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 const config = {
-  content: [
-    "./pages/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./app/**/*.{ts,tsx}",
-    "./src/**/*.{ts,tsx}",
-  ],
-  prefix: "",
-  theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
+    content: [
+        './pages/**/*.{ts,tsx}',
+        './components/**/*.{ts,tsx}',
+        './app/**/*.{ts,tsx}',
+        './src/**/*.{ts,tsx}',
+    ],
+    prefix: '',
+    theme: {
+        container: {
+            center: true,
+            padding: '2rem',
+            screens: {
+                '2xl': '1400px',
+            },
+        },
+        extend: {
+            colors: {
+                primary: '#134e4a',
+                'bg-primary': '#134e4a', // teal
+                'primary-foreground': '#ffffff', // white text on teal
+            },
+            fontFamily: {
+                sans: [
+                    'Matter-Regular',
+                    'ui-sans-serif',
+                    'system-ui',
+                    'sans-serif',
+                ],
+                matter: ['Matter-Regular', 'sans-serif'],
+                'matter-bold': ['Matter-Bold', 'sans-serif'],
+                'matter-light': ['Matter-Light', 'sans-serif'],
+                'matter-medium': ['Matter-Medium', 'sans-serif'],
+                'matter-heavy': ['Matter-Heavy', 'sans-serif'],
+            },
+        },
     },
-    extend: {
-      colors: {
-        "primary": "#134e4a",
-        "bg-primary": "#134e4a", // teal
-        "primary-foreground": "#ffffff", // white text on teal
-      },
-      fontFamily: {
-        sans: [
-          "Matter-Regular",
-          "ui-sans-serif",
-          "system-ui",
-          "sans-serif",
-        ],
-        matter: ["Matter-Regular", "sans-serif"],
-        "matter-bold": ["Matter-Bold", "sans-serif"],
-        "matter-light": ["Matter-Light", "sans-serif"],
-        "matter-medium": ["Matter-Medium", "sans-serif"],
-        "matter-heavy": ["Matter-Heavy", "sans-serif"],
-      },
-      
-    },
-  },
-  plugins: [],
+    plugins: [],
 } satisfies Config;
 
 export default config;

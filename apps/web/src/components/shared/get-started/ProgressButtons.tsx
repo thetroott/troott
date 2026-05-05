@@ -1,73 +1,68 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import OnboardingItems from "@/_data/onboarding";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
-
-
+import { useLocation, useNavigate } from 'react-router-dom';
+import OnboardingItems from '@/_data/onboarding';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft } from 'lucide-react';
 
 const ProgressButtons = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
 
-  const location = useLocation();
-  const navigate = useNavigate();
+    const stepGroup = OnboardingItems.find((item) =>
+        location.pathname.startsWith(item.action),
+    );
 
-  const stepGroup = OnboardingItems.find((item) =>
-    location.pathname.startsWith(item.action)
-  );
-  
-  const steps = stepGroup?.steps?.map((step) => step.action) || [];
-  const currentIndex = steps.findIndex((path) =>
-    location.pathname === path
-  );
+    const steps = stepGroup?.steps?.map((step) => step.action) || [];
+    const currentIndex = steps.findIndex((path) => location.pathname === path);
 
-  const handleBack = () => {
-    if (currentIndex > 0) {
-      const previousStep = steps[currentIndex - 1];
-      if (previousStep) navigate(previousStep);
-    } else {
-      // Special case: navigate from MinistryInput to HomeAddressForm
-      if (location.pathname === "/get-started/ministry-input") {
-        navigate("/get-started/home-address");
-      }
-    }
-  };
+    const handleBack = () => {
+        if (currentIndex > 0) {
+            const previousStep = steps[currentIndex - 1];
+            if (previousStep) navigate(previousStep);
+        } else {
+            // Special case: navigate from MinistryInput to HomeAddressForm
+            if (location.pathname === '/get-started/ministry-input') {
+                navigate('/get-started/home-address');
+            }
+        }
+    };
 
-  const handleContinue = () => {
-    if (currentIndex < steps.length - 1) {
-      const nextStep = steps[currentIndex + 1];
-      if (nextStep) navigate(nextStep);
-    } else {
-      // Special case: navigate from HomeAddressForm to MinistryInput
-      if (location.pathname === "/get-started/home-address") {
-        navigate("/get-started/ministry-input");
-      } else {
-        // Final step: navigate to completion or dashboard
-        navigate("/get-started");
-      }
-    }
-  };
+    const handleContinue = () => {
+        if (currentIndex < steps.length - 1) {
+            const nextStep = steps[currentIndex + 1];
+            if (nextStep) navigate(nextStep);
+        } else {
+            // Special case: navigate from HomeAddressForm to MinistryInput
+            if (location.pathname === '/get-started/home-address') {
+                navigate('/get-started/ministry-input');
+            } else {
+                // Final step: navigate to completion or dashboard
+                navigate('/get-started');
+            }
+        }
+    };
 
-  //if (!steps.length || currentIndex === -1) return null;
+    //if (!steps.length || currentIndex === -1) return null;
 
-  return (
-    <div>
-      <div className="flex justify-between mt-8 pt-6 border-t gap-4">
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-          className="px-6 py-2 transition-colors cursor-pointer"
-        >
-          <ChevronLeft size={16} />
-          Back
-        </Button>
-        <Button
-          onClick={handleContinue}
-          className="px-12 cursor-pointer transition-colors"
-        >
-          Continue
-        </Button>
-      </div>
-    </div>
-  );
+    return (
+        <div>
+            <div className="flex justify-between mt-8 pt-6 border-t gap-4">
+                <Button
+                    variant="ghost"
+                    onClick={handleBack}
+                    className="px-6 py-2 transition-colors cursor-pointer"
+                >
+                    <ChevronLeft size={16} />
+                    Back
+                </Button>
+                <Button
+                    onClick={handleContinue}
+                    className="px-12 cursor-pointer transition-colors"
+                >
+                    Continue
+                </Button>
+            </div>
+        </div>
+    );
 };
 
 export default ProgressButtons;

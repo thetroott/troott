@@ -1,8 +1,5 @@
-const Bin  = () => {
-  return (
-    
-    <div>Bin</div>
-  )
-}
+const Bin = () => {
+    return <div>Bin</div>;
+};
 
-export default Bin
+export default Bin;

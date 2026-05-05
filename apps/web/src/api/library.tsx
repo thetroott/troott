@@ -2,13 +2,13 @@ class Library {
     client;
     secondaryClient;
 
-    constructor( client: any, secondaryClient?: any ) {
+    constructor(client: any, secondaryClient?: any) {
         this.client = client;
         this.secondaryClient = secondaryClient;
     }
 
-    getUserLibrary( payload: any ) {
-        return this.client.get( "/library", payload );
+    getUserLibrary(payload: any) {
+        return this.client.get('/library', payload);
     }
 }
 

@@ -1,9 +1,5 @@
 import React, { useRef, useState } from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';

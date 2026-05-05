@@ -2,13 +2,13 @@ class Creator {
     client;
     secondaryClient;
 
-    constructor( client: any, secondaryClient?: any ) {
+    constructor(client: any, secondaryClient?: any) {
         this.client = client;
         this.secondaryClient = secondaryClient;
     }
 
-    getCreators( payload: any ) {
-        return this.client.get( "/creators", payload );
+    getCreators(payload: any) {
+        return this.client.get('/creators', payload);
     }
 }
 

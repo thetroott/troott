@@ -1,4 +1,4 @@
-import { IRoute } from "@/utils/interfaces";
+import { IRoute } from '@/utils/interfaces';
 
 const adminRoutes: Array<IRoute> = [
     {
@@ -29,7 +29,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'talents',
@@ -39,7 +39,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'businesses',
@@ -49,14 +49,14 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'divider',
                 url: '/',
                 isAuth: true,
                 params: [],
-                content: {}
+                content: {},
             },
             {
                 name: 'admins',
@@ -66,9 +66,9 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
-            }
-        ]
+                content: { collapsed: false, backButton: true },
+            },
+        ],
     },
     {
         name: 'hackathons',
@@ -87,7 +87,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'admin-hackathons-moderate',
@@ -96,11 +96,11 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
-            }
-        ]
+                content: { collapsed: false },
+            },
+        ],
     },
-    
+
     {
         name: 'admin-settings',
         title: 'System Settings',
@@ -118,7 +118,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'admin-settings-security',
@@ -128,7 +128,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'admin-settings-invitations',
@@ -138,9 +138,9 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
-            }
-        ]
+                content: { collapsed: false },
+            },
+        ],
     },
     {
         name: 'resources',
@@ -151,7 +151,8 @@ const adminRoutes: Array<IRoute> = [
         isAuth: true,
         params: [],
         content: { collapsed: false },
-    },    {
+    },
+    {
         name: 'referrals',
         title: 'Referrals',
         iconName: 'gift',
@@ -159,7 +160,7 @@ const adminRoutes: Array<IRoute> = [
         action: 'navigate',
         isAuth: true,
         params: [],
-        content: { collapsed: false, backButton: true }
+        content: { collapsed: false, backButton: true },
     },
 
     {
@@ -180,7 +181,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [{ type: 'url', name: 'id' }],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'subscriptions',
@@ -190,16 +191,16 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [{ type: 'url', name: 'id' }],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'divider',
                 url: '/',
                 isAuth: true,
                 params: [],
-                content: {}
-            }
-        ]
+                content: {},
+            },
+        ],
     },
 
     {
@@ -220,7 +221,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [{ type: 'url', name: 'id' }],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'preferences',
@@ -230,14 +231,14 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [{ type: 'url', name: 'id' }],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'divider',
                 url: '/',
                 isAuth: true,
                 params: [],
-                content: {}
+                content: {},
             },
             {
                 name: 'billing',
@@ -247,9 +248,9 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [{ type: 'url', name: 'id' }],
-                content: { collapsed: false, backButton: true }
-            }
-        ]
+                content: { collapsed: false, backButton: true },
+            },
+        ],
     },
 
     {
@@ -270,7 +271,7 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'updates',
@@ -280,14 +281,14 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'divider',
                 url: '/',
                 isAuth: true,
                 params: [],
-                content: {}
+                content: {},
             },
             {
                 name: 'help',
@@ -297,9 +298,9 @@ const adminRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
-            }
-        ]
+                content: { collapsed: false, backButton: true },
+            },
+        ],
     },
 ];
 

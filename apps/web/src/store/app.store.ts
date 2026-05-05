@@ -1,19 +1,24 @@
 import { create } from 'zustand';
 
-interface IPagination { page: number; pageSize: number; totalPages: number; }
-
-export interface ICollection { 
-    data: any[]; 
-    count: number; 
-    total: number; 
-    loading: boolean; 
-    pagination: IPagination; 
-    message: string; 
+interface IPagination {
+    page: number;
+    pageSize: number;
+    totalPages: number;
 }
 
-interface IMetrics { totalUsers: number; totalSales: number; }
+export interface ICollection {
+    data: any[];
+    count: number;
+    total: number;
+    loading: boolean;
+    pagination: IPagination;
+    message: string;
+}
 
-
+interface IMetrics {
+    totalUsers: number;
+    totalSales: number;
+}
 
 /**
  * Defines the shape of the global state (data properties).
@@ -53,7 +58,6 @@ interface ISetLoadingResource {
 // The final ISetLoading type: one of the two interfaces above
 export type ISetLoading = ISetLoadingDefault | ISetLoadingResource;
 
-
 // IUnsetLoading: Default option (global loading)
 interface IUnsetLoadingDefault {
     option: 'default';
@@ -71,25 +75,31 @@ interface IUnsetLoadingResource {
 // The final IUnsetLoading type: one of the two interfaces above
 export type IUnsetLoading = IUnsetLoadingDefault | IUnsetLoadingResource;
 
-
-export interface IClearResource { 
-    resource: 'multiple' | 'single'; 
-    type: keyof AppState; 
+export interface IClearResource {
+    resource: 'multiple' | 'single';
+    type: keyof AppState;
 }
 
 interface AppActions {
     setLoading: (data: ISetLoading) => void;
     unsetLoading: (data: IUnsetLoading) => void;
     clearResource: (data: IClearResource) => void;
-    setCollection: (key: keyof AppState, data: ICollection) => void; 
-    setResource: (key: keyof AppState, data: any) => void; 
+    setCollection: (key: keyof AppState, data: ICollection) => void;
+    setResource: (key: keyof AppState, data: any) => void;
 }
 
 type AppStore = AppState & AppActions;
 
 // Mock Data (based on original imports)
 const pagination: IPagination = { page: 1, pageSize: 10, totalPages: 5 };
-const collection: ICollection = { data: [], count: 0, total: 0, loading: false, pagination, message: '' };
+const collection: ICollection = {
+    data: [],
+    count: 0,
+    total: 0,
+    loading: false,
+    pagination,
+    message: '',
+};
 const metrics: IMetrics = { totalUsers: 1000, totalSales: 50000 };
 
 // --- INITIAL STATE DEFINITION ---
@@ -109,14 +119,12 @@ const initialAppState: AppState = {
     search: collection,
     leaderboard: collection,
     message: '',
-    loading: false
+    loading: false,
 };
-
 
 // --- ZUSTAND STORE CREATION ---
 
 export const useAppStore = create<AppStore>((set) => ({
-    
     ...initialAppState,
 
     /**
@@ -132,10 +140,10 @@ export const useAppStore = create<AppStore>((set) => ({
         if (data.option === 'resource') {
             // No need for the explicit check '&& data.type' and no more type error!
             set((state) => ({
-                [data.type]: { 
+                [data.type]: {
                     ...(state[data.type] as ICollection), // Cast still necessary since 'data.type' can be a non-collection key
-                    loading: true 
-                }
+                    loading: true,
+                },
             }));
         }
     },
@@ -153,11 +161,11 @@ export const useAppStore = create<AppStore>((set) => ({
         if (data.option === 'resource') {
             // No need for the explicit check '&& data.type' and no more type error!
             set((state) => ({
-                [data.type]: { 
+                [data.type]: {
                     ...(state[data.type] as ICollection), // Cast still necessary
                     loading: false,
-                    message: data.message || '' 
-                }
+                    message: data.message || '',
+                },
             }));
         }
     },
@@ -169,13 +177,13 @@ export const useAppStore = create<AppStore>((set) => ({
     clearResource: (data: IClearResource) => {
         if (data.resource === 'multiple') {
             set(() => ({
-                [data.type]: collection 
+                [data.type]: collection,
             }));
         } else {
-             // Clearing a single resource (resetting to empty object)
-             set(() => ({
-                [data.type]: {} 
-             }));
+            // Clearing a single resource (resetting to empty object)
+            set(() => ({
+                [data.type]: {},
+            }));
         }
     },
 
@@ -185,17 +193,17 @@ export const useAppStore = create<AppStore>((set) => ({
      */
     setCollection: (key: keyof AppState, data: ICollection) => {
         set(() => ({
-            [key]: data
+            [key]: data,
         }));
     },
-    
+
     /**
      * @name setResource
      * Direct setter for updating an individual resource state property.
      */
     setResource: (key: keyof AppState, data: any) => {
         set(() => ({
-            [key]: data
+            [key]: data,
         }));
     },
 }));

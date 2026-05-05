@@ -95,39 +95,63 @@
 }
 
 /* Utility classes */
-.font-matter-heavy, .font-matter-heavy a, .font-matter-heavy span {
+.font-matter-heavy,
+.font-matter-heavy a,
+.font-matter-heavy span {
     font-family: 'Matter-Heavy';
-  }
-  .font-matter-heavyi, .font-matter-heavyi a, .font-matter-heavyi span {
+}
+.font-matter-heavyi,
+.font-matter-heavyi a,
+.font-matter-heavyi span {
     font-family: 'Matter-HeavyItalic';
-  }
-  .font-matter-bold, .font-matter-bold a, .font-matter-bold span {
+}
+.font-matter-bold,
+.font-matter-bold a,
+.font-matter-bold span {
     font-family: 'Matter-Bold';
-  }
-  .font-matter-boldi, .font-matter-boldi a, .font-matter-boldi span {
+}
+.font-matter-boldi,
+.font-matter-boldi a,
+.font-matter-boldi span {
     font-family: 'Matter-BoldItalic';
-  }
-  .font-matter-semibold, .font-matter-semibold a, .font-matter-semibold span {
+}
+.font-matter-semibold,
+.font-matter-semibold a,
+.font-matter-semibold span {
     font-family: 'Matter-SemiBold';
-  }
-  .font-matter-semiboldi, .font-matter-semiboldi a, .font-matter-semiboldi span {
+}
+.font-matter-semiboldi,
+.font-matter-semiboldi a,
+.font-matter-semiboldi span {
     font-family: 'Matter-SemiBoldItalic';
-  }
-  .font-matter-medium, .font-matter-medium a, .font-matter-medium span {
+}
+.font-matter-medium,
+.font-matter-medium a,
+.font-matter-medium span {
     font-family: 'Matter-Medium';
-  }
-  .font-matter-mediumi, .font-matter-mediumi a, .font-matter-mediumi span {
+}
+.font-matter-mediumi,
+.font-matter-mediumi a,
+.font-matter-mediumi span {
     font-family: 'Matter-MediumItalic';
-  }
-  .font-matter, .font-matter a, .font-matter span {
+}
+.font-matter,
+.font-matter a,
+.font-matter span {
     font-family: 'Matter-Regular';
-  }
-  .font-matteri, .font-matteri a, .font-matteri span {
+}
+.font-matteri,
+.font-matteri a,
+.font-matteri span {
     font-family: 'Matter-RegularItalic';
-  }
-  .font-matter-light, .font-matter-light a, .font-matter-light span {
+}
+.font-matter-light,
+.font-matter-light a,
+.font-matter-light span {
     font-family: 'Matter-Light';
-  }
-  .font-matter-lighti, .font-matter-lighti a, .font-matter-lighti span {
+}
+.font-matter-lighti,
+.font-matter-lighti a,
+.font-matter-lighti span {
     font-family: 'Matter-LightItalic';
-  }
+}

@@ -1,11 +1,11 @@
 {
-  "extends": "../../configs/typescript/base.app.json",
-  "compilerOptions": {
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["*"]
+    "extends": "../../configs/typescript/base.app.json",
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "paths": {
+            "@/*": ["*"]
+        },
+        "types": ["vite/client", "node", "jquery"]
     },
-    "types": ["vite/client", "node", "jquery"]
-  },
-  "include": ["src"]
+    "include": ["src"]
 }

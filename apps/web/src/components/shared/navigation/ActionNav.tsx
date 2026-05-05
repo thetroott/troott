@@ -1,10 +1,5 @@
-
 const ActionNav = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+    return <div></div>;
+};
 
-export default ActionNav
+export default ActionNav;

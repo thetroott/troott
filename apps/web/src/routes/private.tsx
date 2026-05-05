@@ -18,7 +18,6 @@ import HomeAddressPage from '@/app/account/HomeAddressInfo';
 import MinistryInputPage from '@/app/account/MinistryInfo';
 
 export const privateRoutes = [
-    
     {
         path: '/',
         element: <Home />,

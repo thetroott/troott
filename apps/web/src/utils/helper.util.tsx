@@ -36,7 +36,6 @@
 //         elem.classList.add(cn);
 //     }
 
-
 // }
 
 // const removeClass = (id: string, cn: string) => {
@@ -162,7 +161,6 @@
 //             }
 
 //         }
-
 
 //     })
 
@@ -323,7 +321,6 @@
 //     const items = $(id).find(childId);
 //     const val = len && len > 0 ? len : 2;
 
-
 //     for (let i = 0; i < items.length; i++) {
 //         heigthList.push(Math.floor($(items[i]).height()!))
 //     }
@@ -364,11 +361,11 @@
 // }
 
 // /**
-//  * 
-//  * @param data 
-//  * @param from 
-//  * @param to 
-//  * @returns 
+//  *
+//  * @param data
+//  * @param from
+//  * @param to
+//  * @returns
 //  */
 // const reposition = (data: Array<any>, from: number, to: number): Array<any> => {
 
@@ -394,9 +391,9 @@
 // }
 
 // /**
-//  * 
-//  * @param data 
-//  * @returns 
+//  *
+//  * @param data
+//  * @returns
 //  */
 // const splitByComma = (data: string): Array<string> => {
 
@@ -429,8 +426,8 @@
 
 // /**
 //  * @name dateToday
-//  * @param d 
-//  * @returns 
+//  * @param d
+//  * @returns
 //  */
 // const dateToday = (d: string | Date): IDateToday => {
 
@@ -451,8 +448,8 @@
 
 // /**
 //  * @name monthsOfYear
-//  * @param val 
-//  * @returns 
+//  * @param val
+//  * @returns
 //  */
 // const monthsOfYear = (val: string | number): string => {
 
@@ -464,11 +461,10 @@
 
 // }
 
-
 // /**
 //  * @name roundFloat
-//  * @param val 
-//  * @returns 
+//  * @param val
+//  * @returns
 //  */
 // const roundFloat = (val: number): number => {
 //     return Math.round(val * 100 + Number.EPSILON) / 100;
@@ -476,9 +472,9 @@
 
 // /**
 //  * @name addElipsis
-//  * @param val 
-//  * @param size 
-//  * @returns 
+//  * @param val
+//  * @param size
+//  * @returns
 //  */
 // const addElipsis = (val: string, size: number): string => {
 
@@ -489,8 +485,8 @@
 
 // /**
 //  * @name leadingZero
-//  * @param val 
-//  * @returns 
+//  * @param val
+//  * @returns
 //  */
 // const leadingZero = (val: number): string => {
 //     let result: string = '';
@@ -506,9 +502,9 @@
 
 // /**
 //  * @name formatPhone
-//  * @param val 
-//  * @param code 
-//  * @returns 
+//  * @param val
+//  * @param code
+//  * @returns
 //  */
 // const formatPhone = (val: string, code: string): string => {
 
@@ -901,7 +897,6 @@
 
 // }
 
-
 // export const enumToArray = (data: Object, type: 'all' | 'values-only' | 'keys-only') => {
 
 //     let result: Array<any> = [];
@@ -933,7 +928,6 @@
 //     return result;
 
 // }
-
 
 // const helper: IHelper = {
 //     init: init,

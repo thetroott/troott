@@ -1,16 +1,11 @@
-import ThemeToggle from "@/components/shared/app/theme-toggle";
+import ThemeToggle from '@/components/shared/app/theme-toggle';
 
 const Home = () => {
-  
-
     return (
-      <>
-
-      <ThemeToggle/>
-        
-      </>
+        <>
+            <ThemeToggle />
+        </>
     );
-  };
-  
-  export default Home;
-  
+};
+
+export default Home;

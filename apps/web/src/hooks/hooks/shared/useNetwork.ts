@@ -1,30 +1,23 @@
-import React, { useEffect } from 'react'
-
+import React, { useEffect } from 'react';
 
 const useNetwork = (trigger: boolean = true) => {
-
-
-
     useEffect(() => {
-
         if (trigger) {
             window.addEventListener(`offline`, toggleNetwork, false);
-            window.addEventListener(`online`, () => { }, false);
+            window.addEventListener(`online`, () => {}, false);
         }
-
-    }, [trigger])
+    }, [trigger]);
 
     const toggleNetwork = (e: any) => {
-        popNetwork()
-    }
+        popNetwork();
+    };
 
     const popNetwork = () => {
         // redirect
-        window.location.href = '/no-network'
-    }
+        window.location.href = '/no-network';
+    };
 
-    return { popNetwork }
+    return { popNetwork };
+};
 
-}
-
-export default useNetwork
+export default useNetwork;

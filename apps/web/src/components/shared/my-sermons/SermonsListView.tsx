@@ -116,7 +116,9 @@ const SermonsListView = ({
                                     </span>
                                 </button>
                             ) : (
-                                <span className={MY_SERMONS_LIST.thSortableInner}>
+                                <span
+                                    className={MY_SERMONS_LIST.thSortableInner}
+                                >
                                     Date Created
                                     <span
                                         className={MY_SERMONS_LIST.thSortBadge}
@@ -150,7 +152,10 @@ const SermonsListView = ({
                         </th>
                         <th
                             scope="col"
-                            className={cn(MY_SERMONS_LIST.thCell, 'w-[46px] max-w-[46px] px-0')}
+                            className={cn(
+                                MY_SERMONS_LIST.thCell,
+                                'w-[46px] max-w-[46px] px-0',
+                            )}
                         >
                             <span className="sr-only">Actions</span>
                         </th>
@@ -158,14 +163,19 @@ const SermonsListView = ({
                 </thead>
                 <tbody>
                     {sermons.map((sermon) => (
-                        <tr key={sermon.id} className={MY_SERMONS_LIST.tbodyRow}>
+                        <tr
+                            key={sermon.id}
+                            className={MY_SERMONS_LIST.tbodyRow}
+                        >
                             <td
                                 className={cn(
                                     MY_SERMONS_LIST.tdCell,
                                     'w-[46px] max-w-[46px] px-0',
                                 )}
                             >
-                                <div className={MY_SERMONS_LIST.tdCheckboxInner}>
+                                <div
+                                    className={MY_SERMONS_LIST.tdCheckboxInner}
+                                >
                                     <input
                                         type="checkbox"
                                         checked={selectedSermons.has(sermon.id)}
@@ -288,10 +298,10 @@ const SermonsListView = ({
                                 )}
                             >
                                 <div className={MY_SERMONS_LIST.tdActionInner}>
-                                <SermonContextMenu
-                                    sermonId={sermon.id}
-                                    menuIcon="vertical"
-                                    onEdit={onEdit}
+                                    <SermonContextMenu
+                                        sermonId={sermon.id}
+                                        menuIcon="vertical"
+                                        onEdit={onEdit}
                                         onRename={onRename}
                                         onDuplicate={onDuplicate}
                                         onMove={onMove}

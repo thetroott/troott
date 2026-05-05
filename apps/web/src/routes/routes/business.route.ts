@@ -1,4 +1,4 @@
-import { IRoute } from "@/utils/interfaces";
+import { IRoute } from '@/utils/interfaces';
 
 const businessRoutes: Array<IRoute> = [
     {
@@ -19,7 +19,7 @@ const businessRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'my-inbox',
@@ -29,8 +29,9 @@ const businessRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
-            },            {
+                content: { collapsed: false },
+            },
+            {
                 name: 'search',
                 title: 'Search',
                 iconName: 'search',
@@ -38,7 +39,7 @@ const businessRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'domains',
@@ -48,7 +49,7 @@ const businessRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'members',
@@ -58,7 +59,7 @@ const businessRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'settings',
@@ -68,7 +69,7 @@ const businessRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'upgrade-plan',
@@ -78,9 +79,9 @@ const businessRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
-        ]
+        ],
     },
 ];
 

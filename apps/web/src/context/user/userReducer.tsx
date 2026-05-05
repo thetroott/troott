@@ -16,112 +16,109 @@ import {
     SET_RESPONSE,
     GET_ADMINS,
     GET_AUDITS,
-    SET_TOAST
+    SET_TOAST,
 } from '../types';
 
-
 const reducer = (state: any, action: any) => {
-
     switch (action.type) {
         case GET_AUDITS:
             return {
                 ...state,
-                audits: action.payload
-            }
+                audits: action.payload,
+            };
         case GET_USERS:
             return {
                 ...state,
-                users: action.payload
-            }
+                users: action.payload,
+            };
         case SET_TOAST:
             return {
                 ...state,
-                toast: action.payload
-            }
+                toast: action.payload,
+            };
         case GET_ADMINS:
             return {
                 ...state,
-                admins: action.payload
-            }
+                admins: action.payload,
+            };
         case GET_LOGGEDIN_USER:
             return {
                 ...state,
                 user: action.payload,
-            }
+            };
         case GET_USER:
             return {
                 ...state,
                 userDetails: action.payload,
-            }
+            };
         case SET_USER:
             return {
                 ...state,
-                user: action.payload
-            }
+                user: action.payload,
+            };
         case SET_USERTYPE:
             return {
                 ...state,
-                userType: action.payload
-            }
+                userType: action.payload,
+            };
         case SET_SIDEBAR:
             return {
                 ...state,
-                sidebar: action.payload
-            }
+                sidebar: action.payload,
+            };
 
         case SET_IS_SUPER:
             return {
                 ...state,
-                isSuper: action.payload
-            }
+                isSuper: action.payload,
+            };
         case SET_IS_ADMIN:
             return {
                 ...state,
-                isAdmin: action.payload
-            }
+                isAdmin: action.payload,
+            };
         case SET_COUNT:
             return {
                 ...state,
-                count: action.payload
-            }
+                count: action.payload,
+            };
         case SET_TOTAL:
             return {
                 ...state,
-                total: action.payload
-            }
+                total: action.payload,
+            };
         case SET_PAGINATION:
             return {
                 ...state,
-                pagination: action.payload
-            }
+                pagination: action.payload,
+            };
         case SET_SEARCH:
             return {
                 ...state,
-                search: action.payload
-            }
+                search: action.payload,
+            };
         case SET_RESPONSE:
             return {
                 ...state,
-                response: action.payload
-            }
+                response: action.payload,
+            };
 
         case SET_LOADING:
             return {
                 ...state,
-                loading: true
-            }
-            
+                loading: true,
+            };
+
         case UNSET_LOADING:
             return {
                 ...state,
                 loading: false,
-                message: action.payload
-            }
+                message: action.payload,
+            };
 
         default:
             return state;
     }
-
-}
+};
 
 export default reducer;

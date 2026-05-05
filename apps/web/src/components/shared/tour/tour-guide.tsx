@@ -1,7 +1,5 @@
 function tourGuide() {
-  return (
-    <div>tour-guide</div>
-  )
+    return <div>tour-guide</div>;
 }
 
-export default tourGuide
+export default tourGuide;

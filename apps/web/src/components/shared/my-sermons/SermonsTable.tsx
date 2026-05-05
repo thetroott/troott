@@ -98,11 +98,7 @@ function clientFilterSermons(
     status: MinisterSermonListParams['status'],
 ): Sermon[] {
     let out = rows;
-    const terms = q
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)
-        .filter(Boolean);
+    const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
     if (terms.length) {
         out = out.filter((s) => {
             const hay = s.name.toLowerCase();
@@ -366,13 +362,7 @@ const SermonsTable = ({
             localStatus,
         );
         return clientSortSermons(f, localSort);
-    }, [
-        controlled,
-        sermons,
-        debouncedLocalSearch,
-        localStatus,
-        localSort,
-    ]);
+    }, [controlled, sermons, debouncedLocalSearch, localStatus, localSort]);
 
     const totalForPagination = controlled
         ? totalCountProp!
@@ -402,13 +392,7 @@ const SermonsTable = ({
         }
         const start = (localPage - 1) * pageSize;
         return uncontrolledFiltered.slice(start, start + pageSize);
-    }, [
-        controlled,
-        sermons,
-        uncontrolledFiltered,
-        localPage,
-        pageSize,
-    ]);
+    }, [controlled, sermons, uncontrolledFiltered, localPage, pageSize]);
 
     const getFilteredSermons = (): Sermon[] => {
         if (activeTab === 'Playlists' || activeTab === 'Series') {
@@ -461,9 +445,7 @@ const SermonsTable = ({
 
     const filterSummaryParts: string[] = [];
     if (status !== 'all') {
-        filterSummaryParts.push(
-            status === 'draft' ? 'Draft' : 'Published',
-        );
+        filterSummaryParts.push(status === 'draft' ? 'Draft' : 'Published');
     }
     if (dateFrom) filterSummaryParts.push(`From ${dateFrom}`);
     if (dateTo) filterSummaryParts.push(`To ${dateTo}`);
@@ -473,7 +455,12 @@ const SermonsTable = ({
             : 'Filters';
 
     return (
-        <div className={cn(MY_SERMONS_PAGE.pageBg, 'flex min-h-0 flex-1 flex-col')}>
+        <div
+            className={cn(
+                MY_SERMONS_PAGE.pageBg,
+                'flex min-h-0 flex-1 flex-col',
+            )}
+        >
             <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
@@ -520,7 +507,9 @@ const SermonsTable = ({
                             <span className={MY_SERMONS_PAGE.titleIconWrap}>
                                 <SermonTitleMicGlyph />
                             </span>
-                            <h1 className={MY_SERMONS_PAGE.title}>My Sermons</h1>
+                            <h1 className={MY_SERMONS_PAGE.title}>
+                                My Sermons
+                            </h1>
                             {isFetching ? (
                                 <span className="sr-only">Updating list</span>
                             ) : null}
@@ -609,7 +598,9 @@ const SermonsTable = ({
                                     align="start"
                                     className="w-64"
                                 >
-                                    <DropdownMenuLabel>Status</DropdownMenuLabel>
+                                    <DropdownMenuLabel>
+                                        Status
+                                    </DropdownMenuLabel>
                                     <DropdownMenuRadioGroup
                                         value={status}
                                         onValueChange={(v) =>
@@ -628,9 +619,7 @@ const SermonsTable = ({
                                             Published
                                         </DropdownMenuRadioItem>
                                     </DropdownMenuRadioGroup>
-                                    {controlled &&
-                                    setDateFrom &&
-                                    setDateTo ? (
+                                    {controlled && setDateFrom && setDateTo ? (
                                         <>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuLabel>
@@ -693,7 +682,10 @@ const SermonsTable = ({
                                         />
                                     </button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-56">
+                                <DropdownMenuContent
+                                    align="end"
+                                    className="w-56"
+                                >
                                     <DropdownMenuRadioGroup
                                         value={
                                             SORT_OPTIONS.some(
@@ -747,10 +739,7 @@ const SermonsTable = ({
                                             : MY_SERMONS_PAGE.viewToggleBtnIdle,
                                     )}
                                 >
-                                    <List
-                                        className="h-4 w-4"
-                                        strokeWidth={2}
-                                    />
+                                    <List className="h-4 w-4" strokeWidth={2} />
                                 </button>
                             </div>
                         </div>

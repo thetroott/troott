@@ -1,11 +1,5 @@
-
-
 const EnterEmail = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+    return <div></div>;
+};
 
-export default EnterEmail
+export default EnterEmail;

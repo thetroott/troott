@@ -36,15 +36,15 @@ interface ReviewSubmitProps {
 }
 
 function apiErrorMessage(err: unknown): string {
-  if (
-    err &&
-    typeof err === 'object' &&
-    'message' in err &&
-    typeof (err as { message: unknown }).message === 'string'
-  ) {
-    return (err as { message: string }).message;
-  }
-  return 'Something went wrong. Please try again.';
+    if (
+        err &&
+        typeof err === 'object' &&
+        'message' in err &&
+        typeof (err as { message: unknown }).message === 'string'
+    ) {
+        return (err as { message: string }).message;
+    }
+    return 'Something went wrong. Please try again.';
 }
 
 const ReviewSubmit: React.FC<ReviewSubmitProps> = ({

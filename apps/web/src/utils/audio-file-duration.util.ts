@@ -22,7 +22,11 @@ export function probeAudioFileDurationSec(
             'loadedmetadata',
             () => {
                 const d = audio.duration;
-                if (Number.isFinite(d) && d > 0 && d !== Number.POSITIVE_INFINITY) {
+                if (
+                    Number.isFinite(d) &&
+                    d > 0 &&
+                    d !== Number.POSITIVE_INFINITY
+                ) {
                     finish(Math.floor(d));
                 } else {
                     finish(undefined);
@@ -30,7 +34,9 @@ export function probeAudioFileDurationSec(
             },
             { once: true },
         );
-        audio.addEventListener('error', () => finish(undefined), { once: true });
+        audio.addEventListener('error', () => finish(undefined), {
+            once: true,
+        });
         audio.src = url;
     });
 }

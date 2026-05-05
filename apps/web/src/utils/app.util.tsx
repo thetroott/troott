@@ -1,23 +1,23 @@
-import type { Theme } from "./types.util";
+import type { Theme } from './types.util';
 
 export interface IAppUser {
-  id: string;
-  name: string;
-  email: string;
+    id: string;
+    name: string;
+    email: string;
 }
 
 export interface IAppState {
-  theme: {
-    mode: Theme;
-  };
-  user: IAppUser | null;
+    theme: {
+        mode: Theme;
+    };
+    user: IAppUser | null;
 }
 
 const initialState: IAppState = {
-  theme: {
-    mode: "system",
-  },
-  user: null,
+    theme: {
+        mode: 'system',
+    },
+    user: null,
 };
 
 export default initialState;

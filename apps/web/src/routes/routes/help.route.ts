@@ -1,7 +1,6 @@
-import { IRoute } from "@/utils/interfaces";
+import { IRoute } from '@/utils/interfaces';
 
 const helpRoutes: Array<IRoute> = [
-
     {
         name: 'help',
         title: 'Help',
@@ -20,7 +19,7 @@ const helpRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
             {
                 name: 'how-to-guides',
@@ -30,8 +29,9 @@ const helpRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
-            },            {
+                content: { collapsed: false, backButton: true },
+            },
+            {
                 name: 'Help Center',
                 title: 'Help Center',
                 iconName: 'help-center',
@@ -39,8 +39,9 @@ const helpRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
-            },            {
+                content: { collapsed: false, backButton: true },
+            },
+            {
                 name: 'trash',
                 title: 'Trash',
                 iconName: 'trash',
@@ -48,10 +49,10 @@ const helpRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false, backButton: true }
+                content: { collapsed: false, backButton: true },
             },
-        ]
+        ],
     },
-]
+];
 
 export default helpRoutes;

@@ -3,8 +3,6 @@
 
 // const useNetwork = (trigger: boolean = true) => {
 
-
-
 //     useEffect(() => {
 
 //         if (trigger) {

@@ -12,7 +12,8 @@ export const UPLOAD_SHELL = {
     outerBg: 'bg-[#2b2a2c]',
     outerBorder: 'border border-[#545454]/50',
     headerMinH: 'min-h-[52px]',
-    titleText: 'font-matter-medium text-[16px] leading-6 text-[#eaeaea] tracking-wide',
+    titleText:
+        'font-matter-medium text-[16px] leading-6 text-[#eaeaea] tracking-wide',
     /**
      * Tabs — Figma [`4558:8296`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4558-8296) vs shell [`4558:8282`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4558-8282):
      * **42px** tab column; **32px** inner row (`Frame 40448`) **top-aligned**; **`#eaeaea`**
@@ -60,7 +61,8 @@ export const UPLOAD_SHELL = {
      * [Material Symbols — `info-outline`](https://icon-sets.iconify.design/material-symbols/info-outline/).
      */
     iconifyFieldLabelHintGlyph: 'material-symbols:info-outline',
-    footerStatusText: 'min-w-0 truncate font-matter text-[13px] leading-5 text-[#eaeaea]',
+    footerStatusText:
+        'min-w-0 truncate font-matter text-[13px] leading-5 text-[#eaeaea]',
     footerStatusMuted: 'font-matter text-[12px] leading-4 text-[#707070]',
     footerLinkField:
         'flex flex-1 items-center gap-2 rounded-md border border-[#545454]/60 bg-[#242325] px-3 py-2.5',
@@ -76,9 +78,12 @@ export const UPLOAD_SHELL = {
         'h-[38px] min-w-[151px] rounded-md border border-[#707070] bg-transparent font-matter-medium text-[14px] leading-5 tracking-wide text-[#eaeaea] shadow-none hover:bg-white/5',
     studioOutlineCtaDisabled: 'pointer-events-none text-[#707070] opacity-80',
     progressTrack: 'h-1.5 w-full max-w-[394px] rounded-md bg-[#9d9d9d]',
-    progressFill: 'h-full rounded-md bg-[#6f94b8] transition-[width] duration-300',
-    mutedLabel: 'font-matter text-[14px] leading-5 text-[#bdbdbd] tracking-wide',
-    mediumLabel: 'font-matter-medium text-[14px] leading-5 text-[#bdbdbd] tracking-wide',
+    progressFill:
+        'h-full rounded-md bg-[#6f94b8] transition-[width] duration-300',
+    mutedLabel:
+        'font-matter text-[14px] leading-5 text-[#bdbdbd] tracking-wide',
+    mediumLabel:
+        'font-matter-medium text-[14px] leading-5 text-[#bdbdbd] tracking-wide',
 } as const;
 
 /**
@@ -98,10 +103,8 @@ export const UPLOAD_OPTIONS_BAR = {
         'flex min-h-[70px] w-[207px] shrink-0 cursor-pointer flex-row items-center gap-2 rounded-lg border px-4 py-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:pointer-events-none disabled:opacity-50',
     chipInactive:
         'border-[#545454]/50 bg-[#1a1a1a] text-[#eaeaea] hover:bg-[#242325]',
-    chipActive:
-        'border-[#545454]/50 bg-white text-[#1a1a1a] hover:bg-white/90',
-    label:
-        'min-w-0 flex-1 font-matter-medium text-[12px] leading-[18px] tracking-wide whitespace-normal text-left line-clamp-2',
+    chipActive: 'border-[#545454]/50 bg-white text-[#1a1a1a] hover:bg-white/90',
+    label: 'min-w-0 flex-1 font-matter-medium text-[12px] leading-[18px] tracking-wide whitespace-normal text-left line-clamp-2',
     labelInactive: 'text-[#eaeaea]',
     labelActive: 'text-[#1a1a1a]',
     icon: 'h-8 w-8 shrink-0 object-contain',

@@ -1,6 +1,5 @@
 class ENV {
-
-    constructor(){}
+    constructor() {}
 
     /**
      * @name isStaging
@@ -8,8 +7,9 @@ class ENV {
      * @returns {boolean} boolean
      */
     public isStaging(): boolean {
-        const result: boolean = import.meta.env.VITE_ENV === 'staging' ? true :false;
-        return result
+        const result: boolean =
+            import.meta.env.VITE_ENV === 'staging' ? true : false;
+        return result;
     }
 
     /**
@@ -18,8 +18,9 @@ class ENV {
      * @returns {boolean} boolean
      */
     public isProduction(): boolean {
-        const result: boolean = import.meta.env.VITE_ENV === 'production' ? true :false;
-        return result
+        const result: boolean =
+            import.meta.env.VITE_ENV === 'production' ? true : false;
+        return result;
     }
 
     /**
@@ -28,10 +29,10 @@ class ENV {
      * @returns {boolean} boolean
      */
     public isDev(): boolean {
-        const result: boolean = import.meta.env.VITE_ENV === 'development' ? true :false;
-        return result
+        const result: boolean =
+            import.meta.env.VITE_ENV === 'development' ? true : false;
+        return result;
     }
-
 }
 
 export default new ENV();

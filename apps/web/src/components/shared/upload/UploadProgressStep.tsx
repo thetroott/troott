@@ -58,9 +58,7 @@ const UploadProgressStep: React.FC = () => {
                 if (mockUpload) {
                     for (let p = 0; p <= 100; p += 12) {
                         if (cancelled) return;
-                        dispatch(
-                            uploadActions.setProgress(Math.min(100, p)),
-                        );
+                        dispatch(uploadActions.setProgress(Math.min(100, p)));
                         await new Promise<void>((resolve) => {
                             setTimeout(resolve, 90);
                         });
@@ -104,7 +102,8 @@ const UploadProgressStep: React.FC = () => {
                 const res = await apiCall.sermon.startUpload(
                     formData,
                     (pct) => {
-                        if (!cancelled) dispatch(uploadActions.setProgress(pct));
+                        if (!cancelled)
+                            dispatch(uploadActions.setProgress(pct));
                     },
                     ac.signal,
                 );
@@ -116,7 +115,9 @@ const UploadProgressStep: React.FC = () => {
                     | undefined;
 
                 if (!payload?.id) {
-                    throw new Error('Upload response did not include a sermon id.');
+                    throw new Error(
+                        'Upload response did not include a sermon id.',
+                    );
                 }
 
                 dispatch(
@@ -215,7 +216,8 @@ const UploadProgressStep: React.FC = () => {
             <div className="flex min-h-0 w-full flex-1 flex-col">
                 <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 py-6 text-center">
                     <p className={UPLOAD_SHELL.mutedLabel}>
-                        No file selected. Go back and choose an audio file to upload.
+                        No file selected. Go back and choose an audio file to
+                        upload.
                     </p>
                     <Button
                         type="button"
@@ -245,7 +247,9 @@ const UploadProgressStep: React.FC = () => {
                                 aria-hidden
                             />
                             <p className="font-matter text-center text-[14px] leading-5 tracking-wide text-[#bdbdbd]">
-                                {showFinalizing ? 'Finalizing...' : 'Uploading...'}
+                                {showFinalizing
+                                    ? 'Finalizing...'
+                                    : 'Uploading...'}
                             </p>
                         </div>
 
@@ -258,7 +262,12 @@ const UploadProgressStep: React.FC = () => {
                                     }}
                                 />
                             </div>
-                            <p className={cn(UPLOAD_SHELL.mediumLabel, 'text-center')}>
+                            <p
+                                className={cn(
+                                    UPLOAD_SHELL.mediumLabel,
+                                    'text-center',
+                                )}
+                            >
                                 {Math.round(progress)}% completed
                             </p>
                         </div>
@@ -363,8 +372,8 @@ const UploadProgressStep: React.FC = () => {
                                     to draft.
                                 </p>
                                 <p>
-                                    You can always restore it later from the Draft
-                                    section.
+                                    You can always restore it later from the
+                                    Draft section.
                                 </p>
                             </div>
                         </DialogDescription>
@@ -394,8 +403,9 @@ const UploadProgressStep: React.FC = () => {
                     <DialogHeader>
                         <DialogTitle>Cancel upload?</DialogTitle>
                         <DialogDescription>
-                            This stops the current upload and clears the selected
-                            file. You can start again from the upload step.
+                            This stops the current upload and clears the
+                            selected file. You can start again from the upload
+                            step.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex justify-end gap-2 pt-4">

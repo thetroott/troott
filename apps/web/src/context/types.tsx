@@ -1,4 +1,4 @@
-export const GET_LOGGEDIN_USER = 'GET_LOGGEDIN_USER'
+export const GET_LOGGEDIN_USER = 'GET_LOGGEDIN_USER';
 export const GET_USER = 'GET_USER';
 export const GET_COUNTRIES = 'GET_COUNTRIES';
 export const GET_LOCATIONS = 'GET_LOCATIONS';

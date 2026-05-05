@@ -1,4 +1,4 @@
-import footer from './footer.route'
+import footer from './footer.route';
 import appRoutes from './app.route';
 import { IRoute } from '@/utils/interfaces';
 import productRoutes from './product.route';

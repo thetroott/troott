@@ -1,38 +1,36 @@
-
-import { v4 as randomUUID } from 'uuid'
+import { v4 as randomUUID } from 'uuid';
 import cookieService from './cookies';
 import { CookieKeyType } from '../types/types';
 
 class IdempotentService {
-
-    constructor() { }
+    constructor() {}
 
     /**
      * @name getRequestKey
-     * @returns 
+     * @returns
      */
     public getRequestKey(): string {
-
         let result: string = '';
 
-        const key = cookieService.getData({ key: CookieKeyType.XHIT, parse: false });
+        const key = cookieService.getData({
+            key: CookieKeyType.XHIT,
+            parse: false,
+        });
 
         if (key) {
             result = key;
-        }else{
-            result = this.setRequestKey()
+        } else {
+            result = this.setRequestKey();
         }
 
         return result;
-
     }
 
     /**
      * @name setRequestKey
-     * @returns 
+     * @returns
      */
     public setRequestKey(): string {
-
         const idempKey = randomUUID();
 
         // save to cookie
@@ -40,13 +38,11 @@ class IdempotentService {
             key: CookieKeyType.XHIT,
             payload: idempKey,
             path: '/',
-            maxAge: 90
+            maxAge: 90,
         });
 
         return idempKey;
-
     }
-
 }
 
-export default new IdempotentService()
+export default new IdempotentService();

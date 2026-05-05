@@ -23,7 +23,7 @@
 
 //     /**
 //      * @name setLoading
-//      * @param data 
+//      * @param data
 //      */
 //     const setLoading = async (data: ISetLoading) => {
 
@@ -51,7 +51,7 @@
 
 //     /**
 //      * @name unsetLoading
-//      * @param data 
+//      * @param data
 //      */
 //     const unsetLoading = async (data: IUnsetLoading) => {
 
@@ -98,16 +98,16 @@
 //     const currentSidebar = (collapse:boolean): ISidebarProps | null => {
 
 //         let result: ISidebarProps | null = null;
-    
+
 //         const name = storage.fetch('route.name');
 //         const sub = storage.fetch('route.subroute');
-    
+
 //         const route = sidebarRoutes.find((x) => x.name === name);
-    
+
 //         if(route && route.subroutes && route.subroutes.length > 0){
-    
+
 //             const subroute = route.subroutes.find((m) => m.name === sub);
-    
+
 //             if(subroute){
 //                 result = {
 //                     collapsed: collapse,
@@ -125,7 +125,7 @@
 //                     isOpen: true
 //                 }
 //             }
-    
+
 //         } else if(route) {
 //             result = {
 //                 collapsed: collapse,
@@ -135,11 +135,10 @@
 //                 isOpen: false
 //             }
 //         }
-    
-//         return result;
-    
-//     }
 
+//         return result;
+
+//     }
 
 //     return <UserContext.Provider
 //         value={{

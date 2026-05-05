@@ -9,22 +9,24 @@ With troott, users can listen to old and new sermons from their favorite ministe
 ## Introduction
 
 Christian content lovers often struggle to:
+
 - Access messages from their favorite ministers.
 - Discover old sermons without knowing exact titles.
 - Organize downloaded sermon files on their devices.
 
 Troott solves these problems with a clean, mobile-first interface that provides:
+
 - Powerful sermon search and discovery.
 - Offline streaming options.
 - Playlist-style sermon management.
 - Quick sharing tools for a shared spiritual experience.
 
 We’re answering key questions to improve user experience:
+
 - How can users find and listen to sermons effortlessly on the go?
 - How do we help users stay organized and avoid local storage clutter?
 - How can sermons empower users to improve their spiritual lifestyle?
 - How can we make sharing sermons as easy as sending a voice note?
-
 
 ## Technologies
 
@@ -37,68 +39,71 @@ We’re answering key questions to improve user experience:
 
 To get it up and running on your local machine, follow the steps below:
 
-1. **Clone the repo**  
-   ```bash
-   git clone https://github.com/thebuildershq/troott-client-web.git
-   cd troott-client-web
-   ```
+1. **Clone the repo**
 
-2. **Install dependencies**  
-   ```bash
-   npm install
-   # or
-   yarn
-   ```
+    ```bash
+    git clone https://github.com/thebuildershq/troott-client-web.git
+    cd troott-client-web
+    ```
+
+2. **Install dependencies**
+
+    ```bash
+    npm install
+    # or
+    yarn
+    ```
 
 3. **Set up environment variables**  
-   Ensure you have a `.env` file with the necessary environment variables for your app. 
+   Ensure you have a `.env` file with the necessary environment variables for your app.
+
     ```bash
-   VITE_API_BASE_URL=https://api.example.com
-   ```
+    VITE_API_BASE_URL=https://api.example.com
+    ```
 
 4. **Run the app in development mode**
    Start the web app:
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+
+    ```bash
+    npm run dev
+    # or
+    yarn dev
+    ```
 
 5. **Run the app in production mode**
    Start the web app:
-   ```bash
-   npm run build
-   # or
-   yarn build
-   ```
+
+    ```bash
+    npm run build
+    # or
+    yarn build
+    ```
 
 6. **Run the app to preview development build**  
    Start the web app:
-   ```bash
-  npm run preview
-   ```
+    ```bash
+    npm run preview
+    ```
 
 ## Branch Structure
 
-| Branch               | Purpose                                                                 |
-|----------------------|-------------------------------------------------------------------------|
-| `master`             | Production-ready code. Always stable. Protected.                        |
-| `staging`            | QA/testing branch for integrating all features before a release.        |
-| `release/vX.Y.Z`     | Pre-production branch used for final testing before going live.         |
-| `@username/feature-*`| Feature branches under a personal namespace.                            |
-| `@username/fix-*`    | Bugfix branches under a personal namespace.                             |
+| Branch                | Purpose                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| `master`              | Production-ready code. Always stable. Protected.                 |
+| `staging`             | QA/testing branch for integrating all features before a release. |
+| `release/vX.Y.Z`      | Pre-production branch used for final testing before going live.  |
+| `@username/feature-*` | Feature branches under a personal namespace.                     |
+| `@username/fix-*`     | Bugfix branches under a personal namespace.                      |
 
 ### Example of Branch Naming Conventions
 
-
-| Type | Pattern | Example |
-|------|---------|---------|
+| Type    | Pattern                          | Example                                     |
+| ------- | -------------------------------- | ------------------------------------------- |
 | Feature | `@username/feature-<short-desc>` | `@topeokuselu/feature-user-invitation-card` |
-| Bug Fix | `@username/fix-<short-desc>` | `@damolaoladipo/fix-email-validation-bug` |
-| Release | `release/v<semver>` | `release/v1.0.2` |
+| Bug Fix | `@username/fix-<short-desc>`     | `@damolaoladipo/fix-email-validation-bug`   |
+| Release | `release/v<semver>`              | `release/v1.0.2`                            |
 
 > Use lowercase and hyphens in branch names. Be concise and descriptive.
-
 
 ## Development Workflow
 
@@ -152,7 +157,7 @@ git merge @username/feature-your-task-name
 git push origin staging
 ```
 
- Your pull request (PR) should target `staging` — not master.  
+Your pull request (PR) should target `staging` — not master.  
 Reference the issue number in the PR description (e.g., Closes #502).
 
 ### 7. Create a Release Branch
@@ -164,7 +169,7 @@ git checkout -b release/v1.0.2
 git push origin release/v1.0.2
 ```
 
-Final QA and bug-fixing happen on this release/* branch before production deployment.
+Final QA and bug-fixing happen on this release/\* branch before production deployment.
 
 ### 8. Merge Release into master and staging
 
@@ -186,15 +191,13 @@ git push origin staging
 
 If you discover a bug or have a suggestion, raise an issue via the GitHub Issues tab (if you have permission), or notify your team lead for triage and assignment.
 
-
 ## Useful Commands
 
-
-| Command            | Description                                   |
-|--------------------|-----------------------------------------------|
-| `npm run dev`      | Starts the app in development mode.           |
-| `npm run build`    | Build app for production                      |
-| `npm run preview`    | Preview production build locally              |
+| Command           | Description                         |
+| ----------------- | ----------------------------------- |
+| `npm run dev`     | Starts the app in development mode. |
+| `npm run build`   | Build app for production            |
+| `npm run preview` | Preview production build locally    |
 
 ## Pull Request Notes
 

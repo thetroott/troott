@@ -1,4 +1,4 @@
-import { IRoute } from "@/utils/interfaces";
+import { IRoute } from '@/utils/interfaces';
 
 const talentRoutes: Array<IRoute> = [
     {
@@ -19,7 +19,7 @@ const talentRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'my-inbox',
@@ -29,7 +29,7 @@ const talentRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'workshops',
@@ -39,7 +39,7 @@ const talentRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'challenges',
@@ -49,7 +49,7 @@ const talentRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'mentors',
@@ -59,7 +59,7 @@ const talentRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'settings',
@@ -69,7 +69,7 @@ const talentRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
             {
                 name: 'upgrade-plan',
@@ -79,9 +79,9 @@ const talentRoutes: Array<IRoute> = [
                 action: 'navigate',
                 isAuth: true,
                 params: [],
-                content: { collapsed: false }
+                content: { collapsed: false },
             },
-        ]
+        ],
     },
 ];
 

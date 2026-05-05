@@ -28,32 +28,29 @@
 // This is the protected route component
 
 // export default ProtectedRoute;
-import React from "react";
-
+import React from 'react';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  roles?: string[]
+    children: React.ReactNode;
+    roles?: string[];
 }
 
-
-
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  //const { user, loading } = useAuth();
+    //const { user, loading } = useAuth();
 
-  // if (loading) {
-  //   return <div>Loading...</div>; // Or a spinner
-  // }
+    // if (loading) {
+    //   return <div>Loading...</div>; // Or a spinner
+    // }
 
-  // if (!user) {
-  //   return <Navigate to="/login" replace />;
-  // }
+    // if (!user) {
+    //   return <Navigate to="/login" replace />;
+    // }
 
-  // if (roles && !roles.includes(user.role)) {
-  //   return <Navigate to="/unauthorized" replace />;
-  // }
+    // if (roles && !roles.includes(user.role)) {
+    //   return <Navigate to="/unauthorized" replace />;
+    // }
 
-  return <>{children}</>;
+    return <>{children}</>;
 };
 
 export default ProtectedRoute;

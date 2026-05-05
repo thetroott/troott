@@ -15,8 +15,7 @@ export const MY_SERMONS_PAGE = {
     mainColumn:
         'box-border flex min-h-0 w-full min-w-0 max-w-none flex-1 flex-col px-4 pb-2 pt-2',
     /** Header + tabs + toolbar — **154px** total; bottom stroke separates from table (`Frame 1618868833`). */
-    chromeStack:
-        'w-full shrink-0 border-b border-[#545454]/50 bg-[#2b2a2c]',
+    chromeStack: 'w-full shrink-0 border-b border-[#545454]/50 bg-[#2b2a2c]',
     /** Table + pagination column (column flex; footer uses `contentWithFooter` + `contentScroll`). */
     contentStack: 'flex min-h-0 flex-1 flex-col',
     /** Fills space under chrome; pagination is last child (`shrink-0`). */
@@ -30,15 +29,14 @@ export const MY_SERMONS_PAGE = {
     /** **20×20** icon slot (`Component 4`). */
     titleIconWrap:
         'inline-flex h-5 w-5 shrink-0 items-center justify-center text-[#eaeaea]',
-    title:
-        'font-matter-medium text-base leading-6 tracking-[0.16px] text-[#eaeaea]',
+    title: 'font-matter-medium text-base leading-6 tracking-[0.16px] text-[#eaeaea]',
     /** Primary CTA — **32** tall, radius **6**, `#08ffdb` / `#1f2020` (`Button`). */
     createCta:
         'inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md bg-[#08ffdb] px-4 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#1f2020] transition-[filter,opacity] hover:brightness-110 active:brightness-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50',
     /** Tabs — **42px** row, bottom stroke `#545454` (`Frame 1618868806`). */
-    tabStrip: 'mt-0 flex h-[42px] w-full items-stretch border-b border-[#545454]',
-    tabBtn:
-        'relative flex h-[42px] min-w-[62px] cursor-pointer items-center justify-center px-2 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#eaeaea] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea]',
+    tabStrip:
+        'mt-0 flex h-[42px] w-full items-stretch border-b border-[#545454]',
+    tabBtn: 'relative flex h-[42px] min-w-[62px] cursor-pointer items-center justify-center px-2 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#eaeaea] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea]',
     tabBtnActive:
         'after:pointer-events-none after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-t after:bg-[#eaeaea]',
     tabBtnInactive: 'text-[#eaeaea]/70 hover:text-[#eaeaea]',
@@ -49,7 +47,8 @@ export const MY_SERMONS_PAGE = {
     /** Search field — max **190px** wide, grows on narrow viewports; radius **8**. */
     searchWrap:
         'relative h-8 w-full min-w-0 max-w-[190px] shrink-[1] basis-[min(100%,190px)]',
-    searchIcon: 'pointer-events-none absolute left-2 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#bdbdbd]',
+    searchIcon:
+        'pointer-events-none absolute left-2 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-[#bdbdbd]',
     searchInput:
         'h-8 w-full cursor-text rounded-lg border border-[#545454]/50 bg-transparent py-0 pl-[34px] pr-3 font-matter text-sm leading-5 tracking-[0.14px] text-[#eaeaea] placeholder:text-[#bdbdbd] placeholder:opacity-100 focus-visible:border-[#545454] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#08ffdb]/40',
     /** Filters / Sort — **32** tall, radius **6**, fill `#2b2a2c`, label `#bdbdbd`. */
@@ -109,13 +108,11 @@ export const MY_SERMONS_LIST = {
         'flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover/sermon-row:pointer-events-auto group-hover/sermon-row:opacity-100',
     rowQuickActionBtn:
         'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-[3px] border border-[#545454] bg-[#2b2a2c] text-[#eaeaea] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
-    tdCell:
-        'box-border h-[64px] border-b border-[#545454]/50 px-4 py-0 align-middle first:pl-4 last:pr-4',
+    tdCell: 'box-border h-[64px] border-b border-[#545454]/50 px-4 py-0 align-middle first:pl-4 last:pr-4',
     /** Native checkbox — **18×18**, radius **4**, stroke `#9d9d9d` (Component 89). */
     checkbox:
         'h-[18px] w-[18px] shrink-0 cursor-pointer rounded border border-[#9d9d9d] bg-[#242325] text-[#08ffdb] accent-[#08ffdb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#333234]',
-    title:
-        'font-matter-medium text-[14px] leading-5 tracking-[0.14px] text-[#eaeaea]',
+    title: 'font-matter-medium text-[14px] leading-5 tracking-[0.14px] text-[#eaeaea]',
     /** Audio length under title — Matter 12/18 `#9d9d9d` ([`10154:35082`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10154-35082)). */
     duration:
         'mt-0.5 font-matter text-[12px] font-normal leading-[18px] tracking-[0.24px] text-[#9d9d9d] tabular-nums',
@@ -204,12 +201,12 @@ export const MY_SERMONS_GRID = {
     mediaStack: 'flex h-[256px] w-full shrink-0 flex-col bg-neutral-900',
     mediaHeader:
         'flex h-[38px] shrink-0 items-start justify-end px-3 pt-2 pb-0',
-    mediaMain:
-        'flex min-h-0 flex-1 flex-col items-center justify-center px-3',
+    mediaMain: 'flex min-h-0 flex-1 flex-col items-center justify-center px-3',
     /** 60×60, radius 20, fill #333234, stroke #545454 — waveform sits ~34×34 inside. */
     iconTile:
         'flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-[20px] border border-[#545454] bg-[#333234]',
-    mediaFooter: 'flex h-[40px] shrink-0 items-center justify-end px-3 pb-2 pt-0',
+    mediaFooter:
+        'flex h-[40px] shrink-0 items-center justify-end px-3 pb-2 pt-0',
     /** Duration chip — fill #2b2a2c, radius 4, Matter 14/20 #eaeaea (node `…45986`). */
     durationChip:
         'rounded bg-[#2b2a2c] px-2 py-1 font-matter-medium text-[14px] leading-5 tracking-[0.14px] text-[#eaeaea]',
@@ -270,7 +267,11 @@ export function SermonListAudioGlyph({
             viewBox="0 0 56 56"
             width={size === 'sm' ? 16 : 34}
             height={size === 'sm' ? 16 : 34}
-            className={cn('shrink-0 text-[#bdbdbd] transition-colors group-hover/sermon-row:text-[#eaeaea]', dim, className)}
+            className={cn(
+                'shrink-0 text-[#bdbdbd] transition-colors group-hover/sermon-row:text-[#eaeaea]',
+                dim,
+                className,
+            )}
             aria-hidden
         >
             <path fill="currentColor" d={SERMON_LIST_AUDIO_WAVE_D} />
