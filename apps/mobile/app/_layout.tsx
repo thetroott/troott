@@ -71,7 +71,9 @@ const RootLayout = () => {
         pathOnly === '/user/photo-picker' ||
         pathOnly === '/user/edit-profile-saved' ||
         pathOnly === '/playlist/create-playlist' ||
-        pathOnly.startsWith('/see-more');
+        pathOnly.startsWith('/see-more') ||
+        pathOnly === '/minister' ||
+        pathOnly.startsWith('/minister/');
 
     const buildShareUrl = useCallback(() => {
         if (track.id != null && String(track.id).length > 0) {

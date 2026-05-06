@@ -87,6 +87,7 @@ function useAllowMiniPlayerForCurrentRoute(): boolean {
     if (base === '/playlist/create-playlist') return false;
     /** Full-screen lists from home “See more” — mini player would crowd the layout */
     if (base.startsWith('/see-more')) return false;
+    if (base === '/minister' || base.startsWith('/minister/')) return false;
 
     return true;
 }

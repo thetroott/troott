@@ -58,7 +58,10 @@ export default function SimilarMinisters({
                     {title}
                 </Text>
                 <Pressable
-                    onPress={onPressSeeMore}
+                    onPress={() => {
+                        if (onPressSeeMore) return onPressSeeMore();
+                        router.push('/see-more/similar-ministers');
+                    }}
                     style={styles.seeMore}
                     accessibilityRole="button"
                     accessibilityLabel={ctaLabel}
