@@ -23,7 +23,7 @@ import {
     LibraryAllSmartCards,
     LibraryListeningHistory,
     LibraryPlaylistCategory,
-    LibraryPreacherCategory,
+    LibraryMinisterCategory,
     LibrarySeriesCategory,
     LibrarySermonCategory,
 } from '@/components/features/library/library-category-bodies';
@@ -31,17 +31,17 @@ import {
     usePlaylistsQuery,
     useUserLibraryQuery,
 } from '@/hooks/use-library-queries';
-import { useUserStore } from '@/stores/user-store';
+import { useContextType } from '@troott/state';
 import { getLibraryArrayField } from '@/engine/utils/library-map';
 
-type CategoryKey = 'All' | 'Playlists' | 'Sermon' | 'Series' | 'Preacher';
+type CategoryKey = 'All' | 'Playlists' | 'Sermon' | 'Series' | 'Minister';
 
 const DEFAULT_SORT: Record<CategoryKey, string> = {
     All: 'Recent Activities',
     Playlists: 'Recently updated',
     Sermon: 'Newest to oldest',
     Series: 'Newest to oldest',
-    Preacher: 'Most played',
+    Minister: 'Most played',
 };
 
 const categories = [
@@ -53,11 +53,12 @@ const categories = [
     },
     { id: 3, name: 'Sermon' as const, subs: ['All Sermons', 'Downloaded'] },
     { id: 4, name: 'Series' as const, subs: ['All Series', 'Downloaded'] },
-    { id: 5, name: 'Preacher' as const, subs: [] as string[] },
+    { id: 5, name: 'Minister' as const, subs: [] as string[] },
 ];
 
 const Library = () => {
-    const userId = useUserStore((s) => s.user?.id);
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
 
     const {
         data: lib,
@@ -194,7 +195,7 @@ const Library = () => {
                 onPress: () => applySort('Most played'),
             },
         ],
-        Preacher: [
+        Minister: [
             {
                 name: 'Alphabetical',
                 selected: sortValue === 'Alphabetical',
@@ -226,7 +227,7 @@ const Library = () => {
         () => getLibraryArrayField(lib, 'likedSermons').length,
         [lib],
     );
-    const preacherCount = useMemo(
+    const ministerCount = useMemo(
         () =>
             getLibraryArrayField(
                 lib,
@@ -284,8 +285,8 @@ const Library = () => {
         return 'recent';
     }, [selectedCategory, sortValue]);
 
-    const preacherSortForCategory = useMemo((): 'alpha' | 'plays' => {
-        if (selectedCategory !== 'Preacher') return 'alpha';
+    const ministerSortForCategory = useMemo((): 'alpha' | 'plays' => {
+        if (selectedCategory !== 'Minister') return 'alpha';
         return sortValue === 'Alphabetical' ? 'alpha' : 'plays';
     }, [selectedCategory, sortValue]);
 
@@ -411,15 +412,15 @@ const Library = () => {
                         <LibraryAllSmartCards
                             isGrid={displayStyle === 'grid'}
                             likedCount={likedCount}
-                            preacherCount={preacherCount}
+                            ministerCount={ministerCount}
                             playlistCount={playlistCount}
                             downloadsCount={downloadsCount}
                             onOpenLiked={() => {
                                 setSelectedCategory('Sermon');
                                 setSortValue('Newest to oldest');
                             }}
-                            onOpenPreachers={() => {
-                                setSelectedCategory('Preacher');
+                            onOpenMinisters={() => {
+                                setSelectedCategory('Minister');
                                 setSortValue('Most played');
                             }}
                             onOpenPlaylists={() => {
@@ -467,10 +468,10 @@ const Library = () => {
                         sortMode={seriesSortForCategory}
                     />
                 )}
-                {selectedCategory === 'Preacher' && (
-                    <LibraryPreacherCategory
+                {selectedCategory === 'Minister' && (
+                    <LibraryMinisterCategory
                         displayStyle={displayStyle}
-                        sortMode={preacherSortForCategory}
+                        sortMode={ministerSortForCategory}
                     />
                 )}
             </ScrollView>

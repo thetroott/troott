@@ -81,15 +81,12 @@ const customResults =
             };
         }
 
-        const status = 0;
-
         res.customResults = {
             success: true,
             count: results.length,
             total,
             pagination,
             data: results,
-            // status: status
         };
 
         next();

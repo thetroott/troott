@@ -24,6 +24,16 @@ const MinisterSchema = new Schema<IMinisterDoc>(
         // Ministry & Content
         description: { type: String },
         ministry: { type: String },
+        ministerialName: { type: String },
+        ministryName: { type: String },
+        ministryHQLocation: { type: String },
+        ministryWebsite: { type: String },
+        // Social handles, structured for the profile editor (Figma 11719:104736).
+        socials: {
+            instagram: { type: String },
+            twitter: { type: String },
+            tiktok: { type: String },
+        },
         sermons: [{ type: Schema.Types.ObjectId, ref: DbModels.SERMON }],
         featuredSermons: [
             { type: Schema.Types.ObjectId, ref: DbModels.SERMON },

@@ -1,6 +1,6 @@
 import Cookies from 'universal-cookie';
 import type { CookieSetOptions } from 'universal-cookie';
-import type { ISetCookie, IGetCookie, IRemoveCookie } from '../types/types';
+import type { ISetCookie, IGetCookie, IRemoveCookie } from '@/utils/interfaces.util';
 
 class CookieService {
     private cookie: Cookies;
@@ -82,18 +82,6 @@ class CookieService {
      */
     public getUserType(): string {
         const result: string = this.getData({ key: 'userType', parse: false });
-        return result;
-    }
-
-    /**
-     * @name getBusinessType
-     * @returns BusinessType string or null
-     */
-    public getBusinessType(): string | null {
-        const result: string = this.getData({
-            key: 'businessType',
-            parse: false,
-        });
         return result;
     }
 

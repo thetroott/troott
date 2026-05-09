@@ -211,8 +211,9 @@ const SermonDetailsForm: React.FC = () => {
         setDragActive(false);
 
         const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleThumbnailSelect(files[0]);
+        const file = files[0];
+        if (file) {
+            handleThumbnailSelect(file);
         }
     };
 
@@ -220,8 +221,9 @@ const SermonDetailsForm: React.FC = () => {
         e: React.ChangeEvent<HTMLInputElement>,
     ) => {
         const files = e.target.files;
-        if (files && files.length > 0) {
-            handleThumbnailSelect(files[0]);
+        const file = files?.[0];
+        if (file) {
+            handleThumbnailSelect(file);
         }
     };
 

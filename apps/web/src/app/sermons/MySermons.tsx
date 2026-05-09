@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import EmptySermonsState from '@/components/shared/my-sermons/EmptySermonsState';
 import SermonsTable from '@/components/shared/my-sermons/SermonsTable';
 import apiCall from '@/api/config';
-import { useUserStore } from '@/store/user-store';
+import { useContextType } from '@troott/state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,
@@ -62,7 +62,8 @@ function sortRawSermonDocs(
 }
 
 const Sermons = () => {
-    const user = useUserStore((s) => s.user) as Record<string, unknown> | null;
+    const { userContext } = useContextType();
+    const user = userContext.user as Record<string, unknown> | null;
     const ministerId = useMemo(() => resolveMinisterId(user), [user]);
     const isDev = import.meta.env.DEV;
     const queryEnabled = Boolean(ministerId) || isDev;

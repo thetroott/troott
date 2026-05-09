@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ImageSourcePropType } from 'react-native';
 
-import { useUserStore } from '@/stores/user-store';
+import { useContextType } from '@troott/state';
 
 export const DEFAULT_PROFILE_AVATAR = require('@/assets/images/4.jpg');
 const DEFAULT_PROFILE_NAME = 'Tobechukwu Obi';
@@ -39,7 +39,8 @@ function resolveAvatarSource(user: Record<string, unknown> | null): ImageSourceP
 }
 
 export function useProfileIdentity() {
-    const user = useUserStore((state) => state.user as Record<string, unknown> | null);
+    const { userContext } = useContextType();
+    const user = userContext.user as Record<string, unknown> | null;
 
     return useMemo(
         () => ({

@@ -15,9 +15,10 @@ import {
 import { SearchForm } from '../dialog/Search.tsx';
 import { Link, useLocation } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator.tsx';
+import type { UserType } from '@troott/api-client';
 
 interface ISideBar {
-    userRole: 'admin' | 'staff' | 'minister';
+    userRole: UserType;
     props?: React.ComponentProps<typeof Sidebar>;
 }
 

@@ -1,137 +1,102 @@
-import Admin from '@/dtos/admin.dto';
-import Business from '@/dtos/business.dto';
-import Entry from '@/dtos/entry.dto';
-import Form, { IBlock, IQuestion, IResponse } from '@/dtos/form.dto';
-import Hackathon from '@/dtos/hackathon.dto';
-import Plan from '@/dtos/plan.dto';
-import Project from '@/dtos/project.dto';
-import Squad from '@/dtos/squad.dto';
-import Submission from '@/dtos/submission.dto';
-import Subscription from '@/dtos/subscription';
-import Talent from '@/dtos/talent.dto';
-import Task from '@/dtos/task.dto';
-import Team from '@/dtos/team.dto';
-import Transaction from '@/dtos/transaction.dto';
-import User from '@/dtos/user.dto';
-import Workspace from '@/dtos/sermon.dto';
-import {
-    IAPIReport,
-    IPagination,
-    ISetLoading,
-    ISidebarProps,
-    IToastState,
-    IUnsetLoading,
-} from '@/utils/interfaces';
-import { RefineType } from '@/utils/types';
+import type { ProfileDTO, TroottUser } from '@troott/api-client/dto';
 
-export interface IClearResource {
-    type: string;
-    resource: 'multiple' | 'single';
+export type { ProfileDTO, TroottUser };
+
+export interface IPagination {
+    next?: { page: number; limit: number };
+    prev?: { page: number; limit: number };
 }
 
-export interface ICollection {
-    data: Array<any>;
-    report?: IAPIReport;
+export interface ICollection<T = unknown> {
+    data: T[];
     count: number;
     total: number;
     pagination: IPagination;
     loading: boolean;
-    refineType?: RefineType;
     message?: string;
-    payload?: any;
 }
 
-export interface ICoreResource {
-    forms: Array<Form>;
-    blocks: Array<IBlock>;
-    questions: Array<IQuestion>;
-    responses: Array<IResponse>;
+export interface IToastState {
+    type: 'success' | 'error' | 'warning' | 'info';
+    show: boolean;
+    message: string;
+    title?: string;
+    position?: string;
 }
 
-export interface IHackDomain {
-    hackathons: Array<Hackathon>;
-    entries: Array<Entry>;
-    submissions: Array<Submission>;
-    squad: Array<Squad>;
+export interface ISidebarProps {
+    collapsed: boolean;
+    isOpen: boolean;
+    route?: unknown;
+    subroutes?: unknown[];
+    inroutes?: unknown[];
 }
 
-export interface IProjectDomain {
-    projects: Array<Project>;
-    Teams: Array<Team>;
-    tasks: Array<Task>;
+export interface ISetLoading {
+    option: 'default' | 'resource';
+    type?: string;
+}
+
+export interface IUnsetLoading {
+    option: 'default' | 'resource';
+    type?: string;
+    message?: string;
 }
 
 export interface IUserContext {
     users: ICollection;
-    user: User;
+    user: TroottUser | Record<string, unknown>;
     userType: string;
-    businessType: string;
-
-    talent: Talent;
-    business: Business;
-    admin: Admin;
-
-    hackathon: Hackathon;
-    entry: Entry;
-    submission: Submission;
-    squad: Squad;
-
-    project: Project;
-    team: Team;
-    task: Task;
-
-    subscription: Subscription;
-    plan: Plan;
-
+    profile: ProfileDTO | null;
+    preferences: unknown;
+    permissions: unknown[];
+    subscription: unknown;
+    plan: unknown;
     loading: boolean;
-    sidebar: ISidebarProps;
     toast: IToastState;
-    setToast(data: IToastState): void;
-    clearToast(): void;
-    setSidebar(data: ISidebarProps): void;
-    currentSidebar(collapse: boolean): ISidebarProps | null;
-    setUserType(type: string): void;
-    setBusinessType(type: string): void;
-    setCollection(type: string, data: ICollection): void;
-    setResource(type: string, data: any): void;
-    setLoading(data: ISetLoading): void;
-    unsetLoading(data: IUnsetLoading): void;
+    sidebar: ISidebarProps;
+
+    setUser: (data: TroottUser | Record<string, unknown>) => void;
+    setUserType: (type: string) => void;
+    setProfile: (data: ProfileDTO | null) => void;
+    setPreferences: (data: unknown) => void;
+    setPermissions: (data: unknown[]) => void;
+    setSubscription: (data: unknown) => void;
+    setPlan: (data: unknown) => void;
+    setToast: (data: IToastState) => void;
+    clearToast: () => void;
+    setSidebar: (data: ISidebarProps) => void;
+    setCollection: (type: string, data: ICollection) => void;
+    setResource: (type: string, data: unknown) => void;
+    setLoading: (data: ISetLoading) => Promise<void>;
+    unsetLoading: (data: IUnsetLoading) => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
 export interface IAppContext {
-    talent: Talent;
-    business: Business;
-    admin: Admin;
-
-    hackathon: Hackathon;
-    entry: Entry;
-    submission: Submission;
-    squad: Squad;
-
-    project: Project;
-    team: Team;
-    task: Task;
-
+    sermons: ICollection;
+    sermon: unknown;
+    playlists: ICollection;
+    playlist: unknown;
+    ministers: ICollection;
+    minister: unknown;
+    listeners: ICollection;
+    listener: unknown;
+    creators: ICollection;
+    creator: unknown;
+    library: unknown;
+    discoveryHome: unknown;
+    featuredMinister: unknown;
+    searchResults: ICollection;
     plans: ICollection;
-    plan: Plan;
+    plan: unknown;
     transactions: ICollection;
-    transaction: Transaction;
-
-    search: ICollection;
-    items: Array<any>;
-
-    workspaces: ICollection;
-    workspace: Workspace;
-
-    core: ICoreResource;
-    hackCore: IHackDomain;
-    projectCore: IProjectDomain;
-    message: string;
+    transaction: unknown;
     loading: boolean;
-    loader: boolean;
-    clearResource(data: IClearResource): void;
-    setCollection(type: string, data: ICollection): void;
-    setResource(type: string, data: any): void;
-    setLoading(data: ISetLoading): void;
-    unsetLoading(data: IUnsetLoading): void;
+
+    setCollection: (type: string, data: ICollection) => void;
+    setResource: (type: string, data: unknown) => void;
+    setLoading: (data: ISetLoading) => Promise<void>;
+    unsetLoading: (data: IUnsetLoading) => Promise<void>;
+    loadDiscoveryHome: () => Promise<void>;
 }

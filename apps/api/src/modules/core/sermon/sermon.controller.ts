@@ -13,6 +13,12 @@ import sermonService from './sermon.service';
 import sermonMapper from './sermon.mapper';
 import { canAccessSermonDocument } from './sermon-access.util';
 import { isSermonPublicTeaserEligible } from '../open/sermon-teaser.util';
+import redisWrapper from '../../../middlewares/redis.mdw';
+import { createHash } from 'crypto';
+
+const SERMON_CACHE_TTL_DETAIL = 300;
+const SERMON_CACHE_TTL_LIST = 180;
+
 
 /**
  * @name uploadSermom
@@ -54,6 +60,24 @@ export const uploadSermon = asyncHandler(
         const response = await sermonMapper.mapSermon(
             upload.data as ISermonDoc,
         );
+        const createdSermon = upload.data as ISermonDoc;
+        if (createdSermon?._id) {
+            await invalidateSermonDetailCache(
+                String(createdSermon._id),
+                getAuthUserId(req),
+            );
+            await invalidateCommonSermonListCaches({
+                ministerId: String(
+                    (createdSermon as unknown as Record<string, unknown>)
+                        ?.minister || '',
+                ).trim(),
+                topic: String(
+                    (createdSermon as unknown as Record<string, unknown>)
+                        ?.topic || '',
+                ).trim(),
+                userId: getAuthUserId(req) || undefined,
+            });
+        }
 
         res.status(200).json({
             error: false,
@@ -93,6 +117,24 @@ export const uploadSermonCover = asyncHandler(
         const response = await sermonMapper.mapSermon(
             upload.data as ISermonDoc,
         );
+        const updatedSermon = upload.data as ISermonDoc;
+        if (updatedSermon?._id) {
+            await invalidateSermonDetailCache(
+                String(updatedSermon._id),
+                getAuthUserId(req),
+            );
+            await invalidateCommonSermonListCaches({
+                ministerId: String(
+                    (updatedSermon as unknown as Record<string, unknown>)
+                        ?.minister || '',
+                ).trim(),
+                topic: String(
+                    (updatedSermon as unknown as Record<string, unknown>)
+                        ?.topic || '',
+                ).trim(),
+                userId: getAuthUserId(req) || undefined,
+            });
+        }
 
         res.status(200).json({
             error: false,
@@ -186,6 +228,16 @@ export const publishSermon = asyncHandler(
             return next(new ErrorResponse(updated.message, updated.code!, []));
         }
 
+        const existingDoc = sermonExist.data as Record<string, unknown>;
+        await invalidateSermonDetailCache(id, getAuthUserId(req));
+        await invalidateCommonSermonListCaches({
+            ministerId: String(
+                minister || existingDoc?.minister || '',
+            ).trim(),
+            topic: String(topic || existingDoc?.topic || '').trim(),
+            userId: getAuthUserId(req) || undefined,
+        });
+
         res.status(200).json({
             error: false,
             errors: [],
@@ -277,6 +329,16 @@ export const updateSermon = asyncHandler(
             return next(new ErrorResponse(updated.message, updated.code!, []));
         }
 
+        const existingDoc = sermonExist.data as Record<string, unknown>;
+        await invalidateSermonDetailCache(id, getAuthUserId(req));
+        await invalidateCommonSermonListCaches({
+            ministerId: String(
+                minister || existingDoc?.minister || '',
+            ).trim(),
+            topic: String(topic || existingDoc?.topic || '').trim(),
+            userId: getAuthUserId(req) || undefined,
+        });
+
         res.status(200).json({
             error: false,
             errors: [],
@@ -343,6 +405,13 @@ export const moveSermonToBin = asyncHandler(
             return next(new ErrorResponse(deleted.message, deleted.code!, []));
         }
 
+        await invalidateSermonDetailCache(id, userId);
+        await invalidateCommonSermonListCaches({
+            ministerId: String(doc?.minister || '').trim(),
+            topic: String(doc?.topic || '').trim(),
+            userId,
+        });
+
         res.status(200).json({
             error: false,
             errors: [],
@@ -400,6 +469,13 @@ export const deleteSermon = asyncHandler(
             return next(new ErrorResponse(deleted.message, deleted.code!, []));
         }
 
+        await invalidateSermonDetailCache(id, userId);
+        await invalidateCommonSermonListCaches({
+            ministerId: String(doc?.minister || '').trim(),
+            topic: String(doc?.topic || '').trim(),
+            userId,
+        });
+
         res.status(200).json({
             error: false,
             errors: [],
@@ -423,6 +499,28 @@ export const getSermonById = asyncHandler(
             return next(new ErrorResponse('id is required', 400, []));
         }
 
+        const userId = getAuthUserId(req);
+        const viewerScope = userId ? `user:${userId}` : 'public';
+        const cacheKey = sermonDetailKey(id, viewerScope);
+        const cached = await redisWrapper.fetchData<{
+            data: unknown;
+            teaserEligible: boolean;
+        }>(cacheKey);
+        if (cached) {
+            if (cached.teaserEligible) {
+                res.setHeader('Cache-Control', 'public, max-age=120');
+            } else {
+                res.setHeader('Cache-Control', 'private, no-store');
+            }
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached.data,
+                message: 'Sermon fetched successfully (cached)',
+                status: 200,
+            });
+        }
+
         const sermon = await sermonRepository.findBySermonId(id);
         if (sermon.error)
             return next(new ErrorResponse(sermon.message, sermon.code!, []));
@@ -438,6 +536,17 @@ export const getSermonById = asyncHandler(
         } else {
             res.setHeader('Cache-Control', 'private, no-store');
         }
+
+        await redisWrapper.keepData(
+            {
+                key: cacheKey,
+                value: {
+                    data: sermon.data,
+                    teaserEligible: isSermonPublicTeaserEligible(doc),
+                },
+            },
+            SERMON_CACHE_TTL_DETAIL,
+        );
 
         res.status(200).json({
             error: false,
@@ -462,22 +571,45 @@ export const getSermonsByTopic = asyncHandler(
         if (!topic) {
             return next(new ErrorResponse('topic is required', 400, []));
         }
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
+        const sort = normalizeSort(req.query.sort);
 
         const options = {
             limit,
             skip,
-            sort: req.query.sort as string,
+            sort,
             populate: 'minister series topic',
         };
+
+        const cacheKey = sermonListKey('topic', {
+            topic,
+            page,
+            limit,
+            sort,
+        });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: `Sermons for topic "${topic}" retrieved successfully (cached)`,
+                status: 200,
+            });
+        }
 
         const result = await sermonRepository.findByTopic(topic, options);
 
         if (result.error) {
             return next(new ErrorResponse(result.message, result.code, []));
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         res.status(200).json({
             error: false,
@@ -498,17 +630,30 @@ export const getSermonsByTopic = asyncHandler(
  */
 export const getAllSermons = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
+        const sort = normalizeSort(req.query.sort);
 
         const filters = {};
         const options = {
             limit,
             skip,
-            sort: req.query.sort as string,
+            sort,
             populate: 'minister series topic',
         };
+
+        const cacheKey = sermonListKey('all', { page, limit, sort });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: 'Sermons retrieved successfully (cached)',
+                status: 200,
+            });
+        }
 
         const result = await sermonRepository.findAll(filters, options);
 
@@ -517,6 +662,11 @@ export const getAllSermons = asyncHandler(
                 new ErrorResponse(result.message, result.code || 500, []),
             );
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         res.status(200).json({
             error: false,
@@ -541,8 +691,8 @@ export const getSermonsByminister = asyncHandler(
         if (!ministerId) {
             return next(new ErrorResponse('ministerId is required', 400, []));
         }
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
 
         const sort = sermonService.normalizeMinisterListSort(req.query.sort);
@@ -573,6 +723,27 @@ export const getSermonsByminister = asyncHandler(
             dateTo,
         };
 
+        const cacheKey = sermonListKey('minister', {
+            ministerId,
+            page,
+            limit,
+            sort,
+            publicationStatus,
+            search,
+            dateFrom,
+            dateTo,
+        });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: `Sermons by minister retrieved successfully (cached)`,
+                status: 200,
+            });
+        }
+
         const result = await sermonRepository.getSermonsByMinister(
             ministerId,
             options,
@@ -583,6 +754,11 @@ export const getSermonsByminister = asyncHandler(
                 new ErrorResponse(result.message, result.code || 500, []),
             );
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         res.status(200).json({
             error: false,
@@ -609,8 +785,8 @@ const getSermonsByMinisterSorted = (
         if (!ministerId) {
             return next(new ErrorResponse('ministerId is required', 400, []));
         }
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
 
         const options = {
@@ -619,6 +795,30 @@ const getSermonsByMinisterSorted = (
             populate: 'minister series topic',
             recentOnly: sortField === 'releaseDate', // for recent filter
         };
+
+        const cacheKey = sermonListKey('minister-ranked', {
+            ministerId,
+            sortField,
+            page,
+            limit,
+        });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            const messagesMap: Record<string, string> = {
+                playCount: 'Most played sermons retrieved successfully (cached)',
+                likeCount: 'Most liked sermons retrieved successfully (cached)',
+                shareCount: 'Most shared sermons retrieved successfully (cached)',
+                releaseDate:
+                    'Recently published sermons retrieved successfully (cached)',
+            };
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: messagesMap[sortField],
+                status: 200,
+            });
+        }
 
         const result = await sermonRepository.findByMinisterSorted(
             ministerId,
@@ -631,6 +831,11 @@ const getSermonsByMinisterSorted = (
                 new ErrorResponse(result.message, result.code || 500, []),
             );
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         const messagesMap: Record<string, string> = {
             playCount: 'Most played sermons retrieved successfully',
@@ -698,8 +903,8 @@ const getSermonsAllSorted = (
     sortField: 'playCount' | 'likeCount' | 'shareCount' | 'releaseDate',
 ) =>
     asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
 
         const options = {
@@ -709,6 +914,29 @@ const getSermonsAllSorted = (
             recentOnly: sortField === 'releaseDate',
         };
 
+        const cacheKey = sermonListKey('global-ranked', {
+            sortField,
+            page,
+            limit,
+        });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            const messagesMap: Record<string, string> = {
+                playCount: 'Most played sermons retrieved successfully (cached)',
+                likeCount: 'Most liked sermons retrieved successfully (cached)',
+                shareCount: 'Most shared sermons retrieved successfully (cached)',
+                releaseDate:
+                    'Recently published sermons retrieved successfully (cached)',
+            };
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: messagesMap[sortField],
+                status: 200,
+            });
+        }
+
         const result = await sermonRepository.findAllSorted(sortField, options);
 
         if (result.error) {
@@ -716,6 +944,11 @@ const getSermonsAllSorted = (
                 new ErrorResponse(result.message, result.code || 500, []),
             );
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         const messagesMap: Record<string, string> = {
             playCount: 'Most played sermons retrieved successfully',
@@ -776,9 +1009,20 @@ export const getSermonsRecentlyPublished = getSermonsAllSorted('releaseDate');
  */
 export const getRecentlyAddedSermons = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
+        const cacheKey = sermonListKey('user-recently-added', { page, limit });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: 'Recently added sermons retrieved successfully (cached)',
+                status: 200,
+            });
+        }
 
         const options = { limit, skip, populate: 'minister series category' };
         const result = await sermonRepository.findRecentlyAddedMonthly(options);
@@ -786,6 +1030,11 @@ export const getRecentlyAddedSermons = asyncHandler(
         if (result.error) {
             return next(new ErrorResponse(result.message, result.code, []));
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         res.status(200).json({
             error: false,
@@ -808,9 +1057,25 @@ export const getUserRecentlyPlayedSermons = asyncHandler(
 
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
+        const cacheKey = sermonListKey('user-recently-played', {
+            userId,
+            page,
+            limit,
+        });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message:
+                    'Recently played sermons retrieved successfully (cached)',
+                status: 200,
+            });
+        }
 
         const options = { limit, skip, populate: 'minister series category' };
         const result = await sermonRepository.findRecentlyPlayedByUser(
@@ -821,6 +1086,11 @@ export const getUserRecentlyPlayedSermons = asyncHandler(
         if (result.error) {
             return next(new ErrorResponse(result.message, result.code, []));
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         res.status(200).json({
             error: false,
@@ -839,9 +1109,20 @@ export const getUserRecentlyPlayedSermons = asyncHandler(
  */
 export const getPopularSermonsRecentlyPlayed = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
+        const cacheKey = sermonListKey('user-popular', { page, limit });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: 'Popular sermons retrieved successfully (cached)',
+                status: 200,
+            });
+        }
 
         const options = { limit, skip, populate: 'minister series topic' };
         const result = await sermonRepository.findMostRecentlyPlayed(options);
@@ -849,6 +1130,11 @@ export const getPopularSermonsRecentlyPlayed = asyncHandler(
         if (result.error) {
             return next(new ErrorResponse(result.message, result.code, []));
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         res.status(200).json({
             error: false,
@@ -874,10 +1160,7 @@ export const getFavoriteMinisterSermons = asyncHandler(
                 : Array.isArray(q)
                   ? q.map(String).join(',')
                   : '';
-        const favoriteMinisterIds = rawIds
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean);
+        const favoriteMinisterIds = normalizeCsvQuery(rawIds);
         if (favoriteMinisterIds.length === 0) {
             return next(
                 new ErrorResponse(
@@ -888,9 +1171,27 @@ export const getFavoriteMinisterSermons = asyncHandler(
             );
         }
 
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
+        const userId = getAuthUserId(req);
+        const cacheKey = sermonListKey('user-favorite-ministers', {
+            userId: userId || 'anon',
+            ids: favoriteMinisterIds,
+            page,
+            limit,
+        });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message:
+                    'Sermons from favorite ministers retrieved successfully (cached)',
+                status: 200,
+            });
+        }
 
         const options = { limit, skip, populate: 'minister series topic' };
         const result =
@@ -902,6 +1203,11 @@ export const getFavoriteMinisterSermons = asyncHandler(
         if (result.error) {
             return next(new ErrorResponse(result.message, result.code, []));
         }
+
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
 
         res.status(200).json({
             error: false,
@@ -927,10 +1233,7 @@ export const getSermonsByUserInterests = asyncHandler(
                 : Array.isArray(q)
                   ? q.map(String).join(',')
                   : '';
-        const interests = rawInterests
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean);
+        const interests = normalizeCsvQuery(rawInterests);
         if (interests.length === 0) {
             return next(
                 new ErrorResponse(
@@ -941,9 +1244,26 @@ export const getSermonsByUserInterests = asyncHandler(
             );
         }
 
-        const page = Number(req.query.page) || 1;
-        const limit = Number(req.query.limit) || 25;
+        const page = toPositiveInt(req.query.page, 1);
+        const limit = toPositiveInt(req.query.limit, 25);
         const skip = (page - 1) * limit;
+        const userId = getAuthUserId(req);
+        const cacheKey = sermonListKey('user-interests', {
+            userId: userId || 'anon',
+            interests,
+            page,
+            limit,
+        });
+        const cached = await redisWrapper.fetchData<any>(cacheKey);
+        if (cached) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                data: cached,
+                message: 'Sermons based on interests retrieved successfully (cached)',
+                status: 200,
+            });
+        }
 
         const options = { limit, skip, populate: 'minister series topic' };
         const result = await sermonRepository.findByUserInterests(
@@ -955,6 +1275,11 @@ export const getSermonsByUserInterests = asyncHandler(
             return next(new ErrorResponse(result.message, result.code, []));
         }
 
+        await redisWrapper.keepData(
+            { key: cacheKey, value: result.data },
+            SERMON_CACHE_TTL_LIST,
+        );
+
         res.status(200).json({
             error: false,
             errors: [],
@@ -964,6 +1289,137 @@ export const getSermonsByUserInterests = asyncHandler(
         });
     },
 );
+
+
+function toPositiveInt(value: unknown, fallback: number): number {
+    const n = Number(value);
+    return Number.isFinite(n) && n > 0 ? Math.trunc(n) : fallback;
+}
+
+function normalizeSort(value: unknown, fallback = '-createdAt'): string {
+    return typeof value === 'string' && value.trim().length > 0
+        ? value.trim()
+        : fallback;
+}
+
+function normalizeCsvQuery(value: unknown): string[] {
+    const raw =
+        typeof value === 'string'
+            ? value
+            : Array.isArray(value)
+              ? value.map(String).join(',')
+              : '';
+    return Array.from(
+        new Set(
+            raw
+                .split(',')
+                .map((s) => s.trim())
+                .filter(Boolean),
+        ),
+    ).sort((a, b) => a.localeCompare(b));
+}
+
+function keyHash(payload: Record<string, unknown>): string {
+    const serialized = JSON.stringify(payload);
+    return createHash('sha1').update(serialized).digest('hex');
+}
+
+function sermonListKey(scope: string, payload: Record<string, unknown>): string {
+    return `sermon:list:${scope}:${keyHash(payload)}`;
+}
+
+function sermonDetailKey(id: string, viewerScope: string): string {
+    return `sermon:id:${id}:viewer:${viewerScope}`;
+}
+
+async function invalidateSermonDetailCache(
+    sermonId: string,
+    userId?: string | null,
+) {
+    try {
+        await redisWrapper.deleteData(sermonDetailKey(sermonId, 'public'));
+        if (userId) {
+            await redisWrapper.deleteData(
+                sermonDetailKey(sermonId, `user:${userId}`),
+            );
+        }
+    } catch (cacheError) {
+        console.error('Sermon detail cache invalidation failed:', cacheError);
+    }
+}
+
+async function invalidateCommonSermonListCaches(params: {
+    ministerId?: string;
+    topic?: string;
+    userId?: string;
+}) {
+    const { ministerId, topic, userId } = params;
+    const keys: string[] = [];
+    keys.push(sermonListKey('all', { page: 1, limit: 25, sort: '-createdAt' }));
+    for (const sortField of [
+        'playCount',
+        'likeCount',
+        'shareCount',
+        'releaseDate',
+    ] as const) {
+        keys.push(
+            sermonListKey('global-ranked', { sortField, page: 1, limit: 25 }),
+        );
+    }
+    if (topic) {
+        keys.push(
+            sermonListKey('topic', {
+                topic,
+                page: 1,
+                limit: 25,
+                sort: '-createdAt',
+            }),
+        );
+    }
+    if (ministerId) {
+        keys.push(
+            sermonListKey('minister', {
+                ministerId,
+                page: 1,
+                limit: 25,
+                sort: '-releaseDate',
+                publicationStatus: 'all',
+                search: undefined,
+                dateFrom: undefined,
+                dateTo: undefined,
+            }),
+        );
+        for (const sortField of [
+            'playCount',
+            'likeCount',
+            'shareCount',
+            'releaseDate',
+        ] as const) {
+            keys.push(
+                sermonListKey('minister-ranked', {
+                    ministerId,
+                    sortField,
+                    page: 1,
+                    limit: 25,
+                }),
+            );
+        }
+    }
+    if (userId) {
+        keys.push(
+            sermonListKey('user-recently-played', { userId, page: 1, limit: 25 }),
+        );
+        keys.push(sermonListKey('user-popular', { page: 1, limit: 25 }));
+    }
+    try {
+        for (const key of keys) {
+            await redisWrapper.deleteData(key);
+        }
+    } catch (cacheError) {
+        console.error('Sermon list cache invalidation failed:', cacheError);
+    }
+}
+
 
 // create sermon metadata
 // get sermon metadata

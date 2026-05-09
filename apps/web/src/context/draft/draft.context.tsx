@@ -5,7 +5,6 @@ import React, {
     useCallback,
 } from 'react';
 import type { ISermonUpload } from '@/utils/interfaces.util';
-import Sermon from '@/api/sermon';
 import api from '@/api/config';
 import {
     readDevUploadDrafts,
@@ -111,7 +110,7 @@ export const useDraft = () => {
 // Provider
 export const DraftProvider: React.FC<{
     children: React.ReactNode;
-    sermonApi?: Sermon;
+    sermonApi?: unknown;
 }> = ({ children, sermonApi }) => {
     const [state, dispatch] = useReducer(draftReducer, initialState);
 

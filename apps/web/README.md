@@ -58,7 +58,6 @@ To get it up and running on your local machine, follow the steps below:
    Ensure you have a `.env` file with the necessary environment variables for your app.
 
     ```bash
-    VITE_API_BASE_URL=https://api.example.com
     ```
 
 4. **Run the app in development mode**

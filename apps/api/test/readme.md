@@ -384,8 +384,8 @@ Common test helper functions for assertions and data creation:
 import {
     createTestUser,
     createAdminUser,
-    createBusinessUser,
-    createTalentUser,
+    createMinisterUser,
+    createCreatorUser,
     expectSuccessResponse,
     expectErrorResponse,
     expectStandardResponse,
@@ -396,8 +396,8 @@ import {
 // Create test users with authentication tokens
 const user = await createTestUser(); // Returns { user, token }
 const admin = await createAdminUser(); // Returns { user, token }
-const business = await createBusinessUser(); // Returns { user, token }
-const talent = await createTalentUser(); // Returns { user, token }
+const minister = await createMinisterUser(); // Returns { user, token }
+const creator = await createCreatorUser(); // Returns { user, token }
 
 // Use the token for authenticated requests
 const response = await request(app)
@@ -425,9 +425,9 @@ Test data factories for creating test entities in the database:
 ```typescript
 import {
     createUser,
-    createTalentUser,
+    createCreatorUser,
     createAdminUser,
-    createBusinessUser,
+    createMinisterUser,
     createUserData,
 } from '../factories/user.factory';
 
@@ -436,7 +436,7 @@ const user = await createUser();
 
 // Create a user with custom options
 const customUser = await createUser({
-    userType: UserType.TALENT,
+    userType: UserType.CREATOR,
     isActive: true,
     isActivated: true,
     email: 'custom@example.com',
@@ -444,23 +444,23 @@ const customUser = await createUser({
 });
 
 // Create specific user types (returns IUserDoc)
-const talent = await createTalentUser();
+const creator = await createCreatorUser();
 const admin = await createAdminUser();
-const business = await createBusinessUser();
+const minister = await createMinisterUser();
 
 // Create user data without saving (returns Partial<IUserDoc>)
-const userData = createUserData({ userType: UserType.TALENT });
+const userData = createUserData({ userType: UserType.CREATOR });
 ```
 
 **Factory Options:**
 
-- `userType`: UserType enum (TALENT, BUSINESS, ADMIN, etc.)
+- `userType`: UserType enum (CREATOR, MINISTER, ADMIN, etc.)
 - `isActive`: boolean
 - `isActivated`: boolean
 - `isLocked`: boolean
 - `email`: string
 - `password`: string
-- `isAdmin`, `isBusiness`, `isTalent`: boolean flags
+- `isAdmin`: boolean
 - `passwordType`: PasswordType enum
 
 ## Writing Tests
@@ -754,20 +754,20 @@ jest.mock('../../src/services/custom.service', () => ({
 ```typescript
 import {
     createUser,
-    createTalentUser,
-    createBusinessUser,
+    createCreatorUser,
+    createMinisterUser,
     createAdminUser,
     createUserData,
 } from '../factories/user.factory';
 
 // Create and save user to database
 const user = await createUser({
-    userType: UserType.TALENT,
+    userType: UserType.CREATOR,
     email: 'test@example.com',
 });
 
 // Create user data without saving
-const userData = createUserData({ userType: UserType.BUSINESS });
+const userData = createUserData({ userType: UserType.MINISTER });
 ```
 
 **Other Factories:**

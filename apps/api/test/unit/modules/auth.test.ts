@@ -4,12 +4,12 @@ import app from '../../../src/configs/app.config';
 import {
     createTestUser,
     createAdminUser,
-    createTalentUser,
+    createCreatorUser,
     expectSuccessResponse,
     expectErrorResponse,
     generateTestData,
 } from '../../utils/test-helpers';
-import { OtpType } from '../../../src/modules/user/user.interface';
+import { OtpType } from '../../../src/modules/users/user/user.interface';
 
 describe('Auth Module - Integration Tests', () => {
     const baseUrl = '/api/v1/auth';
@@ -23,11 +23,11 @@ describe('Auth Module - Integration Tests', () => {
     });
 
     describe('POST /auth/register', () => {
-        it('should register a new talent user successfully', async () => {
+        it('should register a new creator user successfully', async () => {
             const userData = {
                 email: generateTestData.email(),
                 password: generateTestData.password(),
-                userType: 'talent',
+                userType: 'creator',
             };
 
             const response = await request(app)
@@ -49,11 +49,11 @@ describe('Auth Module - Integration Tests', () => {
             expect(response.body.message).toContain('OTP');
         });
 
-        it('should register a new business user successfully', async () => {
+        it('should register a new minister user successfully', async () => {
             const userData = {
                 email: generateTestData.email(),
                 password: generateTestData.password(),
-                userType: 'business',
+                userType: 'minister',
             };
 
             const response = await request(app)
@@ -68,7 +68,7 @@ describe('Auth Module - Integration Tests', () => {
             const userData = {
                 email: 'invalid-email',
                 password: generateTestData.password(),
-                userType: 'talent',
+                userType: 'creator',
             };
 
             const response = await request(app)
@@ -82,7 +82,7 @@ describe('Auth Module - Integration Tests', () => {
             const userData = {
                 email: generateTestData.email(),
                 password: 'weak',
-                userType: 'talent',
+                userType: 'creator',
             };
 
             const response = await request(app)
@@ -105,7 +105,7 @@ describe('Auth Module - Integration Tests', () => {
             const userData = {
                 email: generateTestData.email(),
                 password: generateTestData.password(),
-                userType: 'talent',
+                userType: 'creator',
             };
 
             // First registration
@@ -123,7 +123,7 @@ describe('Auth Module - Integration Tests', () => {
 
     describe('POST /auth/login', () => {
         beforeEach(async () => {
-            testUser = await createTalentUser();
+            testUser = await createCreatorUser();
         });
 
         it('should login user with valid credentials', async () => {
@@ -167,7 +167,7 @@ describe('Auth Module - Integration Tests', () => {
 
     describe('POST /auth/activate', () => {
         beforeEach(async () => {
-            testUser = await createTalentUser();
+            testUser = await createCreatorUser();
             // Set OTP for activation
             testUser.user.Otp = '123456';
             testUser.user.OtpExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
@@ -246,7 +246,7 @@ describe('Auth Module - Integration Tests', () => {
 
     describe('POST /auth/forgot-password', () => {
         beforeEach(async () => {
-            testUser = await createTalentUser();
+            testUser = await createCreatorUser();
         });
 
         it('should send password reset OTP', async () => {
@@ -273,7 +273,7 @@ describe('Auth Module - Integration Tests', () => {
 
     describe('POST /auth/reset-password', () => {
         beforeEach(async () => {
-            testUser = await createTalentUser();
+            testUser = await createCreatorUser();
             // Set OTP for password reset
             testUser.user.Otp = '123456';
             testUser.user.OtpExpiry = Date.now() + 15 * 60 * 1000;

@@ -16,7 +16,7 @@ import {
     View,
 } from 'react-native';
 import { CloseCircle, SearchNormal } from 'iconsax-react-nativejs';
-import { router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 
 import Input from '@/components/ui/input';
 import Loader from '@/components/ui/loader';
@@ -53,7 +53,7 @@ import {
     usePlaylistsQuery,
     useUserLibraryQuery,
 } from '@/hooks/use-library-queries';
-import { useUserStore } from '@/stores/user-store';
+import { useContextType } from '@troott/state';
 import {
     getLibraryArrayField,
     playlistDocToRow,
@@ -120,11 +120,22 @@ function libraryMatchingSermonIds(lib: unknown, q: string): Set<string> {
 }
 
 export default function SearchQueryScreen() {
-    const [query, setQuery] = useState('');
+    const { q: qParam } = useLocalSearchParams<{ q?: string }>();
+    const initialFromRoute =
+        typeof qParam === 'string' && qParam.trim().length > 0 ? qParam : '';
+
+    const [query, setQuery] = useState(initialFromRoute);
     const [clearRecentOpen, setClearRecentOpen] = useState(false);
+
+    useEffect(() => {
+        if (typeof qParam === 'string' && qParam.trim().length > 0) {
+            setQuery(qParam);
+        }
+    }, [qParam]);
     const [chip, setChip] = useState<SearchFilterChip>('Sermon');
 
-    const userId = useUserStore((s) => s.user?.id);
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
 
     const {
         entries: recentEntries,

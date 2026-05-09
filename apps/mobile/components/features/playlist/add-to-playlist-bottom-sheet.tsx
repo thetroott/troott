@@ -14,8 +14,10 @@ import {
 } from './use-add-to-playlist';
 
 export type AddToPlaylistBottomSheetProps = {
-    /** Defaults to demo playlists; replace with API data when available. */
+    /** Defaults to demo playlists when omitted and no API rows are passed. */
     playlists?: ChoosePlaylistListItem[];
+    /** When set, PATCH `/playlists/:id/add` runs before success UI. */
+    sermonTrackId?: string | null;
     /** Stacked on top of another bottom sheet. */
     zIndex?: number;
     portalName?: string;
@@ -36,6 +38,7 @@ const AddToPlaylistBottomSheet = forwardRef<
 >(function AddToPlaylistBottomSheet(
     {
         playlists = DEFAULT_CHOOSE_PLAYLISTS,
+        sermonTrackId = null,
         zIndex = 20,
         portalName: portalNameProp,
         onSermonAddedToPlaylist,
@@ -71,6 +74,7 @@ const AddToPlaylistBottomSheet = forwardRef<
                 <PlaylistAddTrackContent
                     ref={flowRef}
                     initialPlaylists={playlists}
+                    sermonTrackId={sermonTrackId}
                     chooseEmbeddedInBottomSheet
                     onSermonAddedToPlaylist={onSermonAddedToPlaylist}
                     onBeforeViewPlaylist={() => {

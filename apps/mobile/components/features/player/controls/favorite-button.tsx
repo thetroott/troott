@@ -39,7 +39,7 @@ export default function FavoriteButton({
 }
 
 function AddFavoriteButton({ item, onToggle }: FavoriteButtonProps) {
-    const { mutate, isPending } = useRemoveFavorite();
+    const { mutate, isPending } = useAddFavorite();
 
     if (isPending) {
         return (
@@ -62,7 +62,7 @@ function AddFavoriteButton({ item, onToggle }: FavoriteButtonProps) {
 }
 
 function RemoveFavoriteButton({ item, onToggle }: FavoriteButtonProps) {
-    const { mutate, isPending } = useAddFavorite();
+    const { mutate, isPending } = useRemoveFavorite();
 
     if (isPending) {
         return (

@@ -38,6 +38,11 @@ export interface InviteListenerDTO {
     resourceId?: string;
 }
 
+export interface BulkInviteListenersDTO {
+    emails: string[];
+    resourceId?: string;
+}
+
 export interface AcceptListenerInvitationDTO {
     token: string;
     email: string;

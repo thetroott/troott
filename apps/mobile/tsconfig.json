@@ -43,10 +43,6 @@
         "screens/Auth",
         "screens/Preview.tsx",
         "hooks/platform/use-theme-color.ts",
-        "hooks/use-user-profile.tsx",
-        "stores/app/device-profile.ts",
-        "hooks/app/**",
-        "hooks/useUser.ts",
-        "hooks/useWorkspace.ts"
+        "stores/app/device-profile.ts"
     ]
 }

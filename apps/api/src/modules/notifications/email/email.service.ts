@@ -520,14 +520,14 @@ class AppEmailService {
         });
     }
 
-    async sendPreacherWelcomeEmail(user: IUserDoc) {
+    async sendMinisterWelcomeEmail(user: IUserDoc) {
         return this.queueEmailJob({
             driver: this.config.service,
             user,
             template: EmailTemplate.WELCOME,
             options: {
-                subject: `Welcome Preacher, ${user.firstName}!`,
-                bodyOne: `You’ve been onboarded as a preacher on Pacepard.`,
+                subject: `Welcome Minister, ${user.firstName}!`,
+                bodyOne: `You’ve been onboarded as a minister on Pacepard.`,
                 bodyTwo: `Start uploading sermons to bless your listeners.`,
                 buttonText: 'Upload Sermon',
                 buttonUrl: `${this.config.clientUrl}/sermons/upload`,

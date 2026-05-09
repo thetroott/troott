@@ -15,13 +15,13 @@ export type SearchFilterChip =
     | 'Playlists'
     | 'Sermon'
     | 'Series'
-    | 'Preachers';
+    | 'Ministers';
 
 const CHIP_ORDER: SearchFilterChip[] = [
     'Playlists',
     'Sermon',
     'Series',
-    'Preachers',
+    'Ministers',
 ];
 
 type PlaylistHit = {
@@ -90,7 +90,7 @@ export default function SearchCatalogResults({
                     ministers: [],
                     playlists: [],
                 };
-            case 'Preachers':
+            case 'Ministers':
                 return { sermons: [], ministers, playlists: [] };
         }
     }, [chip, sermons, ministers, playlists]);
@@ -116,7 +116,7 @@ export default function SearchCatalogResults({
 
     const topMinister = filtered.ministers[0];
     const moreMinisters =
-        chip === 'Preachers' ? filtered.ministers.slice(1) : [];
+        chip === 'Ministers' ? filtered.ministers.slice(1) : [];
 
     const ministerHit = useMemo(
         () =>
@@ -214,8 +214,8 @@ export default function SearchCatalogResults({
                             layout="shell"
                             imageUri={topMinister.image}
                             imageShape="circle"
-                            title={topMinister.name ?? 'Preacher'}
-                            subtitle="Preacher"
+                            title={topMinister.name ?? 'Minister'}
+                            subtitle="Minister"
                             onPress={() =>
                                 router.push(`/minister/${topMinister.id}`)
                             }
@@ -279,8 +279,8 @@ export default function SearchCatalogResults({
                             layout="list"
                             imageUri={m.image}
                             imageShape="circle"
-                            title={m.name ?? 'Preacher'}
-                            subtitle="Preacher"
+                            title={m.name ?? 'Minister'}
+                            subtitle="Minister"
                             onPress={() => router.push(`/minister/${m.id}`)}
                             style={
                                 index === moreMinisters.length - 1
@@ -361,10 +361,10 @@ export default function SearchCatalogResults({
                 </View>
             ) : null}
 
-            {filtered.ministers.length > 0 && chip !== 'Preachers' ? (
+            {filtered.ministers.length > 0 && chip !== 'Ministers' ? (
                 <View style={styles.block}>
                     <Text weight="semiBold" size="lg" color={theme.colors.white[50]}>
-                        Preachers
+                        Ministers
                     </Text>
                     {filtered.ministers.map((m, index) => (
                         <SearchCatalogEntityRow
@@ -372,8 +372,8 @@ export default function SearchCatalogResults({
                             layout="list"
                             imageUri={m.image}
                             imageShape="circle"
-                            title={m.name ?? 'Preacher'}
-                            subtitle="Preacher"
+                            title={m.name ?? 'Minister'}
+                            subtitle="Minister"
                             onPress={() => router.push(`/minister/${m.id}`)}
                             style={
                                 index === filtered.ministers.length - 1

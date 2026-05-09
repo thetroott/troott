@@ -6,6 +6,7 @@ import ministerRepository from './minister.repository';
 import {
     UpdateMinisterDTO,
     InviteMinisterDTO,
+    BulkInviteMinistersDTO,
     AcceptMinisterInvitationDTO,
     SetMinisterPasswordDTO,
     SubmitMinisterVerificationDTO,
@@ -24,10 +25,56 @@ import redisWrapper from '../../../middlewares/redis.mdw';
 import { PasswordType, UserType, IUserDoc } from '../user/user.interface';
 import { VerificationStatus } from '../../../utils/enums.util';
 
+function isAdminOrSuperAdmin(req: Request): boolean {
+    const user = (req as any).user ?? {};
+    const userType = String(user?.userType ?? '').toLowerCase();
+    return (
+        user?.isAdmin === true ||
+        user?.isSuper === true ||
+        userType === UserType.ADMIN ||
+        userType === UserType.SUPERADMIN
+    );
+}
+
+function normalizeInviteEmail(email: string): string {
+    return email.trim().toLowerCase();
+}
+
+async function invalidateInvitationCachesForEmail(
+    email: string,
+    resourceId: string,
+    inviterId?: string,
+) {
+    const normalizedEmail = normalizeInviteEmail(email);
+    const keys = [
+        `invitation:list:invitee:${normalizedEmail}`,
+        `invitation:list:resource:${resourceId}`,
+    ];
+    if (inviterId) {
+        keys.push(`invitation:list:inviter:${inviterId}`);
+    }
+    for (const key of keys) {
+        try {
+            await redisWrapper.deleteData(key);
+        } catch (e) {
+            console.error('Invitation cache invalidation failed:', e);
+        }
+    }
+}
+
 export const inviteMinister: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        if (!isAdminOrSuperAdmin(req)) {
+            return next(
+                new ErrorResponse(
+                    'Only admin and super admin can invite ministers',
+                    403,
+                    [],
+                ),
+            );
+        }
 
         const { email, resourceId }: InviteMinisterDTO = req.body;
 
@@ -35,14 +82,15 @@ export const inviteMinister: RequestHandler = asyncHandler(
             return next(new ErrorResponse('Email is required', 400, []));
         }
 
-        const mailCheck = await authService.checkEmail(email);
+        const normalizedEmail = normalizeInviteEmail(email);
+        const mailCheck = await authService.checkEmail(normalizedEmail);
         if (!mailCheck) {
             return next(new ErrorResponse('Invalid email format', 400, []));
         }
 
         const invitationResult = await invitationService.newInvitation({
             invitedBy: userId,
-            inviteeEmail: email.trim().toLowerCase(),
+            inviteeEmail: normalizedEmail,
             inviteType: InvitationType.MINISTER,
             resourceId: resourceId || userId,
         } as any);
@@ -71,11 +119,11 @@ export const inviteMinister: RequestHandler = asyncHandler(
             );
         }
 
-        const invitationUrl = `${EMAIL_CONFIG.clientUrl}/minister/invite/accept?token=${token}&email=${encodeURIComponent(email.trim().toLowerCase())}`;
+        const invitationUrl = `${EMAIL_CONFIG.clientUrl}/minister/invite/accept?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
 
         const inviteeUser = {
-            email: email.trim().toLowerCase(),
-            firstName: email.split('@')[0] || 'Minister',
+            email: normalizedEmail,
+            firstName: normalizedEmail.split('@')[0] || 'Minister',
             lastName: '',
         } as any;
 
@@ -93,6 +141,17 @@ export const inviteMinister: RequestHandler = asyncHandler(
             );
         }
 
+        try {
+            await redisWrapper.deleteData(`minister:profile:${userId}`);
+        } catch (cacheError) {
+            console.error('Cache invalidation failed:', cacheError);
+        }
+        await invalidateInvitationCachesForEmail(
+            normalizedEmail,
+            String(resourceId || userId),
+            String(userId),
+        );
+
         res.status(201).json({
             error: false,
             errors: [],
@@ -104,6 +163,203 @@ export const inviteMinister: RequestHandler = asyncHandler(
                 invitationResult.message ||
                 'Minister invitation sent successfully.',
             status: 201,
+        });
+    },
+);
+
+export const bulkInviteMinisters: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        if (!isAdminOrSuperAdmin(req)) {
+            return next(
+                new ErrorResponse(
+                    'Only admin and super admin can invite ministers',
+                    403,
+                    [],
+                ),
+            );
+        }
+
+        const { emails, resourceId }: BulkInviteMinistersDTO = req.body;
+        if (!Array.isArray(emails) || emails.length === 0) {
+            return next(
+                new ErrorResponse('Emails must be a non-empty array', 400, []),
+            );
+        }
+
+        const inviterResult = await userRepository.findById(userId);
+        const inviter = inviterResult.data as any;
+        const results = {
+            successful: [] as Array<{ email: string; token?: string }>,
+            failed: [] as Array<{ email: string; error: string }>,
+        };
+
+        for (const rawEmail of emails) {
+            const normalizedEmail = normalizeInviteEmail(String(rawEmail || ''));
+            if (!normalizedEmail) {
+                results.failed.push({
+                    email: String(rawEmail || ''),
+                    error: 'Email is required',
+                });
+                continue;
+            }
+            const mailCheck = await authService.checkEmail(normalizedEmail);
+            if (!mailCheck) {
+                results.failed.push({
+                    email: normalizedEmail,
+                    error: 'Invalid email format',
+                });
+                continue;
+            }
+
+            const invitationResult = await invitationService.newInvitation({
+                invitedBy: userId,
+                inviteeEmail: normalizedEmail,
+                inviteType: InvitationType.MINISTER,
+                resourceId: resourceId || userId,
+            } as any);
+            if (invitationResult.error) {
+                results.failed.push({
+                    email: normalizedEmail,
+                    error: invitationResult.message,
+                });
+                continue;
+            }
+
+            const token = (invitationResult.data as any)?.token;
+            if (!token) {
+                results.failed.push({
+                    email: normalizedEmail,
+                    error: 'Failed to generate invitation token',
+                });
+                continue;
+            }
+
+            const invitationUrl = `${EMAIL_CONFIG.clientUrl}/minister/invite/accept?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+            const inviteeUser = {
+                email: normalizedEmail,
+                firstName: normalizedEmail.split('@')[0] || 'Minister',
+                lastName: '',
+            } as any;
+            const emailResult = await emailService.sendInvitationEmail(
+                inviteeUser,
+                inviter?.firstName || 'A team member',
+                invitationUrl,
+                'Minister',
+            );
+            if (emailResult.error) {
+                console.error(
+                    `Failed to queue invitation email for ${normalizedEmail}:`,
+                    emailResult.message,
+                );
+            }
+
+            results.successful.push({ email: normalizedEmail, token });
+            await invalidateInvitationCachesForEmail(
+                normalizedEmail,
+                String(resourceId || userId),
+                String(userId),
+            );
+        }
+
+        res.status(201).json({
+            error: false,
+            errors: [],
+            data: {
+                successful: results.successful,
+                failed: results.failed,
+                total: emails.length,
+                successfulCount: results.successful.length,
+                failedCount: results.failed.length,
+            },
+            message: `Bulk minister invitation processed. ${results.successful.length} successful, ${results.failed.length} failed.`,
+            status: 201,
+        });
+    },
+);
+
+export const resendMinisterInvite: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        if (!isAdminOrSuperAdmin(req)) {
+            return next(
+                new ErrorResponse(
+                    'Only admin and super admin can resend minister invites',
+                    403,
+                    [],
+                ),
+            );
+        }
+
+        const { token, email }: InviteTokenDTO = req.body;
+        if (!token || !email) {
+            return next(
+                new ErrorResponse('Token and email are required', 400, []),
+            );
+        }
+
+        const normalizedEmail = normalizeInviteEmail(email);
+        const resendResult = await invitationService.resendInvite({
+            token,
+            email: normalizedEmail,
+        });
+        if (resendResult.error) {
+            return next(
+                new ErrorResponse(resendResult.message, resendResult.code, []),
+            );
+        }
+
+        const inviterResult = await userRepository.findById(userId);
+        const inviter = inviterResult.data as any;
+        const newToken = (resendResult.data as any)?.newToken;
+        if (!newToken) {
+            return next(
+                new ErrorResponse(
+                    'Failed to generate new invitation token',
+                    500,
+                    [],
+                ),
+            );
+        }
+
+        const invitationUrl = `${EMAIL_CONFIG.clientUrl}/minister/invite/accept?token=${newToken}&email=${encodeURIComponent(normalizedEmail)}`;
+        const inviteeUser = {
+            email: normalizedEmail,
+            firstName: normalizedEmail.split('@')[0] || 'Minister',
+            lastName: '',
+        } as any;
+        const emailResult = await emailService.sendInvitationEmail(
+            inviteeUser,
+            inviter?.firstName || 'A team member',
+            invitationUrl,
+            'Minister',
+        );
+        if (emailResult.error) {
+            console.error(
+                'Failed to queue invitation email:',
+                emailResult.message,
+            );
+        }
+
+        await invalidateInvitationCachesForEmail(
+            normalizedEmail,
+            String(userId),
+            String(userId),
+        );
+
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: {
+                ...resendResult.data,
+                emailQueued: !emailResult.error,
+            },
+            message:
+                resendResult.message ||
+                'Minister invitation resent successfully.',
+            status: 200,
         });
     },
 );
@@ -189,6 +445,11 @@ export const acceptMinisterInvitation: RequestHandler = asyncHandler(
 
         await authService.activateAccount(user);
         await authService.updateLastLogin(user);
+        await invalidateInvitationCachesForEmail(
+            normalizeInviteEmail(email),
+            String(invitedBy || ''),
+            String(invitedBy || ''),
+        );
 
         res.status(201).json({
             error: false,
@@ -428,6 +689,17 @@ export const setMinisterPassword: RequestHandler = asyncHandler(
 
 export const revokeMinisterInvitation: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        if (!isAdminOrSuperAdmin(req)) {
+            return next(
+                new ErrorResponse(
+                    'Only admin and super admin can revoke minister invites',
+                    403,
+                    [],
+                ),
+            );
+        }
         const { token, email }: InviteTokenDTO = req.body;
 
         if (!token || !email) {
@@ -446,6 +718,12 @@ export const revokeMinisterInvitation: RequestHandler = asyncHandler(
                 new ErrorResponse(revokeResult.message, revokeResult.code, []),
             );
         }
+
+        await invalidateInvitationCachesForEmail(
+            normalizeInviteEmail(email),
+            String(userId),
+            String(userId),
+        );
 
         res.status(200).json({
             error: false,

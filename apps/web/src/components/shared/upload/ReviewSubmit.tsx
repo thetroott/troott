@@ -26,7 +26,7 @@ import { useDraft } from '@/context/draft/draft.context';
 import apiCall from '@/api/config';
 import storage from '@/utils/storage.util';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
-import { useUserStore } from '@/store/user-store';
+import { useContextType } from '@troott/state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 
 interface ReviewSubmitProps {
@@ -57,7 +57,8 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
     const { uploadData, isLoading, uploadComplete, progress } = state;
     const navigate = useNavigate();
     const queryClient = useQueryClient();
-    const user = useUserStore((s) => s.user) as Record<string, unknown> | null;
+    const { userContext } = useContextType();
+    const user = userContext.user as Record<string, unknown> | null;
     const ministerId = resolveMinisterId(user);
     const [showMoreFields, setShowMoreFields] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);

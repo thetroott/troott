@@ -73,7 +73,11 @@ const useFormValidation = (initialValues: Record<string, any>) => {
             Object.keys(validationRules).forEach((fieldName) => {
                 const value = values[fieldName];
                 const rules = validationRules[fieldName];
-                const error = validateField(fieldName, value, rules);
+                const error = validateField(
+                    fieldName,
+                    value,
+                    rules ?? ({} as ValidationRules),
+                );
 
                 if (error) {
                     newErrors[fieldName] = error;

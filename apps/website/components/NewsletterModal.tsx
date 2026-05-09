@@ -24,7 +24,7 @@ interface ISubscribeError {
 interface ISubscribeDialog {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    user_type: 'listener' | 'preacher';
+    user_type: 'listener' | 'minister';
 }
 export default function Newsletter(data: ISubscribeDialog) {
     const { open, onOpenChange, user_type } = data;

@@ -10,6 +10,10 @@ import { StyleSheet, View } from 'react-native';
 
 import { theme } from '@/constants/theme';
 
+import Toast from 'react-native-toast-message';
+
+import { useAddSermonToPlaylistMutation } from '@/hooks/use-playlist-mutations';
+
 import AddToPlaylistConfirmationBar from './add-to-playlist-confirmation-bar';
 import ChoosePlaylistSheet from './choose-playlist-sheet';
 import type { ChoosePlaylistListItem } from './playlist-choose-types';
@@ -21,6 +25,8 @@ export type PlaylistAddTrackContentRef = {
 
 type PlaylistAddTrackContentProps = {
     initialPlaylists: ChoosePlaylistListItem[];
+    /** When set with `playlistType` on rows, persists via PATCH before confirmation UI. */
+    sermonTrackId?: string | null;
     /**
      * When true, the choose list is nested in a bottom sheet (e.g. over full player).
      */
@@ -40,12 +46,15 @@ const PlaylistAddTrackContent = forwardRef<
 >(function PlaylistAddTrackContent(
     {
         initialPlaylists,
+        sermonTrackId = null,
         chooseEmbeddedInBottomSheet = false,
         onBeforeViewPlaylist,
         onSermonAddedToPlaylist,
     },
     ref,
 ) {
+    const addToPlaylist = useAddSermonToPlaylistMutation();
+
     const { selectedId, toast, handleSelect, handleViewPlaylist, reset: resetState } =
         useAddToPlaylistState(
             onSermonAddedToPlaylist
@@ -69,6 +78,41 @@ const PlaylistAddTrackContent = forwardRef<
 
     useImperativeHandle(ref, () => ({ reset }), [reset]);
 
+    const onPickPlaylist = useCallback(
+        async (id: string) => {
+            const row = listItems.find((p) => p.id === id);
+            if (sermonTrackId && row) {
+                const playlistItemType = row.playlistType?.trim();
+                if (!playlistItemType) {
+                    Toast.show({
+                        text1: 'Cannot add sermon',
+                        text2: 'This playlist is missing a type. Try another playlist.',
+                        type: 'error',
+                    });
+                    return;
+                }
+                try {
+                    await addToPlaylist.mutateAsync({
+                        playlistId: id,
+                        sermonId: sermonTrackId,
+                        playlistItemType,
+                    });
+                } catch (e) {
+                    const msg =
+                        e instanceof Error ? e.message : 'Could not add to playlist';
+                    Toast.show({
+                        text1: 'Save failed',
+                        text2: msg,
+                        type: 'error',
+                    });
+                    return;
+                }
+            }
+            handleSelect(id, listItems);
+        },
+        [addToPlaylist, handleSelect, listItems, sermonTrackId],
+    );
+
     return (
         <View>
             {toast ? (
@@ -86,7 +130,7 @@ const PlaylistAddTrackContent = forwardRef<
                 embeddedInBottomSheet={chooseEmbeddedInBottomSheet}
                 playlists={listItems}
                 selectedId={selectedId}
-                onSelect={(id) => handleSelect(id, listItems)}
+                onSelect={onPickPlaylist}
             />
         </View>
     );

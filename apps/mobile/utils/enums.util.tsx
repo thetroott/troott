@@ -195,14 +195,7 @@ export enum EPasswordType {
     RESET = 'reset',
 }
 
-export enum UserType {
-    SUPERADMIN = 'superadmin',
-    ADMIN = 'admin',
-    PREACHER = 'minister',
-    CREATOR = 'creator',
-    LISTENER = 'listener',
-    USER = 'user',
-}
+export { UserType } from '@troott/api-client';
 
 export enum EVerificationStatus {
     PENDING = 'pending',
@@ -225,7 +218,7 @@ export enum EModels {
     LISTENER = 'listener',
     PLAN = 'plan',
     PLAYLIST = 'playlist',
-    PREACHER = 'preacher',
+    MINISTER = 'minister',
     SUBSCRIPTION = 'subscription',
     SERIES = 'series',
     SERMON = 'sermon',

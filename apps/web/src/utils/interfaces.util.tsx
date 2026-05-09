@@ -7,9 +7,16 @@ import type {
 import { emitWarning } from 'node:process';
 
 export interface IStorage {
-    storeAuth(token: string, id: string): void;
+    storeAuth(
+        token: string,
+        id: string,
+        userType: string,
+        email: string,
+    ): void;
     checkToken(): boolean;
     getToken(): string | null;
+    checkUserType(): boolean;
+    getUserType(): string | null;
     checkUserID(): boolean;
     getUserID(): string;
     checkUserEmail(): boolean;
@@ -18,12 +25,17 @@ export interface IStorage {
     getConfigWithBearer(): any;
     clearAuth(): void;
     keep(key: string, data: any): boolean;
-    keepLegacy(key: string, data: any): boolean;
     fetch(key: string): any;
-    fetchLegacy(key: string): any;
     deleteItem(key: string, legacy?: boolean): void;
     trimSpace(str: string): void;
     copyCode(code: string): void;
+    debugAuth(): {
+        hasToken: boolean;
+        tokenValid: boolean;
+        hasUserId: boolean;
+        hasUserType: boolean;
+        hasUserEmail: boolean;
+    };
 }
 
 export type RouteType = {
@@ -163,6 +175,8 @@ export interface IRouteParam {
 export interface IRouteItem {
     name: string;
     title?: string;
+    /** Used by sidebar layouts that show a shorter title */
+    displayTitle?: string;
     url: string;
     isAuth: boolean;
     iconName?: string;
@@ -182,6 +196,25 @@ export interface IInRoute extends IRouteItem {
 export interface IRoute extends IRouteItem {
     subroutes?: Array<IRouteItem>;
     inroutes?: Array<IInRoute>;
+    /** Optional redirect hint for legacy route tables */
+    redirect?: boolean | string;
+}
+
+/** Helpers exported from `routes/routes/helper.ts` */
+export interface IRoutil {
+    computePath: (route: string) => string;
+    computeSubPath: (route: IRoute, subroute: IRouteItem) => string;
+    computeInPath: (inroute: IInRoute) => string;
+    computeAppRoute: (route: IRoute) => string;
+    inRoute: (payload: {
+        route: string;
+        name: string;
+        params?: Array<IRouteParam>;
+    }) => string;
+    resolveRouteParams: (
+        params: Array<IRouteParam>,
+        stickTo: 'app' | 'page',
+    ) => string;
 }
 
 export interface IState {
@@ -324,7 +357,7 @@ export interface ISermonUpload {
     sermonId?: string;
     uploadRef?: string;
     slug?: string;
-    preacherId?: string;
+    ministerId?: string;
     seriesId?: string;
     // Draft tracking
     draftId?: string;

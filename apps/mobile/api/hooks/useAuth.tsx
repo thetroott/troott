@@ -5,10 +5,10 @@ import { IAPIResponse } from '@/utils/interface.utl';
 import { useRegisterStore } from '@/stores/register-store';
 import { useForgotPasswordStore } from '@/stores/otp-store';
 import { handleMutationError } from '@/utils/helpers.util';
-import { useUserStore } from '@/stores/user-store';
+import { useContextType } from '@troott/state';
 import useGoTo from '../../hooks/shared/useGoTo';
 import secureStorage from '@/services/secure-storage';
-import { UserType } from '@/utils/enums.util';
+import { UserType } from '@troott/api-client';
 
 import AUthAPI from '@/api/auth';
 import { storage } from '@/services/storage-service';
@@ -23,7 +23,8 @@ const authKeys = {
 export const useAuth = () => {
     const { goTo, goToNewScreen } = useGoTo();
     const { reset } = useRegisterStore();
-    const { setToken, setUser, setLoading, setUserType } = useUserStore();
+    const { userContext } = useContextType();
+    const { setUser, setUserType } = userContext;
     // const { setUser: setAuthUser, setToken: setAuthToken } = useAuthStore();
     const { setFormData, setErrors, setTouched, setResendCountdown, setStep } =
         useForgotPasswordStore();
@@ -265,7 +266,7 @@ export const useAuth = () => {
         onSuccess: (data: IAPIResponse) => {
             if (data?.message) {
                 setUser({});
-                setToken(null);
+                setUser({});
 
                 queryClient.invalidateQueries({ queryKey: authKeys.user() });
                 removeCatalogSearchQueries(queryClient);
@@ -279,7 +280,7 @@ export const useAuth = () => {
 
         onError: (error: any) => {
             setUser({});
-            setToken(null);
+            setUser({});
 
             queryClient.invalidateQueries({ queryKey: authKeys.user() });
             removeCatalogSearchQueries(queryClient);

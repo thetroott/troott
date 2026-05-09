@@ -1,5 +1,4 @@
-// import { create } from 'zustand'
-// import { createJSONStorage, devtools, persist } from 'zustand/middleware'
+// Archived player settings store scaffold.
 // import { mmkvStateStorage } from '../../constants/storage'
 // import { useStreamingDeviceProfileStore } from '../device-profile'
 // import { useEffect } from 'react'

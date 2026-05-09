@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 
 import type { ShareTrack } from '@/components/features/share/share-types';
 import type { SharingFlowStep } from '@/components/features/share/listener-sharing-flow';

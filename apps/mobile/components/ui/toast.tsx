@@ -1,7 +1,7 @@
 // components/ui/Toaster.tsx
 import { View, Text, Pressable } from 'react-native';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 import { useEffect } from 'react';
 import React from 'react';
 

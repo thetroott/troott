@@ -1,18 +1,19 @@
-import auth from '@/api/auth';
-import { UserDataQueryKey } from '@/engine/queries/query-keys';
+import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
 import type { SermonItemDTO } from '@/types/sermon';
-import { useUserStore } from '@/stores/user-store';
-import { useQuery } from '@tanstack/react-query';
 
+/**
+ * Favorite state from the same persisted store as the mini-player heart control.
+ */
 export const useIsFavorite = (item: SermonItemDTO) => {
-    const api = auth;
-    const { user } = useUserStore();
-    const userKey = user?.id ? { id: user.id } : undefined;
+    const sermonId = item?.id != null ? String(item.id) : '';
+    const isFavorite = useFavoriteSermonIdsStore((s) =>
+        sermonId.length > 0 ? s.isFavorite(sermonId) : false,
+    );
 
-    return useQuery({
-        queryKey: UserDataQueryKey(userKey, item),
-        queryFn: () => api,
-        select: (data) => typeof data === 'object' && data.logoutUser,
-        enabled: !!api && !!user?.id && !!item.id,
-    });
+    return {
+        data: isFavorite,
+        isPending: false,
+        isFetching: false,
+        isError: false,
+    };
 };

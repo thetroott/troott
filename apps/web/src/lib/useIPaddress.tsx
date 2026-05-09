@@ -28,7 +28,9 @@ const getIpAddress = async (): Promise<IResult> => {
             .reduce(
                 (acc, pair) => {
                     const [key, value] = pair.split('=');
-                    acc[key] = value;
+                    if (key !== undefined && key !== '') {
+                        acc[key] = value ?? '';
+                    }
                     return acc;
                 },
                 {} as Record<string, string>,

@@ -5,6 +5,8 @@ import {
     getMinisters,
     updateMinister,
     inviteMinister,
+    bulkInviteMinisters,
+    resendMinisterInvite,
     acceptMinisterInvitation,
     setMinisterPassword,
     revokeMinisterInvitation,
@@ -26,6 +28,8 @@ ministerRoutes.put(
 );
 
 ministerRoutes.post('/invite', Protect, inviteMinister);
+ministerRoutes.post('/invite/bulk', Protect, bulkInviteMinisters);
+ministerRoutes.post('/invite/resend', Protect, resendMinisterInvite);
 ministerRoutes.post('/invite/accept', acceptMinisterInvitation);
 ministerRoutes.post('/invite/revoke', Protect, revokeMinisterInvitation);
 

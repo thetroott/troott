@@ -148,14 +148,8 @@ export enum PasswordType {
     RESET = 'reset',
 }
 
-export enum UserType {
-    SUPERADMIN = 'superadmin',
-    ADMIN = 'admin',
-    minister = 'minister',
-    CREATOR = 'creator',
-    LISTENER = 'listener',
-    USER = 'user',
-}
+import type { UserType } from '@troott/api-client';
+export type { UserType };
 
 export interface IUser {
     firstName: string;

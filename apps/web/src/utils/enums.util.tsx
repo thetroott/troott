@@ -32,30 +32,7 @@ export enum PasswordType {
     RESET = 'reset',
 }
 
-export enum UserType {
-    STAFF = 'staff',
-    SUPERADMIN = 'super-admin',
-    ADMIN = 'admin',
-    MINISTER = 'minister',
-    CREATOR = 'creator',
-    LISTENER = 'listener',
-}
-
-export enum StaffUnit {
-    ENGINEERING = 'engineering',
-    PRODUCT = 'product',
-    DESIGN = 'design',
-    OPERATIONS = 'operations',
-    FINANCE = 'finance',
-}
-
-export enum StaffRole {
-    HEAD = 'head',
-    MANAGER = 'manager',
-    LEAD = 'lead',
-    ASSOCIATE = 'assocaite',
-    JUNIOR = 'junior',
-}
+export { UserType, OtpType } from '@troott/api-client';
 
 export enum AccountManagerRole {
     OWNER = 'owner',
@@ -89,7 +66,6 @@ export enum DbModels {
     SUBSCRIPTION = 'subscription',
     SERIES = 'series',
     SERMON = 'sermon',
-    STAFF = 'staff',
     TRANSACTION = 'transaction',
 }
 
@@ -205,15 +181,6 @@ export enum EdeviceType {
     IOS = 'ios',
 }
 
-export enum OtpType {
-    REGISTER = 'register',
-    LOGIN = 'login',
-    GENERIC = 'generic',
-    ACTIVATEACCOUNT = 'activate-account',
-    CHANGEPASSWORD = 'change-password',
-    FORGOTPASSWORD = 'forgot-password',
-}
-
 export enum EContentState {
     UPLOADING = 'uploading',
     PROCESSING = 'processing',
@@ -236,15 +203,6 @@ export enum EcatalogueType {
     RECENTLYPLAYED = 'sermon',
     BITE = 'bite',
     P = 'Minister',
-}
-
-export enum EStaffPermissions {
-    Moderate = 'moderate',
-    Create = 'create',
-    ManageUsers = 'manageUsers',
-    ManagePlaylists = 'managePlaylists',
-    TrackEngagement = 'trackEngagement',
-    FullAccess = 'fullAccess',
 }
 
 export enum EEmailDriver {

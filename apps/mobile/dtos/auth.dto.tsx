@@ -1,4 +1,4 @@
-import type { OtpType, UserType } from '@/utils/enums.util';
+import type { OtpType, UserType } from '@troott/api-client';
 
 export interface RegisterUserDTO {
     firstName: string;

@@ -228,7 +228,7 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
 
                     <AboutSection
                         ministerName={minister.name}
-                        text="Apostle Joshua Selman is a Nigerian preacher, teacher, and founder of Eternity Network International (ENI), known for the Koinonia ministry. Born on June 25, 1980, he gained prominence for his deep teachings on intimacy with God.."
+                        text="Apostle Joshua Selman is a Nigerian minister, teacher, and founder of Eternity Network International (ENI), known for the Koinonia ministry. Born on June 25, 1980, he gained prominence for his deep teachings on intimacy with God.."
                         onPressCta={() =>
                             router.push(`/minister/${minister.id}/about`)
                         }

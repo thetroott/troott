@@ -2,5 +2,8 @@
     "$schema": "https://json.schemastore.org/tsconfig",
     "display": "Monorepo composite projects (run: pnpm exec tsc -b tsconfig.workspace.json)",
     "files": [],
-    "references": [{ "path": "./packages/sdk" }]
+    "references": [
+        { "path": "./packages/api-client" },
+        { "path": "./packages/state" }
+    ]
 }

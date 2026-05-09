@@ -1,3 +1,6 @@
+import '@/api/config';
+import { TroottStateProvider } from '@troott/state';
+import { PlaybackBridge } from '@/engine/state/use-playback-bridge';
 import Constants from 'expo-constants';
 import { AppState, Platform, Share, StyleSheet, View } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -30,6 +33,7 @@ import { useShareFlow } from '@/stores/app/share';
 import { FullWindowOverlay } from 'react-native-screens';
 import { Portal } from '@/components/ui/portal';
 import { GlobalLoadingPortal } from '@/components/ui/loading-state';
+import { useAuthStore } from '@/stores/auth.store';
 
 function getSharingModule(): {
     isAvailableAsync: () => Promise<boolean>;
@@ -58,6 +62,26 @@ const QUERY_PERSIST_APP_VERSION =
 const RootLayout = () => {
     usePendingDeepLinkBootstrap();
     const pathname = usePathname();
+
+    useEffect(() => {
+        function migrateCanonicalUserType() {
+            try {
+                const u = useAuthStore.getState().user as {
+                    userType?: string;
+                };
+                if (u?.userType === 'superadmin') {
+                    useAuthStore.setState({
+                        user: { ...u, userType: 'super-admin' },
+                    });
+                }
+            } catch {
+                /* ignore */
+            }
+        }
+        migrateCanonicalUserType();
+        const id = setTimeout(migrateCanonicalUserType, 250);
+        return () => clearTimeout(id);
+    }, []);
 
     const [fontsLoaded, fontError] = useFonts(matterFonts);
     const [playerIsReady, setPlayerIsReady] = useState<boolean>(false);
@@ -131,6 +155,18 @@ const RootLayout = () => {
             }
         } catch {
             await Share.share({ message: `${message}\n${url}`, url });
+        } finally {
+            close();
+        }
+    }, [buildShareUrl, close, track.title]);
+
+    const handlePressInstagram = useCallback(async () => {
+        const url = buildShareUrl();
+        const message = `Listen to ${track.title ?? 'this sermon'} on Troott`;
+        try {
+            await Share.share({ message: `${message}\n${url}`, url });
+        } catch {
+            /* ignore */
         } finally {
             close();
         }
@@ -253,6 +289,8 @@ const RootLayout = () => {
                         buster: QUERY_PERSIST_APP_VERSION,
                     }}
                 >
+                    <TroottStateProvider>
+                        <PlaybackBridge />
                     <SafeAreaView
                         style={{
                             flex: 1,
@@ -327,10 +365,12 @@ const RootLayout = () => {
                                 track={track}
                                 onDismiss={close}
                                 onPressCopy={handleCopyToClipboard}
+                                onPressInstagram={handlePressInstagram}
                                 onPressMoreOptions={handleOpenNativeShare}
                             />
                         </Portal>
                     </SafeAreaView>
+                    </TroottStateProvider>
                 </PersistQueryClientProvider>
             </SafeAreaProvider>
         </GestureHandlerRootView>

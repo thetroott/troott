@@ -1,79 +1,61 @@
-import { usersService } from '@/api/services';
-import { getToken } from '@/api/storage/auth';
-import { User } from '@/api/types';
-import { queryKeys } from '@/api/utils/query-keys';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useContextType } from '@troott/state';
+import { useProfileMeQuery } from '@/hooks/profile/use-profile-me';
+import { useEffect, useMemo, useState } from 'react';
+import storage from '@/services/storage-service';
+
+type UserSnapshot = { id?: string; [key: string]: unknown } | null;
 
 interface UseUserProfileReturn {
-    user: User | null;
+    user: UserSnapshot;
     streak: number;
     isLoading: boolean;
     error: Error | null;
     refetch: () => Promise<void>;
 }
 
+/**
+ * Session user from the persisted store plus `/profile/me` when logged in.
+ */
 export const useUserProfile = (): UseUserProfileReturn => {
-    const queryClient = useQueryClient();
+    const { userContext } = useContextType();
+    const user = userContext.user as UserSnapshot;
     const [streak, setStreak] = useState<number>(0);
-
-    // First, try to get user from React Query cache (set on login/register)
-    const cachedUser = queryClient.getQueryData<User | null>(
-        queryKeys.auth.user(),
-    );
-
-    // If we have a cached user with ID, fetch fresh data to ensure it's up to date
-    // This ensures we have the latest user data after onboarding/partner linking
-    const shouldFetch = !!cachedUser?.id;
-    const userId = cachedUser?.id || '';
-
-    const {
-        data: fetchedUser,
-        isLoading: isFetching,
-        error,
-        refetch: refetchQuery,
-    } = useQuery({
-        queryKey: queryKeys.users.detail(userId),
-        queryFn: () => usersService.getUserById(userId),
-        enabled: shouldFetch && !!userId,
-        staleTime: 2 * 60 * 1000, // 2 minutes - shorter to ensure fresh data
-        retry: false,
-    });
-
-    // Use fetched user if available, otherwise use cached user
-    const user = (fetchedUser || cachedUser) as User | null;
-
-    // Check if we have a token to determine if we should show loading
     const [hasToken, setHasToken] = useState<boolean | null>(null);
 
+    const profileQuery = useProfileMeQuery({
+        enabled: Boolean(user?.id),
+    });
+
     useEffect(() => {
-        const checkToken = async () => {
-            const token = await getToken();
-            setHasToken(!!token);
+        let cancelled = false;
+        void (async () => {
+            const t = await storage.getToken();
+            if (!cancelled) setHasToken(!!t);
+        })();
+        return () => {
+            cancelled = true;
         };
-        checkToken();
     }, []);
 
-    const refetch = async () => {
-        if (cachedUser?.id) {
-            await refetchQuery();
-        } else {
-            // If no cached user, try to get from cache again
-            queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
-        }
-    };
-
-    // Mock streak for now (can be replaced with actual API call)
     useEffect(() => {
-        // TODO: Fetch actual streak from API
         setStreak(12);
     }, []);
 
+    const refetch = async () => {
+        await profileQuery.refetch();
+    };
+
+    const isLoading = useMemo(() => {
+        if (hasToken === null) return true;
+        if (!user?.id) return false;
+        return profileQuery.isLoading;
+    }, [hasToken, profileQuery.isLoading, user?.id]);
+
     return {
-        user: user || null,
+        user: user ?? null,
         refetch,
         streak,
-        isLoading: hasToken === null ? true : shouldFetch ? isFetching : false,
-        error: error as Error | null,
+        isLoading,
+        error: profileQuery.error as Error | null,
     };
 };

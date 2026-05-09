@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../../src/configs/app.config';
 import {
     createTestUser,
-    createBusinessUser,
+    createMinisterUser,
     expectSuccessResponse,
     expectErrorResponse,
     TestUser,
@@ -35,7 +35,7 @@ describe('Multi-Entity Workflow Integration Tests', () => {
 
     beforeEach(async () => {
         // Create a business user for the workflow
-        businessUser = await createBusinessUser();
+        businessUser = await createMinisterUser();
 
         // Create business entity
         business = await createBusiness({

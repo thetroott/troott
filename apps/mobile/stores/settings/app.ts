@@ -1,7 +1,5 @@
 import { mmkvStateStorage } from '@/services/storage';
-import { create } from 'zustand';
-import { createJSONStorage, devtools, persist } from 'zustand/middleware';
-import { useShallow } from 'zustand/react/shallow';
+import { create, createJSONStorage, devtools, persist, useShallow } from '@/lib/zstore';
 
 type AppSettingsStore = {
     sendMetrics: boolean;

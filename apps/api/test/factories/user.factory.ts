@@ -5,9 +5,9 @@ import {
     PasswordType,
     OnboardStatus,
     InviteStatus,
-} from '../../src/modules/user/user.interface';
-import User from '../../src/modules/user/user.model';
-import authService from '../../src/modules/auth/auth.service';
+} from '../../src/modules/users/user/user.interface';
+import User from '../../src/modules/users/user/user.model';
+import authService from '../../src/modules/authentication/auth/auth.service';
 import { genUserCode } from '../../src/utils/code.util';
 
 /**
@@ -22,8 +22,6 @@ export interface UserFactoryOptions {
     email?: string;
     password?: string;
     isAdmin?: boolean;
-    isBusiness?: boolean;
-    isTalent?: boolean;
     passwordType?: PasswordType;
 }
 
@@ -34,17 +32,19 @@ export const createUserData = (
     options: UserFactoryOptions = {},
 ): Partial<IUserDoc> => {
     const {
-        userType = UserType.TALENT,
+        userType = UserType.CREATOR,
         isActive = true,
         isActivated = true,
         isLocked = false,
         email,
         password = 'Test@1234',
         isAdmin = false,
-        isBusiness = false,
-        isTalent = true,
         passwordType = PasswordType.USERGENERATED,
     } = options;
+
+    const isUser =
+        !isAdmin &&
+        (userType === UserType.LISTENER || userType === UserType.USER);
 
     return {
         email: email || faker.internet.email().toLowerCase(),
@@ -56,9 +56,7 @@ export const createUserData = (
         isActivated,
         isLocked,
         isAdmin,
-        isBusiness,
-        isTalent,
-        isUser: !isAdmin && !isBusiness && !isTalent,
+        isUser,
         loginLimit: 0,
         login: {
             last: new Date().toISOString(),
@@ -114,31 +112,25 @@ export const createAdminUser = async (): Promise<IUserDoc> => {
     return createUser({
         userType: UserType.ADMIN,
         isAdmin: true,
-        isBusiness: false,
-        isTalent: false,
     });
 };
 
 /**
- * Creates a business user
+ * Creates a minister user (legacy tests referred to this as "business")
  */
-export const createBusinessUser = async (): Promise<IUserDoc> => {
+export const createMinisterUser = async (): Promise<IUserDoc> => {
     return createUser({
-        userType: UserType.BUSINESS,
+        userType: UserType.MINISTER,
         isAdmin: false,
-        isBusiness: true,
-        isTalent: false,
     });
 };
 
 /**
- * Creates a talent user
+ * Creates a creator user (legacy tests referred to this as "talent")
  */
-export const createTalentUser = async (): Promise<IUserDoc> => {
+export const createCreatorUser = async (): Promise<IUserDoc> => {
     return createUser({
-        userType: UserType.TALENT,
+        userType: UserType.CREATOR,
         isAdmin: false,
-        isBusiness: false,
-        isTalent: true,
     });
 };

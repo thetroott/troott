@@ -1,6 +1,5 @@
 import { DeviceProfile } from '@jellyfin/sdk/lib/generated-client';
-import { create } from 'zustand';
-import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import { create, createJSONStorage, devtools, persist } from '@/lib/zstore';
 import { mmkvStateStorage } from '../constants/storage';
 import { getDeviceProfile } from '../utils/device-profiles';
 import StreamingQuality from '../enums/audio-quality';

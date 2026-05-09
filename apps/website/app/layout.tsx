@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     keywords: [
         'sermons',
-        'preachers',
+        'ministers',
         'teachings',
         'troott',
         'messages',

@@ -7,7 +7,7 @@ import Newsletter from '../NewsletterModal';
 
 export default function CTASection() {
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [role, setRole] = useState<'listener' | 'preacher'>('listener');
+    const [role, setRole] = useState<'listener' | 'minister'>('listener');
 
     return (
         <section
@@ -54,8 +54,8 @@ export default function CTASection() {
                     variant="secondary"
                     className="h-14 px-8 md:h-12 md:px-6 group gap-x-2 bg-transparent font-semibold hover:bg-transparent dark:bg-transparent hover:dark:bg-transparent"
                     onClick={() => {
-                        setRole('preacher');
-                        track('preacherSignup');
+                        setRole('minister');
+                        track('ministerSignup');
                         setDialogOpen(true);
                     }}
                 >

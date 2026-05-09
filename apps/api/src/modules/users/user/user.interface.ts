@@ -22,6 +22,7 @@ export interface IUserDoc extends Document {
 
     avatar: Upload;
     coverImage: Upload;
+    bio?: string;
 
     location: ILocation;
     timeZone: string;

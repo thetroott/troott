@@ -61,7 +61,7 @@ export interface AuthResponseDTO {
     firstName: string;
     lastName: string;
     email: string;
-    userType: string;
+    userType: UserType;
 
     isActive: boolean;
     isLocked: boolean;
@@ -75,7 +75,7 @@ export interface MapRegisteredUserDTO {
     firstName: string;
     lastName: string;
     email: string;
-    userType: string;
+    userType: UserType;
 
     phoneNumber: string;
     phoneCode: string;

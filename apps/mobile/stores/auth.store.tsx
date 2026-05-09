@@ -1,7 +1,6 @@
 import mmkvstorage from '@/services/mmkv-storage';
 import storage from '@/services/storage-service';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create, persist } from '@/lib/zstore';
 
 const collection = {};
 const STORAGE_KEY = 'isFirstTime';

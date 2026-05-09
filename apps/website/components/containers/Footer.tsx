@@ -4,7 +4,7 @@ import { TroottLogo } from '@/public/TroottLogo';
 
 const navigation = {
     product: [
-        { name: 'Preachers', href: '#preacher', external: false },
+        { name: 'Ministers', href: '#minister', external: false },
         { name: 'Listeners', href: '#listener', external: false },
         { name: 'faqs', href: '#faqs', external: false },
     ],

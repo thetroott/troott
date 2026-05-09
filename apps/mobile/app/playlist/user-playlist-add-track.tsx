@@ -1,12 +1,40 @@
 import { Pressable, StyleSheet, View } from 'react-native';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { router } from 'expo-router';
 
 import PlaylistAddTrackContent from '@/components/features/playlist/playlist-add-track-content';
 import { DEFAULT_CHOOSE_PLAYLISTS } from '@/components/features/playlist/use-add-to-playlist';
 import ScreenModalAndroidView from '@/components/ui/screen-modal-android';
+import { usePlaylistsQuery } from '@/hooks/use-library-queries';
+import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
+import { useCurrentTrack } from '@/stores/player/queue';
+import { useContextType } from '@troott/state';
 
 const UserPlayList = () => {
+    const current = useCurrentTrack();
+    const sermonTrackId =
+        current?.item?.id != null
+            ? String(current.item.id)
+            : current?.id != null
+              ? String(current.id)
+              : null;
+
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
+    const { data: playlistsRaw } = usePlaylistsQuery(!!userId);
+
+    const sermonPlaylists = useMemo(() => {
+        const mapped = mapPlaylistDocsToChooseItems(playlistsRaw);
+        return mapped.filter(
+            (p) => (p.playlistType ?? '').toLowerCase() === 'sermon',
+        );
+    }, [playlistsRaw]);
+
+    const initialPlaylists = useMemo(() => {
+        if (sermonPlaylists.length > 0) return sermonPlaylists;
+        return sermonTrackId ? [] : DEFAULT_CHOOSE_PLAYLISTS;
+    }, [sermonPlaylists, sermonTrackId]);
+
     return (
         <ScreenModalAndroidView>
             <View style={styles.root}>
@@ -18,7 +46,8 @@ const UserPlayList = () => {
                 />
                 <View style={styles.foreground} pointerEvents="box-none">
                     <PlaylistAddTrackContent
-                        initialPlaylists={DEFAULT_CHOOSE_PLAYLISTS}
+                        initialPlaylists={initialPlaylists}
+                        sermonTrackId={sermonTrackId}
                     />
                 </View>
             </View>

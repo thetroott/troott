@@ -1,6 +1,5 @@
 import { mmkvStateStorage } from '@/services/storage';
-import { create } from 'zustand';
-import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import { create, createJSONStorage, devtools, persist } from '@/lib/zstore';
 
 type DeveloperSettingsStore = {
     developerOptionsEnabled: boolean;

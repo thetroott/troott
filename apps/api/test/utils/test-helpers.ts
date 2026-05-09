@@ -4,10 +4,10 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import request from 'supertest';
 import app from '../../src/configs/app.config';
-import { IUserDoc, UserType } from '../../src/modules/user/user.interface';
-import User from '../../src/modules/user/user.model';
-import tokenService from '../../src/services/token.service';
-import authService from '../../src/modules/auth/auth.service';
+import { IUserDoc, UserType } from '../../src/modules/users/user/user.interface';
+import User from '../../src/modules/users/user/user.model';
+import tokenService from '../../src/modules/internals/token/token.service';
+import authService from '../../src/modules/authentication/auth/auth.service';
 import { genUserCode } from '../../src/utils/code.util';
 
 /**
@@ -25,7 +25,13 @@ export interface TestUser {
 export const createTestUser = async (
     overrides?: Partial<IUserDoc>,
 ): Promise<TestUser> => {
-    const userType = overrides?.userType || UserType.TALENT;
+    const userType = overrides?.userType ?? UserType.CREATOR;
+    const isAdmin = overrides?.isAdmin ?? userType === UserType.ADMIN;
+    const isUser =
+        overrides?.isUser ??
+        (!isAdmin &&
+            (userType === UserType.LISTENER || userType === UserType.USER));
+
     const userData = {
         email: faker.internet.email().toLowerCase(),
         password: 'Test@1234',
@@ -35,9 +41,8 @@ export const createTestUser = async (
         isLocked: false,
         loginLimit: 0,
         userType,
-        isTalent: userType === UserType.TALENT,
-        isBusiness: userType === UserType.BUSINESS,
-        isAdmin: userType === UserType.ADMIN,
+        isAdmin,
+        isUser,
         ...overrides,
     };
 
@@ -66,32 +71,29 @@ export const createAdminUser = async (): Promise<TestUser> => {
     return createTestUser({
         userType: UserType.ADMIN,
         isAdmin: true,
-        isBusiness: false,
-        isTalent: false,
+        isUser: false,
     });
 };
 
 /**
- * Creates a business test user with authentication token
+ * Creates a minister test user with authentication token
  */
-export const createBusinessUser = async (): Promise<TestUser> => {
+export const createMinisterUser = async (): Promise<TestUser> => {
     return createTestUser({
-        userType: UserType.BUSINESS,
-        isBusiness: true,
+        userType: UserType.MINISTER,
         isAdmin: false,
-        isTalent: false,
+        isUser: false,
     });
 };
 
 /**
- * Creates a talent test user with authentication token
+ * Creates a creator test user with authentication token
  */
-export const createTalentUser = async (): Promise<TestUser> => {
+export const createCreatorUser = async (): Promise<TestUser> => {
     return createTestUser({
-        userType: UserType.TALENT,
-        isTalent: true,
+        userType: UserType.CREATOR,
         isAdmin: false,
-        isBusiness: false,
+        isUser: false,
     });
 };
 

@@ -1,8 +1,7 @@
-import auth from '@/api/auth';
 import useHapticFeedback from '@/hooks/shared/use-haptic-feedback';
+import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
 import type { SermonTrackDTO } from '@/types/sermon';
 import { useMutation } from '@tanstack/react-query';
-import { isUndefined } from 'lodash';
 import Toast from 'react-native-toast-message';
 
 interface SetFavoriteMutation {
@@ -10,18 +9,38 @@ interface SetFavoriteMutation {
     onToggle?: () => void;
 }
 
-export const useAddFavorite = () => {
-    const api = auth;
+function resolveSermonId(item: SermonTrackDTO): string | null {
+    const fromItem = item.item?.id;
+    if (fromItem != null && String(fromItem).length > 0) {
+        return String(fromItem);
+    }
+    const legacy = item.id ?? item.mediaId;
+    if (legacy != null && String(legacy).length > 0) {
+        return String(legacy);
+    }
+    return null;
+}
 
+/**
+ * Persists "favorite" to the local MMKV-backed store (same source as mini-player heart).
+ * Server sync can be layered on later without changing call sites.
+ */
+export const useAddFavorite = () => {
     const trigger = useHapticFeedback();
 
     return useMutation({
         mutationFn: async ({ item }: SetFavoriteMutation) => {
-            if (isUndefined(api)) Promise.reject('API instance not defined');
-            const trackId = item.id ?? item.mediaId;
-            if (!trackId) Promise.reject('Item ID is undefined');
+            const sermonId = resolveSermonId(item);
+            if (!sermonId) {
+                throw new Error('Sermon id is required');
+            }
+            const { isFavorite, toggleFavorite } =
+                useFavoriteSermonIdsStore.getState();
+            if (!isFavorite(sermonId)) {
+                toggleFavorite(sermonId);
+            }
         },
-        onSuccess: (data, { item, onToggle }) => {
+        onSuccess: (_data, { onToggle }) => {
             Toast.show({
                 text1: 'Added favorite',
                 type: 'success',
@@ -29,9 +48,9 @@ export const useAddFavorite = () => {
 
             trigger('notificationSuccess');
 
-            if (onToggle) onToggle();
+            onToggle?.();
         },
-        onError: (error, variables) => {
+        onError: (error) => {
             console.error('Unable to set favorite for item', error);
 
             trigger('notificationError');
@@ -45,17 +64,21 @@ export const useAddFavorite = () => {
 };
 
 export const useRemoveFavorite = () => {
-    const api = auth;
-
     const trigger = useHapticFeedback();
 
     return useMutation({
         mutationFn: async ({ item }: SetFavoriteMutation) => {
-            if (isUndefined(api)) Promise.reject('API instance not defined');
-            const trackId = item.id ?? item.mediaId;
-            if (!trackId) Promise.reject('Item ID is undefined');
+            const sermonId = resolveSermonId(item);
+            if (!sermonId) {
+                throw new Error('Sermon id is required');
+            }
+            const { isFavorite, toggleFavorite } =
+                useFavoriteSermonIdsStore.getState();
+            if (isFavorite(sermonId)) {
+                toggleFavorite(sermonId);
+            }
         },
-        onSuccess: (data, { item, onToggle }) => {
+        onSuccess: (_data, { onToggle }) => {
             Toast.show({
                 text1: 'Removed favorite',
                 type: 'success',
@@ -63,9 +86,9 @@ export const useRemoveFavorite = () => {
 
             trigger('notificationSuccess');
 
-            if (onToggle) onToggle();
+            onToggle?.();
         },
-        onError: (error, variables) => {
+        onError: (error) => {
             console.error('Unable to remove favorite for item', error);
 
             trigger('notificationError');

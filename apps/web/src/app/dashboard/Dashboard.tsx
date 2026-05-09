@@ -11,7 +11,7 @@ import {
 import FileUploadZone from '@/components/shared/upload/FileUploadZone';
 import UploadModal from '@/components/shared/upload/UploadModal';
 import apiCall from '@/api/config';
-import { useUserStore } from '@/store/user-store';
+import { useContextType } from '@troott/state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,
@@ -29,7 +29,8 @@ const UploadContent: React.FC = () => {
         activeOption = 'upload',
     } = state;
     const location = useLocation();
-    const user = useUserStore((s) => s.user) as Record<string, unknown> | null;
+    const { userContext } = useContextType();
+    const user = userContext.user as Record<string, unknown> | null;
     const ministerId = useMemo(() => resolveMinisterId(user), [user]);
 
     const { data: ministerSermonsRaw } = useQuery({

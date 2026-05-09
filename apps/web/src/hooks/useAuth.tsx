@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import AuthService from '@/services/auth-service';
 import { handleMutationError } from '@/utils/helpers.util';
 import type { IAPIResponse } from '@/utils/interfaces.util';
 import useGoTo from '@/hooks/shared/useGoTo';
@@ -8,11 +7,21 @@ import { useRegisterStore } from '@/store/register-store';
 import { useForgotPasswordStore } from '@/store/otp-store';
 import { useRef } from 'react';
 import logger from '@/utils/logger.util';
-import { useUserStore } from '@/store/user-store';
-import { useAuthStore } from '@/store/auth.store';
+import { useContextType } from '@troott/state';
 import storage from '@/utils/storage.util';
-import { UserType } from '@/utils/enums.util';
+import { UserType } from '@troott/api-client';
 import cookieService from '@/services/shared/cookie';
+import type {
+    ActivateDTO,
+    ForgotPasswordDTO,
+    LoginDTO,
+    RegisterUserDTO,
+    ResendOtpDTO,
+    ResetPasswordDTO,
+    VerifyOtpDTO,
+} from '@/dtos/auth.dto';
+import '@/api/clients/troott';
+import { troottAPIClient } from '@troott/api-client';
 
 const authKeys = {
     all: ['auth'] as const,
@@ -23,8 +32,16 @@ const useAuth = () => {
     const { goTo } = useGoTo();
     const { reset } = useRegisterStore();
 
-    const { setToken, setUser, setLoading, setUserType } = useUserStore();
-    const { setUser: setAuthUser, setToken: setAuthToken } = useAuthStore();
+    const { userContext } = useContextType();
+    const { setUser, setLoading, unsetLoading, setUserType } = userContext;
+
+    const setGlobalLoading = (loading: boolean) => {
+        if (loading) {
+            void setLoading({ option: 'default' });
+            return;
+        }
+        void unsetLoading({ option: 'default' });
+    };
 
     const queryClient = useQueryClient();
 
@@ -46,11 +63,30 @@ const useAuth = () => {
         }, 1000);
     };
 
+    const register = (payload: RegisterUserDTO) =>
+        troottAPIClient().auth.registerUser(payload) as Promise<IAPIResponse>;
+    const activateUser = (payload: ActivateDTO) =>
+        troottAPIClient().auth.activateUser(payload) as Promise<IAPIResponse>;
+    const login = (payload: LoginDTO) =>
+        troottAPIClient().auth.loginUser(payload) as Promise<IAPIResponse>;
+    const sendOtp = (payload: ForgotPasswordDTO) =>
+        troottAPIClient().auth.forgotPassword(payload) as Promise<IAPIResponse>;
+    const verifyOtp = (payload: VerifyOtpDTO) =>
+        troottAPIClient().auth.verifyOTP(payload) as Promise<IAPIResponse>;
+    const resendOtp = (payload: ResendOtpDTO) =>
+        troottAPIClient().auth.resendOTP(payload) as Promise<IAPIResponse>;
+    const logout = () =>
+        troottAPIClient().auth.logoutUser({
+            userId: storage.getUserID(),
+        } as never) as Promise<IAPIResponse>;
+    const resetPassword = (payload: ResetPasswordDTO) =>
+        troottAPIClient().auth.resetPassword(payload) as Promise<IAPIResponse>;
+
     const Register = useMutation({
-        mutationFn: AuthService.register,
+        mutationFn: register,
 
         onMutate: () => {
-            setLoading(true);
+            setGlobalLoading(true);
         },
 
         onSuccess: (data: IAPIResponse) => {
@@ -68,7 +104,7 @@ const useAuth = () => {
         onError: handleMutationError,
 
         onSettled: () => {
-            setLoading(false);
+            setGlobalLoading(false);
         },
     });
 
@@ -92,7 +128,7 @@ const useAuth = () => {
      * @property {function(): void} mutationConfig.onSettled - Callback executed after the mutation finishes (success or error), responsible for setting `loading` state to false.
      */
     const ActivateUser = useMutation({
-        mutationFn: AuthService.activateUser,
+        mutationFn: activateUser,
 
         onSuccess: (data: IAPIResponse) => {
             toast.success(data.data.message);
@@ -149,8 +185,6 @@ const useAuth = () => {
                     // Set user data in both stores
                     setUser(userData);
                     setUserType(user.userType);
-                    setAuthUser(userData);
-                    setAuthToken(token);
 
                     // Store onboarding progress to avoid additional API calls
                     if (user.onboarding) {
@@ -179,7 +213,7 @@ const useAuth = () => {
         onError: handleMutationError,
 
         onSettled: () => {
-            setLoading(false);
+            setGlobalLoading(false);
         },
     });
 
@@ -207,7 +241,7 @@ const useAuth = () => {
      * - Sets the loading state to false.
      */
     const Login = useMutation({
-        mutationFn: AuthService.login,
+        mutationFn: login,
 
         onSuccess: (data: IAPIResponse) => {
             toast.success(data.data.message);
@@ -268,8 +302,6 @@ const useAuth = () => {
                     // Set user data in both stores
                     setUser(userData);
                     setUserType(user.userType);
-                    setAuthUser(userData);
-                    setAuthToken(token);
 
                     // Store onboarding progress to avoid additional API calls
                     if (user.onboarding) {
@@ -299,12 +331,12 @@ const useAuth = () => {
         onError: handleMutationError,
 
         onSettled: () => {
-            setLoading(false);
+            setGlobalLoading(false);
         },
     });
 
     const SendOtp = useMutation({
-        mutationFn: AuthService.sendOtp,
+        mutationFn: sendOtp,
 
         onSuccess: (data: IAPIResponse) => {
             logger.log({ data: data, label: 'response data: ', type: 'info' });
@@ -320,7 +352,7 @@ const useAuth = () => {
     });
 
     const VerifyOtp = useMutation({
-        mutationFn: AuthService.verifyOtp,
+        mutationFn: verifyOtp,
 
         onSuccess: (data: IAPIResponse) => {
             toast.success(data.message);
@@ -331,7 +363,7 @@ const useAuth = () => {
     });
 
     const ResendOtp = useMutation({
-        mutationFn: AuthService.resendOtp,
+        mutationFn: resendOtp,
 
         onSuccess: () => {
             setFormData({ otp: Array(6).fill('') });
@@ -344,12 +376,12 @@ const useAuth = () => {
     });
 
     const Logout = useMutation({
-        mutationFn: AuthService.logout,
+        mutationFn: logout,
 
         onSuccess: (data: IAPIResponse) => {
             if (data?.message) {
                 setUser({});
-                setToken(null);
+                setUser({});
 
                 queryClient.invalidateQueries({ queryKey: authKeys.user() });
                 storage.clearAuth();
@@ -359,7 +391,7 @@ const useAuth = () => {
         },
         onError: (error: any) => {
             setUser({});
-            setToken(null);
+            setUser({});
 
             queryClient.invalidateQueries({ queryKey: authKeys.user() });
             storage.clearAuth();
@@ -370,7 +402,7 @@ const useAuth = () => {
     });
 
     const ResetPassword = useMutation({
-        mutationFn: AuthService.resetPassword,
+        mutationFn: resetPassword,
         onSuccess: (data: IAPIResponse) => {
             if (!data.error && data.status === 200) {
                 // Password reset successful

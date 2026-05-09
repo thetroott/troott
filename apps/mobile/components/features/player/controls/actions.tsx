@@ -11,6 +11,7 @@ import {
     Profile,
     Send2,
 } from 'iconsax-react-nativejs';
+import Toast from 'react-native-toast-message';
 import { openShareFlow } from '@/stores/app/share';
 
 export type GetTrackListActionsOptions = {
@@ -19,6 +20,12 @@ export type GetTrackListActionsOptions = {
      * instead of navigating to the modal route.
      */
     onOpenAddToPlaylist?: () => void;
+    onLike?: () => void;
+    onAddPlayNext?: () => void;
+    onAddToQueue?: () => void;
+    onViewMinister?: () => void;
+    /** Offline download intent — wire storage pipeline when available. */
+    onDownload?: () => void;
 };
 
 export type TrackListAction = {
@@ -34,7 +41,9 @@ export const getTrackListActions = (
     {
         icon: <Heart color={theme.colors.grey[50]} />,
         label: 'Like',
-        action: () => {},
+        action: () => {
+            options?.onLike?.();
+        },
     },
     {
         icon: <SaveToPlaylistIcon color={theme.colors.grey[50]} />,
@@ -50,17 +59,31 @@ export const getTrackListActions = (
     {
         icon: <Next color={theme.colors.grey[50]} />,
         label: 'Add to play next',
-        action: () => {},
+        action: () => {
+            options?.onAddPlayNext?.();
+        },
     },
     {
         icon: <MusicFilter color={theme.colors.grey[50]} />,
         label: 'Add to queue',
-        action: () => {},
+        action: () => {
+            options?.onAddToQueue?.();
+        },
     },
     {
         icon: <DocumentDownload color={theme.colors.grey[50]} />,
         label: 'Download',
-        action: () => {},
+        action: () => {
+            if (options?.onDownload) {
+                options.onDownload();
+            } else {
+                Toast.show({
+                    text1: 'Downloads',
+                    text2: 'Offline downloads are not available on this build yet.',
+                    type: 'info',
+                });
+            }
+        },
     },
     {
         icon: <Send2 color={theme.colors.grey[50]} />,
@@ -78,7 +101,9 @@ export const getTrackListActions = (
     {
         icon: <Profile color={theme.colors.grey[50]} />,
         label: 'View Minister',
-        action: () => {},
+        action: () => {
+            options?.onViewMinister?.();
+        },
     },
     // {
     //     icon: <Warning2 color={theme.colors.grey[50]} />,

@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/ui/icons';
-import { useAuthStore } from '@/store/auth.store';
 
 interface OAuthButtonsProps {
     className?: string;
@@ -8,11 +7,9 @@ interface OAuthButtonsProps {
 }
 
 export function OAuthButtons({ className, formType }: OAuthButtonsProps) {
-    const { setLoading } = useAuthStore();
     const actionText = formType === 'login' ? 'with' : 'with';
 
     const handleOAuthLogin = async (provider: 'google' | 'github') => {
-        setLoading(true);
         window.location.href = `/api/auth/${provider}`;
     };
 

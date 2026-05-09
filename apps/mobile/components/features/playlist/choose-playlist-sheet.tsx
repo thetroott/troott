@@ -12,7 +12,7 @@ import type { ChoosePlaylistListItem } from './playlist-choose-types';
 export type ChoosePlaylistSheetProps = {
     playlists: ChoosePlaylistListItem[];
     selectedId: string | null;
-    onSelect: (id: string) => void;
+    onSelect: (id: string) => void | Promise<void>;
     /** Strips outer chrome when nested inside another bottom sheet. */
     embeddedInBottomSheet?: boolean;
 };

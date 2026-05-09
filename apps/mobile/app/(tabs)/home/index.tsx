@@ -5,7 +5,7 @@ import { theme } from '@/constants/theme';
 import UserHighlights from '@/components/features/home/user-highlight';
 import LikedByUser from '@/components/features/home/liked-by-user';
 import {
-    MoreFromPreacher,
+    MoreFromMinister,
     SimilarMinisters,
     TrendingPlaylist,
 } from '@/components/features/home';
@@ -37,7 +37,7 @@ const Home = () => {
                 <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
                 <SermonsForYou />
                 <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
-                <MoreFromPreacher />
+                <MoreFromMinister />
                 <View style={{ marginTop: theme.sizes.spacing.xl }}></View>
                 <TrendingPlaylist />
                 <View style={{ marginTop: theme.sizes.spacing.xl }}></View>

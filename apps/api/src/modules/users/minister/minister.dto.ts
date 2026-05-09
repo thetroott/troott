@@ -41,6 +41,11 @@ export interface InviteMinisterDTO {
     resourceId?: string;
 }
 
+export interface BulkInviteMinistersDTO {
+    emails: string[];
+    resourceId?: string;
+}
+
 export interface AcceptMinisterInvitationDTO {
     token: string;
     email: string;

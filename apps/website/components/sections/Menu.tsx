@@ -33,7 +33,7 @@ export default function NavBar() {
                 <div className="hidden md:flex items-center gap-8">
                     <Link href="/">Hero</Link>
                     <Link href="/listeners">Listeners</Link>
-                    <Link href="/preachers">Preachers</Link>
+                    <Link href="/ministers">Ministers</Link>
                     <Link href="/faqs">FAQs</Link>
                     <div className="flex gap-4 ml-6">
                         <Button variant="outline">Start Listening</Button>
@@ -70,8 +70,8 @@ export default function NavBar() {
                     <Link href="/listeners" onClick={() => setMenuOpen(false)}>
                         Listeners
                     </Link>
-                    <Link href="/preachers" onClick={() => setMenuOpen(false)}>
-                        Preachers
+                    <Link href="/ministers" onClick={() => setMenuOpen(false)}>
+                        Ministers
                     </Link>
                     <Link href="/faqs" onClick={() => setMenuOpen(false)}>
                         FAQs

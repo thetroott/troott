@@ -10,10 +10,15 @@ const useGoTo = () => {
         }
     };
 
+    const toMainRoute = () => {
+        navigate('/');
+    };
+
     return {
         location,
         navigate,
         goTo,
+        toMainRoute,
     };
 };
 

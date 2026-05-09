@@ -1,18 +1,17 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { IAppContext, IUserContext } from './helpers/interface';
+import { useContext } from 'react';
+import type { IAppContext, IUserContext } from './helpers/interface';
 import UserContext from './user/userContext';
 import AppContext from './app/appContext';
 
-const useContextType = () => {
-    const userContext = useContext<IUserContext>(UserContext);
-    const appContext = useContext<IAppContext>(AppContext);
-
-    useEffect(() => {}, []);
+export default function useContextType(): {
+    userContext: IUserContext;
+    appContext: IAppContext;
+} {
+    const userContext = useContext(UserContext) as IUserContext;
+    const appContext = useContext(AppContext) as IAppContext;
 
     return {
         userContext,
         appContext,
     };
-};
-
-export default useContextType;
+}

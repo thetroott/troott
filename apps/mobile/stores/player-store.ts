@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 import { IPlayerState } from './types';
 
 export const useTrackStore = create<IPlayerState>((set, get) => ({

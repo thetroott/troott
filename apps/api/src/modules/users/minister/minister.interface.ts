@@ -23,12 +23,14 @@ export interface IMinisterDoc extends Document {
     verifiedAt: Date;
     isPublic: boolean; // Only set to true AFTER verification
 
+    /** @deprecated legacy single-string field; prefer `ministryName`. */
+    ministry?: string;
     ministerialName: string;
     ministryName: string;
     description: string;
     ministryHQLocation: string;
     ministryWebsite: string;
-    socials: Array<ISocials | any>;
+    socials: IProfileSocials;
 
     sermons: Array<ObjectId | any>;
     featuredSermons: Array<ObjectId | any>;
@@ -82,6 +84,16 @@ export interface ISocials {
     name: string;
     url: string;
     username: string;
+}
+
+/**
+ * Structured social handles surfaced on the minister profile editor.
+ * Matches the three platforms in Figma node 11719:104736.
+ */
+export interface IProfileSocials {
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
 }
 
 export enum VerificationStatus {

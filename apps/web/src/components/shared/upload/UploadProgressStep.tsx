@@ -13,7 +13,7 @@ import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
 import apiCall from '@/api/config';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
-import { useUserStore } from '@/store/user-store';
+import { useContextType } from '@troott/state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -29,7 +29,8 @@ import { probeAudioFileDurationSec } from '@/utils/audio-file-duration.util';
  */
 const UploadProgressStep: React.FC = () => {
     const queryClient = useQueryClient();
-    const user = useUserStore((s) => s.user) as Record<string, unknown> | null;
+    const { userContext } = useContextType();
+    const user = userContext.user as Record<string, unknown> | null;
     const ministerId = resolveMinisterId(user);
     const { state, dispatch } = useUpload();
     const { uploadData, progress, uploadComplete, isLoading } = state;
@@ -101,7 +102,7 @@ const UploadProgressStep: React.FC = () => {
 
                 const res = await apiCall.sermon.startUpload(
                     formData,
-                    (pct) => {
+                    (pct: number) => {
                         if (!cancelled)
                             dispatch(uploadActions.setProgress(pct));
                     },

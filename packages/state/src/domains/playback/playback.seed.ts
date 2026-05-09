@@ -1,0 +1,25 @@
+import type { PlaybackState } from './playback.types';
+
+export const playbackInitial: PlaybackState = {
+    currentTrackId: null,
+    isPlaying: false,
+    positionMs: 0,
+    durationMs: 0,
+    repeatMode: 0,
+    shuffle: false,
+    volume: 1,
+    muted: false,
+    playbackRate: 1,
+    crossfadeMs: 0,
+    currentDeviceId: null,
+    sleepTimerEndsAt: null,
+    isBuffering: false,
+    error: null,
+    resumePoints: {},
+    lyrics: null,
+    lyricsCursorMs: 0,
+    chapters: {},
+    currentChapterId: null,
+    bookmarks: {},
+    timedMetadata: null,
+};

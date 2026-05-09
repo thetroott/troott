@@ -1,4 +1,4 @@
-import { UserType } from './enums.util';
+import type { UserType } from '@troott/api-client';
 
 export interface registerUserPayload {
     firstName: string;

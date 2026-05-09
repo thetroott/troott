@@ -78,7 +78,7 @@ export function AuthLayout(data: IAuthLayout) {
                             Community-Oriented:
                         </h2>
                         <p className="text-gray-400 mt-2">
-                            Empowering faith-driven creators & preachers to{' '}
+                            Empowering faith-driven creators & ministers to{' '}
                             <br /> share the gospel worldwide
                         </p>
                     </div>

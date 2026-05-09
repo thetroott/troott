@@ -37,7 +37,7 @@ We’re answering key questions to improve user experience:
 - **React-native-track-player**
 - **React-native-video**
 - **EAS (Expo Application Services)**
-- **AsyncStorage / MMKV**
+- **MMKV**
 - **SVG animations**
 
 ## Monorepo (troott workspace)

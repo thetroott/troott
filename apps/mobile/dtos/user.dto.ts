@@ -28,8 +28,7 @@ export interface UserDTO {
     profiles: {
         listener: string;
         creator: string;
-        preacher: string;
-        staff: string;
+        minister: string;
     };
 
     createdAt: string;

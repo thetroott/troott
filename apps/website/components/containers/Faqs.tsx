@@ -10,7 +10,7 @@ const faqs = [
     {
         question:
             'I’m tired of searching for old sermons. How does Troott make this easier?',
-        answer: 'This makes us stand out, we make it easy to find old sermons. We organise sermons by preacher, date, topic, and series. You can also search and filter in seconds.',
+        answer: 'This makes us stand out, we make it easy to find old sermons. We organise sermons by minister, date, topic, and series. You can also search and filter in seconds.',
     },
     {
         question:
@@ -23,12 +23,12 @@ const faqs = [
         answer: 'No downloads needed. Troott streams sermons without taking up your storage, so you can save space for other important things while always having your sermons ready to play.',
     },
     {
-        question: 'How many preachers can I follow or listen to on Troott?',
-        answer: 'There’s no limit. You can follow and listen to as many preachers as you want. Troott gives you full access to all the ministers and messages that help you grow. No hidden restrictions.',
+        question: 'How many ministers can I follow or listen to on Troott?',
+        answer: 'There’s no limit. You can follow and listen to as many ministers as you want. Troott gives you full access to all the ministers and messages that help you grow. No hidden restrictions.',
     },
     {
         question:
-            'I’m a preacher. What does it cost to share my sermons on Troott?',
+            'I’m a minister. What does it cost to share my sermons on Troott?',
         answer: 'Uploading your sermons is free. Troott exists to help you grow your reach and disciple more people.',
     },
 ];

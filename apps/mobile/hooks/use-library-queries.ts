@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import axiosService from '@/api/core/axios';
 import { QueryKeys } from '@/utils/enums.util';
-import { useUserStore } from '@/stores/user-store';
+import { useContextType } from '@troott/state';
 
 function parseApi<T>(raw: unknown): T {
     const r = raw as { error?: boolean; message?: string; data?: unknown };
@@ -15,7 +15,7 @@ function parseApi<T>(raw: unknown): T {
     return raw as T;
 }
 
-/** Staff-only listing — kept for tooling; app uses {@link useUserLibraryQuery}. */
+/** Internal tooling listing — app uses {@link useUserLibraryQuery}. */
 function parseApiMaybeEmpty(raw: unknown): unknown | null {
     const r = raw as { error?: boolean; message?: string; data?: unknown };
     if (r && typeof r === 'object' && r.error) {
@@ -36,7 +36,8 @@ function parseApiMaybeEmpty(raw: unknown): unknown | null {
  * Returns `null` when no library document exists yet (404).
  */
 export function useUserLibraryQuery(enabled = true) {
-    const userId = useUserStore((s) => s.user?.id);
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
 
     return useQuery({
         queryKey: [QueryKeys.Libraries, userId],
@@ -59,7 +60,8 @@ export function useUserLibraryQuery(enabled = true) {
 }
 
 export function usePlaylistsQuery(enabled = true) {
-    const userId = useUserStore((s) => s.user?.id);
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
 
     return useQuery({
         queryKey: [QueryKeys.Playlists, userId],

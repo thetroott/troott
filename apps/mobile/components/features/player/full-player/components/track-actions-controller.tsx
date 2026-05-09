@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Heart, Send } from 'iconsax-react-nativejs';
+import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import { colors } from '@/constants/colors';
@@ -12,6 +13,10 @@ import { useCurrentIndex, useCurrentTrack, usePlayQueue } from '@/stores/player/
 import { useSkip } from '@/engine/hooks/useControl';
 import PlaybackQueue from '@/components/features/player/playback/playback-queue';
 import { BottomSheetModal, BottomSheetRef } from '@/components/ui/bottom-sheet-modal';
+import {
+    useFavoriteSermonIdsStore,
+    useIsSermonFavorite,
+} from '@/engine/state/favorite-sermon-ids-store';
 
 function mapTrackToSermonItem(track: SermonTrackDTO): SermonItemDTO {
     return {
@@ -38,7 +43,6 @@ export function TrackActionsController({
 }: {
     track: SermonTrackDTO | null;
 }) {
-    const [liked, setLiked] = React.useState(false);
     const [shared, setShared] = React.useState(false);
     const [queued, setQueued] = React.useState(false);
     const queueSheetRef = React.useRef<BottomSheetRef>(null);
@@ -47,6 +51,15 @@ export function TrackActionsController({
     const currentIndex = useCurrentIndex();
     const skip = useSkip();
     const feedbackTimersRef = React.useRef<ReturnType<typeof setTimeout>[]>([]);
+
+    const sermonId =
+        track?.item?.id != null
+            ? String(track.item.id)
+            : track?.id != null
+              ? String(track.id)
+              : undefined;
+    const isFavorite = useIsSermonFavorite(sermonId);
+    const toggleFavorite = useFavoriteSermonIdsStore((s) => s.toggleFavorite);
 
     const flashIcon = React.useCallback(
         (setter: React.Dispatch<React.SetStateAction<boolean>>, duration = 220) => {
@@ -138,11 +151,13 @@ export function TrackActionsController({
 
             <View style={styles.iconsContainer}>
                 <Pressable
-                    onPress={() => flashIcon(setLiked)}
+                    onPress={() => {
+                        if (sermonId) toggleFavorite(sermonId);
+                    }}
                     accessibilityLabel="Like Track"
                 >
                     <Heart
-                        color={liked ? colors.teal[500] : colors.white[100]}
+                        color={isFavorite ? colors.teal[500] : colors.white[100]}
                         size={28}
                     />
                 </Pressable>
@@ -171,6 +186,10 @@ export function TrackActionsController({
                     nowPlaying={nowPlaying}
                     nextUp={nextUp}
                     onClose={handleCloseQueue}
+                    onAddToQueue={() => {
+                        handleCloseQueue();
+                        router.push('/search/query');
+                    }}
                     onPressQueueItem={handlePressQueueItem}
                 />
             </BottomSheetModal.Root>

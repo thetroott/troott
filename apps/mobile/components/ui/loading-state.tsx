@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 
 import Text from '@/components/ui/text';
 import Loader from '@/components/ui/loader';

@@ -73,7 +73,7 @@ troott/
 │   └── mobile/       # Expo app (@troott/mobile)
 ├── packages/          # Shared packages
 │   ├── ui/           # Web UI primitives (@troott/ui)
-│   ├── sdk/          # Shared SDK (@troott/sdk)
+│   ├── api-client/   # Shared API client (@troott/api-client)
 │   ├── tokens/       # Design tokens (@troott/tokens)
 │   └── native-ui/    # Native UI (@troott/native-ui)
 ├── configs/          # Shared configurations
@@ -102,7 +102,7 @@ Workspace apps and packages use the `@troott/*` namespace (examples):
     - `@troott/mobile` - Expo (React Native)
 - **Packages:**
     - `@troott/ui` - Web UI / shadcn-style components
-    - `@troott/sdk` - Shared client utilities and hooks
+    - `@troott/api-client` - Shared client utilities and hooks
     - `@troott/tokens` - Design tokens
     - `@troott/native-ui` - React Native UI primitives
 - **Configs:**
@@ -165,7 +165,7 @@ pnpm add <package-name> --filter @troott/website
 pnpm add <package-name> --filter @troott/api
 pnpm add <package-name> --filter @troott/mobile
 pnpm add <package-name> --filter @troott/ui
-pnpm add <package-name> --filter @troott/sdk
+pnpm add <package-name> --filter @troott/api-client
 ```
 
 ### Adding a Dev Dependency
@@ -198,7 +198,7 @@ To use a workspace package in another package, reference it in `package.json`:
 {
     "dependencies": {
         "@troott/ui": "workspace:*",
-        "@troott/sdk": "workspace:*"
+        "@troott/api-client": "workspace:*"
     }
 }
 ```
@@ -267,7 +267,7 @@ Turborepo automatically handles build order based on the `dependsOn: ["^build"]`
 
 2. **Shared libraries** (examples):
 
-- `@troott/ui`, `@troott/sdk`, `@troott/tokens`, `@troott/native-ui` – build only if their `package.json` defines `build`
+- `@troott/ui`, `@troott/api-client`, `@troott/tokens`, `@troott/native-ui` – build only if their `package.json` defines `build`
 
 3. **Applications** build last (depend on packages):
 
@@ -378,7 +378,7 @@ Workspace libraries live under `packages/*`. Each has its own `package.json`; us
 Examples:
 
 - `@troott/ui` — `packages/ui`
-- `@troott/sdk` — `packages/sdk`
+- `@troott/api-client` — `packages/api-client`
 - `@troott/tokens` — `packages/tokens`
 - `@troott/native-ui` — `packages/native-ui`
 
@@ -477,7 +477,7 @@ pnpm add -D tsc-alias copyfiles -w
 {
     "dependencies": {
         "@troott/ui": "workspace:*",
-        "@troott/sdk": "workspace:*"
+        "@troott/api-client": "workspace:*"
     }
 }
 ```
@@ -680,7 +680,7 @@ If you discover a bug or have a suggestion, raise an issue via the GitHub Issues
 ### Project-Specific Guidelines
 
 - **UI Components**: Prefer `@troott/ui` (web) or `@troott/native-ui` (mobile)
-- **Shared Logic**: Prefer `@troott/sdk` for cross-app client utilities
+- **Shared Logic**: Prefer `@troott/api-client` for cross-app client utilities
 - **API Changes**: Document in `apps/api` or your API docs as appropriate
 - **Environment Variables**: Use `.env` files (they're gitignored)
 

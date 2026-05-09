@@ -45,6 +45,10 @@ const UserSchema = new Schema<IUserDoc>(
             s3Key: { type: String },
         },
 
+        // Profile copy shared by listener and minister profiles
+        // (Figma node 11719:104736 - "About" / bio textarea).
+        bio: { type: String },
+
         // Location & Time
         location: {
             phoneCode: { type: String },

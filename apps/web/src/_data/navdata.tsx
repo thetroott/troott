@@ -1,3 +1,4 @@
+import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
 import {
     BarChart3Icon,
     CloudUploadIcon,
@@ -12,6 +13,7 @@ import {
     RocketIcon,
     TrashIcon,
     UsersIcon,
+    UserRound,
 } from 'lucide-react';
 
 export const navItems = {
@@ -19,13 +21,13 @@ export const navItems = {
         {
             title: 'Main',
             url: '#',
-            roles: ['staff', 'minister'],
+            roles: INTERNAL_PORTAL_ROLES,
             items: [
                 {
                     title: 'Get Started',
                     url: '/get-started',
                     icon: RocketIcon,
-                    roles: ['staff', 'minister'],
+                    roles: INTERNAL_PORTAL_ROLES,
                     isActive: false,
                     showOnboarding: true,
                 },
@@ -59,13 +61,19 @@ export const navItems = {
                     icon: TrashIcon,
                     isActive: false,
                 },
+                {
+                    title: 'Profile',
+                    url: '/profile',
+                    icon: UserRound,
+                    isActive: false,
+                },
             ],
         },
     ],
     sermonNav: [
         {
-            //title: "Sermon Management",
-            roles: ['staff', 'minister'],
+            title: 'Sermon Management',
+            roles: INTERNAL_PORTAL_ROLES,
             url: '#',
             items: [
                 // {
@@ -91,9 +99,9 @@ export const navItems = {
     ],
     engagementNav: [
         {
-            // title: "Engagement & Analytics",
+            title: 'Engagement and analytics',
             url: '#',
-            roles: ['staff', 'minister'],
+            roles: INTERNAL_PORTAL_ROLES,
             items: [
                 // {
                 //   title: "Sermon Analytics",

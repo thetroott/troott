@@ -162,7 +162,7 @@ describe('Repository Service - Unit Tests', () => {
             const newUserData = {
                 email: `test-${Date.now()}@example.com`,
                 code: 'test-code',
-                userType: 'talent',
+                userType: 'creator',
             };
 
             const result = await repository.create(newUserData);

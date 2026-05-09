@@ -5,6 +5,7 @@ import AppSidebar from '../shared/navigation/Sidebar';
 import storage from '@/utils/storage.util';
 import NavBar from '../shared/navigation/NavBar';
 import { cn } from '@/lib/utils';
+import { UserType } from '@troott/api-client';
 
 /** My Sermons matches Figma [`10154:35083`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10154-35083) — no global top nav; shell fill `#2b2a2c` (not theme `neutral-900`). */
 /** My Sermons list — full canvas, no top nav (see Figma note above). */
@@ -37,7 +38,7 @@ const DashboardLayout = () => {
                     shellBg,
                 )}
             >
-                <AppSidebar userRole="minister" />
+                <AppSidebar userRole={UserType.MINISTER} />
 
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                     {!hideTopNav ? <NavBar /> : null}

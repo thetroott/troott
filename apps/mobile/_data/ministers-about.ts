@@ -13,7 +13,7 @@ const MINISTER_ABOUT_SEED: MinisterAboutSeed[] = [
         id: 'apostle-joshua-selman',
         aliases: ['apostle joshua selman', 'joshua selman'],
         description:
-            'Apostle Joshua Selman is a Nigerian preacher and teacher known for Christ-centered teachings on intimacy with God, prayer, and spiritual growth through the Koinonia ministry.',
+            'Apostle Joshua Selman is a Nigerian minister and teacher known for Christ-centered teachings on intimacy with God, prayer, and spiritual growth through the Koinonia ministry.',
     },
     {
         id: 'jesudamilare-adesegun-david',
@@ -33,7 +33,7 @@ const MINISTER_ABOUT_SEED: MinisterAboutSeed[] = [
             'pst. chris oyakhilome',
         ],
         description:
-            'Pastor Chris Oyakhilome is a Nigerian preacher and teacher recognized globally for Christ-centered messages on faith, healing, and life in the Spirit through multiple ministry platforms.',
+            'Pastor Chris Oyakhilome is a Nigerian minister and teacher recognized globally for Christ-centered messages on faith, healing, and life in the Spirit through multiple ministry platforms.',
     },
     {
         id: 'billy-graham',

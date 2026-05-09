@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 
 import AboutSection from '@/components/features/minister/about-section';
 import {
-    MoreFromPreacher,
+    MoreFromMinister,
     NewSermon,
     SimilarMinisters,
 } from '@/components/features/home';
@@ -86,7 +86,7 @@ export function SermonDetails({
 
             <View style={styles.spacerSmall} />
 
-            <MoreFromPreacher />
+            <MoreFromMinister />
 
             <SimilarMinisters title="Similar Ministers" ctaLabel="See more" />
         </View>

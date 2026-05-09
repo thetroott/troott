@@ -21,7 +21,7 @@ type Props = {
     title: string;
     subtitle?: string;
     imageUri?: string | null;
-    /** Square artwork (sermons/playlists) vs circular (preachers). */
+    /** Square artwork (sermons/playlists) vs circular (ministers). */
     imageShape: 'square' | 'circle';
     onPress: () => void;
     /** Shown for parity with {@link SermonCard} small rows; optional handler. */

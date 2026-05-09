@@ -4,12 +4,6 @@ export type ApiMethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 export type ApiServiceType = 'default' | 'backend' | 'identity';
 export type RouteParamType = 'url' | 'query' | 'path';
 export type RouteActionType = 'navigate' | 'open-secondary' | 'logout';
-export type UserType =
-    | 'superadmin'
-    | 'staff'
-    | 'minister'
-    | 'creator'
-    | 'listener';
 export type StatusType = 'enabled' | 'active' | 'status';
 export type FileAcceptType =
     | 'csv'

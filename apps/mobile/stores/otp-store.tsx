@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 
 export interface IForgotPasswordStore {
     step: 'email' | 'otp' | 'success';

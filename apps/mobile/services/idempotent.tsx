@@ -1,22 +1,23 @@
-import { v4 as randomUUID } from 'uuid';
-import mmkvstorage from './mmkv-storage';
+import { MMKV } from 'react-native-mmkv';
+import { createMmkvIdempotencyStorage } from '@troott/api-client';
 
-class IdempotentService {
-    private key = 'XHIT';
+const storage = createMmkvIdempotencyStorage(
+    new MMKV(),
+    'troott:idempotency:request-key',
+);
 
+/** Backwards-compatible shape for existing imports (`getRequestKey` / `setRequestKey`). */
+const IdempotentService = {
     async getRequestKey(): Promise<string> {
-        const raw = await mmkvstorage.getData({ key: this.key, parse: false });
-        if (typeof raw === 'string' && raw.length > 0) {
-            return raw;
-        }
-        return this.setRequestKey();
-    }
+        return storage.getKey();
+    },
 
     async setRequestKey(): Promise<string> {
-        const idempKey = randomUUID();
-        await mmkvstorage.setData({ key: this.key, payload: idempKey });
-        return idempKey;
-    }
-}
+        if (storage.rotateKey) {
+            return storage.rotateKey();
+        }
+        return storage.getKey();
+    },
+};
 
-export default new IdempotentService();
+export default IdempotentService;

@@ -133,15 +133,17 @@ const FileUploadZone: React.FC<FileUploadZoneProps> = ({
         setIsDragActive(false);
 
         const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            handleFileSelect(files[0]);
+        const file = files[0];
+        if (file) {
+            handleFileSelect(file);
         }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (files && files.length > 0) {
-            handleFileSelect(files[0]);
+        const file = files?.[0];
+        if (file) {
+            handleFileSelect(file);
         }
     };
 

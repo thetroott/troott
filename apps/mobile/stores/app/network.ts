@@ -1,6 +1,5 @@
 import { networkStatusTypes } from '@/types/network-status';
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { create, devtools } from '@/lib/zstore';
 
 type NetworkStore = {
     networkStatus: networkStatusTypes | null;

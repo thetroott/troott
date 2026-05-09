@@ -61,8 +61,8 @@ const files = [
 const features = [
     {
         Icon: UserRoundCheckIcon,
-        name: 'Preachers you love',
-        description: 'Easy to find preachers, just tap and listen.',
+        name: 'Ministers you love',
+        description: 'Easy to find ministers, just tap and listen.',
         href: '',
         cta: '',
         className: 'col-span-3 lg:col-span-1',

@@ -209,6 +209,7 @@ class AuthService {
     public async validatUserType(type: string): Promise<boolean> {
         let flag = false;
         const list = [
+            UserType.SUPERADMIN,
             UserType.USER,
             UserType.LISTENER,
             UserType.CREATOR,

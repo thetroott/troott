@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Platform, type View, type ViewStyle } from 'react-native';
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 
 const DEFAULT_PORTAL_HOST = 'INTERNAL_PRIMITIVE_DEFAULT_HOST_NAME';
 

@@ -14,17 +14,17 @@ type AboutMeta = {
 const ABOUT_BY_MINISTER: Record<string, AboutMeta> = {
     'sam-adeyemi': {
         title: 'Sam Adeyemi',
-        bio: 'Pastor Sam Adeyemi is a Nigerian preacher and leadership teacher known for practical, faith-based teaching that empowers growth in purpose, leadership, and personal transformation.',
+        bio: 'Pastor Sam Adeyemi is a Nigerian minister and leadership teacher known for practical, faith-based teaching that empowers growth in purpose, leadership, and personal transformation.',
         ministryName: 'Daystar Christian Centre',
     },
     'bolaji-idowu': {
         title: 'Bolaji Idowu',
-        bio: 'Pastor Bolaji Idowu is a Nigerian preacher and ministry leader known for clear, scripture-rooted teaching and practical discipleship that strengthens believers in everyday life.',
+        bio: 'Pastor Bolaji Idowu is a Nigerian minister and ministry leader known for clear, scripture-rooted teaching and practical discipleship that strengthens believers in everyday life.',
         ministryName: 'Harvesters International',
     },
     'chris-oyakhilome': {
         title: 'Chris Oyakhilome',
-        bio: 'Pastor Chris Oyakhilome is a Nigerian preacher and teacher recognized globally for Christ-centered messages on faith, healing, and life in the Spirit through multiple ministry platforms.',
+        bio: 'Pastor Chris Oyakhilome is a Nigerian minister and teacher recognized globally for Christ-centered messages on faith, healing, and life in the Spirit through multiple ministry platforms.',
         ministryName: 'LoveWorld Incorporated',
     },
 };

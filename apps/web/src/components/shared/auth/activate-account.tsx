@@ -30,8 +30,8 @@ const ActivateUserForm = (data: IForm) => {
 
     const maskEmail = (email: string): string => {
         if (!email) return '';
-        const [localPart, domain] = email.split('@');
-        if (localPart.length <= 2) return email;
+        const [localPart = '', domain = ''] = email.split('@');
+        if (!domain || localPart.length <= 2) return email;
         const maskedLocal =
             localPart[0] +
             '*'.repeat(localPart.length - 2) +

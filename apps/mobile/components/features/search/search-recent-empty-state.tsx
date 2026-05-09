@@ -13,7 +13,7 @@ export default function SearchRecentEmptyState() {
         <View
             style={styles.wrap}
             accessibilityRole="text"
-            accessibilityLabel="Ready for a fresh start. Search for sermons, preachers, or playlists."
+            accessibilityLabel="Ready for a fresh start. Search for sermons, ministers, or playlists."
         >
             <Text
                 size="md"

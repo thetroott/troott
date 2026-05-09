@@ -30,10 +30,15 @@ import { getTrackListActions } from '@/components/features/player/controls/actio
 import type { BaseSermonDtoSlimified, SermonItemDTO } from '@/types/sermon';
 import type { Queue } from '@/types/queue-ref';
 import { usePlayQueue } from '@/stores/player/queue';
-import { useLoadNewQueue } from '@/engine/hooks/useControl';
+import { useAddToQueue, useLoadNewQueue } from '@/engine/hooks/useControl';
 import { useNetworkStatus } from '@/stores/app/network';
 import { networkStatusTypes } from '@/types/network-status';
 import { QueuingType } from '@/utils/enums.util';
+import { usePlaylistsQuery } from '@/hooks/use-library-queries';
+import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
+import { resolveMinisterIdFromLabel } from '@/_data/ministers-about';
+import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
+import { useContextType } from '@troott/state';
 
 export type SermonCardVariant = 'small' | 'large';
 
@@ -107,7 +112,19 @@ export default function SermonCard({
         useState<SermonAddedToPlaylistInfo | null>(null);
     const playQueue = usePlayQueue();
     const loadNewQueue = useLoadNewQueue();
+    const addToQueue = useAddToQueue();
     const [networkStatus] = useNetworkStatus();
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
+    const { data: playlistsRaw } = usePlaylistsQuery(!!userId);
+    const toggleFavorite = useFavoriteSermonIdsStore((s) => s.toggleFavorite);
+
+    const sermonPlaylistItems = useMemo(() => {
+        const mapped = mapPlaylistDocsToChooseItems(playlistsRaw);
+        return mapped.filter(
+            (p) => (p.playlistType ?? '').toLowerCase() === 'sermon',
+        );
+    }, [playlistsRaw]);
 
     const source = useMemo(() => artworkSource(track), [track]);
     const title = track.title ?? 'Untitled';
@@ -185,12 +202,55 @@ export default function SermonCard({
             addToPlaylistRef.current?.open();
         }, 300);
     }, []);
+
+    const handleLike = useCallback(() => {
+        if (track.id != null && String(track.id).length > 0) {
+            toggleFavorite(String(track.id));
+        }
+    }, [toggleFavorite, track.id]);
+
+    const handleAddPlayNext = useCallback(() => {
+        if (track.id == null) return;
+        void addToQueue({
+            api: undefined,
+            networkStatus: networkStatus ?? networkStatusTypes.ONLINE,
+            tracks: [track],
+            queuingType: QueuingType.PlayingNext,
+        });
+    }, [addToQueue, networkStatus, track]);
+
+    const handleAddToQueueEnd = useCallback(() => {
+        if (track.id == null) return;
+        void addToQueue({
+            api: undefined,
+            networkStatus: networkStatus ?? networkStatusTypes.ONLINE,
+            tracks: [track],
+            queuingType: QueuingType.DirectlyQueued,
+        });
+    }, [addToQueue, networkStatus, track]);
+
+    const handleViewMinister = useCallback(() => {
+        const mid = resolveMinisterIdFromLabel(minister);
+        router.push(`/minister/${mid}/about`);
+    }, [minister]);
+
     const trackListActions = useMemo(
         () =>
             getTrackListActions(track, {
                 onOpenAddToPlaylist: openAddToPlaylistSheet,
+                onLike: handleLike,
+                onAddPlayNext: handleAddPlayNext,
+                onAddToQueue: handleAddToQueueEnd,
+                onViewMinister: handleViewMinister,
             }),
-        [track, openAddToPlaylistSheet],
+        [
+            track,
+            openAddToPlaylistSheet,
+            handleLike,
+            handleAddPlayNext,
+            handleAddToQueueEnd,
+            handleViewMinister,
+        ],
     );
 
     const imageEl = useMemo(() => {
@@ -375,6 +435,8 @@ export default function SermonCard({
             </BottomSheetModal.Root>
             <AddToPlaylistBottomSheet
                 ref={addToPlaylistRef}
+                playlists={sermonPlaylistItems}
+                sermonTrackId={track.id != null ? String(track.id) : null}
                 onSermonAddedToPlaylist={onSermonAddedToPlaylist}
             />
         </View>

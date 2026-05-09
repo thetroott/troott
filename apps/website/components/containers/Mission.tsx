@@ -4,7 +4,7 @@ import MissionImage from './MIssionImage';
 export default function Mission() {
     return (
         <section
-            id="preacher"
+            id="minister"
             aria-labelledby="code-example-title"
             className="mx-auto mt-10 sm:mt-28 w-full max-w-6xl px-3"
         >
@@ -19,7 +19,7 @@ export default function Mission() {
                 Troott helps you reach hungry hearts ready to listen, guide more
                 lives, with no distractions, clutter, or limits. We’re turning
                 audio sermons into a tool for true discipleship and help
-                preachers reach millions without noise. We help you build
+                ministers reach millions without noise. We help you build
                 disciples not just listeners.
             </p>
 

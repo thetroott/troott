@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 
 interface AuthState {
     formData: { email: string; password: string };

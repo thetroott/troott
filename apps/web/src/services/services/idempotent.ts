@@ -1,6 +1,6 @@
 import { v4 as randomUUID } from 'uuid';
 import cookieService from './cookies';
-import { CookieKeyType } from '../types/types';
+import { CookieKeyType } from '@/utils/enums.util';
 
 class IdempotentService {
     constructor() {}

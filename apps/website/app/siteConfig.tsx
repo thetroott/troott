@@ -7,7 +7,7 @@ export const siteConfig = {
     baseLinks: {
         home: '/',
         listeners: '#listener',
-        preachers: '#preacher',
+        ministers: '#minister',
         faqs: '#faqs',
         imprint: '/',
         privacy:

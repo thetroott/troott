@@ -35,7 +35,7 @@ const emailServiceMock = {
             code: 202,
             data: {},
         }),
-    sendPreacherWelcomeEmail: jest
+    sendMinisterWelcomeEmail: jest
         .fn<(user: IUserDoc) => Promise<IResult>>()
         .mockResolvedValue({
             error: false,

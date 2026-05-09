@@ -38,28 +38,28 @@ type DisplayStyle = 'grid' | 'list';
 export function LibraryAllSmartCards({
     isGrid,
     likedCount,
-    preacherCount,
+    ministerCount,
     playlistCount,
     downloadsCount,
     onOpenLiked,
-    onOpenPreachers,
+    onOpenMinisters,
     onOpenPlaylists,
     onOpenDownloads,
 }: {
     isGrid: boolean;
     likedCount: number;
-    preacherCount: number;
+    ministerCount: number;
     playlistCount: number;
     downloadsCount: number;
     onOpenLiked: () => void;
-    onOpenPreachers: () => void;
+    onOpenMinisters: () => void;
     onOpenPlaylists: () => void;
     onOpenDownloads: () => void;
 }) {
     const likedLabel =
         likedCount === 1 ? '1 sermon' : `${likedCount} sermons`;
-    const preacherLabel =
-        preacherCount === 1 ? '1 minister' : `${preacherCount} ministers`;
+    const ministerLabel =
+        ministerCount === 1 ? '1 minister' : `${ministerCount} ministers`;
     const downloadsLabel =
         downloadsCount === 1 ? '1 sermon' : `${downloadsCount} sermons`;
     const playlistsLabel =
@@ -86,12 +86,12 @@ export function LibraryAllSmartCards({
                 }}
             />
             <PlayListCard
-                title="Favorite preachers"
-                description={preacherLabel}
-                id="favorite-preachers"
+                title="Favorite ministers"
+                description={ministerLabel}
+                id="favorite-ministers"
                 icon={OutlineIcons.UserPlusIcon}
                 variant={isGrid ? 'large' : 'small'}
-                onPress={onOpenPreachers}
+                onPress={onOpenMinisters}
                 cardStyle={{
                     width: isGrid ? theme.sizes.screen.width * 0.42 : '100%',
                 }}
@@ -411,7 +411,7 @@ export function LibrarySeriesCategory({
     );
 }
 
-function PreacherRow({
+function MinisterRow({
     row,
 }: {
     row: { id: string; name: string; image?: string };
@@ -437,7 +437,7 @@ function PreacherRow({
     );
 }
 
-function sortPreachers(
+function sortMinisters(
     rows: { id: string; name: string; image?: string }[],
     mode: 'alpha' | 'plays',
 ): { id: string; name: string; image?: string }[] {
@@ -448,7 +448,7 @@ function sortPreachers(
     return copy;
 }
 
-export function LibraryPreacherCategory({
+export function LibraryMinisterCategory({
     displayStyle: _displayStyle,
     sortMode,
 }: {
@@ -461,7 +461,7 @@ export function LibraryPreacherCategory({
         'favouriteMinisters',
         'favouriteministers',
     );
-    const rows = sortPreachers(
+    const rows = sortMinisters(
         raw
             .map((d) => ministerDocToRow(d))
             .filter((r): r is NonNullable<typeof r> => r != null),
@@ -471,9 +471,9 @@ export function LibraryPreacherCategory({
     if (!rows.length) {
         return (
             <LibraryEmptyState
-                title="No preachers yet"
+                title="No ministers yet"
                 subtitle="Follow ministers to see them in your library."
-                actionLabel="Explore preachers"
+                actionLabel="Explore ministers"
                 actionFilled
                 onAction={() => router.push('/search')}
             />
@@ -483,7 +483,7 @@ export function LibraryPreacherCategory({
     return (
         <View style={{ gap: theme.sizes.spacing.sm }}>
             {rows.map((row) => (
-                <PreacherRow key={row.id} row={row} />
+                <MinisterRow key={row.id} row={row} />
             ))}
         </View>
     );

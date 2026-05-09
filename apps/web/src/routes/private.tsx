@@ -16,12 +16,15 @@ import VerifyDocument1 from '@/components/shared/get-started/verify-document1';
 import { UploadDocumentWrapper } from '@/components/shared/upload';
 import HomeAddressPage from '@/app/account/HomeAddressInfo';
 import MinistryInputPage from '@/app/account/MinistryInfo';
+import UserProfile from '@/app/profile/UserProfile';
+import { Outlet } from 'react-router-dom';
+import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
 
 export const privateRoutes = [
     {
         path: '/',
         element: <Home />,
-        roles: ['admin', 'staff', 'preacher'],
+        roles: INTERNAL_PORTAL_ROLES,
     },
     {
         path: '',
@@ -31,14 +34,14 @@ export const privateRoutes = [
             {
                 path: 'get-started',
                 element: <GetStarted />,
-                roles: ['admin', 'staff', 'preacher'],
+                roles: INTERNAL_PORTAL_ROLES,
             },
 
             // get-started sub routes using InnerLayout
             {
                 path: 'get-started',
                 element: <InnerLayout />,
-                roles: ['admin', 'staff', 'preacher'],
+                roles: INTERNAL_PORTAL_ROLES,
                 children: [
                     { path: 'verify-account', element: <UserAccount /> },
                     {
@@ -86,30 +89,35 @@ export const privateRoutes = [
 
             {
                 path: 'get-started/tour-guide',
-                element: '',
+                element: <Outlet />,
             },
 
             {
                 path: 'dashboard',
                 element: <Dashboard />,
-                roles: ['admin', 'staff', 'preacher'],
+                roles: INTERNAL_PORTAL_ROLES,
             },
 
             {
                 path: 'sermons',
                 element: <Sermons />,
-                roles: ['admin', 'staff', 'preacher'],
+                roles: INTERNAL_PORTAL_ROLES,
             },
             {
                 path: 'analytics',
                 element: <Analytics />,
-                roles: ['admin', 'staff', 'preacher'],
+                roles: INTERNAL_PORTAL_ROLES,
             },
 
             {
                 path: 'bin',
                 element: <Bin />,
-                roles: ['admin', 'staff', 'preacher'],
+                roles: INTERNAL_PORTAL_ROLES,
+            },
+            {
+                path: 'profile',
+                element: <UserProfile />,
+                roles: INTERNAL_PORTAL_ROLES,
             },
         ],
     },

@@ -1,5 +1,4 @@
-import { create } from 'zustand';
-import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import { create, createJSONStorage, devtools, persist } from '@/lib/zstore';
 import { Platform } from 'react-native';
 import { StreamingQuality } from '@/utils/enums.util';
 import { mmkvStateStorage } from '@/services/storage';

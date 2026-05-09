@@ -1,88 +1,49 @@
 import { MMKV } from 'react-native-mmkv';
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import { AsyncStorage as TanstackAsyncStorage } from '@tanstack/react-query-persist-client';
-import { StateStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+import { StateStorage } from '@/lib/zstore';
 
 let _storage: MMKV | null = null;
-/** After a failed init, do not call `new MMKV()` again (avoids log spam / crashes). */
-let _mmkvInitFailed = false;
-
-const memoryPersistStore = new Map<string, string>();
-
-const memoryStateStorage: StateStorage = {
-    setItem: (key, value) => {
-        memoryPersistStore.set(key, value);
-    },
-    getItem: (key) => memoryPersistStore.get(key) ?? null,
-    removeItem: (key) => {
-        memoryPersistStore.delete(key);
-    },
-};
-
-function getMMKV(): MMKV | null {
-    if (_mmkvInitFailed) return null;
+function getMMKV(): MMKV {
     if (_storage !== null) return _storage;
-    try {
-        _storage = new MMKV();
-        return _storage;
-    } catch (e) {
-        _mmkvInitFailed = true;
-        console.warn(
-            '[storage] MMKV unavailable (remote Chrome debugger, or JSI not ready). Using in-memory Zustand persist for this session. Disable remote JS debugging to use MMKV.',
-            e,
-        );
-        return null;
-    }
+    _storage = new MMKV();
+    return _storage;
 }
 
 export const storage = new Proxy({} as MMKV, {
     get(_, prop) {
         const inst = getMMKV();
-        if (inst)
-            return (inst as unknown as Record<string, unknown>)[prop as string];
-        return undefined;
+        return (inst as unknown as Record<string, unknown>)[prop as string];
     },
 });
 
 const storageFunctions = {
-    setItem: async (key: string, value: string) => {
-        await AsyncStorage.setItem(key, value);
+    setItem: (key: string, value: string) => {
+        getMMKV().set(key, value);
     },
-    getItem: async (key: string) => {
-        const value = await AsyncStorage.getItem(key);
+    getItem: (key: string) => {
+        const value = getMMKV().getString(key);
         return value === undefined ? null : value;
     },
-    removeItem: async (key: string) => {
-        await AsyncStorage.removeItem(key);
+    removeItem: (key: string) => {
+        getMMKV().delete(key);
     },
 };
 
 const mmkvStorageFunctions: StateStorage = {
     setItem: (key: string, value: string) => {
-        const inst = getMMKV();
-        if (inst) inst.set(key, value);
-        else memoryStateStorage.setItem(key, value);
+        getMMKV().set(key, value);
     },
     getItem: (key: string) => {
-        const inst = getMMKV();
-        if (inst) {
-            const value = inst.getString(key);
-            return value === undefined ? null : value;
-        }
-        return memoryStateStorage.getItem(key);
+        const value = getMMKV().getString(key);
+        return value === undefined ? null : value;
     },
     removeItem: (key: string) => {
-        const inst = getMMKV();
-        if (inst) inst.delete(key);
-        else memoryStateStorage.removeItem(key);
+        getMMKV().delete(key);
     },
 };
 
-const clientStorage: TanstackAsyncStorage<string> = storageFunctions;
-
-export const queryClientPersister = createAsyncStoragePersister({
-    storage: clientStorage,
+export const queryClientPersister = createSyncStoragePersister({
+    storage: storageFunctions,
 });
 
 export const stateStorage: StateStorage = storageFunctions;

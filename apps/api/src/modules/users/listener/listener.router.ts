@@ -6,6 +6,8 @@ import {
     updateListener,
     updateInterests,
     inviteListener,
+    bulkInviteListeners,
+    resendListenerInvite,
     acceptListenerInvitation,
     setListenerPassword,
     revokeListenerInvitation,
@@ -20,6 +22,8 @@ listenerRoutes.put('/', Protect, updateListener);
 listenerRoutes.put('/interests', Protect, updateInterests);
 
 listenerRoutes.post('/invite', Protect, inviteListener);
+listenerRoutes.post('/invite/bulk', Protect, bulkInviteListeners);
+listenerRoutes.post('/invite/resend', Protect, resendListenerInvite);
 listenerRoutes.post('/invite/accept', acceptListenerInvitation);
 listenerRoutes.post('/invite/revoke', Protect, revokeListenerInvitation);
 

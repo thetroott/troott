@@ -124,12 +124,14 @@ const clearAuth = () => {
     localStorage.removeItem('role');
     localStorage.removeItem('userType');
     localStorage.removeItem('userEmail');
+    localStorage.removeItem('businessType');
 
     // Clear cookies
     CookieService.removeData({ key: 'token' });
     CookieService.removeData({ key: 'userId' });
     CookieService.removeData({ key: 'userType' });
     CookieService.removeData({ key: 'userEmail' });
+    CookieService.removeData({ key: 'businessType' });
 };
 
 const keep = (key: string, data: any) => {

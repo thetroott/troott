@@ -2,7 +2,7 @@ Sermon Series
 
 title: string;
 description: string;
-preacher: ObjectId | any; // name of the preacher
+minister: ObjectId | any; // name of the minister
 sermons: Array<ObjectId | any>; // list the title of all the parts of the series
 imageUrl?: string; // image of the series
 part: Number; // how many parts

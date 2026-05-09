@@ -30,7 +30,7 @@ For a **sermon audio app**, a share feature should be **simple, contextual, and 
 **Minimal info for context:**
 
 - **Sermon title** – e.g., _“Faith in Times of Doubt”_
-- **Speaker / preacher name**
+- **Speaker / minister name**
 - **Series or collection name** (if applicable)
 - **Cover image or thumbnail** – gives visual cue
 - **App deep link / URL** – so the recipient can open the sermon directly in your app

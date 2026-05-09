@@ -1,6 +1,6 @@
-import { create } from 'zustand';
+import { create } from '@/lib/zstore';
 
-import { UserType } from '@/utils/enums.util';
+import { UserType } from '@troott/api-client';
 import type { RegisterUserDTO } from '@/dtos/auth.dto';
 
 interface PasswordStrength {
@@ -39,7 +39,7 @@ export const useRegisterStore = create<RegisterState>((set) => ({
         lastName: '',
         email: '',
         password: '',
-        userType: UserType.PREACHER,
+        userType: UserType.MINISTER,
     },
     email: '',
     userEmail: false,
@@ -87,7 +87,7 @@ export const useRegisterStore = create<RegisterState>((set) => ({
                 lastName: '',
                 email: '',
                 password: '',
-                userType: UserType.PREACHER,
+                userType: UserType.MINISTER,
             },
             touched: {
                 firstName: false,

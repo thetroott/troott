@@ -23,7 +23,7 @@ export function Navigation() {
     const scrolled = useScroll(15);
     const [open, setOpen] = React.useState(false);
     const [dialogOpen, setDialogOpen] = React.useState(false);
-    const [role, setRole] = React.useState<'listener' | 'preacher'>('listener');
+    const [role, setRole] = React.useState<'listener' | 'minister'>('listener');
 
     React.useEffect(() => {
         const mediaQuery = window.matchMedia('(min-width: 768px)');
@@ -72,9 +72,9 @@ export function Navigation() {
                                 </Link>
                                 <Link
                                     className="px-2 py-1"
-                                    href={siteConfig.baseLinks.preachers}
+                                    href={siteConfig.baseLinks.ministers}
                                 >
-                                    Preachers
+                                    Ministers
                                 </Link>
                                 <Link
                                     className="px-2 py-1"
@@ -132,10 +132,10 @@ export function Navigation() {
                             Listeners
                         </MobileLink>
                         <MobileLink
-                            href={siteConfig.baseLinks.preachers}
+                            href={siteConfig.baseLinks.ministers}
                             onClick={() => setOpen(false)}
                         >
-                            Preachers
+                            Ministers
                         </MobileLink>
                         <MobileLink
                             href={siteConfig.baseLinks.faqs}
@@ -168,7 +168,7 @@ export function Navigation() {
 
                             <Button
                                 onClick={() => {
-                                    setRole('preacher');
+                                    setRole('minister');
                                     setDialogOpen(true);
                                 }}
                                 variant="secondary"
