@@ -1,45 +1,91 @@
-import type { LogRequestDTO } from '@/dtos/system.dto';
+import { NODE_ENV, NodeEnv } from './types.util';
 
-class Logger {
-    private getTimestamp(): string {
-        const now = new Date();
-        return now.toLocaleTimeString();
-    }
-
-    public log(payload: LogRequestDTO) {
-        const { data, label, type } = payload;
-        if (!data) return;
-
-        const timestamp = this.getTimestamp();
-        const prefix = label ? `[${label}]` : '';
-        const base = `%c${prefix} ${timestamp} → ${data}`;
-
-        let style = `
-      color: #fff;
-      font-weight: regular;
-      padding: 2px 6px;
-      border-radius: 4px;
-    `;
-
-        switch (type) {
-            case 'error':
-                style += 'background: #e63946;';
-                break;
-            case 'success':
-                style += 'background: #2a9d8f;';
-                break;
-            case 'info':
-                style += 'background: #457b9d;';
-                break;
-            case 'warning':
-                style += 'background: #f4a261;';
-                break;
-            default:
-                style += 'background: #6c757d;';
-        }
-
-        console.log(base, style);
-    }
+export enum LogLevel {
+	INFO = 'info',
+	WARN = 'warn',
+	ERROR = 'error',
+	DEBUG = 'debug',
 }
 
-export default new Logger();
+interface LoggerConfig {
+	enabledEnvironments: NodeEnv[];
+	showTimestamp?: boolean;
+	showLogLevel?: boolean;
+}
+
+class Logger {
+	private static instance: Logger;
+	private config: LoggerConfig;
+	private isEnabled: boolean;
+
+	private constructor(
+		config: LoggerConfig = {
+			enabledEnvironments: [NodeEnv.LOCAL, NodeEnv.DEV, NodeEnv.PROD],
+			showTimestamp: true,
+			showLogLevel: true,
+		},
+	) {
+		this.config = config;
+		this.isEnabled = this.checkIfEnabled();
+	}
+
+	public static getInstance(config?: LoggerConfig): Logger {
+		if (!Logger.instance) {
+			Logger.instance = new Logger(config);
+		}
+		return Logger.instance;
+	}
+
+	private checkIfEnabled(): boolean {
+		return this.config.enabledEnvironments.includes(NODE_ENV);
+	}
+
+	private formatMessage(level: LogLevel, ...args: unknown[]): string {
+		const parts: string[] = [];
+
+		if (this.config.showTimestamp) {
+			parts.push(`[${new Date().toISOString()}]`);
+		}
+
+		if (this.config.showLogLevel) {
+			parts.push(`[${level.toUpperCase()}]`);
+		}
+
+		parts.push(...args.map((arg) => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg))));
+
+		return parts.join(' ');
+	}
+
+	public info(...args: unknown[]): void {
+		if (this.isEnabled) {
+			console.info(this.formatMessage(LogLevel.INFO, ...args));
+		}
+	}
+
+	public warn(...args: unknown[]): void {
+		if (this.isEnabled) {
+			console.warn(this.formatMessage(LogLevel.WARN, ...args));
+		}
+	}
+
+	public error(...args: unknown[]): void {
+		console.error(this.formatMessage(LogLevel.ERROR, ...args));
+	}
+
+	public debug(...args: unknown[]): void {
+		if (this.isEnabled) {
+			console.debug(this.formatMessage(LogLevel.DEBUG, ...args));
+		}
+	}
+
+	public setConfig(newConfig: Partial<LoggerConfig>): void {
+		this.config = { ...this.config, ...newConfig };
+		this.isEnabled = this.checkIfEnabled();
+	}
+}
+
+// Singleton export
+export const logger = Logger.getInstance();
+
+// Export class for custom use
+export { Logger };

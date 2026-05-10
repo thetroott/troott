@@ -1,8 +1,12 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from '@/routes/AppRoutes';
-import { AppProvider } from '@/context/app/app.context';
+import { AppProvider } from '@/context/apps/app.context';
+import useVersionCheck from './hooks/shared/useVersionCheck';
 
 const App = () => {
+
+    useVersionCheck();
+
     return (
         <AppProvider>
             <Router>

@@ -38,6 +38,21 @@ export interface IStorage {
     };
 }
 
+export interface IPagination {
+    next: { page: number; limit: number };
+    prev: { page: number; limit: number };
+}
+
+export interface ICollection<T = unknown> {
+    data: T[];
+    count: number;
+    total: number;
+    pagination: IPagination;
+    loading: boolean;
+    message?: string;
+}
+
+
 export type RouteType = {
     path: string;
     element: JSX.Element;
@@ -118,6 +133,17 @@ export interface IAPIResponse {
     token?: string;
     status: number;
 }
+
+export interface IAPIKey {
+    secret: string,
+    public: string,
+    token: string,
+    publicToken: string,
+    domain: string,
+    isActive: boolean,
+    updatedAt: string
+}
+
 
 export interface IPagination {
     next: { page: number; limit: number };
