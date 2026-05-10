@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import axiosService from '@/api/core/axios';
+import axiosService from '@/apis/core/axios';
 import { QueryKeys } from '@/utils/enums.util';
 import { useContextType } from '@troott/state';
 

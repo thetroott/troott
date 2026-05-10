@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import axiosService from '@/api/core/axios';
+import axiosService from '@/apis/core/axios';
 import {
     mapSermonDocsToItems,
     ministerDocToRow,

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { IAPIResponse } from '@troott/api-client';
 import { queryKeys, troottAPIClient } from '@troott/api-client';
-import '@/api/config';
+import '@/apis/config';
 import storage from '@/services/storage-service';
 import { useEffect, useState } from 'react';
 

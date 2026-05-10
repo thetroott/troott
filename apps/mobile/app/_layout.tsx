@@ -1,4 +1,4 @@
-import '@/api/config';
+import '@/apis/config';
 import { TroottStateProvider } from '@troott/state';
 import { PlaybackBridge } from '@/engine/state/use-playback-bridge';
 import Constants from 'expo-constants';

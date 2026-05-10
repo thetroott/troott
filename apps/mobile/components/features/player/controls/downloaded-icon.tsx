@@ -3,7 +3,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { memo } from 'react';
 
 import { SermonItemDTO } from '@/dtos/sermon.dto';
-import auth from '@/api/auth';
+import auth from '@/apis/auth';
 import { Separator } from '@/components/ui/separator';
 
 function DownloadedIcon({ item }: { item: SermonItemDTO }) {
