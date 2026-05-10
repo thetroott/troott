@@ -106,4 +106,82 @@ export default class Troott extends TroottAPIClient {
         super(transport);
         setGlobalInstance(this);
     }
+
+    /**
+     * Stripe-style static access:
+     *   new Troott(baseUrl);
+     *   await Troott.discovery.getHome();
+     */
+    static get auth(): AuthAPI {
+        return troottAPIClient().auth;
+    }
+    static get role(): RoleAPI {
+        return troottAPIClient().role;
+    }
+    static get permission(): PermissionAPI {
+        return troottAPIClient().permission;
+    }
+    static get user(): UserAPI {
+        return troottAPIClient().user;
+    }
+    static get profile(): ProfileAPI {
+        return troottAPIClient().profile;
+    }
+    static get listener(): ListenerAPI {
+        return troottAPIClient().listener;
+    }
+    static get minister(): MinisterAPI {
+        return troottAPIClient().minister;
+    }
+    static get creator(): CreatorAPI {
+        return troottAPIClient().creator;
+    }
+    static get admin(): AdminAPI {
+        return troottAPIClient().admin;
+    }
+    static get sermon(): SermonAPI {
+        return troottAPIClient().sermon;
+    }
+    static get library(): LibraryAPI {
+        return troottAPIClient().library;
+    }
+    static get playlist(): PlaylistAPI {
+        return troottAPIClient().playlist;
+    }
+    static get preference(): PreferenceAPI {
+        return troottAPIClient().preference;
+    }
+    static get search(): SearchAPI {
+        return troottAPIClient().search;
+    }
+    static get discovery(): DiscoveryAPI {
+        return troottAPIClient().discovery;
+    }
+    static get playback(): PlaybackAPI {
+        return troottAPIClient().playback;
+    }
+    static get open(): OpenAPI {
+        return troottAPIClient().open;
+    }
+    static get share(): ShareAPI {
+        return troottAPIClient().share;
+    }
+    static get storage(): StorageAPI {
+        return troottAPIClient().storage;
+    }
+    static get invitation(): InvitationAPI {
+        return troottAPIClient().invitation;
+    }
+    static get push(): PushAPI {
+        return troottAPIClient().push;
+    }
+    static get plan(): PlanAPI {
+        return troottAPIClient().plan;
+    }
+    static get subscription(): SubscriptionAPI {
+        return troottAPIClient().subscription;
+    }
+    static get transaction(): TransactionAPI {
+        return troottAPIClient().transaction;
+    }
 }

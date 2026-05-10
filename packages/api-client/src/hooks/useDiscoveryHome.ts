@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { troottAPIClient } from '../api/_base/config';
+import Troott from '../api/_base/config';
 import { queryKeys } from './queryKeys';
 
 export function useDiscoveryHome(enabled = true) {
@@ -7,7 +7,7 @@ export function useDiscoveryHome(enabled = true) {
         queryKey: queryKeys.discovery.home,
         enabled,
         queryFn: async () => {
-            const res = await troottAPIClient().discovery.getHome();
+            const res = await Troott.discovery.getHome();
             return res.data;
         },
     });
