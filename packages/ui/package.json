@@ -7,7 +7,6 @@
         "lint": "eslint . --max-warnings 0"
     },
     "dependencies": {
-        "@troott/tokens": "workspace:*",
         "@floating-ui/core": "^1.7.1",
         "@floating-ui/dom": "^1.7.1",
         "@floating-ui/react-dom": "^2.1.2",

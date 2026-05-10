@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import { colors, radii, fontSizes } from '@troott/tokens';
+import { colors, radii, fontSizes } from './src/tokens';
 
 const config: Config = {
     content: ['./src/**/*.{ts,tsx}'],
