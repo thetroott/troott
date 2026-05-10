@@ -1,5 +1,13 @@
 import { Document, Types } from 'mongoose';
 import { IDebitCard } from '../../shared/card.interface';
+import { IMinisterDoc } from '../minister/minister.interface';
+import {
+    ILibraryDoc,
+    ISeriesDoc,
+    ISermonDoc,
+    ISubscriptionDoc,
+    IUserDoc,
+} from '@/utils/interfaces.util';
 
 type ObjectId = Types.ObjectId;
 
@@ -7,37 +15,49 @@ export interface IListenerDoc extends Document {
     code: string; // user public ID
     firstName: string;
     lastName: string;
+    middleName: string;
     email: string;
-
+    slug: string;
+    avatar: string;
+    dateOfBirth: Date;
+    gender: string;
+    onboarding: {
+        step: number;
+        status: string;
+    };
     phoneNumber: string;
     phoneCode: string;
     country: string;
     countryPhone: string;
-
-    avatar: string;
-    dateOfBirth: Date;
-    gender: string;
-    slug: string;
+    homeCountry: string;
+    ministry: string;
     card: IDebitCard;
 
-    playlists: Array<ObjectId | any>;
-    listeningHistory: Array<ObjectId | any>;
-    likedSermons: Array<ObjectId | any>;
-    sharedSermons: Array<ObjectId | any>;
+    topics: Array<string>;
+    ministers: Array<IMinisterDoc | any>;
 
-    viewedSermonBites: Array<ObjectId | any>;
-    sharedSermonBites: Array<ObjectId | any>;
-    savedSermonBites: Array<ObjectId | any>;
+    likedSermons: Array<ISermonDoc | any>;
+    LikedSeries: Array<ISeriesDoc | any>;
+    sharedSermons: Array<ISermonDoc | any>;
 
-    followers: Array<ObjectId | any>;
-    following: Array<ObjectId | any>;
-    interests: Array<string>;
-    badges: Array<string>;
+    followers: Array<IUserDoc | any>;
+    followings: Array<IUserDoc | any>;
 
-    user: ObjectId | any;
-    subscriptions: Array<ObjectId | any>;
+    user: IUserDoc | any;
+    settings: string | any;
+    Library: ILibraryDoc | any;
+    subscription: ISubscriptionDoc | any;
     transactions: Array<ObjectId | any>;
-    createdBy: ObjectId | any;
+
+    createdBy: IUserDoc | any;
+
+    // PlaybackHistory: {
+    //     listener: IListenerDoc;
+    //     sermon: ISermonDoc;
+    //     playedAt: string;
+    //     progress: number;
+    //     completed: boolean;
+    // };
 
     createdAt: string;
     updatedAt: string;

@@ -1,5 +1,8 @@
 import { Document, Types } from 'mongoose';
-import { Upload } from '../user/user.interface';
+import { IUserDoc, Upload } from '../user/user.interface';
+import { ITransactionDoc } from '@/modules/payments/transaction/transaction.interface';
+import { IPlaylistDoc } from '@/modules/core/playlist/playlist.interface';
+import { ISermonDoc } from '@/utils/interfaces.util';
 
 type ObjectId = Types.ObjectId;
 
@@ -7,59 +10,63 @@ export interface IMinisterDoc extends Document {
     code: string; // user public ID
     firstName: string;
     lastName: string;
-    email: string;
+    middleName: string;
+    gender: string;
+    dateOfBirth: Date;
     phoneNumber: string;
     phoneCode: string;
-    country: string;
     countryPhone: string;
 
     avatar: string;
-    dateOfBirth: Date;
-    gender: string;
+    banner: string;
     slug: string;
+    email: string;
 
-    docVerification: DocumentUpload;
-    verificationStatus: VerificationStatus;
-    verifiedAt: Date;
-    isPublic: boolean; // Only set to true AFTER verification
+    profile: {
+        description: string;
+        ministerialName: string;
+        ministryName: string;
+        ministryLogo: string;
+        ministryType: string; // Pentecostal, Charismatic, etc.
+        ministryHQLocation: string;
+        phoneNumber: string;
+        phoneCode: string;
+        countryPhone: string;
+        email: string;
+        websiteUrl: string;
+        socials: Array<ISocials>; // Instagram, Twitter, TikTok, etc.
+        languages: Array<string>;
+    };
 
-    /** @deprecated legacy single-string field; prefer `ministryName`. */
-    ministry?: string;
-    ministerialName: string;
-    ministryName: string;
-    description: string;
-    ministryHQLocation: string;
-    ministryWebsite: string;
-    socials: IProfileSocials;
+    onboarding: {
+        step: number;
+        status: string;
+    };
+    location: {
+        city: string;
+        state: string;
+        address: string;
+    };
+    verification: {
+        document: DocumentUpload;
+        status: VerificationStatus;
+        verifiedAt: Date;
+        isPublic: boolean; // Only set to true AFTER verification
+    };
+    status: MinisterStatus;
+    published: boolean;
 
-    sermons: Array<ObjectId | any>;
-    featuredSermons: Array<ObjectId | any>;
-    bites: Array<ObjectId | any>;
-    topSermons: Array<ObjectId | any>;
-    topBites: Array<ObjectId | any>;
-
-    playlists: Array<ObjectId | any>;
-    featuredPlaylists: Array<ObjectId | any>;
-
-    followers: Array<ObjectId | any>;
     monthlyListeners: number;
-    likes: number;
-    shares: number;
 
-    uploads: Array<ObjectId | any>;
-    uploadHistory: Array<ObjectId | any>;
-    deletedSermons: Array<{
-        id: ObjectId;
-        deletedBy: ObjectId | any;
-        deletedAt: Date;
-        reason?: string;
-    }>;
+    settings: string | any;
+    subscription: string | any;
+    user: IUserDoc | any;
 
-    accountManagers: Array<{ userId: ObjectId; role: AccountManagerRole }>;
+    sermons: Array<ISermonDoc | any>;
+    playlists: Array<IPlaylistDoc | any>;
+    transactions: Array<ITransactionDoc | any>;
 
-    user: ObjectId | any;
-    transactions: Array<ObjectId | any>;
-    createdBy: ObjectId | any;
+    createdBy: IUserDoc | any;
 
     createdAt: string;
     updatedAt: string;
@@ -86,14 +93,10 @@ export interface ISocials {
     username: string;
 }
 
-/**
- * Structured social handles surfaced on the minister profile editor.
- * Matches the three platforms in Figma node 11719:104736.
- */
-export interface IProfileSocials {
-    instagram?: string;
-    twitter?: string;
-    tiktok?: string;
+export enum MinisterStatus {
+    ACTIVE = 'active',
+    INACTIVE = 'inactive',
+    SUSPENDED = 'suspended',
 }
 
 export enum VerificationStatus {

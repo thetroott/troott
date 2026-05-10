@@ -124,7 +124,15 @@ export interface ILocation {
     postalCode: string;
 }
 
-export interface IDevice {}
+export interface IDeviceType {
+    type: DeviceType;
+    token: string;
+    deviceId: string;
+    deviceName: string;
+    deviceModel: string;
+    devicePlatform: string;
+    deviceVersion: string;
+}
 
 export enum OnboardStatus {
     NOT_STARTED = 'not-started',

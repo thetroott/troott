@@ -9,6 +9,7 @@ export interface ILibraryDoc extends Document {
     playlists: Array<ObjectId | any>;
     favouriteMinisters: Array<ObjectId | any>;
     mostPlayed: Array<ObjectId | any>;
+    recentlyPlayed: Array<string>;
 
     createdAt: string;
     updatedAt: string;

@@ -5,7 +5,7 @@ import roleRepository from './role.repository';
 import { IResult } from '@/modules/shared/interfaces.util';
 import User from '../../users/user/user.model';
 import { IUserDoc, UserType } from '../../users/user/user.interface';
-import permissionService from '../permission/permission.service';
+import permissionService from '../../permission/permission.service';
 
 class RoleService {
     public result: IResult;
