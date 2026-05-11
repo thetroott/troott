@@ -1,5 +1,5 @@
-import { PasswordType, UserType } from './user.interface';
-import { IFile } from '../../../utils/interfaces.util';
+import { PasswordType, UserType } from '@/modules/users/user/user.interface';
+import { IFile } from '../utils/interfaces.util';
 
 export interface createUserDTO {
     email: string;

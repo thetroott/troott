@@ -1,4 +1,4 @@
-import { ShareableLinkType } from './shareable-link.interface';
+import { ShareableLinkType } from '@/interfaces/shareable-link.interface';
 
 export interface CreateShareableLinkDTO {
     linkType: ShareableLinkType;

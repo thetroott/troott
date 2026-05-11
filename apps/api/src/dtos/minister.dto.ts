@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongoose';
-import { IUserDoc } from '../user/user.interface';
-import { VerificationStatus } from '../../../utils/enums.util';
-import { UserType } from '../user/user.interface';
+import { IUserDoc, UserType } from '@/modules/users/user/user.interface';
+import { VerificationStatus } from '../utils/enums.util';
 
 export interface CreateMinisterDTO {
     user: IUserDoc;

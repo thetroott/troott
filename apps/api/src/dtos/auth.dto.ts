@@ -1,5 +1,5 @@
-import type { IUserDoc } from '../../users/user/user.interface';
-import { OtpType, UserType } from '../../users/user/user.interface';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { OtpType, UserType } from '@/modules/users/user/user.interface';
 
 export interface RegisterUserDTO {
     firstName: string;

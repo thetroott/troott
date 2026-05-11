@@ -1,4 +1,4 @@
-import { Currency } from '../subscription/subscription.interface';
+import { Currency } from '@/modules/payments/subscription/subscription.interface';
 
 /**
  * Payload used to initialize a Paystack transaction.

@@ -1,9 +1,9 @@
-import { IUserDoc } from '../user/user.interface';
+import { IUserDoc } from '@/modules/users/user/user.interface';
 import {
     AdminDepartmentEnum,
     AdminTypeEnum,
     CompanyRoleEnum,
-} from './admin.interface';
+} from '@/modules/users/admin/admin.interface';
 
 export interface CreateAdminDTO {
     code: string;

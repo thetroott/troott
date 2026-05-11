@@ -1,6 +1,6 @@
 import { IMinisterDoc } from '@/utils/interfaces.util';
-import { ImageSource, SermonSource } from '../sermon/sermon.interface';
-import { SermonDTO } from '../sermon/sermon.dto';
+import { ImageSource, SermonSource } from '@/modules/core/sermon/sermon.interface';
+import { SermonDTO } from '@/dtos/sermon.dto';
 import { ContentState, ContentStatus } from '@/utils/content.enums';
 
 /**

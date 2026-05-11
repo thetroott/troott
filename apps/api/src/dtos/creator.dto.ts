@@ -1,5 +1,5 @@
-import { IUserDoc } from '../user/user.interface';
-import { VerificationStatus } from '../../../utils/enums.util';
+import { IUserDoc } from '@/modules/users/user/user.interface';
+import { VerificationStatus } from '../utils/enums.util';
 
 export interface CreateCreatorDTO {
     user: IUserDoc;

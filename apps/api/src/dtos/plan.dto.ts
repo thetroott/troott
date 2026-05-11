@@ -3,7 +3,7 @@ import {
     IPlanPricing,
     IPlanTrial,
     PlanType,
-} from './plan.interface';
+} from '@/modules/payments/plan/plan.interface';
 
 export interface newPlanDTO {
     name: string;

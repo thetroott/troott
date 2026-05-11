@@ -1,4 +1,4 @@
-import { BillingFrequency, Currency } from './subscription.interface';
+import { BillingFrequency, Currency } from '@/modules/payments/subscription/subscription.interface';
 
 export interface newSubscriptionDTO {
     planId: string;

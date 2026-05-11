@@ -1,10 +1,11 @@
 import { ObjectId } from 'mongoose';
-import { BillingFrequency } from '../../../utils/enums.util';
+import { BillingFrequency } from '../utils/enums.util';
 import {
     IPaymentMethod,
     IPlanDoc,
     IUserDoc,
-} from '../../../utils/interfaces.util';
+} from '../utils/interfaces.util';
+import { IDebitCard } from '@/interfaces/subscription.interface';
 
 export interface createPlanDto {}
 export interface updatePlanDto {}
@@ -48,3 +49,10 @@ export interface verifyPaymentDTO {
     paymentMethod: IPaymentMethod;
 }
 export interface updateSubscriptionDto {}
+
+
+export interface VerifyCardDTO {
+    user: IUserDoc;
+    card: IDebitCard;
+    reference: string;
+}

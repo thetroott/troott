@@ -1,4 +1,4 @@
-import { InvitationStatus, InvitationType } from './invitation.interface';
+import { InvitationStatus, InvitationType } from '../interfaces/invitation.interface';
 
 export interface CreateInvitationDTO {
     invitedBy: string;

@@ -1,5 +1,5 @@
-import { Upload, UserType } from '../user/user.interface';
-import type { IProfileSocials } from '../minister/minister.interface';
+import { Upload, UserType } from '@/modules/users/user/user.interface';
+import type { IProfileSocials } from '@/modules/users/minister/minister.interface';
 
 /**
  * Canonical Profile contract.
