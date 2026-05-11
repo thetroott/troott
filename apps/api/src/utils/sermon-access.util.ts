@@ -1,8 +1,8 @@
 import type { Request } from 'express';
 import mongoose from 'mongoose';
-import Minister from '../../users/minister/minister.model';
-import { getAuthUserId } from '../../../utils/auth-request.util';
-import { isSermonPublicTeaserEligible } from '../open/sermon-teaser.util';
+import Minister from '@/models/minister.model';
+import { getAuthUserId } from './auth-request.util';
+import { isSermonPublicTeaserEligible } from './sermon-teaser.util';
 
 function ministerIdFromDoc(minister: unknown): string {
     if (minister == null) {

@@ -1,5 +1,5 @@
 import colors from 'colors';
-import { LogRequestDTO } from '../modules/internals/system/system.dto';
+import { LogRequestDTO } from '@/dtos/system.dto';
 
 class Logger {
     constructor() {}
