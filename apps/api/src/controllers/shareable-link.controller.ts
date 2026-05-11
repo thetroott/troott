@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import shareableLinkService from './shareable-link.service';
-import logger from '../../../utils/logger.util';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import shareableLinkService from '@/services/shareable-link.service';
+import logger from '../utils/logger.util';
 
 /**
  * Public resolve for deep links (may return null `resource` if type unsupported).

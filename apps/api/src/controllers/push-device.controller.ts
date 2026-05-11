@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import { getAuthUserId } from '../../../utils/auth-request.util';
-import type { PushDevicePlatform } from './push-device.interface';
-import pushDeviceRepository from './push-device.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import { getAuthUserId } from '../utils/auth-request.util';
+import type { PushDevicePlatform } from '@/modules/notifications/push/push-device.interface';
+import pushDeviceRepository from '@/repository/push-device.repository';
 
 function parsePlatform(raw: unknown): PushDevicePlatform {
     const p = typeof raw === 'string' ? raw.toLowerCase() : 'unknown';

@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import storageService from './storage.service';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import storageService from '@/services/storage.service';
 import { IFile } from '@/modules/shared/interfaces.util';
-import imageMapper, { ImageDTO } from './storage.dto';
+import imageMapper, { ImageDTO } from '@/dtos/storage.dto';
 
 /**
  * @name uploadImage

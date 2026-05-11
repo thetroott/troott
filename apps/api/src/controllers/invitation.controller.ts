@@ -1,10 +1,10 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import invitationService from './invitation.service';
-import { InvitationStatus } from './invitation.interface';
-import redisWrapper from '../../../middlewares/redis.mdw';
-import { UserType } from '../../users/user/user.interface';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import invitationService from '@/services/invitation.service';
+import { InvitationStatus } from '../interfaces/invitation.interface';
+import redisWrapper from '../middlewares/redis.mdw';
+import { UserType } from '@/modules/users/user/user.interface';
 
 const INVITATION_CACHE_TTL_DETAIL = 300;
 const INVITATION_CACHE_TTL_LIST = 180;

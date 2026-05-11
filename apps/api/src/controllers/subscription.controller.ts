@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import { IUserDoc } from '../../users/user/user.interface';
-import subscriptionService from './subscription.service';
-import systemService from '../../internals/system/system.service';
-import subscriptionIntentService from './subscription intent/subscriptionIntent.service';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import { IUserDoc } from '@/modules/users/user/user.interface';
+import subscriptionService from '@/services/subscription.service';
+import systemService from '@/services/system.service';
+import subscriptionIntentService from '@/services/subscriptionIntent.service';
 import {
     CreateSubscriptionIntentDTO,
     ISubscriptionIntentDoc,
     SubscriptionIntentState,
-} from './subscription intent/subscriptionIntent.interface';
+} from '@/interfaces/subscriptionIntent.interface';
 
 /**
  * @name newSubscription
