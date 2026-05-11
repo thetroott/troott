@@ -2,8 +2,8 @@ import mongoose, { Model, Schema } from 'mongoose';
 import {
     ISubscriptionIntentDoc,
     SubscriptionIntentState,
-} from './subscriptionIntent.interface';
-import { DbModels } from '../../../../utils/enums.util';
+} from '@/interfaces/subscriptionIntent.interface';
+import { DbModels } from '@/types/common.enum';
 
 const SubscriptionIntentSchema = new Schema<ISubscriptionIntentDoc>(
     {

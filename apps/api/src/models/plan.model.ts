@@ -1,10 +1,12 @@
 import mongoose, { Model, Schema } from 'mongoose';
-import { IPlanDoc, PlanType } from './plan.interface';
-import { DbModels } from '../../../utils/enums.util';
+import IPlanDoc, { PlanType } from '@/interfaces/plan.interface';
+import { DbModels } from '@/types/common.enum';
 
 const PlanSchema = new Schema<IPlanDoc>(
     {
         code: { type: String, required: true, unique: true, index: true },
+        slug: { type: String, required: true, unique: true, index: true },
+
         label: { type: String, required: true },
         planType: {
             type: String,
@@ -31,20 +33,14 @@ const PlanSchema = new Schema<IPlanDoc>(
             },
         },
 
-        members: {
+        sermon: {
             limit: { type: Number, required: true },
             frequency: { type: String, required: true },
         },
-        domains: {
+        sermonBite: {
             limit: { type: Number, required: true },
             frequency: { type: String, required: true },
         },
-        projects: {
-            limit: { type: Number, required: true },
-            frequency: { type: String, required: true },
-        },
-
-        slug: { type: String, required: true, unique: true, index: true },
 
         paystackPlanCodes: {
             nairaMonthly: { type: String },
@@ -53,7 +49,6 @@ const PlanSchema = new Schema<IPlanDoc>(
             dollarYearly: { type: String },
         },
     },
-
     {
         timestamps: true,
         versionKey: '_version',

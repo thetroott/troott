@@ -1,19 +1,22 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { ITransactionDoc } from '@/modules/shared/interfaces.util';
-import { DbModels, TransactionsType } from '../../../utils/enums.util';
-import { decrypt, encrypt } from '../../../utils/encryption.util';
+import ITransactionDoc, {
+    TransactionType,
+    TransactionStatus,
+    TransactionLabel,
+} from '@/interfaces/transaction.interface';
+import { DbModels } from '@/types/common.enum';
+import { decrypt, encrypt } from '../utils/encryption.util';
 
 const TransactionSchema = new Schema<ITransactionDoc>(
     {
         type: {
             type: String,
-            enum: Object.values(TransactionsType),
+            enum: Object.values(TransactionType),
             required: true,
             index: true,
         },
-        medium: { type: String, required: true, index: true },
+        label: { type: String, index: true },
         resource: { type: String, required: true, index: true },
-        entity: { type: String, required: true, index: true },
         reference: { type: String, unique: true, required: true },
         currency: { type: String, required: true, index: true },
         providerRef: { type: String },
@@ -21,14 +24,18 @@ const TransactionSchema = new Schema<ITransactionDoc>(
         description: { type: String },
         narration: { type: String },
         amount: { type: Number, required: true },
-        unitAmount: { type: Number, required: true }, // kobo unit * 100
+        unitAmount: { type: Number, required: true },
         fee: { type: Number, required: true },
-        unitFee: { type: Number, required: true }, // kobo unit * 100
-        status: { type: String, required: true, index: true },
+        unitFee: { type: Number, required: true },
+        status: {
+            type: String,
+            enum: Object.values(TransactionStatus),
+            required: true,
+            index: true,
+        },
         reason: { type: String },
         message: { type: String },
         providerData: [{ type: Schema.Types.Mixed }],
-        metadata: [{ type: Schema.Types.Mixed }],
         channel: { type: String },
         slug: { type: String, unique: true, required: true },
         card: {
@@ -41,22 +48,31 @@ const TransactionSchema = new Schema<ITransactionDoc>(
             token: { type: String },
             provider: { type: String },
         },
+        policed: { type: Number },
 
-        // Relationships
-        user: {
+        talent: {
             type: Schema.Types.ObjectId,
-            ref: DbModels.USER,
-            required: true,
+            ref: DbModels.LISTENER,
             index: true,
         },
+        subscription: {
+            type: Schema.Types.ObjectId,
+            ref: DbModels.SUBSCRIPTION,
+            index: true,
+        },
+
+        completedAt: { type: String },
     },
     {
         timestamps: true,
-        versionKey: '_versions',
+        versionKey: '_version',
         toJSON: {
-            transform(doc, ret) {
+            virtuals: true,
+            getters: true,
+            transform(_doc: any, ret) {
                 ret.id = ret._id;
-                if ('__v' in ret) delete (ret as any).__v;
+                delete (ret as any).__v;
+                return ret;
             },
         },
     },
@@ -82,13 +98,6 @@ TransactionSchema.methods.decryptCardDetails = function () {
     }
     return this.card;
 };
-
-// const transaction = await Transaction.findById(transactionId);
-// const decryptedTransaction = {
-//   ...transaction.toObject(),
-//   card: transaction.decryptCardDetails(),
-// };
-// console.log(decryptedTransaction.card.authCode); // Decrypted value
 
 const Transaction: Model<ITransactionDoc> = mongoose.model<ITransactionDoc>(
     DbModels.TRANSACTION,

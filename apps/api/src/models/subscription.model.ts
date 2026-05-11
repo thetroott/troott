@@ -1,16 +1,15 @@
-import mongoose, { Document, Model, Schema } from 'mongoose';
-import {
+import mongoose, { Model, Schema } from 'mongoose';
+import ISubscriptionDoc, {
     BillingFrequency,
     Currency,
-    ISubscriptionDoc,
-    SubscriberUserType,
     SubscriptionStatus,
-} from './subscription.interface';
-import { DbModels } from '../../../utils/enums.util';
+} from '@/interfaces/subscription.interface';
+import { DbModels } from '@/types/common.enum';
 
 const SubscriptionSchema = new Schema<ISubscriptionDoc>(
     {
         code: { type: String, required: true, unique: true, index: true },
+        slug: { type: String, unique: true, sparse: true, index: true },
 
         status: {
             type: String,
@@ -40,22 +39,31 @@ const SubscriptionSchema = new Schema<ISubscriptionDoc>(
             isPaid: { type: Boolean, default: false },
         },
 
-        plan: {
+        card: {
+            authCode: { type: String, select: false },
+            cardBin: { type: String },
+            cardLast: { type: String },
+            expiryMonth: { type: String },
+            expiryYear: { type: String },
+            cardPan: { type: String, select: false },
+        },
+
+        trial: {
+            days: { type: Number },
+            enabled: { type: Boolean },
+        },
+
+        listener: {
             type: Schema.Types.ObjectId,
-            ref: DbModels.PLAN,
+            ref: DbModels.LISTENER,
             required: true,
             index: true,
         },
 
-        subscriberUserType: {
-            type: String,
-            required: true,
-            enum: Object.values(SubscriberUserType),
-        },
-        subscriberId: {
+        plan: {
             type: Schema.Types.ObjectId,
+            ref: DbModels.PLAN,
             required: true,
-            refPath: 'SubscriberUserType', // need to verify this works as intended even though its lowercase
             index: true,
         },
 
