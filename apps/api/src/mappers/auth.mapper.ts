@@ -2,9 +2,9 @@ import {
     MapActivatedUserDTO,
     MapRegisteredUserDTO,
     MapUserDTO,
-} from './auth.dto';
-import type { IUserDoc } from '../../users/user/user.interface';
-import { UserType } from '../../users/user/user.interface';
+} from '@/dtos/auth.dto';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { UserType } from '@/modules/users/user/user.interface';
 
 class AuthMapper {
     constructor() {}

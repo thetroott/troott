@@ -1,12 +1,12 @@
-import type { IUserDoc } from '../user/user.interface';
-import { UserType } from '../user/user.interface';
-import type { IMinisterDoc } from '../minister/minister.interface';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { UserType } from '@/modules/users/user/user.interface';
+import type { IMinisterDoc } from '@/modules/users/minister/minister.interface';
 import type {
     BaseProfileDTO,
     ListenerProfileDTO,
     MinisterProfileDTO,
     ProfileDTO,
-} from './profile.dto';
+} from '@/dtos/profile.dto';
 
 /**
  * @name profileMapper

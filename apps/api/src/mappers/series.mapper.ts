@@ -1,6 +1,6 @@
-import { UploadDTO } from '../sermon/sermon.dto';
-import { SeriesDTO, UpdateSeriesDTO } from './series.dto';
-import { ISeriesDoc } from './series.interface';
+import { UploadDTO } from '@/dtos/sermon.dto';
+import { SeriesDTO, UpdateSeriesDTO } from '@/dtos/series.dto';
+import { ISeriesDoc } from '@/modules/core/series/series.interface';
 
 class SeriesMapper {
     constructor() {}

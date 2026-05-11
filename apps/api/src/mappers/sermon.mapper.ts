@@ -3,8 +3,8 @@ import {
     SermonPlaybackDTO,
     UpdateSermonDTO,
     UploadDTO,
-} from './sermon.dto';
-import type { ISermonDoc } from './sermon.interface';
+} from '@/dtos/sermon.dto';
+import type { ISermonDoc } from '@/modules/core/sermon/sermon.interface';
 import type { IMinisterDoc, ISeriesDoc } from '@/utils/interfaces.util';
 
 function ministerPayload(minister: unknown): Partial<IMinisterDoc> {

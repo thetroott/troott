@@ -1,5 +1,5 @@
-import { UserDTO, UserProfileDTO } from './user.dto';
-import { IUserDoc } from './user.interface';
+import { UserDTO, UserProfileDTO } from '@/dtos/user.dto';
+import { IUserDoc } from '@/modules/users/user/user.interface';
 
 class UserMapper {
     constructor() {}

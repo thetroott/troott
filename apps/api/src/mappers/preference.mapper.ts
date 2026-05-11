@@ -1,5 +1,5 @@
-import type { IUserPreferencesDoc } from './preference.interface';
-import type { PreferenceResponseData } from './preference.dto';
+import type { IUserPreferencesDoc } from '@/modules/core/preference/preference.interface';
+import type { PreferenceResponseData } from '@/dtos/preference.dto';
 
 class PreferenceMapper {
     public toResponse(doc: IUserPreferencesDoc): PreferenceResponseData {
