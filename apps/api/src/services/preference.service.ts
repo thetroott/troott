@@ -1,23 +1,23 @@
 import { Types } from 'mongoose';
-import User from '../../users/user/user.model';
-import type { IUserDoc } from '../../users/user/user.interface';
-import { userIsStaff } from '../../users/user/user.staff.util';
-import { IResult } from '../../../utils/interfaces.util';
-import { preferenceRepository } from './preference.repository';
-import type { IUserPreferencesDoc } from './preference.interface';
-import { mergePreferencePatch } from './preference.merge';
-import preferenceMapper from './preference.mapper';
+import User from '@/models/user.model';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { userIsStaff } from '@/modules/users/user/user.staff.util';
+import { IResult } from '../utils/interfaces.util';
+import { preferenceRepository } from '@/repository/preference.repository';
+import type { IUserPreferencesDoc } from '@/modules/core/preference/preference.interface';
+import { mergePreferencePatch } from '@/modules/core/preference/preference.merge';
+import preferenceMapper from '@/mappers/preference.mapper';
 import {
     applyPreferenceStateToDoc,
     docToPreferenceState,
     isMongoDuplicateKeyError,
     legacyMinisterToObjectIds,
     preferencePatchHasKeys,
-} from './preference.util';
+} from '@/modules/core/preference/preference.util';
 import type {
     CreatePreferencesDTO,
     PreferencePatchDTO,
-} from './preference.dto';
+} from '@/dtos/preference.dto';
 
 const forbidden: IResult = {
     error: true,

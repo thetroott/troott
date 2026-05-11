@@ -1,28 +1,28 @@
-import { IFile, IResult } from '../../../utils/interfaces.util';
+import { IFile, IResult } from '../utils/interfaces.util';
 import type {
     IAudioHLSJobDTO,
     IAudioMetadataJobDTO,
     ISermonDoc,
-} from './sermon.interface';
-import StorageService from '../../platform/storage/storage.service';
+} from '@/modules/core/sermon/sermon.interface';
+import StorageService from '@/services/storage.service';
 import {
     UploadStatus,
     S3Folder,
     ContentStatus,
     UploadStepType,
     UserType,
-} from '../../../utils/enums.util';
-import { PublishSermonDTO } from './sermon.dto';
+} from '../utils/enums.util';
+import { PublishSermonDTO } from '@/dtos/sermon.dto';
 import { Upload } from '@aws-sdk/lib-storage';
-import sermonRepository from './sermon.repository';
-import Sermon from './sermon.model';
-import Minister from '../../users/minister/minister.model';
+import sermonRepository from '@/repository/sermon.repository';
+import Sermon from '@/models/sermon.model';
+import Minister from '@/models/minister.model';
 import mongoose from 'mongoose';
-import { AWS_BUCKET_NAME, s3 } from '../../../configs/aws.config';
-import { mediaConfig } from '../../../configs/media.config';
-import { addJob } from '../../../tasks/jobs/job';
-import { JobChannel, QueueChannel } from '../../../queues/channel.queue';
-import logger from '../../../utils/logger.util';
+import { AWS_BUCKET_NAME, s3 } from '../configs/aws.config';
+import { mediaConfig } from '../configs/media.config';
+import { addJob } from '../tasks/jobs/job';
+import { JobChannel, QueueChannel } from '../queues/channel.queue';
+import logger from '../utils/logger.util';
 
 class SermonService {
     private s3Client = s3;

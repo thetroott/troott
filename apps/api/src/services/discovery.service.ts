@@ -1,5 +1,5 @@
-import sermonRepository from '../sermon/sermon.repository';
-import { IQueryOptions } from '../../../utils/interfaces.util';
+import sermonRepository from '@/repository/sermon.repository';
+import { IQueryOptions } from '../utils/interfaces.util';
 
 /** Lightweight home / discovery rails backed by existing sermon queries. */
 class DiscoveryService {

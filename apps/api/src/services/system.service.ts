@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { IResult } from '../../../utils/interfaces.util';
-import { DecryptDataDTO, EncryptDataDTO } from './system.dto';
+import { IResult } from '../utils/interfaces.util';
+import { DecryptDataDTO, EncryptDataDTO } from '@/dtos/system.dto';
 
 class SystemService {
     public result: IResult;

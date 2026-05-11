@@ -8,12 +8,12 @@ import {
 } from '@aws-sdk/client-s3';
 import type { Readable } from 'stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { s3, AWS_BUCKET_NAME } from '../../../configs/aws.config';
+import { s3, AWS_BUCKET_NAME } from '../configs/aws.config';
 import { IFile, IResult } from '@/modules/shared/interfaces.util';
 
 import { Upload } from '@aws-sdk/lib-storage';
-import { UploadStatus } from '../../../utils/enums.util';
-import { getS3Folder } from '../../../utils/helpers.util';
+import { UploadStatus } from '../utils/enums.util';
+import { getS3Folder } from '../utils/helpers.util';
 
 class StorageService {
     private s3Client: S3Client = s3;

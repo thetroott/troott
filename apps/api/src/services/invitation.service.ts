@@ -1,14 +1,14 @@
-import { InvitationStatus, InvitationType } from './invitation.interface';
-import { IResult } from '../../../utils/interfaces.util';
+import { InvitationStatus, InvitationType } from '../interfaces/invitation.interface';
+import { IResult } from '../utils/interfaces.util';
 import {
     CreateInvitationDTO,
     InviteTokenDTO,
     CreateBulkInvitationDTO,
-} from './invitation.dto';
-import invitationRepository from './invitation.repository';
-import Invites from './invitation.model';
+} from '@/dtos/invitation.dto';
+import invitationRepository from '@/repository/invitation.repository';
+import Invites from '@/models/invitation.model';
 import { dateToday, IDateToday, Random } from '@btffamily/pacitude';
-import systemService from '../../internals/system/system.service';
+import systemService from '@/services/system.service';
 import mongoose from 'mongoose';
 
 /**

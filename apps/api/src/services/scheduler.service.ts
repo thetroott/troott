@@ -1,7 +1,7 @@
 import * as cron from 'node-cron';
 import { Queue, JobOptions } from 'bull';
-import logger from '../../../utils/logger.util';
-import BullQueue from '../../../queues/queue';
+import logger from '../utils/logger.util';
+import BullQueue from '../queues/queue';
 
 /**
  * Scheduled Job Configuration

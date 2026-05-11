@@ -1,26 +1,26 @@
 import { dateToday, IDateToday, Random } from '@btffamily/pacitude';
-import { IResult } from '../../../utils/interfaces.util';
+import { IResult } from '../utils/interfaces.util';
 import {
     CreateShareableLinkDTO,
     ValidateShareableLinkDTO,
     RevokeShareableLinkDTO,
     GetShareableLinksDTO,
     UpdateShareableLinkDTO,
-} from './shareable-link.dto';
-import shareableLinkRepository from './shareable-link.repository';
-import ShareableLink from './shareable-link.model';
+} from '@/dtos/shareable-link.dto';
+import shareableLinkRepository from '@/repository/shareable-link.repository';
+import ShareableLink from '@/models/shareable-link.model';
 import {
     IShareableLinkDoc,
     ShareableLinkType,
-} from './shareable-link.interface';
-import systemService from '../../internals/system/system.service';
+} from '@/interfaces/shareable-link.interface';
+import systemService from '@/services/system.service';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
-import sermonRepository from '../../core/sermon/sermon.repository';
-import playlistRepository from '../../core/playlist/playlist.repository';
-import ministerRepository from '../../users/minister/minister.repository';
-import seriesRepository from '../../core/series/series.repository';
-import libraryRepository from '../../core/library/library.repository';
+import sermonRepository from '@/repository/sermon.repository';
+import playlistRepository from '@/repository/playlist.repository';
+import ministerRepository from '@/repository/minister.repository';
+import seriesRepository from '@/repository/series.repository';
+import libraryRepository from '@/repository/library.repository';
 
 /**
  * @name ShareableLinkService

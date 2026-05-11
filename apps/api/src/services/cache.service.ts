@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import redisHandler from '../../../middlewares/redis.mdw';
+import asyncHandler from '../middlewares/async.mdw';
+import redisHandler from '../middlewares/redis.mdw';
 
 /**
  * @name getCacheData

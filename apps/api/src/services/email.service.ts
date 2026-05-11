@@ -3,17 +3,17 @@ import nodemailer from 'nodemailer';
 import appRootPath from 'app-root-path';
 import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
 import { SendMailClient } from 'zeptomail';
-import { SendEmailDTO, SendOtpDTO } from './email.dto';
-import { EmailService, EmailTemplate } from './email.enums';
+import { SendEmailDTO, SendOtpDTO } from '@/dtos/email.dto';
+import { EmailService, EmailTemplate } from '@/modules/notifications/email/email.enums';
 import {
     EmailConfig,
     IEmailJob,
     IResult,
-} from '../../../utils/interfaces.util';
-import { EMAIL_CONFIG } from '../../../configs/email.config';
-import { addJob } from '../../../tasks/jobs/job';
-import { JobChannel, QueueChannel } from '../../../queues/channel.queue';
-import { IUserDoc, OtpType } from '../../users/user/user.interface';
+} from '../utils/interfaces.util';
+import { EMAIL_CONFIG } from '../configs/email.config';
+import { addJob } from '../tasks/jobs/job';
+import { JobChannel, QueueChannel } from '../queues/channel.queue';
+import { IUserDoc, OtpType } from '@/modules/users/user/user.interface';
 
 const BASE_FOLDER = `${appRootPath.path}/apps/api/src`;
 
