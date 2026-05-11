@@ -1,29 +1,26 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import ministerService from './minister.service';
-import ministerRepository from './minister.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import listenerService from '@/services/listener.service';
+import listenerRepository from '@/repository/listener.repository';
 import {
-    UpdateMinisterDTO,
-    InviteMinisterDTO,
-    BulkInviteMinistersDTO,
-    AcceptMinisterInvitationDTO,
-    SetMinisterPasswordDTO,
-    SubmitMinisterVerificationDTO,
-    UpdateMinisterVerificationStatusDTO,
-} from './minister.dto';
-import { InvitationType } from '../../platform/Invitation/invitation.interface';
-import { InviteTokenDTO } from '../../platform/Invitation/invitation.dto';
-import invitationService from '../../platform/Invitation/invitation.service';
-import emailService from '../../notifications/email/email.service';
-import { EMAIL_CONFIG } from '../../../configs/email.config';
-import userRepository from '../user/user.repository';
-import userService from '../user/user.service';
-import { statusCodeForUserServiceError } from '../user/user.http-error.util';
-import authService from '../../authentication/auth/auth.service';
-import redisWrapper from '../../../middlewares/redis.mdw';
-import { PasswordType, UserType, IUserDoc } from '../user/user.interface';
-import { VerificationStatus } from '../../../utils/enums.util';
+    UpdateListenerDTO,
+    InviteListenerDTO,
+    BulkInviteListenersDTO,
+    AcceptListenerInvitationDTO,
+    SetListenerPasswordDTO,
+} from '@/dtos/listener.dto';
+import { InvitationType } from '../interfaces/invitation.interface';
+import { InviteTokenDTO } from '@/dtos/invitation.dto';
+import invitationService from '@/services/invitation.service';
+import emailService from '@/services/email.service';
+import { EMAIL_CONFIG } from '../configs/email.config';
+import userRepository from '@/repository/user.repository';
+import userService from '@/services/user.service';
+import { statusCodeForUserServiceError } from '@/utils/user.http-error.util';
+import authService from '@/services/auth.service';
+import redisWrapper from '../middlewares/redis.mdw';
+import { PasswordType, UserType, IUserDoc } from '@/modules/users/user/user.interface';
 
 function isAdminOrSuperAdmin(req: Request): boolean {
     const user = (req as any).user ?? {};
@@ -62,25 +59,29 @@ async function invalidateInvitationCachesForEmail(
     }
 }
 
-export const inviteMinister: RequestHandler = asyncHandler(
+/**
+ * @name inviteListener
+ * @route POST /listener/invite
+ * @access Private
+ */
+export const inviteListener: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         if (!isAdminOrSuperAdmin(req)) {
             return next(
                 new ErrorResponse(
-                    'Only admin and super admin can invite ministers',
+                    'Only admin and super admin can invite listeners',
                     403,
                     [],
                 ),
             );
         }
 
-        const { email, resourceId }: InviteMinisterDTO = req.body;
+        const { email, resourceId }: InviteListenerDTO = req.body;
 
-        if (!email || email.trim().length === 0) {
+        if (!email || email.trim().length === 0)
             return next(new ErrorResponse('Email is required', 400, []));
-        }
 
         const normalizedEmail = normalizeInviteEmail(email);
         const mailCheck = await authService.checkEmail(normalizedEmail);
@@ -91,7 +92,7 @@ export const inviteMinister: RequestHandler = asyncHandler(
         const invitationResult = await invitationService.newInvitation({
             invitedBy: userId,
             inviteeEmail: normalizedEmail,
-            inviteType: InvitationType.MINISTER,
+            inviteType: InvitationType.LISTENER,
             resourceId: resourceId || userId,
         } as any);
 
@@ -119,11 +120,11 @@ export const inviteMinister: RequestHandler = asyncHandler(
             );
         }
 
-        const invitationUrl = `${EMAIL_CONFIG.clientUrl}/minister/invite/accept?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+        const invitationUrl = `${EMAIL_CONFIG.clientUrl}/listener/invite/accept?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
 
         const inviteeUser = {
             email: normalizedEmail,
-            firstName: normalizedEmail.split('@')[0] || 'Minister',
+            firstName: normalizedEmail.split('@')[0] || 'Listener',
             lastName: '',
         } as any;
 
@@ -131,7 +132,7 @@ export const inviteMinister: RequestHandler = asyncHandler(
             inviteeUser,
             inviter?.firstName || 'A team member',
             invitationUrl,
-            'Minister',
+            'Listener',
         );
 
         if (emailResult.error) {
@@ -142,7 +143,7 @@ export const inviteMinister: RequestHandler = asyncHandler(
         }
 
         try {
-            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`listener:profile:${userId}`);
         } catch (cacheError) {
             console.error('Cache invalidation failed:', cacheError);
         }
@@ -161,27 +162,27 @@ export const inviteMinister: RequestHandler = asyncHandler(
             },
             message:
                 invitationResult.message ||
-                'Minister invitation sent successfully.',
+                'Listener invitation sent successfully.',
             status: 201,
         });
     },
 );
 
-export const bulkInviteMinisters: RequestHandler = asyncHandler(
+export const bulkInviteListeners: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         if (!isAdminOrSuperAdmin(req)) {
             return next(
                 new ErrorResponse(
-                    'Only admin and super admin can invite ministers',
+                    'Only admin and super admin can invite listeners',
                     403,
                     [],
                 ),
             );
         }
 
-        const { emails, resourceId }: BulkInviteMinistersDTO = req.body;
+        const { emails, resourceId }: BulkInviteListenersDTO = req.body;
         if (!Array.isArray(emails) || emails.length === 0) {
             return next(
                 new ErrorResponse('Emails must be a non-empty array', 400, []),
@@ -204,6 +205,7 @@ export const bulkInviteMinisters: RequestHandler = asyncHandler(
                 });
                 continue;
             }
+
             const mailCheck = await authService.checkEmail(normalizedEmail);
             if (!mailCheck) {
                 results.failed.push({
@@ -216,7 +218,7 @@ export const bulkInviteMinisters: RequestHandler = asyncHandler(
             const invitationResult = await invitationService.newInvitation({
                 invitedBy: userId,
                 inviteeEmail: normalizedEmail,
-                inviteType: InvitationType.MINISTER,
+                inviteType: InvitationType.LISTENER,
                 resourceId: resourceId || userId,
             } as any);
             if (invitationResult.error) {
@@ -236,17 +238,17 @@ export const bulkInviteMinisters: RequestHandler = asyncHandler(
                 continue;
             }
 
-            const invitationUrl = `${EMAIL_CONFIG.clientUrl}/minister/invite/accept?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+            const invitationUrl = `${EMAIL_CONFIG.clientUrl}/listener/invite/accept?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
             const inviteeUser = {
                 email: normalizedEmail,
-                firstName: normalizedEmail.split('@')[0] || 'Minister',
+                firstName: normalizedEmail.split('@')[0] || 'Listener',
                 lastName: '',
             } as any;
             const emailResult = await emailService.sendInvitationEmail(
                 inviteeUser,
                 inviter?.firstName || 'A team member',
                 invitationUrl,
-                'Minister',
+                'Listener',
             );
             if (emailResult.error) {
                 console.error(
@@ -273,20 +275,20 @@ export const bulkInviteMinisters: RequestHandler = asyncHandler(
                 successfulCount: results.successful.length,
                 failedCount: results.failed.length,
             },
-            message: `Bulk minister invitation processed. ${results.successful.length} successful, ${results.failed.length} failed.`,
+            message: `Bulk listener invitation processed. ${results.successful.length} successful, ${results.failed.length} failed.`,
             status: 201,
         });
     },
 );
 
-export const resendMinisterInvite: RequestHandler = asyncHandler(
+export const resendListenerInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         if (!isAdminOrSuperAdmin(req)) {
             return next(
                 new ErrorResponse(
-                    'Only admin and super admin can resend minister invites',
+                    'Only admin and super admin can resend listener invites',
                     403,
                     [],
                 ),
@@ -324,17 +326,17 @@ export const resendMinisterInvite: RequestHandler = asyncHandler(
             );
         }
 
-        const invitationUrl = `${EMAIL_CONFIG.clientUrl}/minister/invite/accept?token=${newToken}&email=${encodeURIComponent(normalizedEmail)}`;
+        const invitationUrl = `${EMAIL_CONFIG.clientUrl}/listener/invite/accept?token=${newToken}&email=${encodeURIComponent(normalizedEmail)}`;
         const inviteeUser = {
             email: normalizedEmail,
-            firstName: normalizedEmail.split('@')[0] || 'Minister',
+            firstName: normalizedEmail.split('@')[0] || 'Listener',
             lastName: '',
         } as any;
         const emailResult = await emailService.sendInvitationEmail(
             inviteeUser,
             inviter?.firstName || 'A team member',
             invitationUrl,
-            'Minister',
+            'Listener',
         );
         if (emailResult.error) {
             console.error(
@@ -358,15 +360,20 @@ export const resendMinisterInvite: RequestHandler = asyncHandler(
             },
             message:
                 resendResult.message ||
-                'Minister invitation resent successfully.',
+                'Listener invitation resent successfully.',
             status: 200,
         });
     },
 );
 
-export const acceptMinisterInvitation: RequestHandler = asyncHandler(
+/**
+ * @name acceptListenerInvitation
+ * @route POST /listener/invite/accept
+ * @access Public
+ */
+export const acceptListenerInvitation: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { token, email, password }: AcceptMinisterInvitationDTO =
+        const { token, email, password }: AcceptListenerInvitationDTO =
             req.body;
 
         if (!token || !email || !password) {
@@ -425,7 +432,7 @@ export const acceptMinisterInvitation: RequestHandler = asyncHandler(
                     email: email.trim().toLowerCase(),
                     password,
                     passwordType: PasswordType.USERGENERATED,
-                    userType: UserType.MINISTER,
+                    userType: UserType.LISTENER,
                     createdBy: invitedBy,
                 });
             } catch (error: unknown) {
@@ -462,18 +469,23 @@ export const acceptMinisterInvitation: RequestHandler = asyncHandler(
                 },
             },
             message:
-                'Minister invitation accepted successfully. Please proceed to onboarding to complete your profile.',
+                'Listener invitation accepted successfully. Please proceed to onboarding to complete your profile.',
             status: 201,
         });
     },
 );
 
-export const getMinister: RequestHandler = asyncHandler(
+/**
+ * @name getListener
+ * @route GET /listener
+ * @access Private
+ */
+export const getListener: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const cacheKey = `minister:profile:${userId}`;
+        const cacheKey = `listener:profile:${userId}`;
         const cacheTTL = 300;
 
         const cached = await redisWrapper.fetchData<any>(cacheKey);
@@ -482,17 +494,17 @@ export const getMinister: RequestHandler = asyncHandler(
                 error: false,
                 errors: [],
                 data: cached,
-                message: 'Minister profile retrieved successfully (cached).',
+                message: 'Listener profile retrieved successfully (cached).',
                 status: 200,
             });
         }
 
-        const result = await ministerService.getMinisterProfile(String(userId));
+        const result = await listenerService.getListenerProfile(String(userId));
 
         if (result.error || !result.data) {
             return next(
                 new ErrorResponse(
-                    result.message || 'Minister profile not found',
+                    result.message || 'Listener profile not found',
                     result.code || 404,
                     [],
                 ),
@@ -514,7 +526,12 @@ export const getMinister: RequestHandler = asyncHandler(
     },
 );
 
-export const getMinisters: RequestHandler = asyncHandler(
+/**
+ * @name getListeners
+ * @route GET /listener/list
+ * @access Private
+ */
+export const getListeners: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const {
             page = 1,
@@ -525,7 +542,7 @@ export const getMinisters: RequestHandler = asyncHandler(
             ...filters
         } = req.query;
 
-        const cacheKey = `ministers:list:${JSON.stringify({ page, limit, sort, select, filters })}`;
+        const cacheKey = `listeners:list:${JSON.stringify({ page, limit, sort, select, filters })}`;
         const cacheTTL = 180;
 
         const cached = await redisWrapper.fetchData<any>(cacheKey);
@@ -537,7 +554,7 @@ export const getMinisters: RequestHandler = asyncHandler(
                 pagination: cached.pagination,
                 count: cached.count,
                 total: cached.total,
-                message: 'Ministers retrieved successfully (cached).',
+                message: 'Listeners retrieved successfully (cached).',
                 status: 200,
             });
         }
@@ -556,7 +573,7 @@ export const getMinisters: RequestHandler = asyncHandler(
             options.populate = String(populate);
         }
 
-        const result = await ministerRepository.getMinisters(
+        const result = await listenerRepository.getListeners(
             filters as any,
             options,
         );
@@ -596,14 +613,19 @@ export const getMinisters: RequestHandler = asyncHandler(
     },
 );
 
-export const updateMinister: RequestHandler = asyncHandler(
+/**
+ * @name updateListener
+ * @route PUT /listener
+ * @access Private
+ */
+export const updateListener: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const data: UpdateMinisterDTO = req.body;
+        const data: UpdateListenerDTO = req.body;
 
-        const result = await ministerService.updateMinister(
+        const result = await listenerService.updateListener(
             String(userId),
             data,
         );
@@ -615,7 +637,7 @@ export const updateMinister: RequestHandler = asyncHandler(
         }
 
         try {
-            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`listener:profile:${userId}`);
         } catch (cacheError) {
             console.error('Cache invalidation failed:', cacheError);
         }
@@ -630,12 +652,62 @@ export const updateMinister: RequestHandler = asyncHandler(
     },
 );
 
-export const setMinisterPassword: RequestHandler = asyncHandler(
+/**
+ * @name updateInterests
+ * @route PUT /listener/interests
+ * @access Private
+ */
+export const updateInterests: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const { password }: SetMinisterPasswordDTO = req.body;
+        const { interests } = req.body;
+
+        if (!interests || !Array.isArray(interests)) {
+            return next(
+                new ErrorResponse('Interests must be an array', 400, []),
+            );
+        }
+
+        const result = await listenerService.updateInterests(
+            String(userId),
+            interests as string[],
+        );
+
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 500, []),
+            );
+        }
+
+        try {
+            await redisWrapper.deleteData(`listener:profile:${userId}`);
+        } catch (cacheError) {
+            console.error('Cache invalidation failed:', cacheError);
+        }
+
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+/**
+ * @name setListenerPassword
+ * @route POST /listener/set-password
+ * @access Private
+ */
+export const setListenerPassword: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+
+        const { password }: SetListenerPasswordDTO = req.body;
 
         if (!password) {
             return next(new ErrorResponse('Password is required', 400, []));
@@ -659,10 +731,10 @@ export const setMinisterPassword: RequestHandler = asyncHandler(
 
         const user = userResult.data as IUserDoc;
 
-        if (user.userType !== UserType.MINISTER) {
+        if (user.userType !== UserType.LISTENER) {
             return next(
                 new ErrorResponse(
-                    'This endpoint is only for minister users',
+                    'This endpoint is only for listener users',
                     403,
                     [],
                 ),
@@ -687,14 +759,19 @@ export const setMinisterPassword: RequestHandler = asyncHandler(
     },
 );
 
-export const revokeMinisterInvitation: RequestHandler = asyncHandler(
+/**
+ * @name revokeListenerInvitation
+ * @route POST /listener/invite/revoke
+ * @access Private
+ */
+export const revokeListenerInvitation: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = (req as any).user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         if (!isAdminOrSuperAdmin(req)) {
             return next(
                 new ErrorResponse(
-                    'Only admin and super admin can revoke minister invites',
+                    'Only admin and super admin can revoke listener invites',
                     403,
                     [],
                 ),
@@ -731,87 +808,7 @@ export const revokeMinisterInvitation: RequestHandler = asyncHandler(
             data: {},
             message:
                 revokeResult.message ||
-                'Minister invitation revoked successfully',
-            status: 200,
-        });
-    },
-);
-
-export const submitMinisterVerification: RequestHandler = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const userId = (req as any).user?.id;
-        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-
-        const { documents }: SubmitMinisterVerificationDTO = req.body;
-        if (!documents || !Array.isArray(documents) || !documents.length) {
-            return next(
-                new ErrorResponse(
-                    'documents must be a non-empty string array',
-                    400,
-                    [],
-                ),
-            );
-        }
-
-        const result = await ministerService.submitVerification(
-            String(userId),
-            documents,
-        );
-        if (result.error) {
-            return next(
-                new ErrorResponse(result.message, result.code || 500, []),
-            );
-        }
-
-        try {
-            await redisWrapper.deleteData(`minister:profile:${userId}`);
-        } catch (e) {
-            console.error('Cache invalidation failed:', e);
-        }
-
-        res.status(200).json({
-            error: false,
-            errors: [],
-            data: result.data,
-            message: result.message,
-            status: 200,
-        });
-    },
-);
-
-export const updateMinisterVerificationStatus: RequestHandler = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
-        const { ministerId, status }: UpdateMinisterVerificationStatusDTO =
-            req.body;
-        if (!ministerId) {
-            return next(new ErrorResponse('ministerId is required', 400, []));
-        }
-        if (
-            !status ||
-            !Object.values(VerificationStatus).includes(
-                status as VerificationStatus,
-            )
-        ) {
-            return next(
-                new ErrorResponse('Invalid verification status', 400, []),
-            );
-        }
-
-        const result = await ministerService.updateVerificationStatus(
-            ministerId,
-            status,
-        );
-        if (result.error) {
-            return next(
-                new ErrorResponse(result.message, result.code || 500, []),
-            );
-        }
-
-        res.status(200).json({
-            error: false,
-            errors: [],
-            data: result.data,
-            message: result.message,
+                'Listener invitation revoked successfully',
             status: 200,
         });
     },

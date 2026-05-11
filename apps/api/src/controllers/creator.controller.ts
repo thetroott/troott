@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import creatorService from './creator.service';
-import creatorRepository from './creator.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import creatorService from '@/services/creator.service';
+import creatorRepository from '@/repository/creator.repository';
 import {
     CreateCreatorDTO,
     UpdateCreatorDTO,
@@ -11,19 +11,19 @@ import {
     SetCreatorPasswordDTO,
     SubmitCreatorVerificationDTO,
     UpdateCreatorVerificationStatusDTO,
-} from './creator.dto';
-import { InvitationType } from '../../platform/Invitation/invitation.interface';
-import { InviteTokenDTO } from '../../platform/Invitation/invitation.dto';
-import invitationService from '../../platform/Invitation/invitation.service';
-import emailService from '../../notifications/email/email.service';
-import { EMAIL_CONFIG } from '../../../configs/email.config';
-import userRepository from '../user/user.repository';
-import userService from '../user/user.service';
-import { statusCodeForUserServiceError } from '../user/user.http-error.util';
-import authService from '../../authentication/auth/auth.service';
-import redisWrapper from '../../../middlewares/redis.mdw';
-import { PasswordType, UserType, IUserDoc } from '../user/user.interface';
-import { VerificationStatus } from '../../../utils/enums.util';
+} from '@/dtos/creator.dto';
+import { InvitationType } from '../interfaces/invitation.interface';
+import { InviteTokenDTO } from '@/dtos/invitation.dto';
+import invitationService from '@/services/invitation.service';
+import emailService from '@/services/email.service';
+import { EMAIL_CONFIG } from '../configs/email.config';
+import userRepository from '@/repository/user.repository';
+import userService from '@/services/user.service';
+import { statusCodeForUserServiceError } from '@/utils/user.http-error.util';
+import authService from '@/services/auth.service';
+import redisWrapper from '../middlewares/redis.mdw';
+import { PasswordType, UserType, IUserDoc } from '@/modules/users/user/user.interface';
+import { VerificationStatus } from '../utils/enums.util';
 
 export const inviteCreator: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {

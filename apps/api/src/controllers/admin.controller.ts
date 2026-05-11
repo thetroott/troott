@@ -1,37 +1,37 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import adminService from './admin.service';
-import adminRepository from './admin.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import adminService from '@/services/admin.service';
+import adminRepository from '@/repository/admin.repository';
 import {
     CreateAdminDTO,
     UpdateAdminDTO,
     InviteAdminDTO,
     AcceptAdminInvitationDTO,
     SetAdminPasswordDTO,
-} from './admin.dto';
-import { InvitationType } from '../../platform/Invitation/invitation.interface';
-import { InviteTokenDTO } from '../../platform/Invitation/invitation.dto';
-import invitationService from '../../platform/Invitation/invitation.service';
-import emailService from '../../notifications/email/email.service';
-import { EMAIL_CONFIG } from '../../../configs/email.config';
-import userRepository from '../user/user.repository';
-import userService from '../user/user.service';
-import authService from '../../authentication/auth/auth.service';
-import redisWrapper from '../../../middlewares/redis.mdw';
+} from '@/dtos/admin.dto';
+import { InvitationType } from '../interfaces/invitation.interface';
+import { InviteTokenDTO } from '@/dtos/invitation.dto';
+import invitationService from '@/services/invitation.service';
+import emailService from '@/services/email.service';
+import { EMAIL_CONFIG } from '../configs/email.config';
+import userRepository from '@/repository/user.repository';
+import userService from '@/services/user.service';
+import authService from '@/services/auth.service';
+import redisWrapper from '../middlewares/redis.mdw';
 import {
     PasswordType,
     UserType,
     IUserDoc,
     OnboardStatus,
-} from '../user/user.interface';
-import { genUserCode } from '../../../utils/code.util';
-import { genSlug } from '../../../utils/helpers.util';
-import roleService from '../../authentication/role/role.service';
-import PermissionService from '../../authentication/permission/permission.service';
-import { AdminDepartmentEnum, CompanyRoleEnum } from './admin.interface';
+} from '@/modules/users/user/user.interface';
+import { genUserCode } from '../utils/code.util';
+import { genSlug } from '../utils/helpers.util';
+import roleService from '@/services/role.service';
+import PermissionService from '@/services/permission.service';
+import { AdminDepartmentEnum, CompanyRoleEnum } from '@/modules/users/admin/admin.interface';
 import { Types } from 'mongoose';
-import { UserType as UserTypeCode } from '../user/user.interface';
+import { UserType as UserTypeCode } from '@/modules/users/user/user.interface';
 
 /**
  * @name inviteAdmin

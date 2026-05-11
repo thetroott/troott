@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import authMapper from '../../authentication/auth/auth.mapper';
-import userService from './user.service';
-import userRepository from './user.repository';
-import { IUserDoc, PasswordType, UserType } from './user.interface';
-import redisWrapper from '../../../middlewares/redis.mdw';
-import { generatePassword } from '../../../utils/helpers.util';
-import emailService from '../../notifications/email/email.service';
-import { statusCodeForUserServiceError } from './user.http-error.util';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import authMapper from '@/mappers/auth.mapper';
+import userService from '@/services/user.service';
+import userRepository from '@/repository/user.repository';
+import { IUserDoc, PasswordType, UserType } from '@/modules/users/user/user.interface';
+import redisWrapper from '../middlewares/redis.mdw';
+import { generatePassword } from '../utils/helpers.util';
+import emailService from '@/services/email.service';
+import { statusCodeForUserServiceError } from '@/utils/user.http-error.util';
 /** Get authenticated user id from request (supports both id and _id from lean() documents) */
 const getUserId = (req: Request): string | undefined =>
     (req as any).user?.id ??

@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import profileService from './profile.service';
-import type { UpdateProfilePayloadDTO } from './profile.dto';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import profileService from '@/services/profile.service';
+import type { UpdateProfilePayloadDTO } from '@/dtos/profile.dto';
 
 const getUserId = (req: Request): string | undefined =>
     (req as any).user?.id ??
