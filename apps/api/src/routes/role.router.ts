@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     createRole,
     getRole,
@@ -9,7 +9,7 @@ import {
     getUserRoles,
     attachRoleToUser,
     detachRoleFromUser,
-} from './role.controller';
+} from '@/controllers/role.controller';
 
 const roleRoutes: Router = Router({ mergeParams: true });
 

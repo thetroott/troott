@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     inviteAdmin,
     acceptAdminInvitation,
@@ -12,7 +12,7 @@ import {
     updateCurrentAdmin,
     updateAdmin,
     deleteAdmin,
-} from './admin.controller';
+} from '@/controllers/admin.controller';
 
 const adminRoutes: Router = Router({ mergeParams: true });
 

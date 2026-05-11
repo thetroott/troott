@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
-import { getUser, getUsers, deactivateAccount } from './user.controller';
+import Protect from '../middlewares/checkAuth.mdw';
+import { getUser, getUsers, deactivateAccount } from '@/controllers/user.controller';
 
 const userRoutes: Router = Router({ mergeParams: true });
 

@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     getPlaybackForSermon,
     listPlaybackProgress,
     savePlaybackProgress,
-} from './playback.controller';
+} from '@/controllers/playback.controller';
 
 const playbackRouter = Router({ mergeParams: true });
 

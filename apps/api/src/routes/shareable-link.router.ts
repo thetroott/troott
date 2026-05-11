@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { resolveShareLink } from './shareable-link.controller';
+import { resolveShareLink } from '@/controllers/shareable-link.controller';
 
 const shareableLinkRouter = Router({ mergeParams: true });
 

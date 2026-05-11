@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
-import { addNewPlan, getPlans, updatePlan } from './plan.controller';
+import Protect from '../middlewares/checkAuth.mdw';
+import { addNewPlan, getPlans, updatePlan } from '@/controllers/plan.controller';
 
 const planRoutes: Router = Router({
     mergeParams: true,

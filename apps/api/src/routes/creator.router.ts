@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     getCreator,
     getCreators,
@@ -12,7 +12,7 @@ import {
     revokeCreatorInvitation,
     submitCreatorVerification,
     updateCreatorVerificationStatus,
-} from './creator.controller';
+} from '@/controllers/creator.controller';
 
 const creatorRoutes: Router = Router({ mergeParams: true });
 

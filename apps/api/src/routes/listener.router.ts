@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     getListener,
     getListeners,
@@ -11,7 +11,7 @@ import {
     acceptListenerInvitation,
     setListenerPassword,
     revokeListenerInvitation,
-} from './listener.controller';
+} from '@/controllers/listener.controller';
 
 const listenerRoutes: Router = Router({ mergeParams: true });
 

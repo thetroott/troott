@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     addItemToPlaylist,
     createPlaylist,
@@ -9,8 +9,8 @@ import {
     getPlaylistsByUser,
     removeItemFromPlaylist,
     updatePlaylist,
-} from './playlist.controller';
-import uploadHandler from '../../../middlewares/upload.mdw';
+} from '@/controllers/playlist.controller';
+import uploadHandler from '../middlewares/upload.mdw';
 
 const playlistRouter = Router({ mergeParams: true });
 

@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
-import optionalAuth from '../../../middlewares/optionalAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
+import optionalAuth from '../middlewares/optionalAuth.mdw';
 import {
     deleteSermon,
     moveSermonToBin,
@@ -25,13 +25,13 @@ import {
     uploadSermonCover,
     getSermonsByMinisterMostPlayed,
     getFavoriteMinisterSermons,
-} from './sermon.controller';
-import uploadHandler from '../../../middlewares/upload.mdw';
+} from '@/controllers/sermon.controller';
+import uploadHandler from '../middlewares/upload.mdw';
 import {
     sermonAudioUploadSizeLimit,
     sermonUploadRateLimiter,
-} from '../../../middlewares/sermon-upload.security.mdw';
-import { requireMinisterProfile } from '../../../middlewares/require-minister.mdw';
+} from '../middlewares/sermon-upload.security.mdw';
+import { requireMinisterProfile } from '../middlewares/require-minister.mdw';
 
 const sermonRouter = Router({ mergeParams: true });
 

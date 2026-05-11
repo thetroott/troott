@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     listPushDevices,
     registerPushDevice,
     removePushDevice,
-} from './push-device.controller';
+} from '@/controllers/push-device.controller';
 
 const pushDeviceRouter = Router({ mergeParams: true });
 

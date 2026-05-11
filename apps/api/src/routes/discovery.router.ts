@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
-import { getDiscoveryHome } from './discovery.controller';
+import Protect from '../middlewares/checkAuth.mdw';
+import { getDiscoveryHome } from '@/controllers/discovery.controller';
 
 const discoveryRouter = Router({ mergeParams: true });
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getPublicSermonTeaser } from './open.controller';
+import { getPublicSermonTeaser } from '@/controllers/open.controller';
 
 const openRouter = Router({ mergeParams: true });
 

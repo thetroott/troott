@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
-import { newSubscription } from './subscription.controller';
+import Protect from '../middlewares/checkAuth.mdw';
+import { newSubscription } from '@/controllers/subscription.controller';
 
 const subscriptionRoutes: Router = Router({
     mergeParams: true,

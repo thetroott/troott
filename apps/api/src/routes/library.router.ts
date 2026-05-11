@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     createLibrary,
     deleteLibrary,
@@ -7,8 +7,8 @@ import {
     getLibraryById,
     getLibraryByUser,
     updateLibrary,
-} from './library.controller';
-import uploadHandler from '../../../middlewares/upload.mdw';
+} from '@/controllers/library.controller';
+import uploadHandler from '../middlewares/upload.mdw';
 
 const libraryRouter = Router({ mergeParams: true });
 

@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     getInvitationById,
     getInvitationsByInviteeEmail,
     getInvitationsByInviter,
     getInvitationsByResource,
-} from './invitation.controller';
+} from '@/controllers/invitation.controller';
 
 const invitationRouter: Router = Router({ mergeParams: true });
 

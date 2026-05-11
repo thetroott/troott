@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
-import { getMyProfile, updateMyProfile } from './profile.controller';
+import Protect from '../middlewares/checkAuth.mdw';
+import { getMyProfile, updateMyProfile } from '@/controllers/profile.controller';
 
 const profileRoutes: Router = Router({ mergeParams: true });
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     getMinister,
     getMinisters,
@@ -12,7 +12,7 @@ import {
     revokeMinisterInvitation,
     submitMinisterVerification,
     updateMinisterVerificationStatus,
-} from './minister.controller';
+} from '@/controllers/minister.controller';
 
 const ministerRoutes: Router = Router({ mergeParams: true });
 

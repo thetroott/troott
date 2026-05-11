@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { searchCatalog } from './search.controller';
+import { searchCatalog } from '@/controllers/search.controller';
 
 const searchRouter = Router({ mergeParams: true });
 

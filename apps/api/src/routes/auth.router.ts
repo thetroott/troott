@@ -11,7 +11,7 @@ import {
     resetPassword,
     socialAuthCallback,
     verifyOTP,
-} from './auth.controller';
+} from '@/controllers/auth.controller';
 import passport from 'passport';
 
 const authRouter = Router({ mergeParams: true });

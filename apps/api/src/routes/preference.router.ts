@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import Protect from '../../../middlewares/checkAuth.mdw';
+import Protect from '../middlewares/checkAuth.mdw';
 import {
     createPreferences,
     deletePreferences,
@@ -8,7 +8,7 @@ import {
     getUserPreferences,
     patchMyPreferences,
     updatePreferences,
-} from './preference.controller';
+} from '@/controllers/preference.controller';
 
 const preferenceRouter = Router({ mergeParams: true });
 
