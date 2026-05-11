@@ -1,13 +1,13 @@
-import { CreateMinisterDTO, UpdateMinisterDTO } from './minister.dto';
-import ministerRepository from './minister.repository';
+import { CreateMinisterDTO, UpdateMinisterDTO } from '@/dtos/minister.dto';
+import ministerRepository from '@/repository/minister.repository';
 import { IResult } from '@/modules/shared/interfaces.util';
-import type { IMinisterDoc } from './minister.interface';
-import type { IUserDoc } from '../user/user.interface';
-import { UserType } from '../user/user.interface';
-import { VerificationStatus } from '../../../utils/enums.util';
-import { genSlug } from '../../../utils/helpers.util';
-import roleService from '../../authentication/role/role.service';
-import PermissionService from '../../authentication/permission/permission.service';
+import type { IMinisterDoc } from '@/modules/users/minister/minister.interface';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { UserType } from '@/modules/users/user/user.interface';
+import { VerificationStatus } from '../utils/enums.util';
+import { genSlug } from '../utils/helpers.util';
+import roleService from '@/services/role.service';
+import PermissionService from '@/services/permission.service';
 
 class MinisterService {
     public result: IResult;

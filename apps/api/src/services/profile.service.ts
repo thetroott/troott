@@ -1,11 +1,11 @@
 import type { IResult } from '@/utils/interfaces.util';
-import userRepository from '../user/user.repository';
-import ministerRepository from '../minister/minister.repository';
-import storageService from '../../platform/storage/storage.service';
-import { UserType, type IUserDoc, type Upload } from '../user/user.interface';
-import type { IMinisterDoc } from '../minister/minister.interface';
-import profileMapper from './profile.mapper';
-import type { ProfileDTO, UpdateProfilePayloadDTO } from './profile.dto';
+import userRepository from '@/repository/user.repository';
+import ministerRepository from '@/repository/minister.repository';
+import storageService from '@/services/storage.service';
+import { UserType, type IUserDoc, type Upload } from '@/modules/users/user/user.interface';
+import type { IMinisterDoc } from '@/modules/users/minister/minister.interface';
+import profileMapper from '@/mappers/profile.mapper';
+import type { ProfileDTO, UpdateProfilePayloadDTO } from '@/dtos/profile.dto';
 
 /**
  * @name profileService

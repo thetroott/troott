@@ -1,10 +1,10 @@
-import User from '../../users/user/user.model';
-import Role from '../role/role.model';
-import redisWrapper from '../../../middlewares/redis.mdw';
+import User from '@/models/user.model';
+import Role from '@/models/role.model';
+import redisWrapper from '../middlewares/redis.mdw';
 import { IResult } from '@/modules/shared/interfaces.util';
-import { IRoleDoc } from '../role/role.interface';
-import { IUserDoc } from '../../users/user/user.interface';
-import { matchPermission as matchPermissionUtil } from '../role/role.util';
+import IRoleDoc from '../interfaces/role.interface';
+import { IUserDoc } from '@/modules/users/user/user.interface';
+import { matchPermission as matchPermissionUtil } from '@/utils/role.util';
 
 const RBAC_USER_CACHE_KEY = (userId: string) => `rbac:perms:user:${userId}`;
 const DEFAULT_TTL = Number(

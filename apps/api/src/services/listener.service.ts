@@ -1,12 +1,12 @@
-import { CreateListenerDTO, UpdateListenerDTO } from './listener.dto';
-import listenerRepository from './listener.repository';
+import { CreateListenerDTO, UpdateListenerDTO } from '@/dtos/listener.dto';
+import listenerRepository from '@/repository/listener.repository';
 import { IResult } from '@/modules/shared/interfaces.util';
-import type { IListenerDoc } from './listener.interface';
-import type { IUserDoc } from '../user/user.interface';
-import { UserType } from '../user/user.interface';
-import { genSlug } from '../../../utils/helpers.util';
-import roleService from '../../authentication/role/role.service';
-import PermissionService from '../../authentication/permission/permission.service';
+import type { IListenerDoc } from '@/modules/users/listener/listener.interface';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { UserType } from '@/modules/users/user/user.interface';
+import { genSlug } from '../utils/helpers.util';
+import roleService from '@/services/role.service';
+import PermissionService from '@/services/permission.service';
 
 class ListenerService {
     public result: IResult;

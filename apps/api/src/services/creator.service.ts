@@ -1,13 +1,13 @@
-import { CreateCreatorDTO, UpdateCreatorDTO } from './creator.dto';
-import creatorRepository from './creator.repository';
+import { CreateCreatorDTO, UpdateCreatorDTO } from '@/dtos/creator.dto';
+import creatorRepository from '@/repository/creator.repository';
 import { IResult } from '@/modules/shared/interfaces.util';
-import type { ICreatorDoc } from './creator.interface';
-import type { IUserDoc } from '../user/user.interface';
-import { UserType } from '../user/user.interface';
-import { VerificationStatus } from '../../../utils/enums.util';
-import { genSlug } from '../../../utils/helpers.util';
-import roleService from '../../authentication/role/role.service';
-import PermissionService from '../../authentication/permission/permission.service';
+import type { ICreatorDoc } from '@/modules/users/creator/creator.interface';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { UserType } from '@/modules/users/user/user.interface';
+import { VerificationStatus } from '../utils/enums.util';
+import { genSlug } from '../utils/helpers.util';
+import roleService from '@/services/role.service';
+import PermissionService from '@/services/permission.service';
 
 const defaultDob = (): Date => new Date('1990-01-01T00:00:00.000Z');
 

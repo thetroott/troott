@@ -5,16 +5,16 @@ import {
     AdminDepartmentEnum,
     AdminTypeEnum,
     CompanyRoleEnum,
-} from './admin.interface';
-import { CreateAdminDTO, UpdateAdminDTO } from './admin.dto';
-import adminRepository from './admin.repository';
+} from '@/modules/users/admin/admin.interface';
+import { CreateAdminDTO, UpdateAdminDTO } from '@/dtos/admin.dto';
+import adminRepository from '@/repository/admin.repository';
 import { IResult } from '@/modules/shared/interfaces.util';
-import { IUserDoc, UserType } from '../user/user.interface';
-import { genUserCode } from '../../../utils/code.util';
-import roleService from '../../authentication/role/role.service';
-import PermissionService from '../../authentication/permission/permission.service';
+import { IUserDoc, UserType } from '@/modules/users/user/user.interface';
+import { genUserCode } from '../utils/code.util';
+import roleService from '@/services/role.service';
+import PermissionService from '@/services/permission.service';
 import { generateRandomChars, genSlug } from '@/utils/helpers.util';
-import SystemService from '../../internals/system/system.service';
+import SystemService from '@/services/system.service';
 
 type ObjectId = Types.ObjectId;
 

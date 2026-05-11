@@ -1,25 +1,25 @@
 import { Request } from 'express';
 import { UAParser } from 'ua-parser-js';
-import { ILogin, IResult } from '../../../utils/interfaces.util';
-import { LoginMethod, type IUserDoc } from '../../users/user/user.interface';
+import { ILogin, IResult } from '../utils/interfaces.util';
+import { LoginMethod, type IUserDoc } from '@/modules/users/user/user.interface';
 import {
     Random,
     arrayIncludes,
     dateToday,
     strIncludesEs6,
 } from '@btffamily/pacitude';
-import SystemService from '../../internals/system/system.service';
-import userRepository from '../../users/user/user.repository';
-import { OtpType, UserType } from '../../users/user/user.interface';
+import SystemService from '@/services/system.service';
+import userRepository from '@/repository/user.repository';
+import { OtpType, UserType } from '@/modules/users/user/user.interface';
 import {
     LoginDTO,
     MatchEncryptedPasswordDTO,
     RegisterUserDTO,
     verifyOtpDTO,
-} from './auth.dto';
-import User from '../../users/user/user.model';
-import Role from '../role/role.model';
-import ErrorResponse from '../../../utils/error.util';
+} from '@/dtos/auth.dto';
+import User from '@/models/user.model';
+import Role from '@/models/role.model';
+import ErrorResponse from '../utils/error.util';
 
 class AuthService {
     public result: IResult;

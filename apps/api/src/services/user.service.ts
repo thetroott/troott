@@ -5,8 +5,8 @@ import {
     OnboardStatus,
     PasswordType,
     UserType,
-} from './user.interface';
-import { IResult } from '../../../utils/interfaces.util';
+} from '@/modules/users/user/user.interface';
+import { IResult } from '../utils/interfaces.util';
 import {
     createUserDTO,
     createUserProfileDTO,
@@ -14,22 +14,22 @@ import {
     IBulkUser,
     EditUserDTO,
     IPassportProfileDTO,
-} from './user.dto';
-import User from './user.model';
-import userRepository from './user.repository';
+} from '@/dtos/user.dto';
+import User from '@/models/user.model';
+import userRepository from '@/repository/user.repository';
 
-import authService from '../../authentication/auth/auth.service';
-import PermissionService from '../../authentication/permission/permission.service';
-import { genSlug } from '../../../utils/helpers.util';
-import { generateRandomChars } from '../../../utils/helpers.util';
-import { OAuthProvider } from '../../authentication/auth/auth.enums';
-import { SocialIdKey } from '../../../utils/types.util';
-import { genUserCode } from '../../../utils/code.util';
-import storageService from '../../platform/storage/storage.service';
-import { IFile } from '../../../utils/interfaces.util';
-import roleService from '@/modules/authentication/role/role.service';
-import emailService from '../../notifications/email/email.service';
-import preferenceService from '../../core/preference/preference.service';
+import authService from '@/services/auth.service';
+import PermissionService from '@/services/permission.service';
+import { genSlug } from '../utils/helpers.util';
+import { generateRandomChars } from '../utils/helpers.util';
+import { OAuthProvider } from '@/modules/authentication/auth/auth.enums';
+import { SocialIdKey } from '../utils/types.util';
+import { genUserCode } from '../utils/code.util';
+import storageService from '@/services/storage.service';
+import { IFile } from '../utils/interfaces.util';
+import roleService from '@/services/role.service';
+import emailService from '@/services/email.service';
+import preferenceService from '@/services/preference.service';
 
 type ObjectId = Types.ObjectId;
 
