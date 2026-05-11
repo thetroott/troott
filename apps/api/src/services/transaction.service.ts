@@ -1,6 +1,6 @@
 import { IResult } from '@/modules/shared/interfaces.util';
-import { initializePayment } from '../paystack/paystack.service';
-import { NewTransactionDTO, SubscriptionDTO } from './transaction.dto';
+import { initializePayment } from '@/services/paystack.service';
+import { NewTransactionDTO, SubscriptionDTO } from '@/dtos/transaction.dto';
 
 /**
  * Responsible for handling transactions. Paystack-based
@@ -109,4 +109,4 @@ VerifyTransaction
 must compare amount currency reference status
  */
 
-//pnpm tsx watch ./src/modules/transaction/transaction.service.ts
+//pnpm tsx watch ./src/services/transaction.service.ts

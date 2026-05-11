@@ -1,21 +1,21 @@
 import { IResult } from '@/modules/shared/interfaces.util';
-import { IPlanPaystackCode } from '../plan/plan.interface';
-import planService from '../plan/plan.service';
-import transactionService from '../transaction/transaction.service';
-import type { IUserDoc } from '../../users/user/user.interface';
-import userRepository from '../../users/user/user.repository';
+import { IPlanPaystackCode } from '@/modules/payments/plan/plan.interface';
+import planService from '@/services/plan.service';
+import transactionService from '@/services/transaction.service';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import userRepository from '@/repository/user.repository';
 import {
     ISubscriptionIntentDoc,
     SubscriptionIntentState,
-} from './subscription intent/subscriptionIntent.interface';
-import subscriptionIntentService from './subscription intent/subscriptionIntent.service';
-import { newSubscriptionDTO } from './subscription.dto';
+} from '@/interfaces/subscriptionIntent.interface';
+import subscriptionIntentService from '@/services/subscriptionIntent.service';
+import { newSubscriptionDTO } from '@/dtos/subscription.dto';
 import {
     BillingFrequency,
     Currency,
     SubscriptionStatus,
-} from './subscription.interface';
-import subscriptionRepository from './subscription.repository';
+} from '@/modules/payments/subscription/subscription.interface';
+import subscriptionRepository from '@/repository/subscription.repository';
 
 class SubscriptionService {
     /**

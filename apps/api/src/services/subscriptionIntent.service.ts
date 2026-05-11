@@ -3,8 +3,8 @@ import {
     CreateSubscriptionIntentDTO,
     ISubscriptionIntentDoc,
     SubscriptionIntentState,
-} from './subscriptionIntent.interface';
-import SubscriptionIntent from './subscriptionIntent.model';
+} from '@/interfaces/subscriptionIntent.interface';
+import SubscriptionIntent from '@/models/subscriptionIntent.model';
 
 const ACTIVE_STATES = [
     SubscriptionIntentState.INITIATED,

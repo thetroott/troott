@@ -4,7 +4,7 @@ import {
     CreatePlanDTO,
     initializePaymentDTO,
     verifWebhookDTO,
-} from './paystack.interface';
+} from '@/interfaces/payments.interface';
 import dotenv from 'dotenv';
 import { RequestHandler } from 'express';
 dotenv.config();

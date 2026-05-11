@@ -6,7 +6,7 @@ import {
     newPlanDTO,
     planAvailabilityDTO,
     updatePlanDTO,
-} from './plan.dto';
+} from '@/dtos/plan.dto';
 import {
     IPlanFilterOptions,
     IPlanPaystackCode,
@@ -14,12 +14,12 @@ import {
     PlanInterval,
     PlanPriceCurrency,
     PlanType,
-} from './plan.interface';
+} from '@/modules/payments/plan/plan.interface';
 import {
     paystackCreatePlan,
     paystackPlanUpdate,
-} from '../paystack/paystack.service';
-import planRepository from './plan.repository';
+} from '@/services/paystack.service';
+import planRepository from '@/repository/plan.repository';
 
 class PlanService {
     constructor() {}
