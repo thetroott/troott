@@ -82,7 +82,7 @@ jest.mock('../src/services/storage.service', () => ({
 }));
 
 // Mock Paystack service (exports named functions)
-jest.mock('../src/modules/paystack/paystack.service', () => ({
+jest.mock('../src/services/paystack.service', () => ({
     initializePayment: paystackServiceMock.initializePayment,
     verifyTransaction: paystackServiceMock.verifyTransaction,
     paystackCreatePlan: paystackServiceMock.paystackCreatePlan,

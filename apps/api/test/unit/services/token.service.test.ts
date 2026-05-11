@@ -1,8 +1,8 @@
 import { describe, it, beforeEach, expect } from '@jest/globals';
-import tokenService from '../../../src/services/token.service';
+import tokenService from '@/services/token.service';
 import { createUser } from '../../factories/user.factory';
 import { IUserDoc } from '../../../src/modules/user/user.interface';
-import User from '../../../src/modules/user/user.model';
+import User from '@/models/user.model';
 
 /**
  * Unit tests for Token Service

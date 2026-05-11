@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import type { Request } from 'express';
 import { canAccessSermonDocument } from '@/modules/core/sermon/sermon-access.util';
-import Minister from '@/modules/users/minister/minister.model';
+import Minister from '@/models/minister.model';
 
-jest.mock('@/modules/users/minister/minister.model', () => ({
+jest.mock('@/models/minister.model', () => ({
     __esModule: true,
     default: {
         findOne: jest.fn(),

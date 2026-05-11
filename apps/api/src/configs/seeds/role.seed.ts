@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import logger from '../../utils/logger.util';
-import Role from '@/modules/authentication/role/role.model';
-import { IRoleDoc } from '@/modules/authentication/role/role.interface';
+import Role from '@/models/role.model';
+import IRoleDoc from '@/interfaces/role.interface';
 
 /**
  * @name rolesData

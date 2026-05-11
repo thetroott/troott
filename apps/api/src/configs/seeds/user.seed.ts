@@ -1,6 +1,6 @@
 import logger from '../../utils/logger.util';
-import User from '@/modules/users/user/user.model';
-import Role from '@/modules/authentication/role/role.model';
+import User from '@/models/user.model';
+import Role from '@/models/role.model';
 import {
     UserType,
     PasswordType,
@@ -8,11 +8,11 @@ import {
     InviteStatus,
 } from '@/modules/users/user/user.interface';
 import ErrorResponse from '@/utils/error.util';
-import authService from '@/modules/authentication/auth/auth.service';
+import authService from '@/services/auth.service';
 import { genUserCode } from '../../utils/code.util';
 import { genSlug } from '@/utils/helpers.util';
-import PermissionService from '@/modules/authentication/permission/permission.service';
-import adminService from '@/modules/users/admin/admin.service';
+import PermissionService from '@/services/permission.service';
+import adminService from '@/services/admin.service';
 import {
     AdminDepartmentEnum,
     AdminTypeEnum,

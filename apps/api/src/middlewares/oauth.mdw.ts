@@ -2,8 +2,8 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as GitHubStrategy } from 'passport-github';
 import { Strategy as AppleStrategy } from 'passport-apple';
-import userRepository from '../modules/users/user/user.repository';
-import userService from '../modules/users/user/user.service';
+import userRepository from '@/repository/user.repository';
+import userService from '@/services/user.service';
 import { OAuthProvider } from '../modules/authentication/auth/auth.enums';
 
 const {

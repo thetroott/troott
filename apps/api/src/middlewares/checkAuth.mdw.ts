@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import ErrorResponse from '../utils/error.util';
 import asyncHandler from './async.mdw';
-import User from '../modules/users/user/user.model';
-import tokenService from '../modules/internals/token/token.service';
+import User from '@/models/user.model';
+import tokenService from '@/services/token.service';
 
 declare global {
     namespace Express {

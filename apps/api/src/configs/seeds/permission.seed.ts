@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import Permission from '@/modules/authentication/permission/permission.model';
-import Role from '@/modules/authentication/role/role.model';
-import User from '@/modules/users/user/user.model';
+import Permission from '@/models/permission.model';
+import Role from '@/models/role.model';
+import User from '@/models/user.model';
 import { UserType } from '@/modules/users/user/user.interface';
-import PermissionService from '@/modules/authentication/permission/permission.service';
+import PermissionService from '@/services/permission.service';
 import logger from '@/utils/logger.util';
 
 /**
@@ -45,7 +45,7 @@ const seedPermissions = async (): Promise<void> => {
 
         // Import rolePermissionMap from permission.util
         const { rolePermissionMap } =
-            await import('@/modules/authentication/permission/permission.util');
+            await import('@/utils/permission.util');
 
         // If a rolePermissionMap is available, map role names to actions
         if (rolePermissionMap && typeof rolePermissionMap === 'object') {

@@ -1,5 +1,5 @@
-import schedulerService from '../../modules/internals/scheduler/scheduler.service';
-import { ScheduledJobConfig } from '../../modules/internals/scheduler/scheduler.service';
+import schedulerService from '@/services/scheduler.service';
+import { ScheduledJobConfig } from '@/services/scheduler.service';
 import { QueueChannel, JobChannel } from '../../queues/channel.queue';
 import {
     CronPatterns,

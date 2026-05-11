@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import asyncHandler from './async.mdw';
-import User from '../modules/users/user/user.model';
+import User from '@/models/user.model';
 
 /**
  * If `Authorization: Bearer <jwt>` is present and valid, sets `req.user` like `Protect`.

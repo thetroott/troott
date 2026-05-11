@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { Types } from 'mongoose';
 import type { IUserPreferencesDoc } from '@/modules/core/preference/preference.interface';
-import preferenceMapper from '@/modules/core/preference/preference.mapper';
+import preferenceMapper from '@/mappers/preference.mapper';
 
 function mockDoc(
     overrides: Partial<IUserPreferencesDoc> = {},

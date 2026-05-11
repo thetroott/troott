@@ -1,5 +1,5 @@
 import BullQueue from '../../queues/queue';
-import { CreateWorkerDTO } from '../../queues/queue.dto';
+import { CreateWorkerDTO } from '@/dtos/queue.dto';
 import { JobChannel, QueueChannel } from '../../queues/channel.queue';
 import emailProcessor from '../jobs/email.job';
 import logger from '../../utils/logger.util';

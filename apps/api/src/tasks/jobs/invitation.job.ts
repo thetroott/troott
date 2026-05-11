@@ -1,7 +1,7 @@
 import { Job, DoneCallback } from 'bull';
 import logger from '../../utils/logger.util';
-import Invites from '../../modules/platform/Invitation/invitation.model';
-import { InvitationStatus } from '../../modules/platform/Invitation/invitation.interface';
+import Invites from '@/models/invitation.model';
+import { InvitationStatus } from '../../interfaces/invitation.interface';
 
 /**
  * Process invitation job

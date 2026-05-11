@@ -5,9 +5,9 @@ import mongoose from 'mongoose';
 import request from 'supertest';
 import app from '../../src/configs/app.config';
 import { IUserDoc, UserType } from '../../src/modules/users/user/user.interface';
-import User from '../../src/modules/users/user/user.model';
-import tokenService from '../../src/modules/internals/token/token.service';
-import authService from '../../src/modules/authentication/auth/auth.service';
+import User from '@/models/user.model';
+import tokenService from '@/services/token.service';
+import authService from '@/services/auth.service';
 import { genUserCode } from '../../src/utils/code.util';
 
 /**

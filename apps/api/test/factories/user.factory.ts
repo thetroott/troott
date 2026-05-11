@@ -6,8 +6,8 @@ import {
     OnboardStatus,
     InviteStatus,
 } from '../../src/modules/users/user/user.interface';
-import User from '../../src/modules/users/user/user.model';
-import authService from '../../src/modules/authentication/auth/auth.service';
+import User from '@/models/user.model';
+import authService from '@/services/auth.service';
 import { genUserCode } from '../../src/utils/code.util';
 
 /**

@@ -1,7 +1,7 @@
 import { Job, DoneCallback } from 'bull';
 import { IEmailJob, IResult } from '../../utils/interfaces.util';
 import logger from '../../utils/logger.util';
-import emailService from '@/modules/notifications/email/email.service';
+import emailService from '@/services/email.service';
 
 /**
  * @name emailProcessor

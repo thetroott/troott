@@ -1,8 +1,8 @@
-import { EmailService, OAuthProvider } from "@/types/common.enum";
-import { PaymentProviders } from "@/types/payments.enums";
-import IUserDoc, { OtpType } from "./user.interface";
-import { PassThrough } from "stream";
-import { FileInfo } from "busboy";
+import { EmailService, OAuthProvider } from '@/types/common.enum';
+import { PaymentProviders } from '@/types/payments.enums';
+import IUserDoc, { OtpType } from './user.interface';
+import { PassThrough } from 'stream';
+import { FileInfo } from 'busboy';
 
 /**
  * S3 upload reference stored on documents that have user-uploaded assets
@@ -15,13 +15,12 @@ export interface Upload {
     s3Key: string;
 }
 
-
 /**
  * Standard API response envelope.
  *
  * @typeParam T - Shape of the `data` payload (defaults to `any`).
  */
-export interface IResult <T = any> {
+export interface IResult<T = any> {
     /** Whether the request resulted in an error. */
     error: boolean;
     /** Human-readable status message. */
@@ -29,17 +28,20 @@ export interface IResult <T = any> {
     /** HTTP status code. */
     code: number;
     /** Response payload. */
-    data: any;
-
-  
-    errors?: Array<T>;
-    report?: IAPIReport;
-    pagination?: IPagination;
-    message: string;
-    code: number;
     data: T;
+
+    /** Array of errors. */
+    errors?: Array<T>;
+    /** API report. */
+    report?: IAPIReport;
+    /** Pagination. */
+    pagination?: IPagination;
+
+    /** Token. */
     token?: string;
+    /** Status. */
     status?: number;
+    /** Filters. */
     filters?: any;
 }
 
@@ -58,17 +60,12 @@ export interface IPagination {
     data: Array<any>;
 }
 
-
-
-
 export interface IAPIReport {
     format: string;
     csv?: string;
     xml?: any;
     pdf?: any;
 }
-
-
 
 /**
  * Tokenised debit/credit card stored after a successful payment authorisation.
@@ -317,7 +314,6 @@ export interface IData {
     key: string;
     value: any;
 }
-
 
 /** AWS SDK configuration for S3 operations. */
 export interface AWSConfig {

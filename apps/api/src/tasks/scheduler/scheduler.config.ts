@@ -1,4 +1,4 @@
-import { ScheduledJobConfig } from '../../modules/internals/scheduler/scheduler.service';
+import { ScheduledJobConfig } from '@/services/scheduler.service';
 import startReminderJobs from './reminder';
 import startCleanupJobs from './tmp-cleanup';
 import startMarketingJobs from './marketing.schedular';

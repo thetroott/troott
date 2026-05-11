@@ -6,7 +6,7 @@ import {
     BillingFrequency,
     SubscriberUserType,
 } from '../../src/modules/subscription/subscription.interface';
-import Subscription from '../../src/modules/subscription/subscription.model';
+import Subscription from '@/models/subscription.model';
 import { IBusinessDoc } from '../../src/modules/business/business.interface';
 import { ITalentDoc } from '../../src/modules/talents/talent.interface';
 import { IPlanDoc } from '../../src/modules/plan/plan.interface';

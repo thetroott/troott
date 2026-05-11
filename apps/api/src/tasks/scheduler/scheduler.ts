@@ -1,4 +1,4 @@
-import schedulerService from '../../modules/internals/scheduler/scheduler.service';
+import schedulerService from '@/services/scheduler.service';
 import startScheduledJobs from './scheduler.config';
 import startSchedulerWorkers from '@/tasks/workers/scheduler.worker';
 import logger from '../../utils/logger.util';

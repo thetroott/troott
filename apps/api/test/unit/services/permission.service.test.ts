@@ -2,10 +2,10 @@ import { describe, it, beforeEach, expect } from '@jest/globals';
 import {
     resolveUserPermissions,
     hasPermission,
-} from '../../../src/services/permission.service';
+} from '@/services/permission.service';
 import { createUser, createAdminUser } from '../../factories/user.factory';
 import { IUserDoc } from '../../../src/modules/user/user.interface';
-import Role from '../../../src/modules/role/role.model';
+import Role from '@/models/role.model';
 import { IRoleDoc } from '../../../src/modules/role/role.interface';
 
 /**

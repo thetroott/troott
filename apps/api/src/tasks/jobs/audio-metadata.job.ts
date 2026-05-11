@@ -1,6 +1,6 @@
 import { Job } from 'bull';
 import { FileType } from '../../utils/enums.util';
-import Sermon from '../../modules/core/sermon/sermon.model';
+import Sermon from '@/models/sermon.model';
 import { DoneCallback } from 'bull';
 import logger from '../../utils/logger.util';
 import type {

@@ -10,14 +10,14 @@ import {
     AudioRenditionDTO,
     IAudioHLSJobDTO,
 } from '@/modules/core/sermon/sermon.interface';
-import audioProcessing from '@/modules/core/processes/audio-processing';
-import storageService from '@/modules/platform/storage/storage.service';
+import audioProcessing from '@/services/audio.service';
+import storageService from '@/services/storage.service';
 import { FileType } from '@/utils/enums.util';
-import Sermon from '@/modules/core/sermon/sermon.model';
+import Sermon from '@/models/sermon.model';
 import {
     ProcessingState,
     UploadStepType,
-} from '@/modules/platform/storage/upload.enums';
+} from '@/types/upload.enums';
 import { ContentStatus } from '@/utils/enums.util';
 import { buildHlsMasterPlaylist } from '@/utils/hls-master.util';
 import { mediaConfig, urlForMediaKey } from '@/configs/media.config';

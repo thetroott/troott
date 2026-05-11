@@ -2,7 +2,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Strategy as GitHubStrategy } from 'passport-github'; // Import the GitHub Strategy
 import { Strategy as AppleStrategy } from 'passport-apple';
-import userRepository from '../modules/users/user/user.repository';
+import userRepository from '@/repository/user.repository';
 
 const {
     GOOGLE_CLIENT_ID,

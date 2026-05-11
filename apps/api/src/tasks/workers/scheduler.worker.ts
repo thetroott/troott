@@ -1,5 +1,5 @@
 import BullQueue from '../../queues/queue';
-import { CreateWorkerDTO } from '../../queues/queue.dto';
+import { CreateWorkerDTO } from '@/dtos/queue.dto';
 import { QueueChannel, JobChannel } from '../../queues/channel.queue';
 import logger from '../../utils/logger.util';
 import processReminderJob from '../jobs/reminder.job';

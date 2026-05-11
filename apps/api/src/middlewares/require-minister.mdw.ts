@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import Minister from '../modules/users/minister/minister.model';
+import Minister from '@/models/minister.model';
 import ErrorResponse from '../utils/error.util';
 import asyncHandler from './async.mdw';
 

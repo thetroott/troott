@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect } from '@jest/globals';
-import RepositoryService from '../../../src/services/repository.service';
-import User from '../../../src/modules/user/user.model';
+import RepositoryService from '@/services/repository.service';
+import User from '@/models/user.model';
 import { IUserDoc } from '../../../src/modules/user/user.interface';
 import { createUser } from '../../factories/user.factory';
 
