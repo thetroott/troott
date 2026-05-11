@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import { pathParam } from '../../../utils/route-params.util';
-import { getAuthUserId } from '../../../utils/auth-request.util';
-import { userIsStaff } from '../../users/user/user.staff.util';
-import type { ILibraryDoc } from './library.interface';
-import libraryRepository from './library.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import { pathParam } from '../utils/route-params.util';
+import { getAuthUserId } from '../utils/auth-request.util';
+import { userIsStaff } from '@/modules/users/user/user.staff.util';
+import type { ILibraryDoc } from '@/modules/core/library/library.interface';
+import libraryRepository from '@/repository/library.repository';
 
 async function assertStaff(req: Request) {
     const id = getAuthUserId(req);

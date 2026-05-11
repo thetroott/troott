@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import preferenceService from './preference.service';
-import ErrorResponse from '../../../utils/error.util';
-import { getAuthUserId } from '../../../utils/auth-request.util';
-import { pathParam } from '../../../utils/route-params.util';
+import asyncHandler from '../middlewares/async.mdw';
+import preferenceService from '@/services/preference.service';
+import ErrorResponse from '../utils/error.util';
+import { getAuthUserId } from '../utils/auth-request.util';
+import { pathParam } from '../utils/route-params.util';
 import type {
     CreatePreferencesDTO,
     PreferencePatchDTO,
-} from './preference.dto';
+} from '@/dtos/preference.dto';
 
 /**
  * @name createPreferences

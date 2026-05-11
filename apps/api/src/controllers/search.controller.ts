@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import customResults from '../../../middlewares/customResult.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import Sermon from '../sermon/sermon.model';
-import Minister from '../../users/minister/minister.model';
-import { ICustomResponse } from '../../shared/interfaces.util';
+import asyncHandler from '../middlewares/async.mdw';
+import customResults from '../middlewares/customResult.mdw';
+import ErrorResponse from '../utils/error.util';
+import Sermon from '@/models/sermon.model';
+import Minister from '@/models/minister.model';
+import { ICustomResponse } from '@/modules/shared/interfaces.util';
 
 type SearchScope = 'sermon' | 'minister' | 'all';
 

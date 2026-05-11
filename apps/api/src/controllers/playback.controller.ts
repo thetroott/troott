@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import { getAuthUserId } from '../../../utils/auth-request.util';
-import { pathParam } from '../../../utils/route-params.util';
-import playbackRepository from './playback.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import { getAuthUserId } from '../utils/auth-request.util';
+import { pathParam } from '../utils/route-params.util';
+import playbackRepository from '@/repository/playback.repository';
 
 /**
  * @route POST /api/v1/playback

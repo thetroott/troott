@@ -1,12 +1,12 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import roleService from './role.service';
-import roleRepository from './role.repository';
-import { CreateRoleDTO, UpdateRoleDTO, AttachRoleDTO } from './role.dto';
-import redisWrapper from '../../../middlewares/redis.mdw';
-import userRepository from '../../users/user/user.repository';
-import { IUserDoc, UserType } from '../../users/user/user.interface';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import roleService from '@/services/role.service';
+import roleRepository from '@/repository/role.repository';
+import { CreateRoleDTO, UpdateRoleDTO, AttachRoleDTO } from '@/dtos/role.dto';
+import redisWrapper from '../middlewares/redis.mdw';
+import userRepository from '@/repository/user.repository';
+import { IUserDoc, UserType } from '@/modules/users/user/user.interface';
 
 /**
  * @name createRole

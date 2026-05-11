@@ -1,13 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import { pathParam } from '../../../utils/route-params.util';
-import sermonRepository from '../sermon/sermon.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import { pathParam } from '../utils/route-params.util';
+import sermonRepository from '@/repository/sermon.repository';
 import {
     buildSermonTeaserPayload,
     isSermonPublicTeaserEligible,
-} from './sermon-teaser.util';
-import logger from '../../../utils/logger.util';
+} from '@/utils/sermon-teaser.util';
+import logger from '../utils/logger.util';
 
 /**
  * Public teaser for marketing / universal links (no auth).

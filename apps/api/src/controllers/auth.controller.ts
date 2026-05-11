@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import User from '../../users/user/user.model';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import User from '@/models/user.model';
 import {
     ChangePasswordDTO,
     LoginDTO,
@@ -9,19 +9,19 @@ import {
     resendOtpDTO,
     ResetPasswordDTO,
     verifyOtpDTO,
-} from './auth.dto';
-import AuthService from './auth.service';
+} from '@/dtos/auth.dto';
+import AuthService from '@/services/auth.service';
 import {
     OtpType,
     PasswordType,
     UserType,
-} from '../../users/user/user.interface';
-import emailService from '../../notifications/email/email.service';
-import tokenService from '../../internals/token/token.service';
-import type { IUserDoc } from '../../users/user/user.interface';
-import userService from '../../users/user/user.service';
-import { statusCodeForUserServiceError } from '../../users/user/user.http-error.util';
-import authMapper from './auth.mapper';
+} from '@/modules/users/user/user.interface';
+import emailService from '@/services/email.service';
+import tokenService from '@/services/token.service';
+import type { IUserDoc } from '@/modules/users/user/user.interface';
+import userService from '@/services/user.service';
+import { statusCodeForUserServiceError } from '@/utils/user.http-error.util';
+import authMapper from '@/mappers/auth.mapper';
 
 /**
  * @name registerUser

@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import playlistRepository from './playlist.repository';
-import asyncHandler from '../../../middlewares/async.mdw';
-import ErrorResponse from '../../../utils/error.util';
-import { pathParam } from '../../../utils/route-params.util';
-import { getAuthUserId } from '../../../utils/auth-request.util';
-import { userIsStaff } from '../../users/user/user.staff.util';
-import type { IPlaylistDoc } from './playlist.interface';
+import playlistRepository from '@/repository/playlist.repository';
+import asyncHandler from '../middlewares/async.mdw';
+import ErrorResponse from '../utils/error.util';
+import { pathParam } from '../utils/route-params.util';
+import { getAuthUserId } from '../utils/auth-request.util';
+import { userIsStaff } from '@/modules/users/user/user.staff.util';
+import type { IPlaylistDoc } from '@/modules/core/playlist/playlist.interface';
 
 function playlistOwnerId(p: { user?: unknown; createdBy?: unknown }): string {
     const idFrom = (u: unknown): string => {
