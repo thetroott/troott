@@ -1,11 +1,10 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import {
-    IAdminDoc,
+import IAdminDoc, {
     AdminDepartmentEnum,
     AdminTypeEnum,
     CompanyRoleEnum,
-} from './admin.interface';
-import { DbModels } from '../../../utils/enums.util';
+} from '@/interfaces/admin.interface';
+import { DbModels } from '@/types/common.enum';
 
 /**
  * Admin Schema
@@ -63,9 +62,18 @@ const AdminSchema = new Schema<IAdminDoc>(
             index: true,
         },
 
+        avatar: {
+            fileName: { type: String },
+            s3Key: { type: String },
+        },
+        banner: {
+            fileName: { type: String },
+            s3Key: { type: String },
+        },
+
         createdBy: {
             type: Schema.Types.ObjectId,
-            ref: DbModels.ADMIN,
+            ref: DbModels.USER,
         },
 
         settings: {
@@ -73,9 +81,6 @@ const AdminSchema = new Schema<IAdminDoc>(
             ref: DbModels.USER,
         },
 
-        /**
-         * Relationships
-         */
         user: {
             type: Schema.Types.ObjectId,
             ref: DbModels.USER,
