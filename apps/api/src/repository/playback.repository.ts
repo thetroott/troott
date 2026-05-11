@@ -1,7 +1,7 @@
 import { Model, Types } from 'mongoose';
-import PlaybackProgress from './playback.model';
-import { IResult } from '../../../utils/interfaces.util';
-import type { IPlaybackProgressDoc } from './playback.interface';
+import PlaybackProgress from '@/models/playback.model';
+import { IResult } from '../utils/interfaces.util';
+import type { IPlaybackProgressDoc } from '@/modules/core/playback/playback.interface';
 
 class PlaybackRepository {
     private model: Model<IPlaybackProgressDoc>;

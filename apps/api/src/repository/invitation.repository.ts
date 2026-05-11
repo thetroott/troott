@@ -1,7 +1,7 @@
-import Invites from './invitation.model';
+import Invites from '@/models/invitation.model';
 import { IResult } from '@/modules/shared/interfaces.util';
-import { IInvitationDoc } from './invitation.interface';
-import { CreateInvitationDTO } from './invitation.dto';
+import type IInvitationDoc from '../interfaces/invitation.interface';
+import { CreateInvitationDTO } from '@/dtos/invitation.dto';
 
 class InvitationRepository {
     public async createInvite(

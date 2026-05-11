@@ -1,10 +1,10 @@
 import { FilterQuery } from 'mongoose';
-import User from './user.model';
-import { IUserDoc } from './user.interface';
-import RepositoryService from '../../internals/repository/repository.service';
-import { IResult } from '../../../utils/interfaces.util';
-import tokenService from '../../internals/token/token.service';
-import { OAuthProvider } from '../../authentication/auth/auth.enums';
+import User from '@/models/user.model';
+import { IUserDoc } from '@/modules/users/user/user.interface';
+import RepositoryService from '@/services/repository.service';
+import { IResult } from '../utils/interfaces.util';
+import tokenService from '@/services/token.service';
+import { OAuthProvider } from '@/modules/authentication/auth/auth.enums';
 
 /**
  * User Repository

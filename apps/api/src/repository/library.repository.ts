@@ -1,7 +1,7 @@
 import { Model, ObjectId } from 'mongoose';
-import Library from './library.model';
-import { IResult, IQueryOptions } from '../../../utils/interfaces.util';
-import type { ILibraryDoc } from './library.interface';
+import Library from '@/models/library.model';
+import { IResult, IQueryOptions } from '../utils/interfaces.util';
+import type { ILibraryDoc } from '@/modules/core/library/library.interface';
 
 class LibraryRepository {
     private model: Model<ILibraryDoc>;

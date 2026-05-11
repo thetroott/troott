@@ -1,7 +1,7 @@
 import { Model } from 'mongoose';
-import Series from './series.model';
-import { IResult } from '../../../utils/interfaces.util';
-import type { ISeriesDoc } from './series.interface';
+import Series from '@/models/series.model';
+import { IResult } from '../utils/interfaces.util';
+import type { ISeriesDoc } from '@/modules/core/series/series.interface';
 
 class SeriesRepository {
     private model: Model<ISeriesDoc>;

@@ -1,8 +1,8 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
-import Admin from './admin.model';
-import { IAdminDoc } from './admin.interface';
-import RepositoryService from '../../internals/repository/repository.service';
-import { IResult } from '../../../utils/interfaces.util';
+import Admin from '@/models/admin.model';
+import { IAdminDoc } from '@/modules/users/admin/admin.interface';
+import RepositoryService from '@/services/repository.service';
+import { IResult } from '../utils/interfaces.util';
 
 /**
  * Admin Repository

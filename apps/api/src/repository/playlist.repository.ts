@@ -1,7 +1,7 @@
 import { Model } from 'mongoose';
-import Playlist from './playlist.model';
-import { IResult, IQueryOptions } from '../../../utils/interfaces.util';
-import type { IPlaylistDoc } from './playlist.interface';
+import Playlist from '@/models/playlist.model';
+import { IResult, IQueryOptions } from '../utils/interfaces.util';
+import type { IPlaylistDoc } from '@/modules/core/playlist/playlist.interface';
 
 class PlaylistRepository {
     private model: Model<IPlaylistDoc>;

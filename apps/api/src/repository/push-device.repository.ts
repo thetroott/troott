@@ -1,10 +1,10 @@
 import { Model, Types } from 'mongoose';
-import PushDevice from './push-device.model';
-import { IResult } from '../../../utils/interfaces.util';
+import PushDevice from '@/models/push-device.model';
+import { IResult } from '../utils/interfaces.util';
 import type {
     IPushDeviceDoc,
     PushDevicePlatform,
-} from './push-device.interface';
+} from '@/modules/notifications/push/push-device.interface';
 
 class PushDeviceRepository {
     private model: Model<IPushDeviceDoc>;

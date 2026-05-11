@@ -1,7 +1,7 @@
-import ShareableLink from './shareable-link.model';
+import ShareableLink from '@/models/shareable-link.model';
 import { IResult } from '@/modules/shared/interfaces.util';
-import { IShareableLinkDoc } from './shareable-link.interface';
-import { CreateShareableLinkDTO } from './shareable-link.dto';
+import { IShareableLinkDoc } from '@/interfaces/shareable-link.interface';
+import { CreateShareableLinkDTO } from '@/dtos/shareable-link.dto';
 
 class ShareableLinkRepository {
     public async createShareableLink(

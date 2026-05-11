@@ -1,10 +1,10 @@
 import mongoose, { Model, ObjectId, Types } from 'mongoose';
-import Sermon from './sermon.model';
+import Sermon from '@/models/sermon.model';
 
-import { IQueryOptions, IResult } from '../../../utils/interfaces.util';
-import type { ISermonDoc } from './sermon.interface';
+import { IQueryOptions, IResult } from '../utils/interfaces.util';
+import type { ISermonDoc } from '@/modules/core/sermon/sermon.interface';
 import { PipelineStage } from 'mongoose';
-import { ContentState, ContentStatus } from '../../../utils/enums.util';
+import { ContentState, ContentStatus } from '../utils/enums.util';
 
 /** Optional filters for GET /sermon/minister/:id (studio list). */
 export type MinisterSermonListFilters = {

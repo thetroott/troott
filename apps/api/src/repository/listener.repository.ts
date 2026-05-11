@@ -1,8 +1,8 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
-import Listener from './listener.model';
-import { IListenerDoc } from './listener.interface';
-import RepositoryService from '../../internals/repository/repository.service';
-import { IResult } from '../../../utils/interfaces.util';
+import Listener from '@/models/listener.model';
+import { IListenerDoc } from '@/modules/users/listener/listener.interface';
+import RepositoryService from '@/services/repository.service';
+import { IResult } from '../utils/interfaces.util';
 
 /**
  * Listener repository — extends the generic repository with listener-specific methods.

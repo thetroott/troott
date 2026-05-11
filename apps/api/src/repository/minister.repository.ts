@@ -1,8 +1,8 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
-import Minister from './minister.model';
-import { IMinisterDoc } from './minister.interface';
-import RepositoryService from '../../internals/repository/repository.service';
-import { IResult } from '../../../utils/interfaces.util';
+import Minister from '@/models/minister.model';
+import { IMinisterDoc } from '@/modules/users/minister/minister.interface';
+import RepositoryService from '@/services/repository.service';
+import { IResult } from '../utils/interfaces.util';
 
 class MinisterRepository extends RepositoryService<IMinisterDoc> {
     constructor() {
