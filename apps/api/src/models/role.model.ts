@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { IRoleDoc } from './role.interface';
-import { genSlug } from '../../../utils/helpers.util';
-import { DbModels } from '../../../utils/enums.util';
+import IRoleDoc from '../interfaces/role.interface';
+import { genSlug } from '../utils/helpers.util';
+import { DbModels } from '@/types/common.enum';
 
 const RoleSchema = new mongoose.Schema<IRoleDoc>(
     {
@@ -23,7 +23,7 @@ const RoleSchema = new mongoose.Schema<IRoleDoc>(
         permissions: [{ type: String, ref: DbModels.PERMISSION }],
         users: [
             {
-                type: Schema.Types.Mixed,
+                type: Schema.Types.ObjectId,
                 ref: DbModels.USER,
             },
         ],

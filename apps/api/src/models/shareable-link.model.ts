@@ -3,8 +3,8 @@ import mongoose, { Model, Schema } from 'mongoose';
 import {
     IShareableLinkDoc,
     ShareableLinkType,
-} from './shareable-link.interface';
-import { DbModels } from '../../../utils/enums.util';
+} from '@/interfaces/shareable-link.interface';
+import { DbModels } from '@/types/common.enum';
 
 const ShareableLinkSchema = new Schema<IShareableLinkDoc>(
     {
@@ -88,11 +88,10 @@ const ShareableLinkSchema = new Schema<IShareableLinkDoc>(
         toJSON: {
             virtuals: true,
             getters: true,
-            transform(_doc, ret) {
-                return {
-                    ...ret,
-                    id: ret._id.toString(),
-                };
+            transform(_doc: any, ret) {
+                ret.id = ret._id;
+                delete (ret as any).__v;
+                return ret;
             },
         },
     },

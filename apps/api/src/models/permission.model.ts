@@ -1,6 +1,6 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import { IPermissionDoc } from './permission.interface';
-import { DbModels } from '../../../utils/enums.util';
+import IPermissionDoc from '../interfaces/permission.interface';
+import { DbModels } from '@/types/common.enum';
 
 const PermissionSchema = new mongoose.Schema<IPermissionDoc>(
     {

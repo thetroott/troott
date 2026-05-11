@@ -1,11 +1,10 @@
 import mongoose, { Model, Schema } from 'mongoose';
 
-import {
-    IInvitationDoc,
+import IInvitationDoc, {
     InvitationStatus,
     InvitationType,
-} from './invitation.interface';
-import { DbModels } from '../../../utils/enums.util';
+} from '../interfaces/invitation.interface';
+import { DbModels } from '@/types/common.enum';
 
 const InvitationSchema = new Schema<IInvitationDoc>(
     {
@@ -108,7 +107,7 @@ InvitationSchema.index(
 );
 
 const Invites: Model<IInvitationDoc> = mongoose.model<IInvitationDoc>(
-    DbModels.INVITES,
+    DbModels.INVITATION,
     InvitationSchema,
 );
 
