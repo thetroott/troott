@@ -8,7 +8,7 @@ import ScreenModalAndroidView from '@/components/ui/screen-modal-android';
 import { usePlaylistsQuery } from '@/hooks/use-library-queries';
 import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
 import { useCurrentTrack } from '@/stores/player/queue';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 
 const UserPlayList = () => {
     const current = useCurrentTrack();

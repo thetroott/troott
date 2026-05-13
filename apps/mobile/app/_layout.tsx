@@ -1,5 +1,5 @@
 import '@/apis/config';
-import { TroottStateProvider } from '@troott/state';
+import { TroottStateProvider } from '@/state/app-state';
 import { PlaybackBridge } from '@/engine/state/use-playback-bridge';
 import Constants from 'expo-constants';
 import { AppState, Platform, Share, StyleSheet, View } from 'react-native';

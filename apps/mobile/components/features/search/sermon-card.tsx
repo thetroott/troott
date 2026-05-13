@@ -38,7 +38,7 @@ import { usePlaylistsQuery } from '@/hooks/use-library-queries';
 import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
 import { resolveMinisterIdFromLabel } from '@/_data/ministers-about';
 import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 
 export type SermonCardVariant = 'small' | 'large';
 

@@ -17,7 +17,7 @@ Columns: Action | Hook / module | Method | Path | Payload | Response (success) |
 
 | Action | Hook / module | Method | Path | Payload | Response | Failure | Status |
 |--------|---------------|--------|------|---------|----------|---------|--------|
-| User library | `useUserLibraryQuery` | GET | `/library/user/:userId` | — | Library doc or null | 404 -> null; other -> throw | **ready** |
+| User library | `useUserLibraryQuery` | GET | `/library/user/:userId` | — | Library doc or null | `:userId` = signed-in user id or listener id (must own listener); 404 -> null; other -> throw | **ready** |
 | List playlists | `usePlaylistsQuery` | GET | `/playlists` | — | Playlist docs (array or envelope) | throws | **ready** |
 
 ## Playlists (mutations)

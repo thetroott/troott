@@ -92,7 +92,7 @@ previewRoutes.get(
             },
         };
 
-        const data = sampleData[template] || {
+        const data = sampleData[template as string] || {
             name: 'Damola',
             ...req.query,
         };
@@ -185,7 +185,7 @@ previewRoutes.get(
             },
         };
 
-        const data = sampleData[template] || {
+        const data = sampleData[template as string] || {
             name: 'Damola',
             ...req.query,
         };

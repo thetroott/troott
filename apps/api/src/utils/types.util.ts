@@ -4,7 +4,7 @@ import {
     IDocumentMetadata,
     IImageMetadata,
     IVideoMetadata,
-} from '@/modules/core/sermon/sermon.interface';
+} from '@/dtos/core/sermon.dto';
 
 export type IUploadMetadata =
     | IAudioMetadata

@@ -31,7 +31,7 @@ import {
     usePlaylistsQuery,
     useUserLibraryQuery,
 } from '@/hooks/use-library-queries';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { getLibraryArrayField } from '@/engine/utils/library-map';
 
 type CategoryKey = 'All' | 'Playlists' | 'Sermon' | 'Series' | 'Minister';

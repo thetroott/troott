@@ -1,7 +1,7 @@
 import {
     usePlaybackDispatch,
     useQueueDispatch,
-} from '@troott/state';
+} from '@/state/app-state';
 import TrackPlayer, { Event } from '@rntp/player';
 import { useEffect, useRef } from 'react';
 import { usePlayerQueueStore } from './player-queue-store';
@@ -9,8 +9,8 @@ import { usePlayerQueueStore } from './player-queue-store';
 const PROGRESS_SYNC_INTERVAL_MS = 750;
 
 /**
- * One-way bridge: RNTP engine + player-queue zustand store into shared `@troott/state`
- * playback and queue slices. Must render under `<TroottStateProvider />`.
+ * One-way bridge: RNTP engine + player-queue zustand store (legacy sync hooks are no-ops).
+ * playback and queue sync hooks. Must render under `<TroottStateProvider />` (pass-through on mobile).
  */
 export function usePlaybackBridge(): void {
     const playbackDispatch = usePlaybackDispatch();
@@ -85,7 +85,7 @@ export function usePlaybackBridge(): void {
     }, [playbackDispatch]);
 }
 
-/** Mount once under `<TroottStateProvider />` (e.g. root layout). */
+/** Mount once at root (e.g. root layout). */
 export function PlaybackBridge(): null {
     usePlaybackBridge();
     return null;

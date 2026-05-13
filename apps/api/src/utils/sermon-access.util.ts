@@ -1,6 +1,6 @@
 import type { Request } from 'express';
 import mongoose from 'mongoose';
-import Minister from '@/models/minister.model';
+import Minister from '@/models/core/minister.model';
 import { getAuthUserId } from './auth-request.util';
 import { isSermonPublicTeaserEligible } from './sermon-teaser.util';
 

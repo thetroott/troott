@@ -5,7 +5,7 @@ import { IAPIResponse } from '@/utils/interface.utl';
 import { useRegisterStore } from '@/stores/register-store';
 import { useForgotPasswordStore } from '@/stores/otp-store';
 import { handleMutationError } from '@/utils/helpers.util';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import useGoTo from '../../hooks/shared/useGoTo';
 import secureStorage from '@/services/secure-storage';
 import { UserType } from '@troott/api-client';

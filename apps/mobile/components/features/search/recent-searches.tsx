@@ -12,7 +12,7 @@ import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
 import { useSearchHistory } from '@/hooks/use-search-history';
 import type { SearchHistoryEntry } from '@/lib/library-recent-search-storage';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 
 type RecentSearchesProps = {
     /** Optional vertical spacing above the section (handled by parent when omitted). */
