@@ -8,5 +8,4 @@ export * from './api/core/sermon/sermon.dto';
 export * from './api/payments/plan.dto';
 export * from './api/payments/subscription.dto';
 export * from './api/payments/transaction.dto';
-export * from './api/users/profile/profile.dto';
 export * from './api/core/discovery/discovery.dto';

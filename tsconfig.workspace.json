@@ -3,7 +3,6 @@
     "display": "Monorepo composite projects (run: pnpm exec tsc -b tsconfig.workspace.json)",
     "files": [],
     "references": [
-        { "path": "./packages/api-client" },
-        { "path": "./packages/state" }
+        { "path": "./packages/api-client" }
     ]
 }
