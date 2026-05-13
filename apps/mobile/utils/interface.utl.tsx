@@ -264,9 +264,18 @@ export interface IResult {
     data: any;
 }
 
+export interface IAPIReport {
+    format: string;
+    csv?: string;
+    xml?: any;
+    pdf?: any;
+}
+
+
 export interface IAPIResponse {
     error: boolean;
     errors: Array<any>;
+    report?: IAPIReport;
     count?: number;
     total?: number;
     pagination?: IPagination;
@@ -275,6 +284,14 @@ export interface IAPIResponse {
     token?: string;
     status: number;
 }
+
+/**
+ * Generic API envelope for typed `data` (e.g. {@link BaseService#extractData} legacy unwrap).
+ * All fields except `data` may be absent on partial server payloads.
+ */
+export type ApiResponse<T = unknown> = Partial<IAPIResponse> & {
+    data?: T | null;
+};
 
 export interface IPagination {
     next: { page: number; limit: number };

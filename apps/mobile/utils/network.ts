@@ -1,11 +1,7 @@
-/**
- * Network Utilities
- *
- * Network status monitoring, connection quality detection,
- * and adaptive timeout/retry strategies based on network conditions.
- */
-
 import NetInfo, { NetInfoStateType } from '@react-native-community/netinfo';
+import { Platform } from 'react-native';
+
+import { networkStatusTypes } from '@/api/dtos/network.dto';
 
 /**
  * Network connection types
@@ -77,6 +73,22 @@ export const getNetworkState = async (): Promise<NetworkState> => {
         isInternetReachable,
     };
 };
+
+/**
+ * Maps {@link NetworkState} to app connectivity (`ONLINE` / `DISCONNECTED`) for Zustand and UI.
+ * Android treats `isInternetReachable === false` as disconnected; iOS uses `isConnected` only.
+ */
+export function getConnectivityStatus(
+    state: NetworkState,
+): networkStatusTypes {
+    const isAndroid = Platform.OS === 'android';
+    const connected =
+        state.isConnected &&
+        (isAndroid ? state.isInternetReachable : true);
+    return connected
+        ? networkStatusTypes.ONLINE
+        : networkStatusTypes.DISCONNECTED;
+}
 
 /**
  * Subscribe to network state changes
