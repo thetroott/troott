@@ -9,17 +9,15 @@ import {
     getPlaylistsByUser,
     removeItemFromPlaylist,
     updatePlaylist,
-} from '@/controllers/playlist.controller';
-import uploadHandler from '../middlewares/upload.mdw';
-
+} from '../controllers/core/playlist.controller';
 const playlistRouter = Router({ mergeParams: true });
 
-playlistRouter.post('/', Protect, uploadHandler, createPlaylist);
+playlistRouter.post('/', Protect, createPlaylist);
 // List and user-scoped routes before `/:id`
 playlistRouter.get('/', Protect, getAllPlaylists);
 playlistRouter.get('/user/:userId', Protect, getPlaylistsByUser);
 playlistRouter.get('/:id', Protect, getPlaylistById);
-playlistRouter.put('/:id', Protect, uploadHandler, updatePlaylist);
+playlistRouter.put('/:id', Protect, updatePlaylist);
 playlistRouter.delete('/:id', Protect, deletePlaylist);
 playlistRouter.patch('/:playlistId/add', Protect, addItemToPlaylist);
 playlistRouter.patch('/:playlistId/remove', Protect, removeItemFromPlaylist);

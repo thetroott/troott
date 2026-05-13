@@ -4,7 +4,7 @@ import {
     getPlaybackForSermon,
     listPlaybackProgress,
     savePlaybackProgress,
-} from '@/controllers/playback.controller';
+} from '@/controllers/core/playback.controller';
 
 const playbackRouter = Router({ mergeParams: true });
 

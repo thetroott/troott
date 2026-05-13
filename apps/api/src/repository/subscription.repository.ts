@@ -1,8 +1,8 @@
 import mongoose, { FilterQuery } from 'mongoose';
 import Subscription from '@/models/subscription.model';
-import { ISubscriptionDoc } from '@/modules/payments/subscription/subscription.interface';
+import { ISubscriptionDoc } from '@/interfaces/subscription.interface';
 import RepositoryService from '@/services/repository.service';
-import { IResult } from '../utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 
 /**
  * Subscription Repository

@@ -12,7 +12,7 @@ import {
     revokeMinisterInvitation,
     submitMinisterVerification,
     updateMinisterVerificationStatus,
-} from '@/controllers/minister.controller';
+} from '../controllers/core/minister.controller';
 
 const ministerRoutes: Router = Router({ mergeParams: true });
 

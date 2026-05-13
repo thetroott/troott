@@ -12,7 +12,7 @@ import {
     revokeCreatorInvitation,
     submitCreatorVerification,
     updateCreatorVerificationStatus,
-} from '@/controllers/creator.controller';
+} from '@/controllers/core/creator.controller';
 
 const creatorRoutes: Router = Router({ mergeParams: true });
 

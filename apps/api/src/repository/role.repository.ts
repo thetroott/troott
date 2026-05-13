@@ -3,7 +3,7 @@ import { FilterQuery, UpdateQuery } from 'mongoose';
 import Role from '@/models/role.model';
 import IRoleDoc from '../interfaces/role.interface';
 import RepositoryService from '@/services/repository.service';
-import { IResult } from '../utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 
 /**
  * Role Repository

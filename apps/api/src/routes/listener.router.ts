@@ -11,7 +11,10 @@ import {
     acceptListenerInvitation,
     setListenerPassword,
     revokeListenerInvitation,
-} from '@/controllers/listener.controller';
+    onboardTopics,
+    onboardMinisters,
+    skipOnboarding,
+} from '@/controllers/core/listener.controller';
 
 const listenerRoutes: Router = Router({ mergeParams: true });
 
@@ -28,5 +31,9 @@ listenerRoutes.post('/invite/accept', acceptListenerInvitation);
 listenerRoutes.post('/invite/revoke', Protect, revokeListenerInvitation);
 
 listenerRoutes.post('/set-password', Protect, setListenerPassword);
+
+listenerRoutes.post('/onboarding/topics', Protect, onboardTopics);
+listenerRoutes.post('/onboarding/ministers', Protect, onboardMinisters);
+listenerRoutes.post('/onboarding/skip', Protect, skipOnboarding);
 
 export default listenerRoutes;

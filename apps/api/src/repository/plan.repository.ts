@@ -1,8 +1,8 @@
 import mongoose, { Model, FilterQuery } from 'mongoose';
 import Plan from '@/models/plan.model';
-import { IPlanDoc, IPlanFilterOptions } from '@/modules/payments/plan/plan.interface';
+import { IPlanDoc, IPlanFilterOptions } from '@/interfaces/plan.interface';
 import RepositoryService from '@/services/repository.service';
-import { IResult } from '../utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 
 /**
  * Plan Repository
@@ -126,7 +126,7 @@ class PlanRepository extends RepositoryService<IPlanDoc> {
         filterOptions: IPlanFilterOptions,
         filter?: FilterQuery<IPlanDoc>,
     ): Promise<IResult> {
-        return this.findAll(filter, filterOptions);
+        return this.findAll(filter, filterOptions as any);
     }
 
     // [MIGRATION-REVIEW] Methods merged from flat repositories/plan.repository.ts
