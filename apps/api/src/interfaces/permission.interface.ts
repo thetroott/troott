@@ -27,4 +27,5 @@ interface IPermissionDoc extends Document {
     id: ObjectId;
 }
 
+export type { IPermissionDoc };
 export default IPermissionDoc;

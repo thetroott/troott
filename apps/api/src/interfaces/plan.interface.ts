@@ -108,4 +108,25 @@ export interface IPlanPaystackCode {
     dollarYearly: string;
 }
 
+export enum PlanInterval {
+    MONTHLY = 'monthly',
+    YEARLY = 'yearly',
+}
+
+export enum PlanPriceCurrency {
+    NGN = 'NGN',
+    USD = 'USD',
+    EUR = 'EUR',
+    GBP = 'GBP',
+    NAIRA = 'NGN',
+    DOLLAR = 'USD',
+}
+
+export interface IPlanFilterOptions {
+    type?: string;
+    status?: string;
+    isEnabled?: boolean;
+}
+
+export type { IPlanDoc };
 export default IPlanDoc;

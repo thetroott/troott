@@ -3,7 +3,7 @@ import IListenerDoc from './listener.interface';
 import IMinisterDoc from './minister.interface';
 import ISeriesDoc from './series.interface';
 import ISermonDoc from './sermon.interface';
-import IUserDoc from './user.interface';
+import IUserDoc from '../user.interface';
 
 type ObjectId = Types.ObjectId;
 
@@ -146,4 +146,5 @@ export enum PlaylistStatus {
     DELETED = 'deleted',
 }
 
+export type { IPlaylistDoc };
 export default IPlaylistDoc;

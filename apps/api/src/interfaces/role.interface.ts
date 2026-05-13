@@ -35,4 +35,5 @@ interface IRoleDoc extends Document {
     id: ObjectId;
 }
 
+export type { IRoleDoc };
 export default IRoleDoc;

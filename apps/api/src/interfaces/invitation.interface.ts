@@ -82,4 +82,5 @@ export enum InviteSendType {
     SINGLE = 'single',
 }
 
+export type { IInvitationDoc };
 export default IInvitationDoc;

@@ -2,7 +2,7 @@ import { Document, Types } from 'mongoose';
 import IListenerDoc from './listener.interface';
 import IPlaybackSessionDoc from './playback-session.interface';
 import ISermonDoc from './sermon.interface';
-import ISubscriptionDoc from './subscription.interface';
+import ISubscriptionDoc from '../subscription.interface';
 
 type ObjectId = Types.ObjectId;
 
@@ -249,4 +249,8 @@ export interface DeviceInfo {
     browserVersion: string;
 }
 
+/** @deprecated Use {@link IPlaybackDoc} instead. */
+export type IPlaybackProgressDoc = IPlaybackDoc;
+
+export type { IPlaybackDoc };
 export default IPlaybackDoc;

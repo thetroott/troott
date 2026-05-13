@@ -90,4 +90,5 @@ export enum MediaType {
     PLAYLIST = 'playlist',
 }
 
+export type { IQueueDoc };
 export default IQueueDoc;

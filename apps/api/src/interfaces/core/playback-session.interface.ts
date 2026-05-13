@@ -105,4 +105,5 @@ interface IPlaybackSessionDoc extends Document {
     id: ObjectId;
 }
 
+export type { IPlaybackSessionDoc };
 export default IPlaybackSessionDoc;
