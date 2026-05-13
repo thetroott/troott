@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import type IListenerDoc from '@/interfaces/listener.interface';
+import type IListenerDoc from '@/interfaces/core/listener.interface';
 import { DbModels } from '@/types/common.enum';
 
 const ListenerSchema = new Schema<IListenerDoc>(
@@ -68,6 +68,12 @@ const ListenerSchema = new Schema<IListenerDoc>(
             { type: Schema.Types.ObjectId, ref: DbModels.TRANSACTION },
         ],
         createdBy: { type: Schema.Types.ObjectId, ref: DbModels.USER },
+        recentSearches: [
+            {
+                query: { type: String, required: true },
+                searchedAt: { type: String, required: true },
+            },
+        ],
     },
     {
         timestamps: true,

@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import type IPlaybackDoc from '@/interfaces/playback.interface';
+import type IPlaybackDoc from '@/interfaces/core/playback.interface';
 import {
     RepeatMode,
     NetworkType,
@@ -8,7 +8,7 @@ import {
     DeviceType,
     PlatformType,
     SkipReason,
-} from '@/interfaces/playback.interface';
+} from '@/interfaces/core/playback.interface';
 import { DbModels } from '@/types/common.enum';
 
 const PlaybackSchema = new Schema<IPlaybackDoc>(

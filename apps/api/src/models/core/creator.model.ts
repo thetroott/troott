@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import type ICreatorDoc from '@/interfaces/creator.interface';
-import { CreatorStatus, DocumentType } from '@/interfaces/creator.interface';
-import  { VerificationStatus } from '@/interfaces/minister.interface';
+import type ICreatorDoc from '@/interfaces/core/creator.interface';
+import { CreatorStatus, DocumentType } from '@/interfaces/core/creator.interface';
+import  { VerificationStatus } from '@/interfaces/core/minister.interface';
 import { DbModels } from '@/types/common.enum';
 
 const CreatorSchema = new Schema<ICreatorDoc>(

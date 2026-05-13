@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import type IMinisterDoc from '@/interfaces/minister.interface';
-import { MinisterStatus, DocumentType } from '@/interfaces/minister.interface';
-import { VerificationStatus } from '@/interfaces/minister.interface';
+import type IMinisterDoc from '@/interfaces/core/minister.interface';
+import { MinisterStatus, DocumentType } from '@/interfaces/core/minister.interface';
+import { VerificationStatus } from '@/interfaces/core/minister.interface';
 import { DbModels } from '@/types/common.enum';
 
 const MinisterSchema = new Schema<IMinisterDoc>(
@@ -116,6 +116,7 @@ const MinisterSchema = new Schema<IMinisterDoc>(
 MinisterSchema.index({
     firstName: 'text',
     lastName: 'text',
+    ministerialName: 'text',
     email: 'text',
     'profile.description': 'text',
     'profile.ministryName': 'text',

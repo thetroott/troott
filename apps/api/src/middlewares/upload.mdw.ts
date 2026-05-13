@@ -5,13 +5,14 @@ import { IncomingHttpHeaders } from 'http';
 import { PassThrough } from 'stream';
 import redisMdw from './redis.mdw';
 import ErrorResponse from '../utils/error.util';
-import { FileFormat, FileMimeType } from '../utils/enums.util';
-import { IFile, IFIleUpload } from '@/modules/shared/interfaces.util';
+import { FileFormat, FileMimeType } from '@/interfaces/common.interface';
+import { IFile, IFIleUpload } from '@/interfaces/common.interface';
 import { determineFileType, genFileName } from '@/utils/helpers.util';
 
 const acceptedMimeType = Object.values(FileMimeType);
 /** Default max file size per field (bytes); sermon audio may be capped separately via route middleware. */
-const expectedSize = Number(process.env.MULTIPART_MAX_FILE_BYTES) || 100 * 1024 * 1024;
+const expectedSize =
+    Number(process.env.MULTIPART_MAX_FILE_BYTES) || 100 * 1024 * 1024;
 
 /**
  * @name uploadHandler

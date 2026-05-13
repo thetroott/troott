@@ -1,6 +1,6 @@
 import mongoose, { Schema, Model } from 'mongoose';
-import type ILibraryDoc from '@/interfaces/library.interface';
-import { LibraryItemType, LibraryItemAddedFrom } from '@/interfaces/library.interface';
+import type ILibraryDoc from '@/interfaces/core/library.interface';
+import { LibraryItemType, LibraryItemAddedFrom } from '@/interfaces/core/library.interface';
 import { DbModels } from '@/types/common.enum';
 
 const LibrarySchema = new Schema<ILibraryDoc>(
