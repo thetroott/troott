@@ -1,6 +1,6 @@
-import { EmailService, EmailTemplate } from '@/modules/notifications/email/email.enums';
-import { OtpType, UserType } from '@/modules/users/user/user.interface';
-import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { EmailService, EmailTemplate } from '@/types/common.enum';
+import type IUserDoc from '@/interfaces/user.interface';
+import { OtpType, UserType } from '@/interfaces/user.interface';
 
 export interface SendgridEmailDataDTO {
     email: string;

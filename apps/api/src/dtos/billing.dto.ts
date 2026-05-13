@@ -1,58 +1,75 @@
-import { ObjectId } from 'mongoose';
-import { BillingFrequency } from '../utils/enums.util';
 import {
-    IPaymentMethod,
-    IPlanDoc,
-    IUserDoc,
-} from '../utils/interfaces.util';
-import { IDebitCard } from '@/interfaces/subscription.interface';
+    BillingFrequency,
+    Currency,
+    IDebitCard,
+    SubscriptionStatus,
+} from '@/interfaces/subscription.interface';
 
-export interface createPlanDto {}
-export interface updatePlanDto {}
-export interface createSubscriptionDto {
-    userId: ObjectId;
-    planId: ObjectId;
-    paymentMethod: IPaymentMethod;
+export interface CreateSubscriptionDTO {
+    userId: string;
+    planId: string;
     frequency: BillingFrequency;
+    currency?: Currency;
+    cardAuthCode?: string;
 }
 
-export interface renewSubscriptionDto {
-    subscriptionId: ObjectId;
-    paymentMethod: IPaymentMethod;
+export interface RenewSubscriptionDTO {
+    subscriptionId: string;
+    cardAuthCode?: string;
 }
 
-export interface cancelSubscriptionDto {
-    subscriptionId: ObjectId;
+export interface CancelSubscriptionDTO {
+    subscriptionId: string;
     reason: string;
 }
 
-export interface changePlanDTO {
-    subscriptionId: ObjectId;
-    newPlanId: ObjectId;
-    paymentMethod: IPaymentMethod;
+export interface ChangePlanDTO {
+    subscriptionId: string;
+    newPlanId: string;
+    prorate?: boolean;
 }
 
-export interface updatePaymentMethodDTO {
-    subscriptionId: ObjectId;
-    paymentMethod: IPaymentMethod;
+export interface UpdatePaymentMethodDTO {
+    subscriptionId: string;
+    card: IDebitCard;
 }
 
-export interface processTransactionDTO {
-    userId: ObjectId;
+export interface ProcessTransactionDTO {
+    userId: string;
     amount: number;
-    paymentMethod: IPaymentMethod;
-    planId?: ObjectId;
+    currency: Currency;
+    cardAuthCode?: string;
+    planId?: string;
 }
 
-export interface verifyPaymentDTO {
+export interface VerifyPaymentDTO {
     transactionId: string;
-    paymentMethod: IPaymentMethod;
+    reference: string;
 }
-export interface updateSubscriptionDto {}
 
+export interface PauseSubscriptionDTO {
+    subscriptionId: string;
+    resumeAt?: Date;
+}
 
 export interface VerifyCardDTO {
-    user: IUserDoc;
+    userId: string;
     card: IDebitCard;
     reference: string;
+}
+
+export interface BillingOverviewResponseDTO {
+    subscriptionId: string;
+    status: SubscriptionStatus;
+    planName: string;
+    currency: Currency;
+    frequency: BillingFrequency;
+    amount: number;
+    nextDueAt: Date;
+    isPaid: boolean;
+    card?: {
+        cardLast: string;
+        expiryMonth: string;
+        expiryYear: string;
+    };
 }

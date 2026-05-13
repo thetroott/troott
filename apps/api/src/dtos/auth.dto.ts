@@ -1,5 +1,6 @@
-import type { IUserDoc } from '@/modules/users/user/user.interface';
-import { OtpType, UserType } from '@/modules/users/user/user.interface';
+import type IUserDoc from '@/interfaces/user.interface';
+import { OtpType, UserType } from '@/interfaces/user.interface';
+
 
 export interface RegisterUserDTO {
     firstName: string;
@@ -58,9 +59,12 @@ export interface MatchEncryptedPasswordDTO {
 
 export interface AuthResponseDTO {
     id: string;
+    code: string;
     firstName: string;
     lastName: string;
     email: string;
+    slug: string;
+    avatar?: string;
     userType: UserType;
 
     isActive: boolean;
@@ -71,6 +75,9 @@ export interface AuthResponseDTO {
 
 export interface MapRegisteredUserDTO {
     id: string;
+    code: string;
+    slug: string;
+    avatar?: string;
 
     firstName: string;
     lastName: string;
@@ -85,6 +92,7 @@ export interface MapRegisteredUserDTO {
 
     isSuper: boolean;
     isAdmin: boolean;
+    isUser: boolean;
     isMinister: boolean;
     isCreator: boolean;
     isListener: boolean;
@@ -93,9 +101,16 @@ export interface MapRegisteredUserDTO {
     isLocked: boolean;
     isActivated: boolean;
     isDeactivated: boolean;
+    isSuspended: boolean;
     lockedUntil?: Date | null;
 
     roles: Array<string | any>;
+
+    onboard: {
+        step: number;
+        stage: string;
+        status: string;
+    };
 }
 
 export interface MapActivatedUserDTO {

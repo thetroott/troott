@@ -1,4 +1,4 @@
-import { InvitationStatus, InvitationType } from '../interfaces/invitation.interface';
+import { InvitationStatus, InvitationType } from '@/interfaces/invitation.interface';
 
 export interface CreateInvitationDTO {
     invitedBy: string;
@@ -25,4 +25,25 @@ export interface CreateBulkInvitationDTO {
     resourceId: string;
     expiresAt?: Date;
     metadata?: Record<string, unknown>;
+}
+
+export interface UpdateInvitationStatusDTO {
+    invitationId: string;
+    status: InvitationStatus;
+}
+
+export interface InvitationResponseDTO {
+    id: string;
+    inviteType: InvitationType;
+    invitedBy: string;
+    inviteeEmail: string;
+    inviteeUserId: string;
+    invitedAt: string;
+    inviteStatus: InvitationStatus;
+    expiresAt: string;
+    acceptedAt: string | null;
+    revokedAt: string | null;
+    declinedAt: string | null;
+    metadata: Record<string, unknown>;
+    createdAt: string;
 }
