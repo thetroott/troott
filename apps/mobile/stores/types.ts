@@ -1,4 +1,4 @@
-import { ISermonTrack } from '@/dtos/sermon.dto';
+import { ISermonTrack } from '@/api/dtos/sermon.dto';
 import type { MetadataReceivedEvent } from '@rntp/player';
 
 type Track = Partial<ISermonTrack>;

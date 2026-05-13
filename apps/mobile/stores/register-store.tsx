@@ -1,7 +1,7 @@
 import { create } from '@/lib/zstore';
 
 import { UserType } from '@troott/api-client';
-import type { RegisterUserDTO } from '@/dtos/auth.dto';
+import type { RegisterUserDTO } from '@/api/dtos/auth.dto';
 
 interface PasswordStrength {
     score: number;

@@ -1,5 +1,5 @@
 import { normalizeSearchQuery } from '@/constants/search-ui';
-import { mmkvStateStorage } from '@/services/storage';
+import { mmkvStateStorage } from '@/api/storage/mmkv-client';
 
 const KEY_LEGACY_PREFIX = 'library_recent_search_queries_v1:';
 const KEY_ENTRIES_PREFIX = 'library_recent_search_entries_v2:';

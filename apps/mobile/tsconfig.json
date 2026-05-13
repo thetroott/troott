@@ -13,17 +13,14 @@
     },
     "include": [
         "app",
-        "apis",
         "assets",
         "components",
         "constants",
         "_data",
-        "dtos",
+        "api",
         "engine",
-        "hooks",
         "lib",
         "screens",
-        "services",
         "stores",
         "types",
         "utils",
@@ -42,7 +39,7 @@
         "components/features/player/player/instant-mix-button.tsx",
         "screens/Auth",
         "screens/Preview.tsx",
-        "hooks/platform/use-theme-color.ts",
+        "api/hooks/platform/use-theme-color.ts",
         "stores/app/device-profile.ts"
     ]
 }

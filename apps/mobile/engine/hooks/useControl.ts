@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import useHapticFeedback from '../../hooks/shared/use-haptic-feedback';
+import useHapticFeedback from '@/api/hooks/shared/use-haptic-feedback';
 import TrackPlayer, { RepeatMode } from '@rntp/player';
 import usePlayerEngineStore, {
     PlayerEngine,

@@ -4,7 +4,7 @@ import { RepeatMode } from '@rntp/player';
 
 import type { Queue } from '@/types/queue-ref';
 import type { SermonTrackDTO } from '@/types/sermon';
-import { mmkvStateStorage } from '@/services/storage';
+import { mmkvStateStorage } from '@/api/storage/mmkv-client';
 
 export type LastPlayedSummary = {
     sermonId: string;

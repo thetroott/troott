@@ -12,7 +12,7 @@ import {
     isPlayableTrackForPlayer,
     resolvePlayableStartIndex,
 } from '@/engine/utils/playable-track';
-import { queryClient } from '../../services/query-client';
+import { queryClient } from '@/api/query-client';
 import { REPEAT_MODE_QUERY_KEY } from '@/engine/queries/query-keys';
 
 export default async function Initialize() {

@@ -1,18 +1,5 @@
-import type { QueuingType } from '@/utils/enums.util';
-
-import type { SermonItemDTO } from '@/types/sermon';
-
-export type Queue =
-    | 'Recently Played'
-    | 'Search'
-    | 'Favorite Tracks'
-    | 'Downloaded Tracks'
-    | 'On Repeat'
-    | 'Instant Mix'
-    | 'Library';
-
-export interface QueuingRequest {
-    sermon: SermonItemDTO;
-    queuingType: QueuingType;
-    atIndex?: number;
-}
+/**
+ * Re-exports client queue UX types from `@/api/dtos`.
+ * Prefer `@/api/dtos/queue-client.dto` in new code.
+ */
+export type { Queue, QueuingRequest } from '@/api/dtos/queue-client.dto';

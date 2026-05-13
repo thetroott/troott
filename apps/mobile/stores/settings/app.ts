@@ -1,4 +1,4 @@
-import { mmkvStateStorage } from '@/services/storage';
+import { mmkvStateStorage } from '@/api/storage/mmkv-client';
 import { create, createJSONStorage, devtools, persist, useShallow } from '@/lib/zstore';
 
 type AppSettingsStore = {

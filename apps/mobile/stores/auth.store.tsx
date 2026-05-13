@@ -1,5 +1,4 @@
-import mmkvstorage from '@/services/mmkv-storage';
-import storage from '@/services/storage-service';
+import { getMMKV } from '@/api/storage/mmkv-client';
 import { create, persist } from '@/lib/zstore';
 
 const collection = {};
@@ -45,10 +44,7 @@ export const useAuthStore = create<AuthState>()(
             setFirstTimeUser: (value) => {
                 set({ isFirstTimeUser: value });
                 if (!value) {
-                    void mmkvstorage.setData({
-                        key: STORAGE_KEY,
-                        payload: 'true',
-                    });
+                    getMMKV().set(STORAGE_KEY, 'true');
                 }
             },
 

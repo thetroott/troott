@@ -1,6 +1,6 @@
 import type { ISermonTrack } from '@/types/sermon';
 import type { SermonItemDTO } from '@/types/sermon';
-import { queryClient } from '@/services/query-client';
+import { queryClient } from '@/api/query-client';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
 import { tracks as mockTracks } from '@/_data/_mock/tracks';
 

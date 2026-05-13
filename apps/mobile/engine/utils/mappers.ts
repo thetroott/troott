@@ -2,7 +2,7 @@ import { Image } from 'react-native';
 import type { SourceType, SermonItemDTO, SermonTrackDTO } from '@/types/sermon';
 import { QueuingType } from '../../utils/enums.util';
 import { getAudioCache } from './offline';
-import { queryClient } from '@/services/query-client';
+import { queryClient } from '@/api/query-client';
 import { MediaInfoQueryKey } from '@/engine/queries/queries';
 
 /** iOS often fails "Cannot Open" with raw `require()` ids; pass a resolved `file://` URI when possible. */
