@@ -10,8 +10,10 @@ import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import { useSearchHistory } from '@/api/hooks/use-search-history';
-import type { SearchHistoryEntry } from '@/lib/library-recent-search-storage';
+import {
+    useSearchHistory,
+    type SearchHistoryEntry,
+} from '@/api/hooks/app/useSearch';
 import { useContextType } from '@/state/app-state';
 
 type RecentSearchesProps = {
@@ -20,7 +22,7 @@ type RecentSearchesProps = {
 };
 
 /**
- * Search landing: horizontal chips from MMKV-backed recent searches (`useSearchHistory`).
+ * Search landing: horizontal chips from MMKV-backed recent searches (`useSearch` module).
  */
 export default function RecentSearches({ onLayout }: RecentSearchesProps) {
     const { userContext } = useContextType();

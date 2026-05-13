@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import PlaylistAddTrackContent from '@/components/features/playlist/playlist-add-track-content';
 import { DEFAULT_CHOOSE_PLAYLISTS } from '@/components/features/playlist/use-add-to-playlist';
 import ScreenModalAndroidView from '@/components/ui/screen-modal-android';
-import { usePlaylistsQuery } from '@/api/hooks/use-library-queries';
+import { usePlaylistsQuery } from '@/api/hooks/app/useLibrary';
 import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
 import { useCurrentTrack } from '@/stores/player/queue';
 import { useContextType } from '@/state/app-state';

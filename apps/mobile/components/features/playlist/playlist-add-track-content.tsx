@@ -12,7 +12,7 @@ import { theme } from '@/constants/theme';
 
 import Toast from 'react-native-toast-message';
 
-import { useAddSermonToPlaylistMutation } from '@/api/hooks/use-playlist-mutations';
+import { useAddSermonToPlaylistMutation } from '@/api/hooks/app/usePlaylist';
 
 import AddToPlaylistConfirmationBar from './add-to-playlist-confirmation-bar';
 import ChoosePlaylistSheet from './choose-playlist-sheet';

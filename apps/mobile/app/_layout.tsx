@@ -8,14 +8,14 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { matterFonts } from '@/constants/typography';
-import { ONE_DAY, queryClient } from '@/api/query-client';
+import { ONE_DAY, queryClient } from '@/api/services/query-client';
 import CustomSplashScreen from '@/components/features/shared/splash';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PortalHost } from '@/components/ui/portal';
 import { theme } from '@/constants/theme';
 import { Toaster } from '@/components/ui/toast';
 import { requestStoragePermission } from '@/lib/permisson-helpers';
-import { queryClientPersister } from '@/api/storage/mmkv-client';
+import { queryClientPersister } from '@/api/services/mmkv-storage';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { enableScreens } from 'react-native-screens';
 import { startPlayerService } from '@/engine/player/setup';
@@ -33,6 +33,8 @@ import { FullWindowOverlay } from 'react-native-screens';
 import { Portal } from '@/components/ui/portal';
 import { GlobalLoadingPortal } from '@/components/ui/loading-state';
 import { useAuthStore } from '@/stores/auth.store';
+import { initNetworkStoreSync } from '@/stores/app/network';
+import InternetConnectionWatcher from '@/components/features/shared/network-watcehr';
 
 function getSharingModule(): {
     isAvailableAsync: () => Promise<boolean>;
@@ -80,6 +82,11 @@ const RootLayout = () => {
         migrateCanonicalUserType();
         const id = setTimeout(migrateCanonicalUserType, 250);
         return () => clearTimeout(id);
+    }, []);
+
+    useEffect(() => {
+        const disconnect = initNetworkStoreSync();
+        return disconnect;
     }, []);
 
     const [fontsLoaded, fontError] = useFonts(matterFonts);
@@ -296,6 +303,7 @@ const RootLayout = () => {
                             backgroundColor: theme.colors.black[50],
                         }}
                     >
+                        <InternetConnectionWatcher />
                         <Stack screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="index" />
                             <Stack.Screen

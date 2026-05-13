@@ -21,7 +21,7 @@ import type { ImageSourcePropType } from 'react-native';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from '@/components/ui/text';
-import { useIsNowPlayingStackRouteFocused } from '@/api/hooks/navigation/now-playing-route';
+import { useIsNowPlayingStackRouteFocused } from '@/api/hooks/player/now-playing-route';
 import PlayPauseButton from '@/components/features/player/controls/play-pause';
 import { Next } from 'iconsax-react-nativejs';
 import { useTrackStore } from '@/stores/player-store';

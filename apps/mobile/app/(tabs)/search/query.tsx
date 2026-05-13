@@ -34,9 +34,11 @@ import SearchRecentEmptyState from '@/components/features/search/search-recent-e
 import SearchHistoryList from '@/components/features/search/search-history-list';
 import SearchEmptyDiscovery from '@/components/features/search/search-empty-discovery';
 import { captureSearchEvent } from '@/components/features/search/search.analytics';
-import { useCatalogSearchQuery } from '@/api/hooks/use-catalog-search';
-import { useSearchHistory } from '@/api/hooks/use-search-history';
-import { useCommittedSearchTerm } from '@/api/hooks/use-committed-search-term';
+import {
+    useCatalogSearchQuery,
+    useSearchHistory,
+} from '@/api/hooks/app/useSearch';
+import { useCommittedSearchTerm } from '@/api/hooks/shared/use-committed-search-term';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
 import { useLoadNewQueue } from '@/engine/hooks/useControl';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
@@ -52,7 +54,7 @@ import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
 import {
     usePlaylistsQuery,
     useUserLibraryQuery,
-} from '@/api/hooks/use-library-queries';
+} from '@/api/hooks/app/useLibrary';
 import { useContextType } from '@/state/app-state';
 import {
     getLibraryArrayField,
