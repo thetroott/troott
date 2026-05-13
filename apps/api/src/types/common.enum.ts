@@ -1,3 +1,46 @@
+export enum ENVType {
+    PRODUCTION = 'production',
+    STAGING = 'staging',
+    DEVELOPMENT = 'development',
+}
+
+export enum AppChannel {
+    WEB = 'web',
+    MOBILE = 'mobile',
+    DESKTOP = 'desktop',
+    TABLET = 'tablet',
+    WATCH = 'watch',
+}
+
+export enum ContentType {
+    SERMON = 'sermon',
+    BITE = 'bite',
+}
+
+export enum ContentState {
+    ACTIVE = 'active',
+    INACTIVE = 'inactive',
+    DELETED = 'deleted',
+    BROKEN = 'broken',
+}
+
+export enum ContentStatus {
+    PUBLISHED = 'published',
+    PROCESSING = 'processing',
+    DRAFT = 'draft',
+    FLAGGED = 'flagged',
+    DELETED = 'deleted',
+    ARCHIVED = 'archived',
+}
+
+export enum CatalogueType {
+    RECENTLYPLAYED = 'sermon',
+    BITE = 'bite',
+    MINISTER = 'Minister',
+}
+
+
+
 export enum DbModels {
     ADMIN = 'Admin',
     COMMENT = 'comment',
@@ -19,6 +62,7 @@ export enum DbModels {
     SUBSCRIPTION = 'subscription',
     SUBSCRIPTION_INTENT = 'subscriptionIntent',
     TRANSACTION = 'transaction',
+    RECOMMENDATION = 'recommendation',
     TOPIC = 'topic',
     USER = 'user',
 }
@@ -30,6 +74,7 @@ export enum EmailService {
     MAILGUN = 'mailgun',
     MAILSEND = 'mailsend',
     SMTP = 'smtp',
+    ZEPTOMAIL = 'zeptomail',
 }
 
 export enum EmailTemplate {
@@ -117,5 +162,13 @@ export enum PartType {
     FIVE = 'five',
     SIX = 'six',
     SEVEN = 'seven',
+}
+
+export enum S3Folder {
+    IMAGES = 'images',
+    AUDIO = 'audio',
+    VIDEOS = 'videos',
+    DOCUMENTS = 'documents',
+    OTHERS = 'others',
 }
 

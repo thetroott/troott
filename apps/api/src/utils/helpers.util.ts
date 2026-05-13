@@ -1,6 +1,34 @@
 import slugify from 'slugify';
-import { FileMimeType, FileType, S3Folder } from './enums.util';
 import { DateTime } from 'luxon';
+import { FileMimeType, FileType, S3Folder } from '@/interfaces/common.interface';
+import { UserType } from '@/interfaces/user.interface';
+import { Random } from '@btffamily/pacitude';
+
+
+
+/**
+ * @name genUserCode
+ * @description Generates a unique, standardized identification code for a user based on their type.
+ * @param {UserType} userType - The classification of the user (e.g. listener, minister).
+ * @returns {string} A formatted string in the format: {abbr}-{year}-{random_6_digits}.
+ */
+export const genUserCode = (userType: UserType): string => {
+    const name: Record<string, string> = {
+        [UserType.SUPERADMIN]: 'sa',
+        [UserType.ADMIN]: 'ad',
+        [UserType.MINISTER]: 'mn',
+        [UserType.CREATOR]: 'cr',
+        [UserType.LISTENER]: 'ls',
+        [UserType.USER]: 'ppl',
+    };
+
+    const baseName = name[userType] || 'ppl';
+    const now = new Date();
+    const year = now.getFullYear();
+    const code = Random.randomNum(6);
+
+    return `${baseName}-${year}-${code}`;
+};
 
 /**
  * Generates random characters
@@ -298,6 +326,7 @@ export const getS3Folder: GetS3Folder = (mimeType: string): S3Folder => {
 export default {
     formatMoney,
     FileType,
+    genUserCode,
     generateRandomChars,
     generateRandomNumbers,
     generateRandomCode,

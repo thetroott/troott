@@ -1,5 +1,5 @@
 import BullQueue from '../../queues/queue';
-import { CreateWorkerDTO } from '@/dtos/queue.dto';
+import { CreateWorkerDTO } from '@/queues/queue.dto';
 import { JobChannel, QueueChannel } from '../../queues/channel.queue';
 import audioMetadataProcessor from '../jobs/audio-metadata.job';
 import logger from '../../utils/logger.util';

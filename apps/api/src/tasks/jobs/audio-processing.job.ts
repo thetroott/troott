@@ -9,11 +9,11 @@ import logger from '../../utils/logger.util';
 import {
     AudioRenditionDTO,
     IAudioHLSJobDTO,
-} from '@/modules/core/sermon/sermon.interface';
-import audioProcessing from '@/services/audio.service';
+} from '@/dtos/core/sermon.dto';
+import audioProcessing from '@/services/core/audio.service';
 import storageService from '@/services/storage.service';
-import { FileType } from '@/utils/enums.util';
-import Sermon from '@/models/sermon.model';
+import { FileType } from '@/interfaces/common.interface';
+import Sermon from '@/models/core/sermon.model';
 import {
     ProcessingState,
     UploadStepType,

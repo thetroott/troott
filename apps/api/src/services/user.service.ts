@@ -5,8 +5,8 @@ import {
     OnboardStatus,
     PasswordType,
     UserType,
-} from '@/modules/users/user/user.interface';
-import { IResult } from '../utils/interfaces.util';
+} from '@/interfaces/user.interface';
+import { IResult } from '@/interfaces/common.interface';
 import {
     createUserDTO,
     createUserProfileDTO,
@@ -22,14 +22,23 @@ import authService from '@/services/auth.service';
 import PermissionService from '@/services/permission.service';
 import { genSlug } from '../utils/helpers.util';
 import { generateRandomChars } from '../utils/helpers.util';
-import { OAuthProvider } from '@/modules/authentication/auth/auth.enums';
+import { OAuthProvider } from '@/types/common.enum';
 import { SocialIdKey } from '../utils/types.util';
 import { genUserCode } from '../utils/code.util';
 import storageService from '@/services/storage.service';
-import { IFile } from '../utils/interfaces.util';
+import { IFile } from '@/interfaces/common.interface';
 import roleService from '@/services/role.service';
 import emailService from '@/services/email.service';
-import preferenceService from '@/services/preference.service';
+import listenerService from '@/services/core/listener.service';
+import ministerService from '@/services/core/minister.service';
+import creatorService from '@/services/core/creator.service';
+import libraryService from '@/services/core/library.service';
+import recommendationService from '@/services/core/recommendation.service';
+import subscriptionRepository from '@/repository/subscription.repository';
+import { SubscriptionStatus, Currency, BillingFrequency } from '@/interfaces/subscription.interface';
+import Plan from '@/models/plan.model';
+import type { IListenerDoc } from '@/interfaces/core/listener.interface';
+
 
 type ObjectId = Types.ObjectId;
 
@@ -48,34 +57,36 @@ class UserService {
      * @returns
      */
     public async createUser(data: createUserDTO): Promise<IUserDoc> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        const { email, password, passwordType, userType, createdBy } = data;
+        const {
+            firstName,
+            lastName,
+            email,
+            password,
+            passwordType,
+            userType,
+            createdBy,
+        } = data;
 
         let finalPasswordType = passwordType;
         let creatorId = createdBy;
 
-        // Self-created listener-style accounts use USER type
         if (userType === UserType.USER) {
             finalPasswordType = PasswordType.USERGENERATED;
         }
 
-        // do a check
-        // For ADMIN must be created by existing admin/superadmin
-        if (userType === UserType.ADMIN) {
+        if (
+            userType === UserType.ADMIN ||
+            userType === UserType.SUPERADMIN
+        ) {
             throw new Error('Forbidden');
         }
 
-        // Generate user code based on the intended user type
         const userCode = genUserCode(userType);
 
-        const payload: Partial<IUserDoc> = {
+        const payload: Partial<IUserDoc> & { password?: string } = {
             code: userCode,
+            firstName,
+            lastName,
             email: email.toLowerCase(),
             password,
             passwordType: finalPasswordType,
@@ -85,20 +96,18 @@ class UserService {
             isActive: false,
             onboard: {
                 step: 1,
+                stage: '',
                 status: OnboardStatus.NOT_STARTED,
             },
         };
 
-        // Create the user object
-        const createUser = await userRepository.createUser(payload);
-
-        if (createUser.error) {
-            throw new Error(createUser.message);
+        const createResult = await userRepository.createUser(payload);
+        if (createResult.error) {
+            throw new Error(createResult.message);
         }
 
-        let user: IUserDoc = createUser.data as IUserDoc;
+        let user: IUserDoc = createResult.data as IUserDoc;
 
-        // If it's a self-created account, set createdBy to their own ID
         if (!creatorId) {
             user.createdBy = user._id;
             const updateResult = await userRepository.updateUser(
@@ -112,28 +121,136 @@ class UserService {
         }
 
         await authService.updateUserType(user, userType);
-
         await authService.encryptUserPassword(user, password);
 
-        // Attach role based on userType
         const attachRole = await roleService.attachRole(user, userType);
         if (!attachRole.error && attachRole.data) {
             let updatedUser = attachRole.data as IUserDoc;
-
-            // Initialize permissions for the role
             const permResult =
                 await PermissionService.initiatePermissionData(updatedUser);
             if (!permResult.error && permResult.data) {
                 updatedUser = permResult.data as IUserDoc;
             }
-
-            // Update user reference
             user = updatedUser;
         }
 
         await user.save();
 
+        await this.createDomainProfile(user, userType);
+
         return user;
+    }
+
+    /**
+     * Orchestrates domain profile creation based on userType.
+     * For LISTENER: creates listener profile, library, free subscription, and cold-start recommendations.
+     * For MINISTER/CREATOR: creates the respective profile only.
+     */
+    private async createDomainProfile(
+        user: IUserDoc,
+        userType: UserType,
+    ): Promise<void> {
+        const userId = String(user._id);
+
+        switch (userType) {
+            case UserType.LISTENER: {
+                const listenerResult = await listenerService.createListener({
+                    user,
+                    userType: UserType.LISTENER,
+                    email: user.email,
+                    createdBy: userId,
+                });
+                if (listenerResult.error) {
+                    throw new Error(listenerResult.message);
+                }
+                const listener = listenerResult.data
+                    .listener as IListenerDoc;
+                const listenerId = String(listener._id);
+
+                const libResult =
+                    await libraryService.getOrCreateLibrary(listenerId);
+                if (!libResult.error && libResult.data) {
+                    listener.Library = (libResult.data as any)._id || libResult.data;
+                    await (listener as any).save();
+                }
+
+                await this.assignFreeSubscription(listenerId, listener);
+
+                try {
+                    await recommendationService.seedColdStart(
+                        listenerId,
+                        (user as any).country || '',
+                    );
+                } catch {
+                    // non-critical -- listener can still use the app
+                }
+                break;
+            }
+
+            case UserType.MINISTER: {
+                const ministerResult = await ministerService.createMinister({
+                    user,
+                    userType: UserType.MINISTER,
+                    email: user.email,
+                    createdBy: user._id as any,
+                });
+                if (ministerResult.error) {
+                    throw new Error(ministerResult.message);
+                }
+                break;
+            }
+
+            case UserType.CREATOR: {
+                const creatorResult = await creatorService.createCreator({
+                    user,
+                    email: user.email,
+                    createdBy: userId,
+                });
+                if (creatorResult.error) {
+                    throw new Error(creatorResult.message);
+                }
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Finds the free plan and creates an active subscription for the listener.
+     */
+    private async assignFreeSubscription(
+        listenerId: string,
+        listener: IListenerDoc,
+    ): Promise<void> {
+        try {
+            const freePlan = await Plan.findOne({
+                name: 'Free',
+                planType: 'listener',
+                isEnabled: true,
+            });
+            if (!freePlan) return;
+
+            const subResult = await subscriptionRepository.addNewSubscription({
+                listener: listenerId as any,
+                plan: freePlan._id as any,
+                status: SubscriptionStatus.ACTIVE,
+                currency: Currency.NGN,
+                billing: {
+                    amount: 0,
+                    frequency: BillingFrequency.MONTHLY,
+                    isPaid: true,
+                } as any,
+            });
+
+            if (!subResult.error && subResult.data) {
+                listener.subscription = (subResult.data as any)._id || subResult.data;
+                await (listener as any).save();
+            }
+        } catch {
+            // non-critical -- listener can still use the app without a subscription record
+        }
     }
 
     /**
@@ -161,14 +278,15 @@ class UserService {
                             bulk.userType || UserType.USER,
                         );
 
-                        const createUser = await userRepository.createUser({
+                        const bulkPayload: Partial<IUserDoc> & { password?: string } = {
                             code: bulkUserCode,
                             email: bulk.email.toLowerCase(),
                             password: bulk.password,
                             passwordType: bulk.passwordType,
                             userType: bulk.userType,
                             createdBy: bulk.createdBy,
-                        });
+                        };
+                        const createUser = await userRepository.createUser(bulkPayload);
 
                         if (createUser.error) {
                             continue; // Skip this user if creation failed
@@ -183,7 +301,6 @@ class UserService {
                         );
                         await user.save();
 
-                        // Initialize roles and permissions for bulk users
                         if (bulk.userType && bulk.userType !== UserType.USER) {
                             try {
                                 const roleAttachResult =
@@ -205,11 +322,8 @@ class UserService {
                                         updatedUser =
                                             permResult.data as IUserDoc;
                                     }
-
-                                    // Update user reference
                                     user = updatedUser;
 
-                                    // Clear permission cache
                                     const userId = updatedUser?._id || user._id;
                                     if (userId) {
                                         await PermissionService.clearUserCache(
@@ -217,10 +331,14 @@ class UserService {
                                         );
                                     }
                                 }
+
+                                await this.createDomainProfile(
+                                    user,
+                                    bulk.userType,
+                                );
                             } catch (error) {
-                                // Log but don't fail bulk creation
                                 console.error(
-                                    `Failed to initialize roles/permissions for ${bulk.email}:`,
+                                    `Failed to initialize profile for ${bulk.email}:`,
                                     error,
                                 );
                             }
@@ -282,21 +400,18 @@ class UserService {
         }
 
         // Handle location fields
-        if (
-            data.country ||
-            data.address ||
-            data.city ||
-            data.state ||
-            data.postalCode
-        ) {
+        if (data.country || data.location) {
             updateData.location = {
                 ...user.location,
-                address: data.address || user.location?.address || '',
-                city: data.city || user.location?.city || '',
-                state: data.state || user.location?.state || '',
-                country: data.country || user.location?.country || '',
-                postalCode: data.postalCode || user.location?.postalCode || '',
-            } as any;
+                address: data.location?.address || user.location?.address || '',
+                city: data.location?.city || user.location?.city || '',
+                state: data.location?.state || user.location?.state || '',
+                country: data.location?.country || user.location?.country || '',
+                postalCode:
+                    data.location?.postalCode ||
+                    user.location?.postalCode ||
+                    '',
+            };
         }
 
         // Handle avatar upload
@@ -358,26 +473,26 @@ class UserService {
             }
         }
 
-        // Handle coverImage upload
-        if (data.coverImage) {
-            const oldCoverImage = user.coverImage;
+        // Handle banner upload
+        if (data.banner) {
+            const oldBanner = user.banner;
 
-            // If there's an old coverImage, delete it from S3
-            if (oldCoverImage?.s3Key) {
+            // If there's an old banner, delete it from S3
+            if (oldBanner?.s3Key) {
                 try {
-                    await storageService.deleteFile(oldCoverImage.s3Key);
+                    await storageService.deleteFile(oldBanner.s3Key);
                 } catch (error) {
-                    console.error('Failed to delete old coverImage:', error);
+                    console.error('Failed to delete old banner:', error);
                 }
             }
 
-            // If coverImage is an IFile with stream, upload it
+            // If banner is an IFile with stream, upload it
             if (
-                typeof data.coverImage === 'object' &&
-                (data.coverImage as IFile).stream
+                typeof data.banner === 'object' &&
+                (data.banner as IFile).stream
             ) {
                 const uploadResult = await storageService.uploadFile(
-                    data.coverImage as IFile,
+                    data.banner as IFile,
                 );
 
                 if (uploadResult.error) {
@@ -387,30 +502,29 @@ class UserService {
                     return result;
                 }
 
-                updateData.coverImage = {
+                updateData.banner = {
                     fileName: uploadResult.data.fileName || '',
                     s3Key: uploadResult.data.s3Key || '',
                 };
-            } else if (typeof data.coverImage === 'object') {
-                // If it's already uploaded, check if it has s3Key
-                const coverImageWithS3Key = data.coverImage as any;
-                if (coverImageWithS3Key.s3Key) {
-                    updateData.coverImage = {
-                        fileName: coverImageWithS3Key.fileName || '',
-                        s3Key: coverImageWithS3Key.s3Key || '',
+            } else if (typeof data.banner === 'object') {
+                const bannerWithS3Key = data.banner as any;
+                if (bannerWithS3Key.s3Key) {
+                    updateData.banner = {
+                        fileName: bannerWithS3Key.fileName || '',
+                        s3Key: bannerWithS3Key.s3Key || '',
                     };
                 } else {
                     result.error = true;
                     result.code = 400;
                     result.message =
-                        'CoverImage s3Key is required for already uploaded images';
+                        'Banner s3Key is required for already uploaded images';
                     return result;
                 }
-            } else if (typeof data.coverImage === 'string') {
+            } else if (typeof data.banner === 'string') {
                 result.error = true;
                 result.code = 400;
                 result.message =
-                    'CoverImage must be provided as a file upload or object with s3Key';
+                    'Banner must be provided as a file upload or object with s3Key';
                 return result;
             }
         }
@@ -432,7 +546,33 @@ class UserService {
         return result;
     }
 
-    // [MIGRATION-REVIEW] Methods merged from flat services/user.service.ts
+    public async findRole(userId: string): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+        const userResult = await userRepository.findById(String(userId));
+        if (userResult.error || !userResult.data) {
+            result.error = true;
+            result.code = 400;
+            result.message = 'user not found';
+            return result;
+        }
+        const user = userResult.data as IUserDoc;
+        if ((user as any).isAdmin) {
+            result.data = true;
+            result.message = 'user is an admin';
+        } else if ((user as any).isCreator) {
+            result.data = true;
+            result.message = 'user is a creator';
+        } else {
+            result.data = false;
+            result.message = 'user is neither an admin nor a creator';
+        }
+        return result;
+    }
 
     public async createSocialUser(
         data: createSocialUserDTO,
@@ -447,10 +587,10 @@ class UserService {
             appleId,
         } = data;
 
-        const existResult = await userRepository.findOne({
-            email: email.toLowerCase(),
-        });
-        if (!existResult.error && existResult.data) {
+        const existingUser = await userRepository.findByEmail(
+            email.toLowerCase(),
+        );
+        if (!existingUser.error && existingUser.data) {
             throw new Error('User already exists');
         }
 
@@ -473,12 +613,15 @@ class UserService {
         if (!roleAttach.error && roleAttach.data) {
             user = roleAttach.data as IUserDoc;
         }
-        const permResult = await PermissionService.initiatePermissionData(user);
+        const permResult =
+            await PermissionService.initiatePermissionData(user);
         if (!permResult.error && permResult.data) {
             user = permResult.data as IUserDoc;
         }
 
         await user.save();
+
+        await this.createDomainProfile(user, userType);
 
         const welcomeEmail = await emailService.sendUserWelcomeEmail(user);
         if (welcomeEmail.error) {
@@ -520,7 +663,7 @@ class UserService {
                 user = await this.createSocialUser({
                     firstName: profile.name?.givenName ?? '',
                     lastName: profile.name?.familyName ?? '',
-                    email: email,
+                    email,
                     userType: UserType.USER,
                     [idField]: socialId,
                 } as createSocialUserDTO);
@@ -548,271 +691,7 @@ class UserService {
         await user.save();
         return user;
     }
-
-    public async findRole(userId: string): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-        const userResult = await userRepository.findById(String(userId));
-        if (userResult.error || !userResult.data) {
-            result.error = true;
-            result.code = 400;
-            result.message = 'user not found';
-            return result;
-        }
-        const user = userResult.data as IUserDoc;
-        if ((user as any).isAdmin) {
-            result.data = true;
-            result.message = 'user is an admin';
-        } else if ((user as any).isCreator) {
-            result.data = true;
-            result.message = 'user is a creator';
-        } else {
-            result.data = false;
-            result.message = 'user is neither an admin nor a creator';
-        }
-        return result;
-    }
-
-    public async updateUserPreferences(
-        user: IUserDoc,
-        preferences: Partial<Pick<any, 'topics' | 'minister'>>,
-    ): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-        if (!preferences.topics && !preferences.minister) {
-            result.error = true;
-            result.code = 400;
-            result.message =
-                'Invalid preferences: must provide topics or minister';
-            return result;
-        }
-        const ministerIds = preferences.minister?.map((m: unknown) =>
-            typeof m === 'string'
-                ? m
-                : m &&
-                    typeof (m as { toString?: () => string }).toString ===
-                        'function'
-                  ? (m as { toString: () => string }).toString()
-                  : '',
-        );
-        return preferenceService.patchByUser(
-            String(user._id),
-            String(user._id),
-            {
-                topics: preferences.topics,
-                minister: ministerIds?.filter(Boolean),
-            },
-        );
-    }
-
-    public async getNotificationPreferences(userId: string): Promise<{
-        email: boolean;
-        push: boolean;
-        sms: boolean;
-    }> {
-        const prefs = await preferenceService.getByUser(userId, userId);
-        if (prefs.error || !prefs.data) {
-            throw new Error(prefs.message || 'User not found');
-        }
-        const data = prefs.data as {
-            notifications: { email: boolean; push: boolean; sms: boolean };
-        };
-        return data.notifications;
-    }
-
-    public async updateNotificationPreferences(
-        user: IUserDoc,
-        notificationPreferences: Partial<{
-            email: boolean;
-            push: boolean;
-            sms: boolean;
-        }>,
-    ): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-        const hasAnyPreference =
-            notificationPreferences.email !== undefined ||
-            notificationPreferences.push !== undefined ||
-            notificationPreferences.sms !== undefined;
-        if (!hasAnyPreference) {
-            result.error = true;
-            result.code = 400;
-            result.message =
-                'Invalid notification preferences: must provide at least one setting';
-            return result;
-        }
-        return preferenceService.patchByUser(
-            String(user._id),
-            String(user._id),
-            { notifications: notificationPreferences },
-        );
-    }
-
-    //   /**
-    //    * @name createSocialUser
-    //    * @description Creates a new user account specifically from a social login profile.
-    //    * @param data - Social user data.
-    //    * @returns {Promise<IUserDoc>} The newly created user document.
-    //    */
-    //   public async createSocialUser(data: createSocialUserDTO): Promise<IUserDoc> {
-
-    //     const { firstName, lastName, email, userType, googleId, githubId, appleId } = data;
-
-    //     // 1. Check if user already exists
-    //     const existingUser = await userRepository.findByEmail(email.toLowerCase());
-    //     if (existingUser) {
-    //       throw new Error(existingUser.message);
-    //     }
-
-    //     // 2. Create the user object with placeholder password and social ID
-    //     let user: IUserDoc = await User.create({
-    //       firstName,
-    //       lastName,
-    //       email: email.toLowerCase(),
-    //       password: generateRandomChars(24), // Placeholder.
-    //       passwordType: PasswordType.OAUTH,
-    //       userType,
-    //       googleId: googleId,
-    //       githubId: githubId,
-    //       appleId: appleId,
-    //       isActive: true,
-    //       isActivated: true,
-    //     });
-
-    //     await authService.updateUserType(user, userType);
-    //     await authService.attachRole(user, userType);
-    //    const permResult = await PermissionService.initiatePermissionData(user);
-    //       if (permResult.error) {
-    //         throw new Error(permResult.message);
-    //       }
-    //       user = permResult.data as IUserDoc;
-
-    //     // 4. Create profile based on userType (REUSE EXISTING LOGIC)
-
-    //     if (user.userType === UserType.LISTENER) {
-    //       const listenerProfile = await listenerService.createListener({
-    //         user: user,
-    //         type: UserType.LISTENER,
-    //       });
-
-    //         if (listenerProfile.error) {
-    //           throw new Error(listenerProfile.message);
-    //         }
-    //         user = listenerProfile.data.user as IUserDoc;
-    //       }
-
-    //       if (user.userType === UserType.MINISTER) {
-
-    //         const ministerProfile = await ministerService.createMinister({
-    //           user: user,
-    //           userType: UserType.MINISTER,
-    //           email: user.email,
-    //         });
-
-    //         if (ministerProfile.error) {
-    //           throw new Error(ministerProfile.message);
-    //         }
-    //         user = ministerProfile.data.user as IUserDoc;
-    //       }
-
-    //     // 5. Save the final user (Mongoose pre-save hook will handle password 'encryption' if needed,
-    //     // but for social it's a placeholder, so no real encryption runs)
-    //     await user.save();
-
-    //     // 6. Send welcome email (REUSED LOGIC FROM YOUR REGISTRATION SUCCESS BLOCK)
-    //     const welcomeEmail = await emailService.sendUserWelcomeEmail(user);
-    //     if (welcomeEmail.error) {
-    //     }
-
-    //     return user;
-    //   }
-
-    //   /**
-    //    * @name findOrCreateSocialUser
-    //    * @description Handles the core logic for social logins: find by ID, find by email, or create new user.
-    //    * @param profile - The Passport profile object from the OAuth provider.
-    //    * @param provider - 'google', 'github', or 'apple'.
-    //    * @returns {Promise<IUserDoc>} The authenticated or newly created user document.
-    //    */
-    //   public async findOrCreateSocialUser(
-    //     profile: IPassportProfileDTO,
-    //     provider: OAuthProvider,
-    //     req: Request
-    //   ): Promise<IUserDoc | null> {
-
-    //     const email = profile.emails?.[0]?.value.toLowerCase();
-    //     const socialId = profile.id;
-    //     let user: IUserDoc | null = null;
-
-    //     // 1. Check if user already exists via the social ID (Primary check)
-    //     const idField = `${provider}Id`; // e.g., 'googleId'
-    //     user = await userRepository.findUserBySocialId(provider, socialId)
-
-    //     if (!user) {
-
-    //       // 2. Check if user exists via email (Attempt to link account)
-    //       const userResult = await userRepository.findUser(email);
-
-    //       if (!userResult.data) {
-    //         throw new Error(userResult.message);
-    //       }
-
-    //       user = userResult.data;
-
-    //       if (user) {
-
-    //         user = await this.linkSocialAccount(user, idField, socialId);
-
-    //       } else {
-    //         // 3. User not found - CREATE A NEW SOCIAL USER
-    //         user = await this.createSocialUser({
-    //           firstName: profile.name?.givenName,
-    //           lastName: profile.name?.familyName,
-    //           email: email,
-    //           userType: UserType.LISTENER,
-    //           [idField]: socialId, // Add the specific social ID
-    //         });
-    //       }
-    //     }
-
-    //     if (user) {
-    //       // 4. Finalize login (REUSE EXISTING LOGIC)
-    //       await authService.activateAccount(user);
-    //       await authService.updateLastLogin(user);
-    //       //await authService.updateLoginInfo(user, req);
-
-    //       user.save()
-
-    //       return user;
-    //     }
-
-    //     return null;
-    //   }
-
-    // /**
-    //    * @name linkSocialAccount
-    //    * @description Links a local user account to a social ID.
-    //    */
-    //   private async linkSocialAccount(user: IUserDoc, idField: string, socialId: string): Promise<IUserDoc> {
-
-    //     const key = idField as SocialIdKey;
-    //     user[key] = socialId;
-    //     user.passwordType = PasswordType.OAUTH;
-    //     await user.save();
-    //     return user;
-    //   }
 }
+
 
 export default new UserService();

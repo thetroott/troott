@@ -1,5 +1,5 @@
 import BullQueue from '../../queues/queue';
-import { CreateWorkerDTO } from '@/dtos/queue.dto';
+import { CreateWorkerDTO } from '@/queues/queue.dto';
 import { QueueChannel, JobChannel } from '../../queues/channel.queue';
 import logger from '../../utils/logger.util';
 import processReminderJob from '../jobs/reminder.job';
@@ -68,19 +68,18 @@ export const startSchedulerWorkers = async (): Promise<void> => {
             concurrency: 1, // Process 1 marketing job at a time to avoid overwhelming the email service
         };
 
-        await BullQueue.addProcessor(
+        const marketingQueue = await BullQueue.addProcessor(
             marketingWorkerConfig,
             processMarketingJob as any,
         );
 
-        // Create worker for invitations queue
         const invitationWorkerConfig: CreateWorkerDTO = {
             queueName: QueueChannel.Invitations,
             jobName: JobChannel.MarkExpiredInvitations,
-            concurrency: 2, // Process 2 invitation jobs concurrently
+            concurrency: 2,
         };
 
-        await BullQueue.addProcessor(
+        const invitationQueue = await BullQueue.addProcessor(
             invitationWorkerConfig,
             processInvitationJob as any,
         );
@@ -90,13 +89,6 @@ export const startSchedulerWorkers = async (): Promise<void> => {
             label: 'scheduler-worker',
             type: 'success',
         });
-
-        return {
-            reminderQueue,
-            cleanupQueue,
-            marketingQueue,
-            invitationQueue,
-        };
     } catch (error) {
         logger.log({
             data: `Failed to start scheduler workers: ${

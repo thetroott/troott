@@ -1,5 +1,5 @@
 import { Job, DoneCallback } from 'bull';
-import { IEmailJob, IResult } from '../../utils/interfaces.util';
+import { IEmailJob, IResult } from '@/interfaces/common.interface';
 import logger from '../../utils/logger.util';
 import emailService from '@/services/email.service';
 

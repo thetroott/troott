@@ -1,4 +1,4 @@
-import { ENVType } from './enums.util';
+import { ENVType } from '@/types/common.enum';
 
 class AppENV {
     constructor() {}

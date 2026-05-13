@@ -1,5 +1,5 @@
 import { Random } from '@btffamily/pacitude';
-import { UserType } from '../modules/users/user/user.interface';
+import { UserType } from '@/interfaces/user.interface';
 
 /**
  * @name genUserCode

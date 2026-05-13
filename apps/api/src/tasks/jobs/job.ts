@@ -1,5 +1,5 @@
 import { Random } from '@btffamily/pacitude';
-import { AddJobDTO, AddJobsDTO } from '@/dtos/queue.dto';
+import { AddJobDTO, AddJobsDTO } from '@/queues/queue.dto';
 import BullQueue from '../../queues/queue';
 import logger from '../../utils/logger.util';
 import { JobOptions } from 'bull';

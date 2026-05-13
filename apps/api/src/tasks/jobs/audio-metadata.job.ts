@@ -1,12 +1,12 @@
 import { Job } from 'bull';
-import { FileType } from '../../utils/enums.util';
-import Sermon from '@/models/sermon.model';
+import { FileType } from '@/interfaces/common.interface';
+import Sermon from '@/models/core/sermon.model';
 import { DoneCallback } from 'bull';
 import logger from '../../utils/logger.util';
 import type {
     IAudioMetadata,
     IAudioMetadataJobDTO,
-} from '../../modules/core/sermon/sermon.interface';
+} from '@/dtos/core/sermon.dto';
 import { ContentStatus } from '../../utils/enums.util';
 
 /**

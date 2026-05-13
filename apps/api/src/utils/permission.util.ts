@@ -1,4 +1,4 @@
-import { UserType } from '@/modules/users/user/user.interface';
+import { UserType } from '@/interfaces/user.interface';
 
 /** Actions aligned with `_data/permissions.json` (sermon streaming). */
 const ALL_STREAMING_PERMISSIONS: string[] = [
