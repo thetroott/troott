@@ -6,7 +6,7 @@ import {
     CreateQueueDTO,
     CreateWorkerDTO,
     JobDataDTO,
-} from '@/dtos/queue.dto';
+} from '@/queues/queue.dto';
 import { REDIS_CONFIG } from '../configs/redis.config';
 
 class BullQueue {

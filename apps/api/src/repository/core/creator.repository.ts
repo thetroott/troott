@@ -1,8 +1,8 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
-import Creator from '@/models/creator.model';
-import { ICreatorDoc } from '@/modules/users/creator/creator.interface';
+import Creator from '@/models/core/creator.model';
+import { ICreatorDoc } from '@/interfaces/core/creator.interface';
 import RepositoryService from '@/services/repository.service';
-import { IResult } from '../utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 
 class CreatorRepository extends RepositoryService<ICreatorDoc> {
     constructor() {
