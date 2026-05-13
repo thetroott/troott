@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 import { theme } from '@/constants/theme';
 import FullPlayerTrackDetails from '../sermon/[id]';
 import { TabBar } from '@/components/features/navigation';
-import { useIsNowPlayingStackRouteFocused } from '@/api/hooks/navigation/now-playing-route';
+import { useIsNowPlayingStackRouteFocused } from '@/api/hooks/player/now-playing-route';
 
 const FullPlayerInTabs = FullPlayerTrackDetails as React.ComponentType<{
     embedInTabsShell?: boolean;
