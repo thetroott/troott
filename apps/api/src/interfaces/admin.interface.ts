@@ -43,6 +43,9 @@ interface IAdminDoc extends Document {
     /** Reference to the admin's settings document. */
     settings: ObjectId | any;
 
+    /** API keys issued to this admin. */
+    apiKeys: Array<{ key: string; createdAt: Date; lastUsed: Date }>;
+
     /** The underlying authentication user. */
     user: IUserDoc | any;
 
@@ -100,4 +103,5 @@ export enum CompanyRoleEnum {
     EXECUTIVE = 'executive',
 }
 
+export type { IAdminDoc };
 export default IAdminDoc;

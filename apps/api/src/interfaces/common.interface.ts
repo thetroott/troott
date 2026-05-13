@@ -1,8 +1,10 @@
-import { EmailService, OAuthProvider } from '@/types/common.enum';
+import { DbModels, EmailService, OAuthProvider } from '@/types/common.enum';
 import { PaymentProviders } from '@/types/payments.enums';
 import IUserDoc, { OtpType } from './user.interface';
 import { PassThrough } from 'stream';
 import { FileInfo } from 'busboy';
+import { Model, ObjectId } from 'mongoose';
+import { Nullable } from '@/types/common.types';
 
 /**
  * S3 upload reference stored on documents that have user-uploaded assets
@@ -43,6 +45,14 @@ export interface IResult<T = any> {
     status?: number;
     /** Filters. */
     filters?: any;
+}
+
+/** Login credentials payload. */
+export interface ILogin {
+    /** User email. */
+    email: string;
+    /** User password. */
+    password: string;
 }
 
 /** Offset-based pagination wrapper returned by list endpoints. */
@@ -485,3 +495,79 @@ export interface IFIleUpload {
     /** Base64-encoded file contents (when {@link format} is `BASE64`). */
     base64?: string;
 }
+
+export interface ISearchQuery {
+    /** Model to search. */
+    model: Model<any | DbModels>;
+    /** Reference to the field to search. */
+    ref: Nullable<string>;
+    /** Value to search for. */
+    value: Nullable<any>;
+    /** Data to search in. */
+    data: any;
+    /** Query to search with. */
+    query: any;
+    /** Query parameters. */
+    queryParam: any;
+    /** Populate fields. */
+    populate: Array<any>;
+    /** Operator to use. */
+    operator: Nullable<string>;
+    /** Fields to select. */
+    fields?: Array<string>;
+    
+    /** Created at. */
+    createdAt: string;
+    /** Updated at. */
+    updatedAt: string;
+    /** ID. */
+    _id: ObjectId;
+    id: ObjectId;
+}
+
+// ---------------------------------------------------------------------------
+// Express response augmentations for pagination middlewares
+// ---------------------------------------------------------------------------
+
+/** Offset-based paginated response used by {@link customResults} middleware. */
+export type ICustomResponse<T = any> = import('express').Response & {
+    customResults?: {
+        success: boolean;
+        count: number;
+        total: number;
+        pagination: {
+            next?: { page: number; limit: number };
+            prev?: { page: number; limit: number };
+        };
+        data: T[];
+    };
+};
+
+/** Constraint for documents that carry a `createdAt` timestamp. */
+export interface IcreatedAt {
+    createdAt: Date;
+}
+
+/** Cursor-based paginated response used by {@link cursorResults} middleware. */
+export type ICursorResponse<T = any> = import('express').Response & {
+    customResults?: {
+        success: boolean;
+        count: number;
+        nextCursor: string | null;
+        data: T[];
+    };
+};
+
+// ---------------------------------------------------------------------------
+// Query options for repository list methods
+// ---------------------------------------------------------------------------
+
+export interface IQueryOptions {
+    limit?: number;
+    skip?: number;
+    sort?: string | Record<string, 1 | -1>;
+    populate?: string | Record<string, any> | Array<string | Record<string, any>>;
+    select?: string;
+    recentOnly?: boolean;
+}
+

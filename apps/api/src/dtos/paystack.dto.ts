@@ -1,3 +1,3 @@
-import { IDebitCard } from '../utils/interfaces.util';
-import type { IUserDoc } from '@/modules/users/user/user.interface';
+import { IDebitCard } from '@/interfaces/common.interface';
+import type { IUserDoc } from '@/interfaces/user.interface';
 

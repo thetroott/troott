@@ -3,54 +3,75 @@ import {
     IPlanPricing,
     IPlanTrial,
     PlanType,
-} from '@/modules/payments/plan/plan.interface';
+} from '@/interfaces/plan.interface';
 
-export interface newPlanDTO {
+export interface CreatePlanDTO {
     name: string;
     label: string;
     planType: PlanType;
     displayName: string;
     description: string;
+    isEnabled?: boolean;
     trial: IPlanTrial;
     pricing: IPlanPricing;
-    members: {
+    sermon: {
         limit: number;
         frequency: string;
     };
-    domains: {
+    sermonBite: {
         limit: number;
         frequency: string;
     };
-    projects: {
-        limit: number;
-        frequency: string;
-    };
+    paystackPlanCodes?: IPlanPaystackCode;
 }
 
-export interface updatePlanDTO {
+export interface UpdatePlanDTO {
     planId: string;
-    updates: Partial<newPlanDTO>;
+    updates: Partial<Omit<CreatePlanDTO, 'planType'>>;
 }
 
-// export interface allowedPlanUpdateDTO extends newPlanDTO {}
-
-export enum allowedPlanUpdateDTO {
+export enum AllowedPlanUpdateField {
     NAME = 'name',
     LABEL = 'label',
-    PLAN_TYPE = 'planType',
     DISPLAY_NAME = 'displayName',
     DESCRIPTION = 'description',
+    IS_ENABLED = 'isEnabled',
     TRIAL = 'trial',
     PRICING = 'pricing',
-    MEMBERS = 'members',
-    DOMAINS = 'domains',
-    PROJECTS = 'projects',
+    SERMON = 'sermon',
+    SERMON_BITE = 'sermonBite',
+    PAYSTACK_PLAN_CODES = 'paystackPlanCodes',
 }
 
-export interface planAvailabilityDTO {
+export interface PlanAvailabilityDTO {
     isAvailable: boolean;
     data: {
         trial: IPlanTrial;
         paystackCodes: IPlanPaystackCode;
     } | null;
+}
+
+export interface PlanResponseDTO {
+    id: string;
+    code: string;
+    slug: string;
+    label: string;
+    planType: PlanType;
+    name: string;
+    displayName: string;
+    isEnabled: boolean;
+    description: string;
+    trial: IPlanTrial;
+    pricing: IPlanPricing;
+    sermon: {
+        limit: number;
+        frequency: string;
+    };
+    sermonBite: {
+        limit: number;
+        frequency: string;
+    };
+    paystackPlanCodes: IPlanPaystackCode;
+    createdAt: string;
+    updatedAt: string;
 }

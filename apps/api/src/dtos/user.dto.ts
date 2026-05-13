@@ -1,7 +1,9 @@
-import { PasswordType, UserType } from '@/modules/users/user/user.interface';
-import { IFile } from '../utils/interfaces.util';
+import { PasswordType, UserType, ILocation } from '@/interfaces/user.interface';
+import { IFile, Upload, ICountry } from '@/interfaces/common.interface';
 
 export interface createUserDTO {
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     passwordType: PasswordType;
@@ -30,16 +32,18 @@ export interface inviteUserDTO {
 export interface EditUserDTO {
     firstName?: string;
     lastName?: string;
+    middleName?: string;
     email?: string;
     phoneNumber?: string;
     phoneCode?: string;
-    address?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    postalCode?: string;
-    avatar?: IFile | string;
-    coverImage?: IFile | string;
+    countryPhone?: string;
+    altPhone?: string;
+    location?: Partial<ILocation>;
+    country?: ICountry | string;
+    homeCountry?: ICountry | string;
+    avatar?: Upload | string;
+    banner?: Upload | string;
+    slug?: string;
     dateOfBirth?: Date;
     gender?: string;
     isActive?: boolean;
@@ -47,25 +51,30 @@ export interface EditUserDTO {
 
 export interface UserProfileDTO {
     id: string;
+    code: string;
     firstName: string;
     lastName: string;
     email: string;
+    slug?: string;
     phoneNumber?: string;
     phoneCode?: string;
     avatar?: string;
+    banner?: string;
     country?: string;
     gender?: string;
     dateOfBirth?: Date;
     isActive?: boolean;
-    userType?: string;
+    userType?: UserType;
     roles?: string[];
 }
 
 export interface UserDTO {
     id: string;
+    code: string;
     firstName: string;
     lastName: string;
     email: string;
+    slug: string;
 
     phoneNumber?: string;
     phoneCode?: string;
@@ -75,22 +84,61 @@ export interface UserDTO {
     dateOfBirth?: Date;
     gender?: string;
 
-    userType: string;
+    userType: UserType;
     isSuper: boolean;
     isAdmin: boolean;
-    isOrganisation: boolean;
+    isUser: boolean;
+    isListener: boolean;
+    isMinister: boolean;
+    isCreator: boolean;
 
     isActive: boolean;
     isLocked: boolean;
     lockedUntil: Date | null;
 }
 
-export interface RoleDTO {
+export interface UserResponseDTO {
     id: string;
-    name: string;
-    permissions: string[];
-    createdAt: Date;
-    updatedAt: Date;
+    code: string;
+    firstName: string;
+    lastName: string;
+    middleName?: string;
+    email: string;
+    slug: string;
+
+    phoneNumber?: string;
+    phoneCode?: string;
+    countryPhone?: string;
+    altPhone?: string;
+    country?: ICountry;
+    homeCountry?: ICountry;
+    location?: ILocation;
+
+    avatar?: Upload;
+    banner?: Upload;
+    gender?: string;
+    dateOfBirth?: Date;
+
+    userType: UserType;
+    isSuper: boolean;
+    isAdmin: boolean;
+    isUser: boolean;
+    isListener: boolean;
+    isMinister: boolean;
+    isCreator: boolean;
+
+    isActive: boolean;
+    isActivated: boolean;
+    isDeactivated: boolean;
+    isSuspended: boolean;
+    isLocked: boolean;
+    lockedUntil: Date | null;
+
+    roles?: string[];
+    inviteStatus?: string;
+
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface IBulkUser {

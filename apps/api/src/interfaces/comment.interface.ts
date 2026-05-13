@@ -1,5 +1,5 @@
 import { Document, Types } from 'mongoose';
-import ISermonDoc from './sermon.interface';
+import ISermonDoc from './core/sermon.interface';
 import IUserDoc from './user.interface';
 
 type ObjectId = Types.ObjectId;
@@ -51,4 +51,5 @@ interface ICommentDoc extends Document {
     id: ObjectId;
 }
 
+export type { ICommentDoc };
 export default ICommentDoc;

@@ -38,3 +38,19 @@ export interface UpdateShareableLinkDTO {
     metadata?: Record<string, unknown>;
     isActive?: boolean;
 }
+
+export interface ShareableLinkResponseDTO {
+    id: string;
+    linkType: ShareableLinkType;
+    resourceId: string;
+    linkName?: string;
+    /** Only present on the creation response. */
+    rawToken?: string;
+    expiresAt: string;
+    isActive: boolean;
+    isRevoked: boolean;
+    revokedAt: string | null;
+    accessCount: number;
+    lastAccessedAt: string | null;
+    createdAt: string;
+}
