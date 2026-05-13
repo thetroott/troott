@@ -1,4 +1,4 @@
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { useProfileMeQuery } from '@/hooks/profile/use-profile-me';
 import { useEffect, useMemo, useState } from 'react';
 import storage from '@/services/storage-service';

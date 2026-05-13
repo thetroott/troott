@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import axiosService from '@/apis/core/axios';
 import { QueryKeys } from '@/utils/enums.util';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 
 function parseApi<T>(raw: unknown): T {
     const r = raw as { error?: boolean; message?: string; data?: unknown };

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { useProfileMeQuery } from '@/hooks/profile/use-profile-me';
 
 /** Types accepted as listener-facing mobile app users (see ADR 0001 / profile module). */

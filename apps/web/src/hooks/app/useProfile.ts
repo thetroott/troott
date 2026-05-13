@@ -1,7 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { IAPIResponse } from '@troott/api-client';
-import { queryKeys, troottAPIClient } from '@troott/api-client';
-import '@/api/clients/troott';
 import {
     isMinisterProfile,
     type ProfileDTO,
@@ -9,18 +6,7 @@ import {
 } from '@/app/profile/profile.types';
 import { DUMMY_MINISTER_PROFILE } from '@/app/profile/profile.dummy';
 
-function profileUsesRealApi(): boolean {
-    const env = (import.meta as { env?: Record<string, string | undefined> }).env;
-    return env?.VITE_PROFILE_USE_REAL_API === 'true';
-}
-
-function extractProfileDto(res: IAPIResponse<unknown>): ProfileDTO {
-    const payload = res.data as Record<string, unknown> | null | undefined;
-    if (payload && typeof payload === 'object' && 'data' in payload) {
-        return (payload as { data: ProfileDTO }).data;
-    }
-    return payload as unknown as ProfileDTO;
-}
+const PROFILE_UI_QUERY_KEY = ['profile', 'me', 'ui', 'mock'] as const;
 
 function applyMockProfileUpdate(
     prev: ProfileDTO,
@@ -69,56 +55,28 @@ function applyMockProfileUpdate(
     return next;
 }
 
-/**
- * Read profile: uses static dummy data unless `VITE_PROFILE_USE_REAL_API=true`.
- */
+/** Profile UI data: local mock only (`GET /profile/me` removed from API). */
 export function useProfileQuery() {
-    const live = profileUsesRealApi();
     return useQuery({
-        queryKey: [...queryKeys.profile.me, live ? 'live' : 'mock'],
-        queryFn: async () => {
-            if (!live) {
-                return DUMMY_MINISTER_PROFILE;
-            }
-            const res = await troottAPIClient().profile.getMe();
-            if (res.error) {
-                throw new Error(
-                    (res.message as string | undefined) ?? 'Failed to load profile',
-                );
-            }
-            return extractProfileDto(res);
-        },
-        staleTime: live ? undefined : Infinity,
+        queryKey: PROFILE_UI_QUERY_KEY,
+        queryFn: async () => DUMMY_MINISTER_PROFILE,
+        staleTime: Infinity,
     });
 }
 
-/**
- * Save profile: merges into React Query cache when using dummy data;
- * otherwise calls `PUT /profile/me`.
- */
+/** Save profile: merges into React Query cache (mock only). */
 export function useUpdateProfileMutation() {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: async (payload: UpdateProfilePayload) => {
-            const live = profileUsesRealApi();
-            if (!live) {
-                await new Promise((r) => setTimeout(r, 400));
-                const key = [...queryKeys.profile.me, 'mock'];
-                const prev =
-                    qc.getQueryData<ProfileDTO>(key) ?? DUMMY_MINISTER_PROFILE;
-                return applyMockProfileUpdate(prev, payload);
-            }
-            const res = await troottAPIClient().profile.updateMe(payload);
-            if (res.error) {
-                throw new Error(
-                    (res.message as string | undefined) ?? 'Failed to update profile',
-                );
-            }
-            return extractProfileDto(res);
+            await new Promise((r) => setTimeout(r, 400));
+            const prev =
+                qc.getQueryData<ProfileDTO>(PROFILE_UI_QUERY_KEY) ??
+                DUMMY_MINISTER_PROFILE;
+            return applyMockProfileUpdate(prev, payload);
         },
         onSuccess: (dto) => {
-            const live = profileUsesRealApi();
-            qc.setQueryData([...queryKeys.profile.me, live ? 'live' : 'mock'], dto);
+            qc.setQueryData(PROFILE_UI_QUERY_KEY, dto);
         },
     });
 }

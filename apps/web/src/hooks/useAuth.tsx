@@ -7,7 +7,7 @@ import { useRegisterStore } from '@/store/register-store';
 import { useForgotPasswordStore } from '@/store/otp-store';
 import { useRef } from 'react';
 import logger from '@/utils/logger.util';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import storage from '@/utils/storage.util';
 import { UserType } from '@troott/api-client';
 import cookieService from '@/services/shared/cookie';

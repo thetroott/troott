@@ -5,7 +5,6 @@ import AuthAPI from '../authentication/auth';
 import RoleAPI from '../authentication/role';
 import PermissionAPI from '../authentication/permission';
 import UserAPI from '../users/user/user';
-import ProfileAPI from '../users/profile/profile';
 import ListenerAPI from '../users/listener/listener';
 import MinisterAPI from '../users/minister/minister';
 import CreatorAPI from '../users/creator/creator';
@@ -13,7 +12,6 @@ import AdminAPI from '../users/admin/admin';
 import SermonAPI from '../core/sermon/sermon';
 import LibraryAPI from '../core/library/library';
 import PlaylistAPI from '../core/playlist/playlist';
-import PreferenceAPI from '../core/preference/preference';
 import SearchAPI from '../core/search/search';
 import DiscoveryAPI from '../core/discovery/discovery';
 import PlaybackAPI from '../core/playback/playback';
@@ -21,7 +19,6 @@ import OpenAPI from '../core/open/open';
 import ShareAPI from '../platform/share/share';
 import StorageAPI from '../platform/storage/storage';
 import InvitationAPI from '../platform/Invitation/invitation';
-import PushAPI from '../notifications/push';
 import PlanAPI from '../payments/plan';
 import SubscriptionAPI from '../payments/subscription';
 import TransactionAPI from '../payments/transaction';
@@ -31,7 +28,6 @@ export class TroottAPIClient {
     public readonly role: RoleAPI;
     public readonly permission: PermissionAPI;
     public readonly user: UserAPI;
-    public readonly profile: ProfileAPI;
     public readonly listener: ListenerAPI;
     public readonly minister: MinisterAPI;
     public readonly creator: CreatorAPI;
@@ -39,7 +35,6 @@ export class TroottAPIClient {
     public readonly sermon: SermonAPI;
     public readonly library: LibraryAPI;
     public readonly playlist: PlaylistAPI;
-    public readonly preference: PreferenceAPI;
     public readonly search: SearchAPI;
     public readonly discovery: DiscoveryAPI;
     public readonly playback: PlaybackAPI;
@@ -47,7 +42,6 @@ export class TroottAPIClient {
     public readonly share: ShareAPI;
     public readonly storage: StorageAPI;
     public readonly invitation: InvitationAPI;
-    public readonly push: PushAPI;
     public readonly plan: PlanAPI;
     public readonly subscription: SubscriptionAPI;
     public readonly transaction: TransactionAPI;
@@ -57,7 +51,6 @@ export class TroottAPIClient {
         this.role = new RoleAPI(transport);
         this.permission = new PermissionAPI(transport);
         this.user = new UserAPI(transport);
-        this.profile = new ProfileAPI(transport);
         this.listener = new ListenerAPI(transport);
         this.minister = new MinisterAPI(transport);
         this.creator = new CreatorAPI(transport);
@@ -65,7 +58,6 @@ export class TroottAPIClient {
         this.sermon = new SermonAPI(transport);
         this.library = new LibraryAPI(transport);
         this.playlist = new PlaylistAPI(transport);
-        this.preference = new PreferenceAPI(transport);
         this.search = new SearchAPI(transport);
         this.discovery = new DiscoveryAPI(transport);
         this.playback = new PlaybackAPI(transport);
@@ -73,7 +65,6 @@ export class TroottAPIClient {
         this.share = new ShareAPI(transport);
         this.storage = new StorageAPI(transport);
         this.invitation = new InvitationAPI(transport);
-        this.push = new PushAPI(transport);
         this.plan = new PlanAPI(transport);
         this.subscription = new SubscriptionAPI(transport);
         this.transaction = new TransactionAPI(transport);
@@ -124,9 +115,6 @@ export default class Troott extends TroottAPIClient {
     static get user(): UserAPI {
         return troottAPIClient().user;
     }
-    static get profile(): ProfileAPI {
-        return troottAPIClient().profile;
-    }
     static get listener(): ListenerAPI {
         return troottAPIClient().listener;
     }
@@ -148,9 +136,6 @@ export default class Troott extends TroottAPIClient {
     static get playlist(): PlaylistAPI {
         return troottAPIClient().playlist;
     }
-    static get preference(): PreferenceAPI {
-        return troottAPIClient().preference;
-    }
     static get search(): SearchAPI {
         return troottAPIClient().search;
     }
@@ -171,9 +156,6 @@ export default class Troott extends TroottAPIClient {
     }
     static get invitation(): InvitationAPI {
         return troottAPIClient().invitation;
-    }
-    static get push(): PushAPI {
-        return troottAPIClient().push;
     }
     static get plan(): PlanAPI {
         return troottAPIClient().plan;

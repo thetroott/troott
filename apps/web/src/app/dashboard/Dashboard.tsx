@@ -11,7 +11,7 @@ import {
 import FileUploadZone from '@/components/shared/upload/FileUploadZone';
 import UploadModal from '@/components/shared/upload/UploadModal';
 import apiCall from '@/api/config';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,

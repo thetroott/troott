@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import EmptySermonsState from '@/components/shared/my-sermons/EmptySermonsState';
 import SermonsTable from '@/components/shared/my-sermons/SermonsTable';
 import apiCall from '@/api/config';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,

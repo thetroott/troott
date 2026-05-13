@@ -6,7 +6,7 @@ import {
     SquarePen,
     UserRound,
 } from 'lucide-react';
-import { useProfileQuery } from '@/hooks/profile';
+import { useProfileQuery } from '@/hooks/app/useProfile';
 import {
     isMinisterProfile,
     type ProfileDTO,

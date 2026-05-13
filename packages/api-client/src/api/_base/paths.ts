@@ -54,9 +54,6 @@ export const P = {
         list: '/user/list',
         deactivate: '/user/deactivate',
     },
-    profile: {
-        me: '/profile/me',
-    },
     listener: {
         root: '/listener',
         list: '/listener/list',
@@ -142,11 +139,6 @@ export const P = {
         add: (playlistId: string) => `/playlist/${playlistId}/add`,
         remove: (playlistId: string) => `/playlist/${playlistId}/remove`,
     },
-    preference: {
-        root: '/preference',
-        me: '/preference/me',
-        byUser: (userId: string) => `/preference/${userId}`,
-    },
     search: {
         root: '/search',
     },
@@ -162,9 +154,6 @@ export const P = {
     playback: {
         root: '/playback',
         sermon: (sermonId: string) => `/playback/sermon/${sermonId}`,
-    },
-    notifications: {
-        device: '/notifications/device',
     },
     storage: {
         upload: '/storage/upload',

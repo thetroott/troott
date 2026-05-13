@@ -26,7 +26,7 @@ import { useDraft } from '@/context/draft/draft.context';
 import apiCall from '@/api/config';
 import storage from '@/utils/storage.util';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 
 interface ReviewSubmitProps {

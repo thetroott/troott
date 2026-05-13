@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
 
 const INTERNAL_PORTAL_USER_TYPES = new Set<string>(

@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { ImageUploadTile } from './ImageUploadTile';
 import {
     useUpdateProfileMutation,
-} from '@/hooks/profile';
+} from '@/hooks/app/useProfile';
 import {
     isMinisterProfile,
     mapFormValuesToUpdatePayload,

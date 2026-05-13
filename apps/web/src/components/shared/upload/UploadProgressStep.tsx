@@ -13,7 +13,7 @@ import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
 import apiCall from '@/api/config';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
-import { useContextType } from '@troott/state';
+import { useContextType } from '@/state/app-state';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
