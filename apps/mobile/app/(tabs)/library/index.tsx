@@ -30,7 +30,7 @@ import {
 import {
     usePlaylistsQuery,
     useUserLibraryQuery,
-} from '@/hooks/use-library-queries';
+} from '@/api/hooks/use-library-queries';
 import { useContextType } from '@/state/app-state';
 import { getLibraryArrayField } from '@/engine/utils/library-map';
 

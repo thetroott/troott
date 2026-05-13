@@ -1,5 +1,5 @@
 import { usePrevious, useSkip } from '@/engine/hooks/useControl';
-import useHapticFeedback from '@/hooks/shared/use-haptic-feedback';
+import useHapticFeedback from '@/api/hooks/shared/use-haptic-feedback';
 import { useCurrentTrack } from '@/stores/player/queue';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';

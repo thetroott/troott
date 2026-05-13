@@ -32,265 +32,155 @@ export enum PasswordType {
     RESET = 'reset',
 }
 
-export { UserType, OtpType } from '@troott/api-client';
-
-export enum AccountManagerRole {
-    OWNER = 'owner',
-    MANAGER = 'manager',
-    EDITOR = 'editor',
-    ANALYST = 'analyst',
-}
-
-export enum VerificationStatus {
-    PENDING = 'pending',
-    APPROVED = 'approved',
-    REJECTED = 'rejected',
-    UNDER_REVIEW = 'under-review',
-    NEEDS_REVISION = 'needs-revision',
-    SUSPENDED = 'suspended',
-}
-
-export enum DbModels {
-    USER = 'user',
-    ROLE = 'role',
-    PERMISSION = 'permission',
-    API_KEY = 'ApiKey',
-    BITE = 'pite',
-    CATALOG = 'catalog',
-    CREATOR = 'creator',
-    LIBRARY = 'library',
-    LISTENER = 'listener',
-    PLAN = 'plan',
-    PLAYLIST = 'playlist',
-    MINISTER = 'minister',
-    SUBSCRIPTION = 'subscription',
-    SERIES = 'series',
-    SERMON = 'sermon',
-    TRANSACTION = 'transaction',
-}
-
-export enum Model {
-    USER = 'User',
-    ROLE = 'Role',
-}
-
-export enum SermonType {
-    SERIES = 'series',
-    ONEOFF = 'one-off',
-}
-
-export enum PartType {
-    ONE = 'one',
-    TW0 = 'two',
-    THREE = 'three',
-    FOUR = 'four',
-    FIVE = 'five',
-    SIX = 'six',
-    SEVEN = 'seven',
-}
-
-export enum PlaylistType {
-    SERMON = 'sermon',
-    SERMONBITE = 'sermonbite',
-}
-
-export enum CurrencyType {
+export enum CurrencyType{
     NGN = 'NGN',
-    USD = 'USD',
-    EUR = 'EUR',
-    GBP = 'GBP',
-    JPY = 'JPY',
-    AUD = 'AUD',
-    CAD = 'CAD',
-    CHF = 'CHF',
-    CNY = 'CNY',
-    INR = 'INR',
-    ZAR = 'ZAR',
+    USD = 'USD'
 }
 
-export enum EProviders {
-    PAYSTACK = 'Paystack',
-    FLUTTERWAVE = 'Flutterwave',
-    STRIPE = 'Stripe',
-    PAYPAL = 'PayPal',
-    SQUARE = 'Square',
-    ALIPAY = 'Alipay',
-    WECHAT_PAY = 'WeChat Pay',
+
+export const UserEnum = {
+    SUPER: 'superadmin',
+    ADMIN: 'admin',
+    BUSINESS: 'business',
+    TALENT: 'talent',
+    USER: 'user'
+} as const
+export enum PasswordType{
+    SELF = 'self',
+    GENERATED = 'generated',
+    SELF_CHANGED = 'self-changed'
 }
 
-export enum ESubcriptionPlan {
-    FREE = 'free',
-    TRIAL = 'trial',
-    PREMIUM = 'premium',
-    FAMILY = 'family',
-    STUDENT = 'student',
+export enum FileLinks {
+    TOPIC_CSV = 'https://docs.google.com/spreadsheets/d/1kJxsETglcWDsRSlHyO7MQEcJHBn9tHiUWnNKW4p1myQ/edit?usp=sharing'
 }
 
-export enum ESubscriptionStatus {
-    ACTIVE = 'active',
-    INACTIVE = 'inactive',
-    PENDING = 'pending',
-    CANCELLED = 'cancelled',
-    EXPIRED = 'expired',
-    TRIAL = 'trial',
+export const LevelEnum = {
+    DEFAULT: 'default',
+    NOVICE: 'novice',
+    BEGINNER: 'beginner',
+    INTERMEDIATE: 'intermediate',
+    ADVANCED: 'advanced',
+    PROFESSIONAL: 'professional',
+    LEADER: 'leader',
+    EXPERT: 'expert'
+} as const
+
+export enum TimeHandleEnum {
+    SECONDS = 'second',
+    MINUTE = 'minute',
+    HOUR = 'hour'
 }
 
-export enum EBillingFrequency {
-    MONTHLY = 'monthly',
-    YEARLY = 'yearly',
+export const DifficultyEnum = {
+    RANDOM: 'random',
+    EASY: 'easy',
+    NORMAL: 'normal',
+    HARD: 'hard',
+    DIFFICULT: 'difficult'
+} as const
+
+export enum QuestionTypeEnum {
+    TRIVIAL = 'trivial',
+    PRACTICAL = 'practical',
+    GENERAL = 'general'
 }
 
-export enum ETransactionsType {
-    SUBSCRIPTION = 'subscription',
-    REFUND = 'refund',
-    ONETIME = 'onetime',
-    UPGRADE = 'upgrade',
-    PAYMENT_METHOD_UPDATE = 'payment-method-update',
+export enum coreTypeEnum {
+    CAREER = 'career',
+    FIELD = 'field',
+    SKILL = 'skill',
+    TOPIC = 'topic',
+    INDUSTRY = 'industry'
 }
 
-export enum ETransactionType {
-    CREDIT = 'credit',
-    DEBIT = 'debit',
-    DEFAULT = 'default',
-}
+export const StatusEnum = {
+    PENDING: 'pending',
+    INPROGRESS: 'in-progress',
+    OVERDUE: 'overdue',
+    PROCESSING: 'processing',
+    ONGOING: 'ongoing',
+    SUCCESSFUL: 'successful',
+    COMPLETED: 'completed',
+    FAILED: 'failed',
+    REFUNDED: 'refunded',
+    PAID: 'paid',
+    CANCELLED: 'cancelled',
+    SUBMITTED: 'submitted',
+    REVIEWED: 'reviewed',
+    ABANDONED: 'abandoned',
+    ACCEPTED: 'accepted',
+    DECLINED: 'declined',
+    DEFAULTED: 'defaulted',
+    APPROVED: 'approved',
+    REJECTED: 'rejected',
+    DRAFT: 'draft',
+    REVOKED: 'revoked',
+    SUMMARIZED: 'summarized',
+    QUEUED: 'queued',
+    RUNNING: 'running',
+    GENERATING: 'generating',
+    PUBLISHED: 'published',
+    ARCHIVED: 'archived'
+} as const
 
-export enum ETransactionStatus {
-    PENDING = 'pending',
-    PROCESSING = 'processing',
-    FAILED = 'failed',
-    SUCCESSFUL = 'successful',
-    REFUNDED = 'refunded',
-    DEFAULT = 'default',
-    EXPIRED = 'expired',
-}
+export const ActionEnum = {
+    GENERATE: 'generate',
+    CREATE: 'create',
+    DELETE: 'delete',
+    UPDATE: 'update',
+    ENABLE: 'enable',
+    DISABLE: 'disable',
+    ATTACH: 'attach',
+    DETACH: 'detach',
+    ADD: 'add',
+    REMOVE: 'remove',
+} as const
 
-export enum ETransactionReason {
-    PENDING = 'pending',
-    ABANDONED = 'abandoned',
-    FRAUDULENT = 'fraudulent',
-    REFUNDED = 'refunded',
-    COMPLETED = 'completed',
-    FAILED = 'failed',
-    ONGOING = 'ongoing',
-    CANCELLED = 'cancelled',
-    DEFAULT = 'default',
-}
+export const TaskTypeEnum = {
+    TEMPLATE: 'template',
+    ASSIGNED: 'assigned'
+} as const
 
-export enum EdeviceType {
-    ANDROID = 'android',
-    IOS = 'ios',
-}
+export const TaskFieldEnum = {
+    OBJECTIVES: 'objectives',
+    INSTRUCTIONS: 'instructions',
+    DELIVERABLES: 'deliverables',
+    RESOURCES: 'resources',
+    OUTCOMES: 'outcomes',
+    REQUIREMENTS: 'requirements',
+    RUBRICS: 'rubrics',
+    SKILLS: 'skills',
+    GUIDELINES: 'guidelines',
+} as const
 
-export enum EContentState {
-    UPLOADING = 'uploading',
-    PROCESSING = 'processing',
-    PROCESSED = 'processed',
-    UPLOADED = 'uploaded',
-    FAILED = 'failed',
-    RETRYING = 'retrying',
-}
+export const UIEnum = {
+    NEW: 'new',
+    OLD: 'old',
+    FORM: 'form',
+    MESSAGE: 'message',
+    BROWSE: 'browse-file',
+    FILE_SELECTED: 'file-selected',
+    UPLOADED: 'uploaded',
+    UPLOAD_ERROR: 'upload-error',
+    VIEW_MODULE: 'view-module',
+    VIEW_LESSON: 'view-lesson',
+    VIEW_LIBRARY: 'view-library',
+} as const
 
-export enum EContentStatus {
-    PUBLISHED = 'published',
-    PENDING_REVIEW = 'pending_review',
-    DRAFT = 'draft',
-    FLAGGED = 'flagged',
-    DELETED = 'deleted',
-    ARCHIVED = 'archived',
-}
+export const EditTaskEnum = {
+    DETAILS: 'details',
+    ...TaskFieldEnum,
+} as const
 
-export enum EcatalogueType {
-    RECENTLYPLAYED = 'sermon',
-    BITE = 'bite',
-    P = 'Minister',
-}
+export const UploadFormatEnum = {
+    BASE64: 'base64',
+    RAW_FILE: 'rawfile'
+} as const
 
-export enum EEmailDriver {
-    SENDGRID = 'sendgrid',
-    AWS = 'aws',
-    MAILTRAP = 'mailtrap',
-}
-export enum EEmailTemplate {
-    WELCOME = 'welcome',
-    PASSWORD_RESET = 'password-reset',
-    PASSWORD_CHANGED = 'password-changed',
-    EMAIL_VERIFICATION = 'email-verification',
-    INVITE = 'invite',
-    OTP = 'otp',
-    VERIFY_EMAIL = 'verify-email',
-}
-export enum EEmailStatus {
-    SENT = 'sent',
-    DELIVERED = 'delivered',
-    OPENED = 'opened',
-    CLICKED = 'clicked',
-    BOUNCED = 'bounced',
-    SPAM = 'spam',
-    UNSUBSCRIBED = 'unsubscribed',
-    FAILED = 'failed',
-    PENDING = 'pending',
-    ERROR = 'error',
-    DELAYED = 'delayed',
-    QUEUED = 'queued',
-    REJECTED = 'rejected',
-    BLOCKED = 'blocked',
-    INVALID = 'invalid',
-    BLACKLISTED = 'blacklisted',
-    COMPLAINED = 'complained',
-    DEFERRED = 'deferred',
-    UNDELIVERED = 'undelivered',
-    TEMPORARY_FAILURE = 'temporary-failure',
-    PERMANENT_FAILURE = 'permanent-failure',
-    TIMEOUT = 'timeout',
-    RETRY = 'retry',
-    UNKNOWN = 'unknown',
-    SUCCESS = 'success',
-    FAILURE = 'failure',
-}
-
-export enum EVerifyOTP {
-    REGISTER = 'register',
-    PASSWORD_RESET = 'password-reset',
-    CHANGE_PASSWORD = 'change-password',
-    LOGIN = 'login',
-    VERIFY = 'verify',
-}
-
-export enum EAPIKeyEnvironment {
-    LIVE = 'live',
-    TEST = 'test',
-}
-
-export enum EAPIKeyStatus {
-    ACTIVE = 'active',
-    REVOKED = 'revoked',
-    EXPIRED = 'expired',
-    SUSPENDED = 'suspended',
-}
-
-export enum EAPIKeyType {
-    FULL = 'full',
-    READ = 'read',
-    WRITE = 'write',
-}
-
-export enum EmailType {
-    TRANSACTIONAL = 'transactional',
-    MARKETING = 'marketing',
-    PRODUCT_UPDATE = 'product_update',
-    FEATURE_ANNOUNCEMENT = 'feature_announcement',
-}
-
-export enum EmailPriority {
-    HIGH = 'high',
-    MEDIUM = 'medium',
-    LOW = 'low',
-}
-
-export enum EmailStatus {
-    DELIVERED = 'delivered',
-    FAILED = 'failed',
-    BOUNCED = 'bounced',
-    OPENED = 'opened',
-    CLICKED = 'clicked',
-}
+export const DurationEnum = {
+    DAY: 'day',
+    DAYS: 'days',
+    WEEK: 'week',
+    WEEKS: 'weeks'
+} as const

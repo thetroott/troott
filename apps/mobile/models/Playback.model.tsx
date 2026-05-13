@@ -1,7 +1,7 @@
 import Listener from './Listener.model';
 import PlaybackSession from './PlaybackSession.model';
 import Sermon from './Sermon.model';
-import Subscription from './Subscription.model';
+import type Subscription from './Subscription.model';
 
 interface Playback {
     code: string;
@@ -9,11 +9,14 @@ interface Playback {
     // Relationships
     session: PlaybackSession | any;
     listener: Listener;
-    mediaItem: Sermon; // the media item that is being played 
-    subscription: Subscription | any; // playback can change based on subscription status
+    mediaItem: Sermon;
+    subscription: Subscription | any;
+
+    mediaId: string;
+    mediaType: MediaSourceType;
 
     // Context
-    sourceType: MediaSourceType; // the type of the source of the current media item eg. sermon, series, playlist
+    sourceType: MediaSourceType;
     sourceId: string; // the id of the source of the current media item eg. sermon id, series id, playlist id
     sourcePosition: number; // the position of the current media item in the source
 

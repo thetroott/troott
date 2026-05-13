@@ -34,7 +34,7 @@ import { useAddToQueue, useLoadNewQueue } from '@/engine/hooks/useControl';
 import { useNetworkStatus } from '@/stores/app/network';
 import { networkStatusTypes } from '@/types/network-status';
 import { QueuingType } from '@/utils/enums.util';
-import { usePlaylistsQuery } from '@/hooks/use-library-queries';
+import { usePlaylistsQuery } from '@/api/hooks/use-library-queries';
 import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
 import { resolveMinisterIdFromLabel } from '@/_data/ministers-about';
 import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';

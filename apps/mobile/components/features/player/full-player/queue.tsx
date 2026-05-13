@@ -1,11 +1,11 @@
-import { SermonTrackDTO } from '@/dtos/sermon.dto';
+import { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import {
     useRemoveFromQueue,
     useRemoveUpcomingTracks,
     useReorderQueue,
     useSkip,
 } from '@/engine/hooks/useControl';
-import useHapticFeedback from '@/hooks/shared/use-haptic-feedback';
+import useHapticFeedback from '@/api/hooks/shared/use-haptic-feedback';
 import {
     useCurrentTrack,
     usePlayQueue,

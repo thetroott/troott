@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import { useSearchHistory } from '@/hooks/use-search-history';
+import { useSearchHistory } from '@/api/hooks/use-search-history';
 import type { SearchHistoryEntry } from '@/lib/library-recent-search-storage';
 import { useContextType } from '@/state/app-state';
 

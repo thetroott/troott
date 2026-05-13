@@ -15,8 +15,8 @@ import {
     usePlaybackState,
     useProgress,
 } from '@/engine/queries/playback-queries';
-import { useCanSkipNext } from '@/hooks/player/use-can-skip-next';
-import { useResumeLastPlayed } from '@/hooks/player/use-resume-last-played';
+import { useCanSkipNext } from '@/api/hooks/player/use-can-skip-next';
+import { useResumeLastPlayed } from '@/api/hooks/player/use-resume-last-played';
 import {
     useCurrentTrack,
     useLastPlayed,

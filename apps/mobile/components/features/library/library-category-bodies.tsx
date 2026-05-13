@@ -28,7 +28,7 @@ import {
 import {
     usePlaylistsQuery,
     useUserLibraryQuery,
-} from '@/hooks/use-library-queries';
+} from '@/api/hooks/use-library-queries';
 
 import { LibraryEmptyState } from './library-states';
 

@@ -2,14 +2,14 @@ import React, { useCallback } from 'react';
 import Icon from '../player/icon';
 import Animated, { BounceIn, FadeIn, FadeOut } from 'react-native-reanimated';
 
-import { SermonItemDTO, SermonTrackDTO } from '@/dtos/sermon.dto';
+import { SermonItemDTO, SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { ActivityIndicator, View } from 'react-native';
 import { Pressable } from 'react-native';
 import {
     useRemoveFavorite,
     useAddFavorite,
-} from '@/hooks/player/use-favourites';
-import { useIsFavorite } from '@/hooks/player/use-is-favorite';
+} from '@/api/hooks/player/use-favourites';
+import { useIsFavorite } from '@/api/hooks/player/use-is-favorite';
 
 interface FavoriteButtonProps {
     item: SermonTrackDTO;

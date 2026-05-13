@@ -7,7 +7,7 @@ import { router } from 'expo-router';
 import { theme } from '@/constants/theme';
 import { SeeMore } from '@/components/features/navigation';
 
-import { ISermonTrack } from '@/dtos/sermon.dto';
+import { ISermonTrack } from '@/api/dtos/sermon.dto';
 import { tracks } from '@/_data/_mock/tracks';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
 import { FlashList } from '@shopify/flash-list';

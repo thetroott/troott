@@ -1,13 +1,36 @@
-import { VerificationStatus } from '@/utils/enums.util';
-import { ICountry } from '../utils/interfaces.util';
+import type { ICountry } from './_api-types';
 import Playlist from './Playlist.model';
 import Sermon from './Sermon.model';
+import type Subscription from './Subscription.model';
 import Transaction from './Transaction.model';
 import User from './User.model';
 
+/** Aligned with `apps/api/src/interfaces/core/minister.interface.ts` `ILocation`. */
+export interface ILocation {
+    city: string;
+    state: string;
+    address: string;
+}
+
+export interface ISocials {
+    name: string;
+    url: string;
+    username: string;
+}
+
+/**
+ * Minister identity verification (aligned with API `minister.interface` `VerificationStatus`).
+ * Distinct from listener/user verification enums elsewhere.
+ */
+export enum VerificationStatus {
+    PENDING = 'pending',
+    APPROVED = 'approved',
+    REJECTED = 'rejected',
+}
+
 interface Minister {
-    code: string; // user public ID
-    
+    code: string;
+
     firstName: string;
     lastName: string;
     middleName: string;
@@ -22,19 +45,19 @@ interface Minister {
     avatar: string;
     banner: string;
     slug: string;
-    email: string; // the registration email of the minister
+    email: string;
 
     profile: {
         description: string;
         ministerialName: string;
         ministryName: string;
         ministryLogo: string;
-        ministryType: string; // Pentecostal, Charismatic, etc.
+        ministryType: string;
         ministryHQLocation: ILocation;
-        phoneNumber: string; // the public phone number of the minister
+        phoneNumber: string;
         phoneCode: string;
-        countryPhone: string; // the publicphone code of the minister
-        email: string; // the public email of the minister
+        countryPhone: string;
+        email: string;
         websiteUrl: string;
         socials: Array<ISocials>;
         languages: Array<string>;
@@ -50,7 +73,7 @@ interface Minister {
         verifiedAt: Date;
         verifiedBy: User | any;
         isVerified: boolean;
-        isPublic: boolean; // Only set to true AFTER verification
+        isPublic: boolean;
     };
     status: MinisterStatus;
     published: boolean;
@@ -58,35 +81,20 @@ interface Minister {
     monthlyListeners: number;
 
     settings: string | any;
-    subscription: string | any;
-    user: string | any;
+    subscription: Subscription | any;
+    user: User | any;
 
     sermons: Array<Sermon | any>;
     playlists: Array<Playlist | any>;
     transactions: Array<Transaction | any>;
     createdBy: User | any;
 
-    // time stamps
     createdAt: string;
     updatedAt: string;
-
-    // unique ids
     _version: number;
     _id: string;
     id: string;
 }
-
-export interface ISocials {
-    name: string;
-    url: string;
-    username: string;
-}
-
-export interface ILocation {
-    city: string;
-    state: string;
-    address: string;
-};
 
 export enum MinisterStatus {
     ACTIVE = 'active',

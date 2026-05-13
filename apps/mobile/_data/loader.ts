@@ -1,5 +1,5 @@
 import sermonsData from '@/_data/sermon.json';
-import { ISermonTrack } from '@/dtos/sermon.dto';
+import { ISermonTrack } from '@/api/dtos/sermon.dto';
 
 /**
  * @name loadSermons

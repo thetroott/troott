@@ -1,7 +1,7 @@
 import { colors } from './colors';
 import { sizes } from './sizes';
 import { typography } from './typography';
-import { useResponsiveScale } from '@/hooks/useResponsive';
+import { useResponsiveScale } from '@/api/hooks/useResponsive';
 
 // Layout helpers (static)
 export const FLEX = { flex: 1 };

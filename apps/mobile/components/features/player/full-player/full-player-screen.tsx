@@ -20,10 +20,10 @@ import Animated, {
 import { TrackDetailsHeader } from '@/components/features/sermon';
 import { useLocalSearchParams } from 'expo-router';
 import { useCurrentTrack, useLastPlayed } from '@/stores/player/queue';
-import type { ISermonTrack, SermonTrackDTO } from '@/dtos/sermon.dto';
+import type { ISermonTrack, SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
-import { usePlayFromCatalogList } from '@/hooks/player/use-play-from-catalog-list';
-import { useDismissFullPlayer } from '@/hooks/player/use-dismiss-full-player';
+import { usePlayFromCatalogList } from '@/api/hooks/player/use-play-from-catalog-list';
+import { useDismissFullPlayer } from '@/api/hooks/player/use-dismiss-full-player';
 import { TrackActionsController } from '@/components/features/player/full-player/components/track-actions-controller';
 import { TrackProgress } from '@/components/features/player/full-player/components/track-progress';
 import { SermonDetails } from '@/components/features/player/full-player/components/sermon-details';

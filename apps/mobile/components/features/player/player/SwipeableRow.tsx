@@ -37,7 +37,7 @@ function renderSwipeableRowChildren(
     return <SwipeableRowProvider value={ctx}>{children}</SwipeableRowProvider>;
 }
 import { Pressable } from 'react-native';
-import useHapticFeedback from '@/hooks/shared/use-haptic-feedback';
+import useHapticFeedback from '@/api/hooks/shared/use-haptic-feedback';
 import { View } from 'react-native';
 import { Icon } from 'react-native-vector-icons/Icon';
 

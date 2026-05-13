@@ -1,4 +1,4 @@
-import type { ISermonTrack } from '@/dtos/sermon.dto';
+import type { ISermonTrack } from '@/api/dtos/sermon.dto';
 
 type MinisterAboutSeed = {
     id: string;

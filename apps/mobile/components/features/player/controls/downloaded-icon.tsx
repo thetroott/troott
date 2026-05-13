@@ -2,14 +2,12 @@ import Icon from '../player/icon';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { memo } from 'react';
 
-import { SermonItemDTO } from '@/dtos/sermon.dto';
-import auth from '@/apis/auth';
+import { SermonItemDTO } from '@/api/dtos/sermon.dto';
 import { Separator } from '@/components/ui/separator';
 
 function DownloadedIcon({ item }: { item: SermonItemDTO }) {
-    const isDownloaded = auth;
-
-    //useIsDownloaded([item.id])
+    // TODO: wire useIsDownloaded([item.id]) when offline downloads are tracked.
+    const isDownloaded = false;
 
     return isDownloaded ? (
         <Animated.View entering={FadeIn} exiting={FadeOut}>

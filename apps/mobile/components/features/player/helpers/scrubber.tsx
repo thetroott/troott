@@ -1,6 +1,6 @@
 import { UPDATE_INTERVAL } from '@/engine/constants/engine';
 import { useSeekTo } from '@/engine/hooks/useControl';
-import useHapticFeedback from '@/hooks/shared/use-haptic-feedback';
+import useHapticFeedback from '@/api/hooks/shared/use-haptic-feedback';
 import { RunTimeSeconds } from '@/engine/helpers/time-codes';
 import { useCurrentTrack } from '@/stores/player/queue';
 import Slider from '@react-native-community/slider';

@@ -11,7 +11,7 @@ import SermonCard from '@/components/features/search/sermon-card';
 import { theme } from '@/constants/theme';
 import Button from '@/components/ui/button';
 import { SolidIcons } from '@/assets/icons';
-import { usePlayFromCatalogList } from '@/hooks/player/use-play-from-catalog-list';
+import { usePlayFromCatalogList } from '@/api/hooks/player/use-play-from-catalog-list';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
 import type { IPlayListCard } from './types';
 import type { SermonItemDTO } from '@/types/sermon';

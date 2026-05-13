@@ -4,53 +4,57 @@ import Series from './Series.model';
 import Topic from './Topic.model';
 import User from './User.model';
 
+/**
+ * Client-side sermon shape aligned with `apps/api/src/interfaces/core/sermon.interface.ts`.
+ * IDs are strings as returned in JSON.
+ */
 interface Sermon {
     code: string;
     slug: string;
     title: string;
     description: string;
 
-    // Playback
-    playbackUrl: string; // the cdn url of the sermon for playback
-    imageUrl: string; // the cdn url of the image for the sermon
-    mimeType: string; // the mime type of the sermon - application/x-mpegURL
-    mediaSource: MediaSource;
+    playbackUrl: string;
+    manifestUrl: string;
+    imageUrl: string;
+    mimeType: string;
     duration: number;
-    mediaType: AudioType;
+    bitrate: number;
+    protocol: SermonStreamingProtocol;
+    quality: SermonStreamingQuality;
 
-    // Classification
-    topic: Topic | any; // the topic or category of the sermon
-    tags: Array<string>; // the tags of the sermon  can be used as additional search keywords
-    language: string; // the language of the sermon - en, es, etc.
+    topic: Topic | any;
+    tags: Array<string>;
+    language: string;
     isPublic: boolean;
 
-    // Relationships
-    series: Series | any; // the series (album) of the sermon
+    token: string;
+    tokenType: SermonTokenType;
+    signature: string;
+    isAuthorized: boolean;
+    authorizationReason?: string;
+
+    series: Series | any;
     isSeries: boolean;
-    minister: Array<Minister> | any; // the ministers of the sermon can be multiple ministers
+    minister: Array<Minister> | any;
     playlist: Playlist | any;
 
-    // Search and Discovery
-    preachedAt: string; // When the sermon was originally preached
-    preachedYear: string; // The year the sermon was originally preached
+    preachedAt: string;
+    preachedYear: string;
     shareableUrl: string;
-    searchText: string; // the search text of the sermon can be used as additional search keywords
+    searchText: string;
 
-    // Playback Rules
     allowDownload: boolean;
     allowComment: boolean;
 
-    // Upload
     item: SermonSource;
     image: ImageSource;
 
-    // Publishing
-    status: MediaStatus; // the status of the media item (sermon)
+    status: MediaStatus;
     isPublished: boolean;
     publishedAt: Date;
     publishedBy: User | any;
 
-    // Engagement
     playCount: number;
     downloadCount: number;
     commentCount: number;
@@ -62,7 +66,7 @@ interface Sermon {
     updatedAt: string;
     _version: number;
     _id: string;
-    id: string; // the id of the media item (sermon)
+    id: string;
 }
 
 export enum MediaSource {
@@ -70,14 +74,20 @@ export enum MediaSource {
     STREAM = 'stream',
 }
 
+export enum SermonTokenType {
+    JWT = 'jwt',
+    SIGNED_URL = 'signed_url',
+    CDN_TOKEN = 'cdn_token',
+}
+
 export interface SermonSource {
-    item: string; // original media item URL
-    duration: number; // in seconds
-    size: number; // in bytes
+    item: string;
+    duration: number;
+    size: number;
     fileType: string;
     mimetype: AudioFileMimeType;
 
-    itemId: string; // the id of the original media item (sermon)
+    itemId: string;
     uploadedBy: User | any;
     uploadStatus: UploadStatus;
 
@@ -86,15 +96,15 @@ export interface SermonSource {
 }
 
 export interface ImageSource {
-    item: string; // original image item URL (sermon)
+    item: string;
     width: number;
     height: number;
 
-    size: number; // in bytes
+    size: number;
     fileType: string;
     mimetype: ImageFileMimeType;
 
-    itemId: string; // the id of the original image item (sermon)
+    itemId: string;
     uploadedBy: User | any;
     uploadStatus: UploadStatus;
 
@@ -102,37 +112,42 @@ export interface ImageSource {
     updatedAt: string;
 }
 
-export enum AudioType {
+/** Adaptive streaming protocol (aligned with API `StreamingProtocol`). */
+export enum SermonStreamingProtocol {
     HLS = 'hls',
     DASH = 'dash',
     PROGRESSIVE = 'progressive',
     SMOOTHSTREAMING = 'smoothstreaming',
 }
 
+/** Quality tier on the sermon document (aligned with API `StreamingQuality`). */
+export enum SermonStreamingQuality {
+    AUTO = 'auto',
+    LOW = 'low',
+    MEDIUM = 'medium',
+    HIGH = 'high',
+    LOSSLESS = 'lossless',
+}
+
 export enum AudioFileMimeType {
-    // Standard Compressed
-    MPEG = 'audio/mpeg', // Official for MP3
-    MP3 = 'audio/mp3', // Common but non-standard (keep for compatibility)
-    AAC = 'audio/aac', // Standard for mobile/web streaming
+    MPEG = 'audio/mpeg',
+    MP3 = 'audio/mp3',
+    AAC = 'audio/aac',
 
-    // High-Quality / Lossless
-    WAV = 'audio/wav', // Uncompressed
-    FLAC = 'audio/flac', // The industry gold standard for lossless
-    ALAC = 'audio/mp4', // Apple Lossless often uses the mp4/m4a container
+    WAV = 'audio/wav',
+    FLAC = 'audio/flac',
+    ALAC = 'audio/mp4',
 
-    // Modern / Efficient
-    OPUS = 'audio/ogg; codecs=opus', // Best for low-latency/voice (e.g. WhatsApp/Sermons)
-    OGG = 'audio/ogg', // Common open-source format
-    WEBM = 'audio/webm', // High efficiency, often used with Opus
+    OPUS = 'audio/ogg; codecs=opus',
+    OGG = 'audio/ogg',
+    WEBM = 'audio/webm',
 
-    // Apple / Mobile Specific
-    M4A = 'audio/x-m4a', // Your current M4A
-    MP4_AUDIO = 'audio/mp4', // The official MIME for .m4a files
-    CAF = 'audio/x-caf', // Apple Core Audio Format (used for system sounds/Opus)
+    M4A = 'audio/x-m4a',
+    MP4_AUDIO = 'audio/mp4',
+    CAF = 'audio/x-caf',
 
-    // Streaming Protocols (CRITICAL for HLS/Dash)
-    HLS = 'application/x-mpegURL', // The most important missing one for HLS [.m3u8]
-    DASH = 'application/dash+xml', // Manifest for MPEG-DASH streaming [.mpd]
+    HLS = 'application/x-mpegURL',
+    DASH = 'application/dash+xml',
 }
 
 export enum ImageFileMimeType {
@@ -148,25 +163,23 @@ export enum ImageFileMimeType {
 }
 
 export enum UploadStatus {
-    IDLE = 'idle', // Initial state, nothing started
-    UPLOADING = 'uploading', // File is currently moving from device to server
-    UPLOADED = 'uploaded', // Raw file is fully received by the server/S3
-
-    PROCESSING = 'processing', // Server is transcoding (e.g., converting MP3 to HLS, converting image to playlist thumbnails, etc.)
-    EXTRACTING = 'extracting', // Optional: Getting metadata like duration/tags
-
-    COMPLETED = 'completed', // Ready for the public to listen
-    FAILED = 'failed', // Something went wrong (network or server error)
-    CANCELLED = 'cancelled', // User stopped the upload manually
+    IDLE = 'idle',
+    UPLOADING = 'uploading',
+    UPLOADED = 'uploaded',
+    PROCESSING = 'processing',
+    EXTRACTING = 'extracting',
+    COMPLETED = 'completed',
+    FAILED = 'failed',
+    CANCELLED = 'cancelled',
 }
 
 export enum MediaStatus {
-    DRAFT = 'draft', // Info is saved, but files might not be there yet
-    PENDING = 'pending', // Files are uploaded but waiting for admin approval
-    PUBLISHED = 'published', // Active and visible to everyone
-    ARCHIVED = 'archived', // Hidden from public but kept in DB
-    FLAGGED = 'flagged', // Hidden due to copyright/content issues
-    DELETED = 'deleted', // Soft delete
+    DRAFT = 'draft',
+    PENDING = 'pending',
+    PUBLISHED = 'published',
+    ARCHIVED = 'archived',
+    FLAGGED = 'flagged',
+    DELETED = 'deleted',
 }
 
 export default Sermon;

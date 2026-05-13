@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import type { CatalogSearchMinisterHit } from '@/hooks/use-catalog-search';
+import type { CatalogSearchMinisterHit } from '@/api/hooks/use-catalog-search';
 import type { SermonItemDTO } from '@/types/sermon';
 import SermonCard from '@/components/features/search/sermon-card';
 import SearchCatalogEntityRow from '@/components/features/search/search-catalog-entity-row';

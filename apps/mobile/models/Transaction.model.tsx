@@ -1,43 +1,62 @@
-import Subscription, { IDebitCard } from "./Subscription.model";
-import Talent from "./Listener.model";
+import type Subscription from './Subscription.model';
+import type Listener from './Listener.model';
+
+export enum TransactionType {
+    PAYMENT = 'PAYMENT',
+    REFUND = 'REFUND',
+    REVERSAL = 'REVERSAL',
+    CHARGEBACK = 'CHARGEBACK',
+    ADJUSTMENT = 'ADJUSTMENT',
+}
+
+export enum TransactionStatus {
+    PENDING = 'PENDING',
+    SUCCESS = 'SUCCESS',
+    FAILED = 'FAILED',
+    CANCELLED = 'CANCELLED',
+}
+
+export enum TransactionLabel {
+    PRODUCT_PURCHASE = 'Product purchase',
+    PRODUCT_REFUND = 'Product refund',
+    SUBSCRIPTION_PAYMENT = 'Subscription payment',
+    SUBSCRIPTION_REFUND = 'Subscription refund',
+    CREATOR_PAYOUT = 'Creator payout',
+}
 
 interface Transaction {
+    type: TransactionType;
+    label: string;
+    resource: string;
+    reference: string;
+    currency: string;
+    providerRef: string;
+    providerName: string;
+    description: string;
+    narration: string;
+    amount: number;
+    unitAmount: number;
+    fee: number;
+    unitFee: number;
 
-    type: string,
-    label: string,
-    resource: string,
-    reference: string,
-    currency: string,
-    providerRef: string,
-    providerName: string,
-    description: string,
-    narration: string,
-    amount: number,
-    unitAmount: number,
-    fee: number,
-    unitFee: number,
-    status: string,
-    reason: string,
-    message: string,
-    providerData: any,
-    metadata: Array<any>
-    channel: string,
-    slug: string,
-    card: IDebitCard,
-    policed: number
+    status: TransactionStatus;
+    reason: string;
+    message: string;
+    providerData: Array<Record<string, any>>;
+    channel: string;
+    slug: string;
+    card: IDebitCard;
+    policed: number;
 
-    // relationships
-    talent: Talent | any;
+    listener: Listener | any;
     subscription: Subscription | any;
 
-    // time stamps
     completedAt: string;
     createdAt: string;
     updatedAt: string;
     _version: number;
     _id: string;
     id: string;
-
 }
 
 export default Transaction;

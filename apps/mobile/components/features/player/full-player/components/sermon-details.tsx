@@ -15,7 +15,7 @@ import {
     resolveMinisterAbout,
     resolveMinisterIdFromLabel,
 } from '@/_data/ministers-about';
-import type { ISermonTrack, SermonTrackDTO } from '@/dtos/sermon.dto';
+import type { ISermonTrack, SermonTrackDTO } from '@/api/dtos/sermon.dto';
 
 type SermonDetailsProps = {
     track: SermonTrackDTO | null;

@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import React from 'react';
 import { SolidIcons } from '@/assets/icons';
 import { theme } from '@/constants/theme';
-import { useDismissFullPlayer } from '@/hooks/player/use-dismiss-full-player';
+import { useDismissFullPlayer } from '@/api/hooks/player/use-dismiss-full-player';
 
 const TrackDetailsHeader = () => {
     const dismiss = useDismissFullPlayer();

@@ -1,18 +1,18 @@
-import { ICountry } from '../utils/interfaces.util';
+import type { ApiUpload, ICountry, IDebitCard } from './_api-types';
 import Library from './Library.model';
 import Minister from './Minister.model';
 import Playback from './Playback.model';
 import Playlist from './Playlist.model';
 import Series from './Series.model';
 import Sermon from './Sermon.model';
-import Subscription from './Subscription.model';
+import type Subscription from './Subscription.model';
 import Topic from './Topic.model';
 import Transaction from './Transaction.model';
 import User from './User.model';
 
 interface Listener {
-    code: string; // user public ID
-  
+    code: string;
+
     firstName: string;
     lastName: string;
     middleName: string;
@@ -26,23 +26,33 @@ interface Listener {
 
     email: string;
     slug: string;
-    avatar: string;
-    banner: string;
+    avatar: ApiUpload | string;
+    banner: ApiUpload | string;
 
     onboarding: {
         step: number;
         status: string;
     };
 
-    // Relationships
     topics: Array<Topic | any>;
     ministers: Array<Minister | any>;
     ministry: string;
+    card: IDebitCard;
 
     likedSermons: Array<Sermon | any>;
     LikedSeries: Array<Series | any>;
     sharedSermons: Array<Sermon | any>;
-    recentlyPlayed: Array<Playback | any>; // the recently played media items by the listener < 20 items / Playback IDs (or MediaItem IDs)
+    recentlyPlayed: Array<Playback | any>;
+
+    listeningHistory: Array<Sermon | any>;
+    following: Array<Minister | any>;
+    followers: Array<User | any>;
+    interests: Array<Topic | any>;
+    viewedSermonBites: Array<any>;
+    sharedSermonBites: Array<any>;
+    savedSermonBites: Array<any>;
+    badges: Array<any>;
+    subscriptions: Array<Subscription | any>;
 
     user: User | any;
     settings: string | any;
@@ -53,7 +63,12 @@ interface Listener {
 
     createdBy: User | any;
 
-    // time stamps
+    recentSearches: Array<{
+        _id?: string;
+        query: string;
+        searchedAt: string;
+    }>;
+
     createdAt: string;
     updatedAt: string;
     _version: number;

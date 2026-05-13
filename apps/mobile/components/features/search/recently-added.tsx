@@ -6,7 +6,7 @@ import { theme } from '@/constants/theme';
 import { TransformArray } from '@/utils/transform-array';
 import SermonCard from './sermon-card';
 import { tracks } from '@/_data/_mock/tracks';
-import type { ISermonTrack } from '@/dtos/sermon.dto';
+import type { ISermonTrack } from '@/api/dtos/sermon.dto';
 import type { SermonItemDTO } from '@/types/sermon';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
