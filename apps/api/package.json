@@ -87,6 +87,7 @@
         "pino": "^9.7.0",
         "pino-http": "^10.4.0",
         "pino-pretty": "^13.0.0",
+        "pug": "^3.0.3",
         "redis": "^4.7.0",
         "redis-cli": "^2.1.2",
         "sharp": "^0.34.2",
@@ -96,7 +97,8 @@
         "uuid": "^11.1.0",
         "wavefile": "^11.0.0",
         "winston": "^3.15.0",
-        "xss-advanced": "^1.0.2"
+        "xss-advanced": "^1.0.2",
+        "zeptomail": "^7.0.2"
     },
     "devDependencies": {
         "@types/app-root-path": "^1.2.8",

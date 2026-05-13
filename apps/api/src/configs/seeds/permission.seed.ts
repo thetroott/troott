@@ -3,7 +3,7 @@ import path from 'path';
 import Permission from '@/models/permission.model';
 import Role from '@/models/role.model';
 import User from '@/models/user.model';
-import { UserType } from '@/modules/users/user/user.interface';
+import { UserType } from '@/interfaces/user.interface';
 import PermissionService from '@/services/permission.service';
 import logger from '@/utils/logger.util';
 

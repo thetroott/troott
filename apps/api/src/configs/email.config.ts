@@ -1,5 +1,5 @@
-import { EmailService, ENVType } from '../utils/enums.util';
-import { EmailConfig } from '@/modules/shared/interfaces.util';
+import { EmailService, ENVType } from '@/types/common.enum';
+import { EmailConfig } from '@/interfaces/common.interface';
 
 export function getEmailConfig(): EmailConfig {
     const env = process.env.NODE_ENV;

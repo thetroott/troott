@@ -24,14 +24,14 @@ import {
     UserType,
     IUserDoc,
     OnboardStatus,
-} from '@/modules/users/user/user.interface';
+} from '@/interfaces/user.interface';
 import { genUserCode } from '../utils/code.util';
 import { genSlug } from '../utils/helpers.util';
 import roleService from '@/services/role.service';
 import PermissionService from '@/services/permission.service';
-import { AdminDepartmentEnum, CompanyRoleEnum } from '@/modules/users/admin/admin.interface';
+import { AdminDepartmentEnum, CompanyRoleEnum } from '@/interfaces/admin.interface';
 import { Types } from 'mongoose';
-import { UserType as UserTypeCode } from '@/modules/users/user/user.interface';
+import { UserType as UserTypeCode } from '@/interfaces/user.interface';
 
 /**
  * @name inviteAdmin
@@ -568,7 +568,7 @@ export const acceptAdminInvitation: RequestHandler = asyncHandler(
         } else {
             // Create user account manually (since userService.createUser throws error for ADMIN type)
             const userCode = genUserCode(UserType.ADMIN);
-            const payload: Partial<IUserDoc> = {
+            const payload: Partial<IUserDoc> & { password?: string } = {
                 code: userCode,
                 email: email.trim().toLowerCase(),
                 password,
@@ -579,6 +579,7 @@ export const acceptAdminInvitation: RequestHandler = asyncHandler(
                 isActive: false,
                 onboard: {
                     step: 1,
+                    stage: 'initial',
                     status: OnboardStatus.NOT_STARTED,
                 },
             };

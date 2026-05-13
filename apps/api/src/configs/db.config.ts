@@ -1,5 +1,5 @@
 import mongoose, { ConnectOptions } from 'mongoose';
-import { ENVType } from '../utils/enums.util';
+import { ENVType } from '@/types/common.enum';
 import colors from 'colors';
 
 const options: ConnectOptions = {

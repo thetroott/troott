@@ -11,16 +11,11 @@ import {
     verifyOtpDTO,
 } from '@/dtos/auth.dto';
 import AuthService from '@/services/auth.service';
-import {
-    OtpType,
-    PasswordType,
-    UserType,
-} from '@/modules/users/user/user.interface';
+import { OtpType, PasswordType, UserType } from '@/interfaces/user.interface';
 import emailService from '@/services/email.service';
 import tokenService from '@/services/token.service';
-import type { IUserDoc } from '@/modules/users/user/user.interface';
+import type IUserDoc from '@/interfaces/user.interface';
 import userService from '@/services/user.service';
-import { statusCodeForUserServiceError } from '@/utils/user.http-error.util';
 import authMapper from '@/mappers/auth.mapper';
 
 /**
@@ -83,26 +78,15 @@ export const registerUser = asyncHandler(
         }
 
         let user: IUserDoc;
-        try {
-            user = await userService.createUser({
-                email,
-                password,
-                passwordType: PasswordType.USERGENERATED,
-                userType: userType as UserType,
-            });
-        } catch (error: unknown) {
-            const message =
-                error instanceof Error
-                    ? error.message
-                    : 'User could not be created';
-            return next(
-                new ErrorResponse(
-                    message,
-                    statusCodeForUserServiceError(message),
-                    [],
-                ),
-            );
-        }
+
+        user = await userService.createUser({
+            firstName,
+            lastName,   
+            email,
+            password,
+            passwordType: PasswordType.USERGENERATED,
+            userType: userType as UserType,
+        });
 
         if (!user) {
             return next(new ErrorResponse('user not created', 404, []));

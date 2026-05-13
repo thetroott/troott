@@ -6,7 +6,7 @@ import {
     PasswordType,
     OnboardStatus,
     InviteStatus,
-} from '@/modules/users/user/user.interface';
+} from '@/interfaces/user.interface';
 import ErrorResponse from '@/utils/error.util';
 import authService from '@/services/auth.service';
 import { genUserCode } from '../../utils/code.util';
@@ -17,7 +17,7 @@ import {
     AdminDepartmentEnum,
     AdminTypeEnum,
     CompanyRoleEnum,
-} from '@/modules/users/admin/admin.interface';
+} from '@/interfaces/admin.interface';
 
 /**
  * @name seedUsers

@@ -1,6 +1,7 @@
 import seedUsers from './user.seed';
 import seedRoles from './role.seed';
 import seedPermissions from './permission.seed';
+import seedPlans from './plan.seed';
 import logger from '../../utils/logger.util';
 
 /**
@@ -8,13 +9,15 @@ import logger from '../../utils/logger.util';
  * @description Seeds all collections in the database in the correct order:
  * 1. Roles (must be first - other seeds depend on roles)
  * 2. Permissions (must be second - users depend on permissions)
- * 3. Users (must be last - depends on roles and permissions)
+ * 3. Plans (free tier; no Paystack)
+ * 4. Users (must be last - depends on roles and permissions)
  *
  * Seeding is conditional:
  * - Only runs if ENABLE_SEEDING=true (required in all environments)
  * - Individual seed functions have built-in safety checks:
  *   - Roles: Only seeds if no roles exist
  *   - Permissions: Uses upsert (safe to rerun)
+ *   - Plans: Skips if free plan already exists
  *   - Users: Only seeds if superadmin doesn't exist
  *
  * @async
@@ -39,6 +42,7 @@ const seedData = async (): Promise<void> => {
     // Seed in correct order (dependencies first)
     await seedRoles();
     await seedPermissions();
+    await seedPlans();
     await seedUsers();
 
     logger.log({
