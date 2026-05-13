@@ -25,7 +25,7 @@ import {
     uploadSermonCover,
     getSermonsByMinisterMostPlayed,
     getFavoriteMinisterSermons,
-} from '@/controllers/sermon.controller';
+} from '@/controllers/core/sermon.controller';
 import uploadHandler from '../middlewares/upload.mdw';
 import {
     sermonAudioUploadSizeLimit,

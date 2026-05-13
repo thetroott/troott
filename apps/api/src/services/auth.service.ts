@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { UAParser } from 'ua-parser-js';
-import { ILogin, IResult } from '../utils/interfaces.util';
-import { LoginMethod, type IUserDoc } from '@/modules/users/user/user.interface';
+import { ILogin, IResult } from '@/interfaces/common.interface';
+import { LoginMethod, type IUserDoc } from '@/interfaces/user.interface';
 import {
     Random,
     arrayIncludes,
@@ -10,7 +10,7 @@ import {
 } from '@btffamily/pacitude';
 import SystemService from '@/services/system.service';
 import userRepository from '@/repository/user.repository';
-import { OtpType, UserType } from '@/modules/users/user/user.interface';
+import { OtpType, UserType } from '@/interfaces/user.interface';
 import {
     LoginDTO,
     MatchEncryptedPasswordDTO,
@@ -517,8 +517,7 @@ class AuthService {
         console.log('Encrypted Password:', encrypted);
 
         if (encrypted) {
-            user.password = encrypted;
-            //await user.save();
+            (user as any).password = encrypted;
 
             result = true;
         }
@@ -534,11 +533,12 @@ class AuthService {
         let result: string | null = null;
 
         console.log('Decrypting password for:', user.email);
-        console.log('Stored Encrypted Password:', user.password);
+        const storedPassword = (user as any).password;
+        console.log('Stored Encrypted Password:', storedPassword);
 
         const decrypted = await SystemService.decryptData({
             password: user.email,
-            payload: user.password,
+            payload: storedPassword,
             separator: '-',
         });
 
@@ -566,7 +566,7 @@ class AuthService {
             separator: '-',
         });
 
-        if (user.password === hashDecrypt) {
+        if ((user as any).password === hashDecrypt) {
             result = true;
         }
 

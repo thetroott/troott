@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { PassThrough } from 'stream';
 import { pipeline } from 'stream/promises';
-import { IResult } from '@/utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 import {
     MeasureLoudnessDTO,
     NormaliseAudioDTO,
@@ -11,7 +11,7 @@ import {
     HLSDTO,
     DASHDTO,
     FFmpegOptionsDTO,
-} from '@/modules/core/sermon/sermon.interface';
+} from '@/dtos/core/sermon.dto';
 
 class AudioProcessing {
     public async MeasureLoudness(data: MeasureLoudnessDTO): Promise<IResult> {

@@ -5,11 +5,11 @@ import {
     AdminDepartmentEnum,
     AdminTypeEnum,
     CompanyRoleEnum,
-} from '@/modules/users/admin/admin.interface';
+} from '@/interfaces/admin.interface';
 import { CreateAdminDTO, UpdateAdminDTO } from '@/dtos/admin.dto';
 import adminRepository from '@/repository/admin.repository';
-import { IResult } from '@/modules/shared/interfaces.util';
-import { IUserDoc, UserType } from '@/modules/users/user/user.interface';
+import { IResult } from '@/interfaces/common.interface';
+import { IUserDoc, UserType } from '@/interfaces/user.interface';
 import { genUserCode } from '../utils/code.util';
 import roleService from '@/services/role.service';
 import PermissionService from '@/services/permission.service';
