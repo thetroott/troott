@@ -1,8 +1,3 @@
-import type { ISermonDoc } from '@/interfaces/core/sermon.interface';
-import type { ISeriesDoc } from '@/interfaces/core/series.interface';
-import type { IMinisterDoc } from '@/interfaces/core/minister.interface';
-import type { IPlaylistDoc } from '@/interfaces/core/playlist.interface';
-import type ITopicDoc from '@/interfaces/core/topic.interface';
 import {
     SermonSearchCard,
     SeriesSearchCard,
@@ -11,19 +6,60 @@ import {
     TopicSearchCard,
 } from '@/dtos/core/search.dto';
 
+function docId(doc: { _id?: unknown; id?: unknown }): string {
+    if (doc._id != null) {
+        return String(doc._id);
+    }
+    if (doc.id != null) {
+        return String(doc.id);
+    }
+    return '';
+}
+
+function firstMinisterFromSearchDoc(doc: any): any {
+    if (Array.isArray(doc.ministers) && doc.ministers.length > 0) {
+        return doc.ministers[0];
+    }
+    if (Array.isArray(doc.minister) && doc.minister.length > 0) {
+        return doc.minister[0];
+    }
+    if (doc.minister && !Array.isArray(doc.minister)) {
+        return doc.minister;
+    }
+    return undefined;
+}
+
+function ministerDisplayName(minister: any): string | undefined {
+    if (!minister) {
+        return undefined;
+    }
+    const name = `${minister.firstName ?? ''} ${minister.lastName ?? ''}`.trim();
+    if (name) {
+        return name;
+    }
+    return undefined;
+}
+
+function seriesTitleFromRef(series: unknown): string | undefined {
+    if (series && typeof series === 'object' && 'title' in series) {
+        const t = (series as { title?: string }).title;
+        if (t != null) {
+            return t;
+        }
+    }
+    return undefined;
+}
+
 class SearchMapper {
     public mapSermon(doc: any): SermonSearchCard {
-        const minister = doc.minister?.[0] || doc.minister;
+        const minister = firstMinisterFromSearchDoc(doc);
         return {
-            id: String(doc._id ?? doc.id),
+            id: docId(doc),
             title: doc.title ?? '',
             imageUrl: doc.imageUrl,
             duration: doc.duration,
-            ministerName: minister
-                ? `${minister.firstName ?? ''} ${minister.lastName ?? ''}`.trim()
-                : undefined,
-            seriesTitle:
-                typeof doc.series === 'object' ? doc.series?.title : undefined,
+            ministerName: ministerDisplayName(minister),
+            seriesTitle: seriesTitleFromRef(doc.series),
             slug: doc.slug,
             preachedAt: doc.preachedAt,
         };
@@ -34,15 +70,27 @@ class SearchMapper {
     }
 
     public mapSeries(doc: any): SeriesSearchCard {
-        const minister = doc.minister?.[0] || doc.minister;
+        const minister = firstMinisterFromSearchDoc(doc);
+        let imageUrl: string | undefined;
+        if (doc.imageUrl) {
+            imageUrl = doc.imageUrl;
+        } else {
+            imageUrl = doc.coverImage;
+        }
+
+        let sermonCount = 0;
+        if (doc.sermonCount != null) {
+            sermonCount = doc.sermonCount;
+        } else if (Array.isArray(doc.sermons)) {
+            sermonCount = doc.sermons.length;
+        }
+
         return {
-            id: String(doc._id ?? doc.id),
+            id: docId(doc),
             title: doc.title ?? '',
-            imageUrl: doc.imageUrl ?? doc.coverImage,
-            sermonCount: doc.sermonCount ?? doc.sermons?.length ?? 0,
-            ministerName: minister
-                ? `${minister.firstName ?? ''} ${minister.lastName ?? ''}`.trim()
-                : undefined,
+            imageUrl,
+            sermonCount,
+            ministerName: ministerDisplayName(minister),
             slug: doc.slug,
         };
     }
@@ -52,15 +100,26 @@ class SearchMapper {
     }
 
     public mapMinister(doc: any): MinisterSearchCard {
+        let avatar: string | undefined;
+        if (typeof doc.avatar === 'string') {
+            avatar = doc.avatar;
+        } else {
+            avatar = doc.avatar?.s3Key;
+        }
+
+        let ministerialName: string | undefined;
+        if (doc.ministerialName) {
+            ministerialName = doc.ministerialName;
+        } else {
+            ministerialName = doc.profile?.ministerialName;
+        }
+
         return {
-            id: String(doc._id ?? doc.id),
+            id: docId(doc),
             firstName: doc.firstName ?? '',
             lastName: doc.lastName ?? '',
-            ministerialName: doc.ministerialName ?? doc.profile?.ministerialName,
-            avatar:
-                typeof doc.avatar === 'string'
-                    ? doc.avatar
-                    : doc.avatar?.s3Key,
+            ministerialName,
+            avatar,
             slug: doc.slug,
         };
     }
@@ -70,14 +129,29 @@ class SearchMapper {
     }
 
     public mapPlaylist(doc: any): PlaylistSearchCard {
+        let itemsCount = 0;
+        if (doc.itemsCount != null) {
+            itemsCount = doc.itemsCount;
+        } else if (Array.isArray(doc.items)) {
+            itemsCount = doc.items.length;
+        }
+
+        let ownerName: string | undefined;
+        if (doc.user) {
+            ownerName = `${doc.user.firstName ?? ''} ${doc.user.lastName ?? ''}`.trim();
+            if (!ownerName) {
+                ownerName = undefined;
+            }
+        } else {
+            ownerName = undefined;
+        }
+
         return {
-            id: String(doc._id ?? doc.id),
+            id: docId(doc),
             title: doc.title ?? '',
             banner: doc.banner,
-            itemsCount: doc.itemsCount ?? doc.items?.length ?? 0,
-            ownerName: doc.user
-                ? `${doc.user.firstName ?? ''} ${doc.user.lastName ?? ''}`.trim()
-                : undefined,
+            itemsCount,
+            ownerName,
             slug: doc.slug,
         };
     }
@@ -88,7 +162,7 @@ class SearchMapper {
 
     public mapTopic(doc: any): TopicSearchCard {
         return {
-            id: String(doc._id ?? doc.id),
+            id: docId(doc),
             name: doc.name ?? '',
             slug: doc.slug ?? '',
             description: doc.description,

@@ -45,11 +45,21 @@ class AuthMapper {
             isActivated: user.isActivated,
             isDeactivated: user.isDeactivated,
             isSuspended: user.isSuspended,
-            roles: (user.roles || []).map((r: any) =>
-                typeof r === 'string'
-                    ? r
-                    : (r?.slug ?? r?.name ?? r?._id?.toString?.() ?? ''),
-            ),
+            roles: (user.roles || []).map((r: any) => {
+                if (typeof r === 'string') {
+                    return r;
+                }
+                if (r?.slug) {
+                    return r.slug;
+                }
+                if (r?.name) {
+                    return r.name;
+                }
+                if (r?._id != null) {
+                    return r._id.toString();
+                }
+                return '';
+            }),
 
             onboard: {
                 step: user.onboard?.step ?? 1,

@@ -15,18 +15,33 @@ class SeriesMapper {
      */
     public async mapSeriesDTO(series: ISeriesDoc): Promise<Partial<SeriesDTO>> {
         const banner = series.banner;
+        let bannerDto: { item: string; width: number; height: number } | undefined;
+        if (banner) {
+            bannerDto = {
+                item: banner.item,
+                width: banner.width,
+                height: banner.height,
+            };
+        } else {
+            bannerDto = undefined;
+        }
+
         const result: Partial<SeriesDTO> = {
             id: series.id.toString(),
             title: series.title,
             description: series.description,
-            banner: banner
-                ? { item: banner.item, width: banner.width, height: banner.height }
-                : undefined,
+            banner: bannerDto,
 
-            ministers: series.ministers.map((minister: IMinisterDoc) => ({
-                id: String(minister.id),
-                name: minister.profile?.ministerialName ?? '',
-            })),
+            ministers: series.ministers.map((minister: IMinisterDoc) => {
+                let name = '';
+                if (minister.profile?.ministerialName) {
+                    name = minister.profile.ministerialName;
+                }
+                return {
+                    id: String(minister.id),
+                    name,
+                };
+            }),
 
             status: series.status,
             totalDuration: series.totalDuration,
@@ -42,15 +57,30 @@ class SeriesMapper {
     }
 
     public async mapSeriesUpdate(series: ISeriesDoc): Promise<UpdateSeriesDTO> {
+        let bannerDto: { item: string; width: number; height: number } | undefined;
+        if (series.banner) {
+            bannerDto = {
+                item: series.banner.item,
+                width: series.banner.width,
+                height: series.banner.height,
+            };
+        } else {
+            bannerDto = undefined;
+        }
+
+        let sermonIds: string[] = [];
+        const rawSermons = (series as any).sermons;
+        if (Array.isArray(rawSermons)) {
+            sermonIds = rawSermons.map((sermon: ISermonDoc) => String(sermon.id));
+        }
+
         const result: UpdateSeriesDTO = {
             title: series.title,
             description: series.description,
-            banner: series.banner
-                ? { item: series.banner.item, width: series.banner.width, height: series.banner.height }
-                : undefined,
+            banner: bannerDto,
 
             ministers: series.ministers.map((minister: IMinisterDoc) => String(minister.id)),
-            sermons: (series as any).sermons?.map((sermon: ISermonDoc) => String(sermon.id)) ?? [],
+            sermons: sermonIds,
 
             status: series.status,
 
@@ -64,11 +94,23 @@ class SeriesMapper {
 
     public async mapUploadSeriesImage(series: ISeriesDoc): Promise<UploadDTO> {
         const banner = series.banner;
+        let itemId = '';
+        if (banner?.itemId != null) {
+            itemId = String(banner.itemId);
+        }
+        let uploadedBy = '';
+        if (banner?.uploadedBy != null) {
+            uploadedBy = String(banner.uploadedBy);
+        }
+        let file = '';
+        if (banner?.item != null) {
+            file = String(banner.item);
+        }
         const result: UploadDTO = {
-            id: banner?.itemId ?? '',
-            uploadRef: banner?.itemId ?? '',
-            uploadedBy: banner?.uploadedBy != null ? String(banner.uploadedBy) : '',
-            file: banner?.item ?? '',
+            id: itemId,
+            uploadRef: itemId,
+            uploadedBy,
+            file,
         };
 
         return result;
