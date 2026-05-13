@@ -1,6 +1,6 @@
 import type { PendingStableTarget } from './parse-stable-target';
 import { parseStableTargetFromUrl } from './parse-stable-target';
-import { mmkvStateStorage } from '@/api/storage/mmkv-client';
+import { mmkvStateStorage } from '@/api/services/mmkv-storage';
 
 const STORAGE_KEY = '@troott/pending_stable_target_v1';
 

@@ -1,7 +1,7 @@
 import { create, createJSONStorage, devtools, persist } from '@/lib/zstore';
 import { Platform } from 'react-native';
 import { StreamingQuality } from '@/utils/enums.util';
-import { mmkvStateStorage } from '@/api/storage/mmkv-client';
+import { mmkvStateStorage } from '@/api/services/mmkv-storage';
 
 export type DownloadQuality = StreamingQuality;
 

@@ -1,4 +1,4 @@
-import { getMMKV } from '@/api/storage/mmkv-client';
+import { getMMKV } from '@/api/services/mmkv-storage';
 import { create, persist } from '@/lib/zstore';
 
 const collection = {};

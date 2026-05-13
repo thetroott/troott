@@ -39,7 +39,7 @@
         "components/features/player/player/instant-mix-button.tsx",
         "screens/Auth",
         "screens/Preview.tsx",
-        "api/hooks/platform/use-theme-color.ts",
+        "api/hooks/shared/use-theme-color.ts",
         "stores/app/device-profile.ts"
     ]
 }

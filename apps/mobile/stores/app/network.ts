@@ -1,5 +1,10 @@
 import { networkStatusTypes } from '@/types/network-status';
 import { create, devtools } from '@/lib/zstore';
+import {
+    getConnectivityStatus,
+    getNetworkState,
+    subscribeToNetworkState,
+} from '@/utils/network';
 
 type NetworkStore = {
     networkStatus: networkStatusTypes | null;
@@ -27,3 +32,32 @@ export const useNetworkStatus = (): [
 
     return [networkStatus, setNetworkStatus];
 };
+
+let subscriptionCleanup: (() => void) | null = null;
+
+/**
+ * Subscribes to NetInfo via {@link subscribeToNetworkState} and keeps
+ * {@link useNetworkStore} `networkStatus` aligned with {@link getConnectivityStatus}.
+ * Call once from the root layout; tear down on unmount (e.g. Fast Refresh).
+ *
+ * @returns Unsubscribe function.
+ */
+export function initNetworkStoreSync(): () => void {
+    subscriptionCleanup?.();
+    subscriptionCleanup = null;
+
+    void getNetworkState().then((state) => {
+        useNetworkStore.getState().setNetworkStatus(getConnectivityStatus(state));
+    });
+
+    subscriptionCleanup = subscribeToNetworkState((state) => {
+        useNetworkStore
+            .getState()
+            .setNetworkStatus(getConnectivityStatus(state));
+    });
+
+    return () => {
+        subscriptionCleanup?.();
+        subscriptionCleanup = null;
+    };
+}
