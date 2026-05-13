@@ -4,7 +4,7 @@ import ErrorResponse from '../utils/error.util';
 import invitationService from '@/services/invitation.service';
 import { InvitationStatus } from '../interfaces/invitation.interface';
 import redisWrapper from '../middlewares/redis.mdw';
-import { UserType } from '@/modules/users/user/user.interface';
+import { UserType } from '@/interfaces/user.interface';
 
 const INVITATION_CACHE_TTL_DETAIL = 300;
 const INVITATION_CACHE_TTL_LIST = 180;

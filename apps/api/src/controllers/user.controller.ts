@@ -4,11 +4,10 @@ import ErrorResponse from '../utils/error.util';
 import authMapper from '@/mappers/auth.mapper';
 import userService from '@/services/user.service';
 import userRepository from '@/repository/user.repository';
-import { IUserDoc, PasswordType, UserType } from '@/modules/users/user/user.interface';
+import { IUserDoc, PasswordType, UserType } from '@/interfaces/user.interface';
 import redisWrapper from '../middlewares/redis.mdw';
 import { generatePassword } from '../utils/helpers.util';
 import emailService from '@/services/email.service';
-import { statusCodeForUserServiceError } from '@/utils/user.http-error.util';
 /** Get authenticated user id from request (supports both id and _id from lean() documents) */
 const getUserId = (req: Request): string | undefined =>
     (req as any).user?.id ??
@@ -236,6 +235,8 @@ export const InviteUser: RequestHandler = asyncHandler(
         let user: IUserDoc;
         try {
             user = await userService.createUser({
+                firstName,
+                lastName,
                 email,
                 password: temporaryPassword,
                 passwordType: PasswordType.SYSTEMGENERATED,
@@ -247,13 +248,12 @@ export const InviteUser: RequestHandler = asyncHandler(
                 error instanceof Error
                     ? error.message
                     : 'Failed to create user';
-            return next(
-                new ErrorResponse(
-                    message,
-                    statusCodeForUserServiceError(message),
-                    [],
-                ),
-            );
+            let httpStatus = 500;
+            if (message === 'Forbidden') httpStatus = 403;
+            else if (message === 'User already exists') httpStatus = 409;
+            else if (message === 'OAuth profile did not include an email')
+                httpStatus = 400;
+            return next(new ErrorResponse(message, httpStatus, []));
         }
 
         if (!user) {
@@ -314,9 +314,6 @@ export const editUser: RequestHandler = asyncHandler(
 // deactivate user account
 // suspend user account
 // delete user account
-// get user preferences
-// update user preferences
-// create user preferences
 
 // follow a user
 // unfollow a user

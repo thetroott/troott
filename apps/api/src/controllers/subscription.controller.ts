@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import asyncHandler from '../middlewares/async.mdw';
 import ErrorResponse from '../utils/error.util';
-import { IUserDoc } from '@/modules/users/user/user.interface';
+import { IUserDoc } from '@/interfaces/user.interface';
 import subscriptionService from '@/services/subscription.service';
 import systemService from '@/services/system.service';
 import subscriptionIntentService from '@/services/subscriptionIntent.service';

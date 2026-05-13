@@ -1,20 +1,20 @@
 import { Request, Response, NextFunction } from 'express';
-import asyncHandler from '../middlewares/async.mdw';
-import ErrorResponse from '../utils/error.util';
-import { pathParam } from '../utils/route-params.util';
-import { getAuthUserId } from '../utils/auth-request.util';
-import sermonRepository from '@/repository/sermon.repository';
-import { DeleteSermonDTO, UpdateSermonDTO } from '@/dtos/sermon.dto';
-import { IFile } from '../utils/interfaces.util';
-import { mediaConfig } from '../configs/media.config';
-import type { ISermonDoc } from '@/modules/core/sermon/sermon.interface';
-import { ContentState, ContentStatus } from '../utils/enums.util';
-import sermonService from '@/services/sermon.service';
+import asyncHandler from '../../middlewares/async.mdw';
+import ErrorResponse from '../../utils/error.util';
+import { pathParam } from '../../utils/route-params.util';
+import { getAuthUserId } from '../../utils/auth-request.util';
+import sermonRepository from '@/repository/core/sermon.repository';
+import { DeleteSermonDTO, UpdateSermonDTO } from '@/dtos/core/sermon.dto';
+import { IFile } from '@/interfaces/common.interface';
+import { mediaConfig } from '../../configs/media.config';
+import type { ISermonDoc } from '@/interfaces/core/sermon.interface';
+import { MediaStatus } from '@/interfaces/core/sermon.interface';;
 import sermonMapper from '@/mappers/sermon.mapper';
 import { canAccessSermonDocument } from '@/utils/sermon-access.util';
 import { isSermonPublicTeaserEligible } from '@/utils/sermon-teaser.util';
-import redisWrapper from '../middlewares/redis.mdw';
+import redisWrapper from '../../middlewares/redis.mdw';
 import { createHash } from 'crypto';
+import sermonService from '@/services/core/sermon.service';
 
 const SERMON_CACHE_TTL_DETAIL = 300;
 const SERMON_CACHE_TTL_LIST = 180;
@@ -171,52 +171,40 @@ export const publishSermon = asyncHandler(
             title,
             description,
             duration,
-            releaseDate,
-            releaseYear,
-            sermonUrl,
-            imageUrl,
-            size,
+            preachedAt,
+            preachedYear,
+            language,
             topic,
             tags,
             isPublic,
-            shareableUrl,
+            allowDownload,
+            allowComment,
             isSeries,
             series,
-            state,
             status,
             minister,
             playlist,
             publishedBy,
-            versionId,
-            changesSummary,
-            uploadRef,
-            uploadSummary,
         } = req.body;
 
         const updatePayload: Partial<UpdateSermonDTO> = {
             title,
             description,
             duration,
-            releaseDate,
-            releaseYear,
-            sermonUrl,
-            imageUrl,
-            size,
+            preachedAt,
+            preachedYear,
+            language,
             topic,
             tags,
             isPublic,
-            shareableUrl,
+            allowDownload,
+            allowComment,
             isSeries,
             series,
-            state,
             status,
             minister,
             playlist,
             publishedBy,
-            versionId,
-            changesSummary,
-            uploadRef,
-            uploadSummary,
         };
 
         const updated = await sermonRepository.updateSermon(
@@ -272,52 +260,40 @@ export const updateSermon = asyncHandler(
             title,
             description,
             duration,
-            releaseDate,
-            releaseYear,
-            sermonUrl,
-            imageUrl,
-            size,
+            preachedAt,
+            preachedYear,
+            language,
             topic,
             tags,
             isPublic,
-            shareableUrl,
+            allowDownload,
+            allowComment,
             isSeries,
             series,
-            state,
             status,
             minister,
             playlist,
             publishedBy,
-            versionId,
-            changesSummary,
-            uploadRef,
-            uploadSummary,
         } = req.body;
 
         const updatePayload: Partial<UpdateSermonDTO> = {
             title,
             description,
             duration,
-            releaseDate,
-            releaseYear,
-            sermonUrl,
-            imageUrl,
-            size,
+            preachedAt,
+            preachedYear,
+            language,
             topic,
             tags,
             isPublic,
-            shareableUrl,
+            allowDownload,
+            allowComment,
             isSeries,
             series,
-            state,
             status,
             minister,
             playlist,
             publishedBy,
-            versionId,
-            changesSummary,
-            uploadRef,
-            uploadSummary,
         };
 
         const updated = await sermonRepository.updateSermon(
@@ -363,7 +339,7 @@ export const moveSermonToBin = asyncHandler(
         if (!id) {
             return next(new ErrorResponse('id is required', 400, []));
         }
-        const { state, status, publishedBy }: Partial<DeleteSermonDTO> =
+        const { status, publishedBy }: Partial<DeleteSermonDTO> =
             req.body;
 
         const sermonExist = await sermonRepository.findBySermonId(id);
@@ -391,15 +367,14 @@ export const moveSermonToBin = asyncHandler(
             return next(new ErrorResponse(policy.message, policy.code!, []));
         }
 
-        const deletePayload = {
-            state: state || ContentState.DELETED,
-            status: status || ContentStatus.DELETED,
+        const deletePayload: Partial<DeleteSermonDTO> = {
+            status: status || MediaStatus.DELETED,
             publishedBy: publishedBy,
         };
 
         const deleted = await sermonRepository.moveSermonToBin(
             id,
-            deletePayload,
+            deletePayload as any,
         );
         if (deleted.error) {
             return next(new ErrorResponse(deleted.message, deleted.code!, []));
@@ -793,7 +768,7 @@ const getSermonsByMinisterSorted = (
             limit,
             skip,
             populate: 'minister series topic',
-            recentOnly: sortField === 'releaseDate', // for recent filter
+            recentOnly: sortField === 'releaseDate',
         };
 
         const cacheKey = sermonListKey('minister-ranked', {
@@ -1360,7 +1335,7 @@ async function invalidateCommonSermonListCaches(params: {
         'playCount',
         'likeCount',
         'shareCount',
-        'releaseDate',
+        'preachedAt',
     ] as const) {
         keys.push(
             sermonListKey('global-ranked', { sortField, page: 1, limit: 25 }),
@@ -1382,7 +1357,7 @@ async function invalidateCommonSermonListCaches(params: {
                 ministerId,
                 page: 1,
                 limit: 25,
-                sort: '-releaseDate',
+                sort: '-preachedAt',
                 publicationStatus: 'all',
                 search: undefined,
                 dateFrom: undefined,
@@ -1393,7 +1368,7 @@ async function invalidateCommonSermonListCaches(params: {
             'playCount',
             'likeCount',
             'shareCount',
-            'releaseDate',
+            'preachedAt',
         ] as const) {
             keys.push(
                 sermonListKey('minister-ranked', {

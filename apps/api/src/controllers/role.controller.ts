@@ -6,7 +6,7 @@ import roleRepository from '@/repository/role.repository';
 import { CreateRoleDTO, UpdateRoleDTO, AttachRoleDTO } from '@/dtos/role.dto';
 import redisWrapper from '../middlewares/redis.mdw';
 import userRepository from '@/repository/user.repository';
-import { IUserDoc, UserType } from '@/modules/users/user/user.interface';
+import { IUserDoc, UserType } from '@/interfaces/user.interface';
 
 /**
  * @name createRole

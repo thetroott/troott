@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import asyncHandler from '../middlewares/async.mdw';
-import discoveryService from '@/services/discovery.service';
+import discoveryService from '@/services/core/discovery.service';
 
 /**
  * @route GET /api/v1/discovery/home
