@@ -7,7 +7,7 @@ import type {
 import axios from 'axios';
 import { MMKV } from 'react-native-mmkv';
 import RNFS from 'react-native-fs';
-import { queryClient } from '@/api/query-client';
+import { queryClient } from '@/api/services/query-client';
 import { DownloadQueryKeys } from '@/engine/types/queries-type';
 // import SermonTrack from '../../../types/SermonTrack'
 // import axios from 'axios'

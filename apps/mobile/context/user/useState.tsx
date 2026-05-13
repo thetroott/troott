@@ -8,7 +8,7 @@ import {
 } from '../types'
 import { useReducer } from 'react';
 import type { ISetLoading, ISidebarProps, IUnsetLoading } from '@/utils/interfaces.util';
-import { storage } from '@/api/storage/mmkv-client';
+import { mmkv } from '@/api/services/mmkv-storage';
 
 
 const UserState = (props: any) => {
@@ -100,8 +100,8 @@ const UserState = (props: any) => {
 
         let result: ISidebarProps | null = null;
 
-        const name = storage.fetch('route.name');
-        const sub = storage.fetch('route.subroute');
+        const name = mmkv.getString('route.name');
+        const sub = mmkv.getString('route.subroute');
 
         const route = sidebarRoutes.find((x) => x.name === name);
 

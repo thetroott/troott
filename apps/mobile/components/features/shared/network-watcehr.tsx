@@ -1,6 +1,5 @@
-import NetInfo from '@react-native-community/netinfo';
-import { useEffect, useRef } from 'react';
-import { Platform, View } from 'react-native';
+import { useEffect } from 'react';
+import { View } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -21,16 +20,16 @@ const internetConnectionWatcher = {
 
 export { networkStatusTypes };
 
-const isAndroid = Platform.OS === 'android';
-
 /** Expanded banner height (replaces Tamagui token `$8`). */
 const BANNER_OPEN_HEIGHT = sizes.spacing.xl + sizes.spacing.md;
 
+/**
+ * Offline / back-online banner driven by {@link useNetworkStatus} (updated from root via
+ * {@link initNetworkStoreSync} and `@/utils/network`).
+ */
 const InternetConnectionWatcher = () => {
-    const lastNetworkStatus = useRef<networkStatusTypes | null>(
-        networkStatusTypes.ONLINE,
-    );
-    const [networkStatus, setNetworkStatus] = useNetworkStatus();
+    
+    const [networkStatus] = useNetworkStatus();
 
     const bannerHeight = useSharedValue(0);
     const opacity = useSharedValue(0);
@@ -58,23 +57,6 @@ const InternetConnectionWatcher = () => {
         };
     });
 
-    const changeNetworkStatus = () => {
-        if (lastNetworkStatus.current !== networkStatusTypes.DISCONNECTED) {
-            setNetworkStatus(null);
-        }
-    };
-
-    const internetConnectionBack = () => {
-        setNetworkStatus(networkStatusTypes.ONLINE);
-        setTimeout(() => {
-            changeNetworkStatus();
-        }, 3000);
-    };
-
-    useEffect(() => {
-        lastNetworkStatus.current = networkStatus;
-    }, [networkStatus]);
-
     useEffect(() => {
         if (networkStatus === networkStatusTypes.DISCONNECTED) {
             animateBannerIn();
@@ -87,29 +69,6 @@ const InternetConnectionWatcher = () => {
             animateBannerOut();
         }
     }, [networkStatus]);
-
-    useEffect(() => {
-        const networkWatcherListener = NetInfo.addEventListener(
-            ({ isConnected, isInternetReachable }) => {
-                const isNetworkDisconnected = !(
-                    isConnected && (isAndroid ? isInternetReachable : true)
-                );
-
-                if (isNetworkDisconnected) {
-                    setNetworkStatus(networkStatusTypes.DISCONNECTED);
-                } else if (
-                    !isNetworkDisconnected &&
-                    lastNetworkStatus.current ===
-                        networkStatusTypes.DISCONNECTED
-                ) {
-                    internetConnectionBack();
-                }
-            },
-        );
-        return () => {
-            networkWatcherListener();
-        };
-    }, []);
 
     const bgColor =
         networkStatus === networkStatusTypes.ONLINE
@@ -133,9 +92,11 @@ const InternetConnectionWatcher = () => {
                     weight="medium"
                     style={{ textAlign: 'center', color: colors.white[50] }}
                 >
-                    {networkStatus === networkStatusTypes.ONLINE
-                        ? internetConnectionWatcher.BACK_ONLINE
-                        : internetConnectionWatcher.NO_INTERNET}
+                    {networkStatus === networkStatusTypes.DISCONNECTED
+                        ? internetConnectionWatcher.NO_INTERNET
+                        : networkStatus === networkStatusTypes.ONLINE
+                          ? internetConnectionWatcher.BACK_ONLINE
+                          : ''}
                 </Text>
             </View>
         </Animated.View>

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import { mmkvStateStorage } from '@/api/storage/mmkv-client';
+import { mmkvStateStorage } from '@/api/services/mmkv-storage';
 
 type FavoriteSermonIdsStore = {
     ids: string[];

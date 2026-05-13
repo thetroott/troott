@@ -1,5 +1,5 @@
 import TrackPlayer from '@rntp/player';
-import { queryClient } from '@/api/query-client';
+import { queryClient } from '@/api/services/query-client';
 import {
     ACTIVE_INDEX_QUERY_KEY,
     NOW_PLAYING_QUERY_KEY,
