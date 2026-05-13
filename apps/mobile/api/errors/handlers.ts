@@ -4,9 +4,9 @@
  * Error handling utilities and logic.
  */
 
-import Bugsnag from '@bugsnag/expo';
 import { apiConfig } from '../config';
 import { ApiError, ApiErrorType } from './types';
+import { getBugsnag } from '../monitoring/bugsnag';
 
 /**
  * Determine error type from HTTP status code
@@ -71,7 +71,14 @@ export const logError = (
   }
 ): void => {
   // Only log to Bugsnag in production/staging
-  if (apiConfig.enableLogging) {
+  if (!apiConfig.enableLogging) {
+    return;
+  }
+  const Bugsnag = getBugsnag();
+  if (!Bugsnag) {
+    return;
+  }
+  try {
     Bugsnag.notify(error, (event) => {
       // Add context metadata
       if (context) {
@@ -104,6 +111,10 @@ export const logError = (
         }
       }
     });
+  } catch (e) {
+    if (__DEV__) {
+      console.warn('[logError] Bugsnag.notify failed:', e);
+    }
   }
 };
 
