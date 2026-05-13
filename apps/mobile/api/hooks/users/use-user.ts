@@ -1,7 +1,5 @@
 /**
- * User Query Hook
- * 
- * React Query hook for fetching a single user by ID.
+ * Current authenticated user (`GET /user`).
  */
 
 import { useQuery } from '@tanstack/react-query';
@@ -10,17 +8,17 @@ import { User } from '../../types';
 import { queryKeys } from '../../utils/query-keys';
 
 /**
- * Get user by ID query hook
- * 
  * @example
- * const { data: user } = useUser('user-id', true);
+ * const { data: user } = useCurrentUser();
  */
-export const useUser = (userId: string, enabled = true) => {
-  return useQuery({
-    queryKey: queryKeys.users.detail(userId),
-    queryFn: (): Promise<User> => usersService.getUserById(userId),
-    enabled: enabled && !!userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
+export const useCurrentUser = (enabled = true) => {
+    return useQuery({
+        queryKey: queryKeys.users.me(),
+        queryFn: (): Promise<User> => usersService.getCurrentUser(),
+        enabled,
+        staleTime: 5 * 60 * 1000,
+    });
 };
 
+/** @deprecated Use {@link useCurrentUser}; Troott has no `GET /user/:id`. */
+export const useUser = (_userId?: string, enabled = true) => useCurrentUser(enabled);

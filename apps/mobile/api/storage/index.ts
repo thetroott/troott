@@ -7,4 +7,5 @@
 export * from './auth';
 export * from './cache';
 export * from './offline';
+export { storage as sessionStorage, storage } from './session-storage';
 

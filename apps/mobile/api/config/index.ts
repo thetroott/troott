@@ -16,7 +16,7 @@ export type Environment = 'development' | 'staging' | 'production';
  * Get current environment from Expo constants
  */
 export const getEnvironment = (): Environment => {
-  const env = Constants.expoConfig?.extra?.env || process.env.NODE_ENV || 'development';
+  const env = Constants.expoConfig?.extra?.env || process.env.NODE_ENV;
   
   if (env === 'production' || env === 'prod') return 'production';
   if (env === 'staging' || env === 'stage') return 'staging';
@@ -41,7 +41,7 @@ export interface ApiConfig {
  */
 const configs: Record<Environment, ApiConfig> = {
   development: {
-    baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://staging.trifold.life',
+    baseURL: process.env.EXPO_PUBLIC_API_URL as string,
     timeout: 30000, // 30 seconds for dev (more lenient)
     retryAttempts: 2,
     enableLogging: true,
@@ -50,7 +50,7 @@ const configs: Record<Environment, ApiConfig> = {
     staleTime: 0, // Always consider data stale in dev
   },
   staging: {
-    baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://staging.trifold.life',
+    baseURL: process.env.EXPO_PUBLIC_API_URL as string,
     timeout: 20000, // 20 seconds
     retryAttempts: 3,
     enableLogging: true,
@@ -59,7 +59,7 @@ const configs: Record<Environment, ApiConfig> = {
     staleTime: 2 * 60 * 1000, // 2 minutes
   },
   production: {
-    baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://staging.trifold.life',
+    baseURL: process.env.EXPO_PUBLIC_API_URL as string,
     timeout: 15000, // 15 seconds (stricter for production)
     retryAttempts: 3,
     enableLogging: false, // Disable verbose logging in production
@@ -106,4 +106,5 @@ export const API_VERSION = 'v1';
 export const API_BASE_PATH = `/api/${API_VERSION}`;
 
 // Export endpoints
+export * from './default-headers';
 export * from './endpoints';

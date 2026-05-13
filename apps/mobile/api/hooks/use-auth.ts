@@ -4,7 +4,7 @@
  * React Query hooks for authentication endpoints with proper error handling.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, post } from '../client';
 import { authEndpoints } from '../config/endpoints';
 import { clearTokens, storeToken } from '../storage/auth';
@@ -18,7 +18,6 @@ import {
     RegisterResponse,
     ResendOtpRequest,
     ResetPasswordRequest,
-    User,
     VerifyOtpRequest,
 } from '../types';
 import { queryKeys } from '../utils/query-keys';
@@ -141,10 +140,7 @@ export const useResetPassword = () => {
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: async (data: ChangePasswordRequest): Promise<void> => {
-      await apiClient(authEndpoints.changePassword, {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-      });
+      await post(authEndpoints.changePassword, data);
     },
   });
 };
@@ -174,21 +170,3 @@ export const useLogout = () => {
     },
   });
 };
-
-/**
- * Get current user query hook
- */
-export const useCurrentUser = () => {
-  return useQuery({
-    queryKey: queryKeys.auth.user(),
-    queryFn: async (): Promise<User | null> => {
-      // This would typically fetch from a /me endpoint
-      // For now, return null as placeholder
-      // You'll need to implement the actual endpoint
-      return null;
-    },
-    enabled: false, // Disable by default, enable when token exists
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-};
-

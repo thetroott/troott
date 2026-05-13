@@ -110,6 +110,11 @@ export const createQueryClient = (): QueryClient => {
  */
 export const queryClient = createQueryClient();
 
+/** Milliseconds — shared TTL helpers (e.g. persist `maxAge`) */
+export const ONE_MINUTE = 1000 * 60;
+export const ONE_HOUR = ONE_MINUTE * 60;
+export const ONE_DAY = ONE_HOUR * 24;
+
 /**
  * Query Client Provider Component
  * 

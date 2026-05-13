@@ -7,7 +7,7 @@ Production-ready TanStack Query integration for the Trifold API V2.
 - ✅ **Type-Safe API Client** - Full TypeScript support with generated types
 - ✅ **TanStack Query v5** - Modern data fetching with caching and synchronization
 - ✅ **Offline Support** - Queue mutations when offline, sync when online
-- ✅ **Cache Persistence** - AsyncStorage-based cache persistence
+- ✅ **Cache Persistence** - MMKV-backed query cache persistence
 - ✅ **Authentication** - Secure token storage with automatic refresh
 - ✅ **Error Handling** - Centralized error handling with Bugsnag integration
 - ✅ **Network Resilience** - Retry logic, circuit breakers, adaptive timeouts

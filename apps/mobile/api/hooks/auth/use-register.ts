@@ -4,10 +4,10 @@
  * React Query mutation hook for user registration.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authService } from '../../services';
 import { storeToken } from '../../storage/auth';
+import { getMMKV } from '../../storage/mmkv-client';
 import { RegisterRequest, RegisterResponse } from '../../types';
 import { queryKeys } from '../../utils/query-keys';
 
@@ -32,9 +32,8 @@ export const useRegister = () => {
         });
       }
 
-      // Store profileCode in AsyncStorage for persistence
       if (response.user?.profileCode) {
-        await AsyncStorage.setItem('userProfileCode', response.user.profileCode);
+        getMMKV().set('userProfileCode', response.user.profileCode);
       }
 
       return response;

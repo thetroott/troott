@@ -1,108 +1,47 @@
 /**
- * Users Service
- * 
- * Service layer for user-related API calls.
+ * User account API (`/user`).
+ *
+ * Partner / legacy Pacepard user routes are not part of Troott; use
+ * {@link listenerService} for listener profile updates.
  */
-
-import { partnerEndpoints, userEndpoints } from '../config/endpoints';
-import {
-    AcceptPartnerInviteRequest,
-    GetUsersParams,
-    SendPartnerInviteRequest,
-    UpdateUserProfileRequest,
-    User,
-} from '../types';
+import { userEndpoints } from '../config/endpoints';
+import type { ApiResponse, GetUsersParams, User } from '../types';
 import { BaseService } from './base.service';
 
-/**
- * Users service
- */
 export class UsersService extends BaseService {
-  /**
-   * Get all users
-   */
-  async getUsers(params?: GetUsersParams): Promise<User[]> {
-    const queryParams = new URLSearchParams();
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.offset) queryParams.append('offset', params.offset.toString());
-    
-    const endpoint = queryParams.toString() 
-      ? `${userEndpoints.getAll}?${queryParams.toString()}`
-      : userEndpoints.getAll;
-    
-    const response = await this.get<{ data: User[] }>(endpoint);
-    return this.extractData(response) || [];
-  }
+    /**
+     * Staff user list (`GET /user/list`).
+     */
+    async getUsers(params?: GetUsersParams): Promise<User[]> {
+        const queryParams = new URLSearchParams();
+        if (params?.limit) queryParams.append('limit', params.limit.toString());
+        if (params?.offset) queryParams.append('offset', params.offset.toString());
 
-  /**
-   * Get user by ID
-   */
-  async getUserById(userId: string): Promise<User> {
-    const response = await this.get<{ data: User }>(userEndpoints.getById(userId));
-    return this.extractData(response);
-  }
+        const endpoint = queryParams.toString()
+            ? `${userEndpoints.list}?${queryParams.toString()}`
+            : userEndpoints.list;
 
-  /**
-   * Get user by email
-   */
-  async getUserByEmail(email: string): Promise<User> {
-    const response = await this.get<{ data: User }>(userEndpoints.getByEmail(email));
-    return this.extractData(response);
-  }
+        const response = await this.get<ApiResponse<User[]>>(endpoint);
+        return this.extractData(response as ApiResponse<User[]>) || [];
+    }
 
-  /**
-   * Update user profile
-   */
-  async updateProfile(data: UpdateUserProfileRequest): Promise<User> {
-    const response = await this.patch<{ data: User }>(userEndpoints.updateProfile, data);
-    return this.extractData(response);
-  }
+    /**
+     * Current authenticated user (`GET /user`).
+     */
+    async getCurrentUser(): Promise<User> {
+        const response = await this.get<ApiResponse<User>>(userEndpoints.me);
+        return this.extractData(response as ApiResponse<User>);
+    }
 
-  /**
-   * Upload avatar
-   */
-  async uploadAvatar(formData: FormData): Promise<{ data: User }> {
-    const response = await this.post<{ data: User }>(userEndpoints.uploadAvatar, formData, {
-      headers: {}, // Let browser set Content-Type for FormData
-    });
-    return response;
-  }
-
-  /**
-   * Delete current user
-   */
-  async deleteMe(): Promise<{ message: string }> {
-    const response = await this.delete<{ message: string }>(userEndpoints.deleteMe);
-    return this.extractData(response);
-  }
-
-  /**
-   * Send partner invite
-   */
-  async sendPartnerInvite(data: SendPartnerInviteRequest): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>(partnerEndpoints.sendInvite, data);
-    return this.extractData(response);
-  }
-
-  /**
-   * Accept partner invite
-   */
-  async acceptPartnerInvite(data: AcceptPartnerInviteRequest): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>(partnerEndpoints.acceptInvite, data);
-    return this.extractData(response);
-  }
-
-  /**
-   * Disconnect partner
-   */
-  async disconnectPartner(): Promise<{ message: string }> {
-    const response = await this.post<{ message: string }>(partnerEndpoints.disconnect);
-    return this.extractData(response);
-  }
+    /**
+     * Deactivate the signed-in account (`DELETE /user/deactivate`).
+     */
+    async deleteMe(): Promise<{ message: string }> {
+        const response = await this.delete<{ message: string }>(
+            userEndpoints.deactivate,
+        );
+        return this.extractData(response);
+    }
 }
 
-/**
- * Singleton instance
- */
 export const usersService = new UsersService();
-

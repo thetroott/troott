@@ -6,9 +6,9 @@
  */
 
 import Bugsnag from '@bugsnag/expo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { apiClient } from '../client';
+import { getMMKV } from './mmkv-client';
 import { NetworkQuality, NetworkState, subscribeToNetworkState } from '@/utils/network';
 
 /**
@@ -26,17 +26,23 @@ export interface QueuedMutation {
   error?: string;
 }
 
-/**
- * AsyncStorage key for offline queue
- */
+/** MMKV key for offline mutation queue */
 const QUEUE_KEY = 'trifold-mutation-queue';
+
+function readQueueJson(): string | undefined {
+    return getMMKV().getString(QUEUE_KEY);
+}
+
+function writeQueueJson(serialized: string): void {
+    getMMKV().set(QUEUE_KEY, serialized);
+}
 
 /**
  * Get all queued mutations
  */
 export const getQueuedMutations = async (): Promise<QueuedMutation[]> => {
   try {
-    const serialized = await AsyncStorage.getItem(QUEUE_KEY);
+    const serialized = readQueueJson();
     if (!serialized) return [];
     return JSON.parse(serialized) as QueuedMutation[];
   } catch (error) {
@@ -62,7 +68,7 @@ export const queueMutation = async (mutation: Omit<QueuedMutation, 'id' | 'times
 
   const queue = await getQueuedMutations();
   queue.push(queuedMutation);
-  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+  writeQueueJson(JSON.stringify(queue));
 
   return id;
 };
@@ -84,7 +90,7 @@ export const updateMutationStatus = async (
       queue[index].error = error;
     }
     queue[index].retries += 1;
-    await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
+    writeQueueJson(JSON.stringify(queue));
   }
 };
 
@@ -94,7 +100,7 @@ export const updateMutationStatus = async (
 export const removeMutation = async (id: string): Promise<void> => {
   const queue = await getQueuedMutations();
   const filtered = queue.filter((m) => m.id !== id);
-  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(filtered));
+  writeQueueJson(JSON.stringify(filtered));
 };
 
 /**
@@ -103,7 +109,7 @@ export const removeMutation = async (id: string): Promise<void> => {
 export const clearCompletedMutations = async (): Promise<void> => {
   const queue = await getQueuedMutations();
   const pending = queue.filter((m) => m.status !== 'completed');
-  await AsyncStorage.setItem(QUEUE_KEY, JSON.stringify(pending));
+  writeQueueJson(JSON.stringify(pending));
 };
 
 /**

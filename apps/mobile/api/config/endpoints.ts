@@ -1,210 +1,307 @@
 /**
- * API Endpoints Constants
- * 
- * Centralized endpoint definitions generated from Postman collection.
- * All endpoints use the base URL from config.
+ * Troott API endpoint paths.
+ *
+ * Mirrors `apps/api/src/routes/v1/routes.router.ts` (mounted at `/api/v1`).
+ * `API_BASE_PATH` is defined in `./index` (default `/api/v1`).
  */
-
 import { API_BASE_PATH } from './index';
 
-/**
- * Base URL placeholder - will be replaced with actual base URL in client
- * Fallback to '/api/v1' if API_BASE_PATH is undefined (prevents circular dependency issues)
- */
 const BASE = API_BASE_PATH || '/api/v1';
 
-/**
- * Authentication endpoints
- */
+// ---------------------------------------------------------------------------
+// Auth (`/auth`)
+// ---------------------------------------------------------------------------
+
 export const authEndpoints = {
-  login: `${BASE}/auth/login`,
-  register: `${BASE}/auth/register`,
-  verifyOtp: `${BASE}/auth/verify-otp`,
-  resendOtp: `${BASE}/auth/resend-otp`,
-  forgotPassword: `${BASE}/auth/forgot-password`,
-  resetPassword: `${BASE}/auth/reset-password`,
-  changePassword: `${BASE}/auth/change-password`,
-  logout: `${BASE}/auth/logout`,
-  sendMail: `${BASE}/auth/send-mail`, // TEST endpoint
+    register: `${BASE}/auth/register`,
+    login: `${BASE}/auth/login`,
+    verifyOtp: `${BASE}/auth/verify-otp`,
+    resendOtp: `${BASE}/auth/resend-otp`,
+    activate: `${BASE}/auth/activate`,
+    forgotPassword: `${BASE}/auth/forgot-password`,
+    resetPassword: `${BASE}/auth/reset-password`,
+    changePassword: `${BASE}/auth/change-password`,
+    refreshToken: `${BASE}/auth/token`,
+    logout: `${BASE}/auth/logout`,
+    oauthGoogle: `${BASE}/auth/google`,
+    oauthGithub: `${BASE}/auth/github`,
+    oauthApple: `${BASE}/auth/apple`,
+    oauthGoogleCallback: `${BASE}/auth/google/callback`,
+    oauthGithubCallback: `${BASE}/auth/github/callback`,
+    oauthAppleCallback: `${BASE}/auth/apple/callback`,
 } as const;
 
-/**
- * User endpoints
- */
+// ---------------------------------------------------------------------------
+// User account (`/user`)
+// ---------------------------------------------------------------------------
+
 export const userEndpoints = {
-  getAll: `${BASE}/users`,
-  getById: (userId: string) => `${BASE}/users/${userId}`,
-  getByEmail: (email: string) => `${BASE}/users/get-user-by-email/${email}`,
-  updateProfile: `${BASE}/users/update-profile`,
-  uploadAvatar: `${BASE}/users/upload-avatar`,
-  deleteMe: `${BASE}/users/delete-me`,
+    /** Current authenticated user profile. */
+    me: `${BASE}/user`,
+    /** Paginated / filtered user list (staff). */
+    list: `${BASE}/user/list`,
+    deactivate: `${BASE}/user/deactivate`,
 } as const;
 
-/**
- * Partner endpoints
- */
-export const partnerEndpoints = {
-  sendInvite: `${BASE}/users/partner/send-invite`,
-  acceptInvite: `${BASE}/users/partner/accept-invite`,
-  disconnect: `${BASE}/users/partner/disconnect-partner`,
-  confirmPartner: `${BASE}/users/partner/confirm-partner`,
+// ---------------------------------------------------------------------------
+// Listener (`/listener`)
+// ---------------------------------------------------------------------------
+
+export const listenerEndpoints = {
+    profile: `${BASE}/listener`,
+    list: `${BASE}/listener/list`,
+    interests: `${BASE}/listener/interests`,
+    invite: `${BASE}/listener/invite`,
+    inviteBulk: `${BASE}/listener/invite/bulk`,
+    inviteResend: `${BASE}/listener/invite/resend`,
+    inviteAccept: `${BASE}/listener/invite/accept`,
+    inviteRevoke: `${BASE}/listener/invite/revoke`,
+    setPassword: `${BASE}/listener/set-password`,
+    onboardingTopics: `${BASE}/listener/onboarding/topics`,
+    onboardingMinisters: `${BASE}/listener/onboarding/ministers`,
+    onboardingSkip: `${BASE}/listener/onboarding/skip`,
 } as const;
 
-/**
- * Assessment endpoints
- */
-export const assessmentEndpoints = {
-  getAll: `${BASE}/assessments`,
-  getById: (assessmentId: string) => `${BASE}/assessments/${assessmentId}`,
-  getByCategory: (category: string) => `${BASE}/assessments/category/${category}`,
-  create: `${BASE}/assessments`,
-  update: (assessmentId: string) => `${BASE}/assessments/${assessmentId}`,
-  delete: (assessmentId: string) => `${BASE}/assessments/${assessmentId}`,
-  generateResult: `${BASE}/assessments/generate-result`,
+// ---------------------------------------------------------------------------
+// Minister (`/minister`)
+// ---------------------------------------------------------------------------
+
+export const ministerEndpoints = {
+    profile: `${BASE}/minister`,
+    list: `${BASE}/minister/list`,
+    verification: `${BASE}/minister/verification`,
+    verificationStatus: `${BASE}/minister/verification/status`,
+    invite: `${BASE}/minister/invite`,
+    inviteBulk: `${BASE}/minister/invite/bulk`,
+    inviteResend: `${BASE}/minister/invite/resend`,
+    inviteAccept: `${BASE}/minister/invite/accept`,
+    inviteRevoke: `${BASE}/minister/invite/revoke`,
+    setPassword: `${BASE}/minister/set-password`,
+    byId: (id: string) => `${BASE}/minister/${id}`,
 } as const;
 
-/**
- * Article endpoints
- */
-export const articleEndpoints = {
-  getAll: `${BASE}/articles`,
-  getById: (articleId: string) => `${BASE}/articles/${articleId}`,
-  create: `${BASE}/articles`,
-  update: (articleId: string) => `${BASE}/articles/${articleId}`,
-  delete: (articleId: string) => `${BASE}/articles/${articleId}`,
+// ---------------------------------------------------------------------------
+// Creator (`/creator`)
+// ---------------------------------------------------------------------------
+
+export const creatorEndpoints = {
+    profile: `${BASE}/creator`,
+    list: `${BASE}/creator/list`,
+    byId: (id: string) => `${BASE}/creator/${id}`,
+    invite: `${BASE}/creator/invite`,
+    inviteAccept: `${BASE}/creator/invite/accept`,
+    inviteRevoke: `${BASE}/creator/invite/revoke`,
+    setPassword: `${BASE}/creator/set-password`,
+    verification: `${BASE}/creator/verification`,
+    verificationStatus: `${BASE}/creator/verification/status`,
 } as const;
 
-/**
- * Category endpoints
- */
-export const categoryEndpoints = {
-  getAll: `${BASE}/categories`,
-  getGuests: `${BASE}/categories/guests`,
-  getAllCategories: `${BASE}/categories/all-categories`,
-  getById: (categoryId: string) => `${BASE}/categories/${categoryId}`,
-  create: `${BASE}/categories`,
-  update: (categoryId: string) => `${BASE}/categories/${categoryId}`,
-  delete: (categoryId: string) => `${BASE}/categories/${categoryId}`,
+// ---------------------------------------------------------------------------
+// Admin (`/admin`)
+// ---------------------------------------------------------------------------
+
+export const adminEndpoints = {
+    profile: `${BASE}/admin`,
+    list: `${BASE}/admin/list`,
+    byId: (id: string) => `${BASE}/admin/${id}`,
+    invite: `${BASE}/admin/invite`,
+    inviteAccept: `${BASE}/admin/invite/accept`,
+    inviteRevoke: `${BASE}/admin/invite/revoke`,
+    setPassword: `${BASE}/admin/set-password`,
 } as const;
 
-/**
- * Post endpoints (v1)
- */
-export const postEndpoints = {
-  getAll: `${BASE}/posts`,
-  getCount: `${BASE}/posts/count`,
-  getById: (postId: string) => `${BASE}/posts/${postId}`,
-  create: `${BASE}/posts`,
-  update: (postId: string) => `${BASE}/posts/${postId}`,
-  delete: (postId: string) => `${BASE}/posts/${postId}`,
+// ---------------------------------------------------------------------------
+// Sermon (`/sermon`)
+// ---------------------------------------------------------------------------
+
+export const sermonEndpoints = {
+    root: `${BASE}/sermon`,
+    byId: (id: string) => `${BASE}/sermon/${id}`,
+    startUpload: `${BASE}/sermon/start-upload`,
+    imageUpload: `${BASE}/sermon/image-upload`,
+    publish: (id: string) => `${BASE}/sermon/publish/${id}`,
+    update: (id: string) => `${BASE}/sermon/update/${id}`,
+    moveToBin: (id: string) => `${BASE}/sermon/move-to-bin/${id}`,
+    delete: (id: string) => `${BASE}/sermon/delete/${id}`,
+    topic: (topic: string) => `${BASE}/sermon/topic/${encodeURIComponent(topic)}`,
+    minister: (ministerId: string) => `${BASE}/sermon/minister/${ministerId}`,
+    ministerMostPlayed: (ministerId: string) =>
+        `${BASE}/sermon/minister/${ministerId}/most-played`,
+    ministerMostLiked: (ministerId: string) =>
+        `${BASE}/sermon/minister/${ministerId}/most-liked`,
+    ministerMostShared: (ministerId: string) =>
+        `${BASE}/sermon/minister/${ministerId}/most-shared`,
+    ministerRecentlyPublished: (ministerId: string) =>
+        `${BASE}/sermon/minister/${ministerId}/recently-published`,
+    statsMostPlayed: `${BASE}/sermon/stats/most-played`,
+    statsMostLiked: `${BASE}/sermon/stats/most-liked`,
+    statsMostShared: `${BASE}/sermon/stats/most-shared`,
+    statsRecentlyPublished: `${BASE}/sermon/stats/recently-published`,
+    userRecentlyAdded: `${BASE}/sermon/user/recently-added`,
+    userRecentlyPlayed: `${BASE}/sermon/user/recently-played`,
+    userPopular: `${BASE}/sermon/user/popular`,
+    userFavoriteMinisters: `${BASE}/sermon/user/favorite-ministers`,
+    userInterests: `${BASE}/sermon/user/interests`,
 } as const;
 
-/**
- * Book endpoints
- */
-export const bookEndpoints = {
-  getAll: `${BASE}/books`,
-  getById: (bookId: string) => `${BASE}/books/${bookId}`,
-  create: `${BASE}/books`,
-  update: (bookId: string) => `${BASE}/books/${bookId}`,
-  delete: (bookId: string) => `${BASE}/books/${bookId}`,
+// ---------------------------------------------------------------------------
+// Library (`/library`)
+// ---------------------------------------------------------------------------
+
+export const libraryEndpoints = {
+    root: `${BASE}/library`,
+    byUser: (userId: string) => `${BASE}/library/user/${userId}`,
+    byUserAndId: (userId: string, libraryId: string) =>
+        `${BASE}/library/user/${userId}/${libraryId}`,
 } as const;
 
-/**
- * Forum endpoints
- */
-export const forumEndpoints = {
-  questions: {
-    getAll: `${BASE}/questions`,
-    getByCategory: (categoryId: string) => `${BASE}/questions/${categoryId}/questions`,
-    getById: (questionId: string) => `${BASE}/questions/${questionId}`,
-    create: `${BASE}/questions`,
-    update: (questionId: string) => `${BASE}/questions/${questionId}`,
-    delete: (questionId: string) => `${BASE}/questions/${questionId}`,
-    getReplies: (questionId: string) => `${BASE}/questions/${questionId}/replies`,
-    createReply: (questionId: string) => `${BASE}/questions/${questionId}/replies`,
-  },
-  replies: {
-    getAll: `${BASE}/replies`,
-    getById: (replyId: string) => `${BASE}/replies/${replyId}`,
-    create: `${BASE}/replies`,
-    update: (replyId: string) => `${BASE}/replies/${replyId}`,
-    delete: (replyId: string) => `${BASE}/replies/${replyId}`,
-  },
+// ---------------------------------------------------------------------------
+// Playlist (`/playlist`)
+// ---------------------------------------------------------------------------
+
+export const playlistEndpoints = {
+    root: `${BASE}/playlist`,
+    byId: (id: string) => `${BASE}/playlist/${id}`,
+    byUser: (userId: string) => `${BASE}/playlist/user/${userId}`,
+    addItem: (playlistId: string) => `${BASE}/playlist/${playlistId}/add`,
+    removeItem: (playlistId: string) => `${BASE}/playlist/${playlistId}/remove`,
 } as const;
 
-/**
- * Nudge endpoints
- */
-export const nudgeEndpoints = {
-  getAll: `${BASE}/nudges`,
-  getByCategoryAndSection: (categoryId: string, section: string) => 
-    `${BASE}/nudges/${categoryId}/${section}`,
-  getById: (nudgeId: string) => `${BASE}/nudges/${nudgeId}`,
-  create: `${BASE}/nudges`,
-  update: (nudgeId: string) => `${BASE}/nudges/${nudgeId}`,
-  delete: (nudgeId: string) => `${BASE}/nudges/${nudgeId}`,
+// ---------------------------------------------------------------------------
+// Search (`/search`)
+// ---------------------------------------------------------------------------
+
+export const searchEndpoints = {
+    catalog: `${BASE}/search`,
+    sermons: `${BASE}/search/sermons`,
+    ministers: `${BASE}/search/ministers`,
+    series: `${BASE}/search/series`,
+    playlists: `${BASE}/search/playlists`,
+    topics: `${BASE}/search/topics`,
+    withinMinister: (ministerId: string) => `${BASE}/search/minister/${ministerId}`,
+    withinSeries: (seriesId: string) => `${BASE}/search/series/${seriesId}`,
+    autocomplete: `${BASE}/search/autocomplete`,
+    trending: `${BASE}/search/trending`,
+    popular: `${BASE}/search/popular`,
+    recent: `${BASE}/search/recent`,
+    recentById: (id: string) => `${BASE}/search/recent/${id}`,
 } as const;
 
-/**
- * Counsellor endpoints
- */
-export const counsellorEndpoints = {
-  getAll: `${BASE}/counsellors`,
-  getPending: `${BASE}/counsellors/pending-counsellors`,
-  getById: (counsellorId: string) => `${BASE}/counsellors/${counsellorId}`,
-  getByEmail: `${BASE}/counsellors/get-counsellor`,
-  create: `${BASE}/counsellors`,
-  update: (counsellorId: string) => `${BASE}/counsellors/${counsellorId}`,
-  delete: (counsellorId: string) => `${BASE}/counsellors/${counsellorId}`,
+// ---------------------------------------------------------------------------
+// Discovery (`/discovery`)
+// ---------------------------------------------------------------------------
+
+export const discoveryEndpoints = {
+    home: `${BASE}/discovery/home`,
 } as const;
 
-/**
- * Meeting endpoints
- */
-export const meetingEndpoints = {
-  getAll: `${BASE}/meetings`,
-  getById: (meetingId: string) => `${BASE}/meetings/${meetingId}`,
-  getCounsellorMeetings: (counsellorId: string) => 
-    `${BASE}/meetings/counsellor/${counsellorId}`,
-  getUpcoming: (counsellorId: string) => 
-    `${BASE}/meetings/counsellor/${counsellorId}/upcoming`,
-  create: `${BASE}/meetings`,
-  delete: (meetingId: string) => `${BASE}/meetings/${meetingId}`,
-  sendMail: `${BASE}/meetings/send-mail`,
+// ---------------------------------------------------------------------------
+// Share (`/share`)
+// ---------------------------------------------------------------------------
+
+export const shareEndpoints = {
+    resolve: `${BASE}/share/resolve`,
 } as const;
 
-/**
- * Payment endpoints
- */
-export const paymentEndpoints = {
-  payNudges: `${BASE}/payments/pay-nudges`,
-  payCounselling: `${BASE}/payments/pay-counselling`,
-  payPremium: `${BASE}/payments/pay-premium`,
+// ---------------------------------------------------------------------------
+// Open / public teaser (`/open`)
+// ---------------------------------------------------------------------------
+
+export const openEndpoints = {
+    sermonTeaser: (id: string) => `${BASE}/open/sermon/${id}`,
 } as const;
 
-/**
- * Health check endpoint
- */
-export const healthEndpoint = `${BASE}/health`;
+// ---------------------------------------------------------------------------
+// Playback progress (`/playback`)
+// ---------------------------------------------------------------------------
+
+export const playbackEndpoints = {
+    root: `${BASE}/playback`,
+    Sermon: (sermonId: string) => `${BASE}/playback/sermon/${sermonId}`,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Plans & subscriptions (`/plans`, `/subscriptions`)
+// ---------------------------------------------------------------------------
+
+export const planEndpoints = {
+    root: `${BASE}/plans`,
+    byId: (planId: string) => `${BASE}/plans/${planId}`,
+} as const;
+
+export const subscriptionEndpoints = {
+    root: `${BASE}/subscriptions`,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Storage (`/storage`)
+// ---------------------------------------------------------------------------
+
+export const storageEndpoints = {
+    upload: `${BASE}/storage/upload`,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Invitations (`/invitation`)
+// ---------------------------------------------------------------------------
+
+export const invitationEndpoints = {
+    byId: (invitationId: string) => `${BASE}/invitation/id/${invitationId}`,
+    byInviter: (inviterId: string) => `${BASE}/invitation/inviter/${inviterId}`,
+    byInvitee: `${BASE}/invitation/invitee`,
+    byResource: (resourceId: string) => `${BASE}/invitation/resource/${resourceId}`,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Roles (`/roles`)
+// ---------------------------------------------------------------------------
+
+export const roleEndpoints = {
+    root: `${BASE}/roles`,
+    list: `${BASE}/roles/list`,
+    byId: (id: string) => `${BASE}/roles/${id}`,
+    userRoles: (userId: string) => `${BASE}/roles/user/${userId}`,
+    userAttach: (userId: string) => `${BASE}/roles/user/${userId}/attach`,
+    userDetach: (userId: string) => `${BASE}/roles/user/${userId}/detach`,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Webhooks (`/webhook`) — server-to-server; listed for completeness
+// ---------------------------------------------------------------------------
+
+export const webhookEndpoints = {
+    email: `${BASE}/webhook/email`,
+} as const;
+
+// ---------------------------------------------------------------------------
+// API root (HTML health view in browser)
+// ---------------------------------------------------------------------------
+
+export const apiRootEndpoint = `${BASE}/`;
 
 /**
- * All endpoints grouped by resource
+ * All Troott endpoints grouped by domain.
  */
 export const endpoints = {
-  auth: authEndpoints,
-  user: userEndpoints,
-  partner: partnerEndpoints,
-  assessment: assessmentEndpoints,
-  article: articleEndpoints,
-  category: categoryEndpoints,
-  post: postEndpoints,
-  book: bookEndpoints,
-  forum: forumEndpoints,
-  nudge: nudgeEndpoints,
-  counsellor: counsellorEndpoints,
-  meeting: meetingEndpoints,
-  payment: paymentEndpoints,
-  health: healthEndpoint,
+    auth: authEndpoints,
+    user: userEndpoints,
+    listener: listenerEndpoints,
+    minister: ministerEndpoints,
+    creator: creatorEndpoints,
+    admin: adminEndpoints,
+    sermon: sermonEndpoints,
+    library: libraryEndpoints,
+    playlist: playlistEndpoints,
+    search: searchEndpoints,
+    discovery: discoveryEndpoints,
+    share: shareEndpoints,
+    open: openEndpoints,
+    playback: playbackEndpoints,
+    plan: planEndpoints,
+    subscription: subscriptionEndpoints,
+    storage: storageEndpoints,
+    invitation: invitationEndpoints,
+    role: roleEndpoints,
+    webhook: webhookEndpoints,
+    root: apiRootEndpoint,
 } as const;
-

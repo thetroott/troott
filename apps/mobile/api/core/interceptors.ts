@@ -5,9 +5,10 @@
  */
 
 import { RequestConfig } from '../client';
-import { apiConfig } from '../config';
+import { apiConfig, DEFAULT_API_REQUEST_HEADERS } from '../config';
 import { ApiError, ApiErrorType, getErrorTypeFromStatus, logError } from '../errors';
 import { clearTokens, getToken, isTokenExpired } from '../storage/auth';
+import { storage as sessionStorage } from '../storage/session-storage';
 
 /**
  * Prepare request headers with authentication
@@ -17,12 +18,17 @@ export const prepareRequestHeaders = async (
 ): Promise<Record<string, string>> => {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    ...DEFAULT_API_REQUEST_HEADERS,
     ...(config.headers as Record<string, string>),
   };
 
-  // Add authentication token if not skipped
+  // Add authentication token if not skipped (SecureStore first, then MMKV session)
   if (!config.skipAuth) {
-    const token = await getToken();
+    let token = await getToken();
+    if (!token) {
+      const mmkv = await sessionStorage.getToken();
+      if (mmkv) token = mmkv;
+    }
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
