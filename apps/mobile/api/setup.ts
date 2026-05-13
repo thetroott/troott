@@ -6,7 +6,7 @@
  */
 
 import { initializeBugsnag } from './monitoring/bugsnag';
-import { initializeOfflineQueue } from './storage/offline';
+import { initializeOfflineQueue } from './services/offline';
 
 /**
  * Initialize all API services
