@@ -1,20 +1,20 @@
-import { IResult } from '@/modules/shared/interfaces.util';
-import { IPlanPaystackCode } from '@/modules/payments/plan/plan.interface';
+import { IResult } from '@/interfaces/common.interface';
+import { IPlanPaystackCode } from '@/interfaces/plan.interface';
 import planService from '@/services/plan.service';
 import transactionService from '@/services/transaction.service';
-import type { IUserDoc } from '@/modules/users/user/user.interface';
+import type { IUserDoc } from '@/interfaces/user.interface';
 import userRepository from '@/repository/user.repository';
 import {
     ISubscriptionIntentDoc,
     SubscriptionIntentState,
 } from '@/interfaces/subscriptionIntent.interface';
 import subscriptionIntentService from '@/services/subscriptionIntent.service';
-import { newSubscriptionDTO } from '@/dtos/subscription.dto';
+import { CreateSubscriptionDTO } from '@/dtos/subscription.dto';
 import {
     BillingFrequency,
     Currency,
     SubscriptionStatus,
-} from '@/modules/payments/subscription/subscription.interface';
+} from '@/interfaces/subscription.interface';
 import subscriptionRepository from '@/repository/subscription.repository';
 
 class SubscriptionService {
@@ -24,7 +24,7 @@ class SubscriptionService {
      * @param dto
      * @returns {Promise<IResult>} A result object indicating success or failure with an appropriate message.
      */
-    public async validateDto(dto: newSubscriptionDTO): Promise<IResult> {
+    public async validateDto(dto: CreateSubscriptionDTO): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',

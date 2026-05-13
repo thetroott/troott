@@ -1,5 +1,5 @@
 import { InvitationStatus, InvitationType } from '../interfaces/invitation.interface';
-import { IResult } from '../utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 import {
     CreateInvitationDTO,
     InviteTokenDTO,

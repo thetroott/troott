@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { IResult } from '../utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 import { DecryptDataDTO, EncryptDataDTO } from '@/dtos/system.dto';
 
 class SystemService {
@@ -25,17 +25,21 @@ class SystemService {
         try {
             const key = crypto.createHash('sha256').update(password).digest();
 
-            // If IV is not provided, generate a new random one
             const vector = iv || crypto.randomBytes(12);
 
             const cipher = crypto.createCipheriv('aes-256-gcm', key, vector);
-            let encrypted = cipher.update(data.payload, 'utf8', 'hex');
-            encrypted += cipher.final('hex');
+            const encrypted = Buffer.concat([
+                cipher.update(data.payload, 'utf8'),
+                cipher.final(),
+            ]);
+            const tag = cipher.getAuthTag();
+
+            const combined = Buffer.concat([encrypted, tag]);
 
             return {
                 error: false,
-                data: encrypted,
-                vector: vector.toString('hex'), // Store IV as hex
+                data: combined.toString('hex'),
+                vector: vector.toString('hex'),
             };
         } catch (error) {
             console.error('Encryption failed:', error);
@@ -90,12 +94,24 @@ class SystemService {
     ): { error: boolean; data?: string } {
         try {
             const key = crypto.createHash('sha256').update(password).digest();
+            const combined = Buffer.from(data.payload, 'hex');
+
+            if (combined.length < 16) {
+                return { error: true };
+            }
+
+            const tag = combined.subarray(combined.length - 16);
+            const encrypted = combined.subarray(0, combined.length - 16);
+
             const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+            decipher.setAuthTag(tag);
 
-            let decrypted = decipher.update(data.payload, 'hex', 'utf8');
-            decrypted += decipher.final('utf8');
+            const decrypted = Buffer.concat([
+                decipher.update(encrypted),
+                decipher.final(),
+            ]);
 
-            return { error: false, data: decrypted };
+            return { error: false, data: decrypted.toString('utf8') };
         } catch (error) {
             console.error('Decryption failed:', error);
             return { error: true };

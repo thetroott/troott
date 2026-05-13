@@ -1,11 +1,11 @@
 import slugify from 'slugify';
 import { Random } from '@btffamily/pacitude';
-import { IResult } from '@/modules/shared/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 import {
-    allowedPlanUpdateDTO,
-    newPlanDTO,
-    planAvailabilityDTO,
-    updatePlanDTO,
+    AllowedPlanUpdateField,
+    CreatePlanDTO,
+    PlanAvailabilityDTO,
+    UpdatePlanDTO,
 } from '@/dtos/plan.dto';
 import {
     IPlanFilterOptions,
@@ -14,7 +14,7 @@ import {
     PlanInterval,
     PlanPriceCurrency,
     PlanType,
-} from '@/modules/payments/plan/plan.interface';
+} from '@/interfaces/plan.interface';
 import {
     paystackCreatePlan,
     paystackPlanUpdate,
@@ -24,14 +24,24 @@ import planRepository from '@/repository/plan.repository';
 class PlanService {
     constructor() {}
 
+    /** All prices zero in minor units: no Paystack subscription plans required. */
+    private isFreePricing(pricing: IPlanPricing): boolean {
+        return (
+            pricing.naira.monthly === 0 &&
+            pricing.naira.yearly === 0 &&
+            pricing.dollar.monthly === 0 &&
+            pricing.dollar.yearly === 0
+        );
+    }
+
     /**
      * @name createNewPlan
      * @description creates a new plan on platform for businesses or talents also creates plan on paystack
-     * @param {newPlanDTO}
+     * @param {CreatePlanDTO}
      * @returns {Promise<IResult>} A result object indicating success or failure with an appropriate message.
      *
      */
-    public async createNewPlan(dto: newPlanDTO): Promise<IResult> {
+    public async createNewPlan(dto: CreatePlanDTO): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -45,9 +55,8 @@ class PlanService {
             description,
             trial,
             pricing,
-            members,
-            domains,
-            projects,
+            sermon,
+            sermonBite,
             planType,
         } = dto;
 
@@ -67,9 +76,8 @@ class PlanService {
             description,
             trial,
             pricing: planPriceAmount,
-            members,
-            domains,
-            projects,
+            sermon,
+            sermonBite,
             slug,
         };
 
@@ -115,10 +123,10 @@ class PlanService {
     /**
      * @name updatePlan
      * @description updates an existing plan on the platform and on paystack
-     * @param {updatePlanDTO} dto
+     * @param {UpdatePlanDTO} dto
      * @returns {Promise<IResult>} A result object indicating success or failure with an appropriate message.
      */
-    public async updatePlan(dto: updatePlanDTO): Promise<IResult> {
+    public async updatePlan(dto: UpdatePlanDTO): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -227,11 +235,11 @@ class PlanService {
 
     /**
      * @name validateDto
-     * @description helper function to validate newPlanDTO for all required fields
+     * @description helper function to validate CreatePlanDTO for all required fields
      * @param dto
      * @returns {Promise<IResult>} A result object indicating success or failure with an appropriate message.
      */
-    public async validateDto(dto: newPlanDTO): Promise<IResult> {
+    public async validateDto(dto: CreatePlanDTO): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -278,22 +286,16 @@ class PlanService {
                 message: 'Plan trial information is required',
             });
         }
-        if (!dto.members) {
+        if (!dto.sermon) {
             errors.push({
-                field: 'members',
-                message: 'Plan members information is required',
+                field: 'sermon',
+                message: 'Plan sermon limits are required',
             });
         }
-        if (!dto.domains) {
+        if (!dto.sermonBite) {
             errors.push({
-                field: 'domains',
-                message: 'Plan domains information is required',
-            });
-        }
-        if (!dto.projects) {
-            errors.push({
-                field: 'projects',
-                message: 'Plan projects information is required',
+                field: 'sermonBite',
+                message: 'Plan sermon bite limits are required',
             });
         }
 
@@ -311,12 +313,12 @@ class PlanService {
 
     /**
      * @name validateUpdateField
-     * @description helper function to validate updatePlanDTO fields against allowed fields
+     * @description helper function to validate UpdatePlanDTO fields against allowed fields
      * @param updates
      * @returns {Promise<IResult>} A result object indicating success or failure with an appropriate message.
      */
     public async validateUpdateField(
-        updates: Partial<newPlanDTO>,
+        updates: Partial<CreatePlanDTO>,
     ): Promise<IResult> {
         let result: IResult = {
             error: false,
@@ -327,7 +329,7 @@ class PlanService {
 
         const allowedPlanTypes = [PlanType.FOR_BUSINESS, PlanType.FOR_LISTENER];
 
-        const allowedFields = Object.keys(allowedPlanUpdateDTO);
+        const allowedFields = Object.keys(AllowedPlanUpdateField);
 
         // check for invalid fields
         const invalidFields = Object.keys(updates).filter(
@@ -367,6 +369,15 @@ class PlanService {
         description: string,
         planPricing: IPlanPricing,
     ): Promise<IPlanPaystackCode> {
+        if (this.isFreePricing(planPricing)) {
+            return {
+                nairaMonthly: '',
+                nairaYearly: '',
+                dollarMonthly: '',
+                dollarYearly: '',
+            };
+        }
+
         const createPaystackPlan = async (
             name: string,
             amount: number,
@@ -450,6 +461,15 @@ class PlanService {
         planPricing: IPlanPricing,
         paystackPlanCodes: IPlanPaystackCode,
     ) {
+        if (this.isFreePricing(planPricing)) {
+            return {
+                nairaMonthly: paystackPlanCodes.nairaMonthly || '',
+                nairaYearly: paystackPlanCodes.nairaYearly || '',
+                dollarMonthly: paystackPlanCodes.dollarMonthly || '',
+                dollarYearly: paystackPlanCodes.dollarYearly || '',
+            };
+        }
+
         const updatePaystack = async (
             paystackPlanCode: string,
             name: string,
@@ -533,12 +553,12 @@ class PlanService {
      * @name getPlanAvailability
      * @description Decides plan availibity for Subscription
      * @param planId
-     * @returns {planAvailabilityDTO }
+     * @returns {PlanAvailabilityDTO }
      */
     public async getPlanAvailability(
         planId: string,
-    ): Promise<planAvailabilityDTO> {
-        let result: planAvailabilityDTO = {
+    ): Promise<PlanAvailabilityDTO> {
+        let result: PlanAvailabilityDTO = {
             isAvailable: true,
             data: null,
         };
@@ -558,16 +578,17 @@ class PlanService {
 
         const codes = plan.paystackPlanCodes;
 
-        if (
-            !codes ||
-            !codes.nairaMonthly ||
-            !codes.nairaYearly ||
-            !codes.dollarMonthly ||
-            !codes.dollarYearly
-        ) {
-            // all paystack plan codes must be aavailable for plan to be avialable
-            result.isAvailable = false;
-            return result;
+        if (!this.isFreePricing(plan.pricing)) {
+            if (
+                !codes ||
+                !codes.nairaMonthly ||
+                !codes.nairaYearly ||
+                !codes.dollarMonthly ||
+                !codes.dollarYearly
+            ) {
+                result.isAvailable = false;
+                return result;
+            }
         }
 
         result.data = {
@@ -588,46 +609,3 @@ class PlanService {
     // remove paystack plan codes from plan
 }
 export default new PlanService();
-
-const testNewPlan: newPlanDTO = {
-    name: 'pro-business',
-    label: 'PRO_BUSINESS',
-    planType: PlanType.FOR_BUSINESS,
-    displayName: 'Pro Business',
-    description: 'Advanced plan for growing businesses with higher limits.',
-    trial: {
-        days: 14,
-        enabled: true,
-    },
-    pricing: {
-        naira: {
-            monthly: 25000,
-            yearly: 250000,
-        },
-        dollar: {
-            monthly: 49,
-            yearly: 499,
-        },
-    },
-    members: {
-        limit: 50,
-        frequency: 'monthly',
-    },
-    domains: {
-        limit: 10,
-        frequency: 'lifetime',
-    },
-    projects: {
-        limit: 100,
-        frequency: 'monthly',
-    },
-};
-
-new PlanService()
-    .createNewPlan(testNewPlan)
-    .then((res) => {
-        console.log(res);
-    })
-    .catch((err) => {
-        console.error(err);
-    });

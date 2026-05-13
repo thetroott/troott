@@ -1,5 +1,5 @@
 import { dateToday, IDateToday, Random } from '@btffamily/pacitude';
-import { IResult } from '../utils/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 import {
     CreateShareableLinkDTO,
     ValidateShareableLinkDTO,
@@ -16,11 +16,11 @@ import {
 import systemService from '@/services/system.service';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
-import sermonRepository from '@/repository/sermon.repository';
-import playlistRepository from '@/repository/playlist.repository';
-import ministerRepository from '@/repository/minister.repository';
-import seriesRepository from '@/repository/series.repository';
-import libraryRepository from '@/repository/library.repository';
+import sermonRepository from '@/repository/core/sermon.repository';
+import playlistRepository from '@/repository/core/playlist.repository';
+import ministerRepository from '@/repository/core/minister.repository';
+import seriesRepository from '@/repository/core/series.repository';
+import libraryRepository from '@/repository/core/library.repository';
 
 /**
  * @name ShareableLinkService

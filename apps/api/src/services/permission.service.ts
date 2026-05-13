@@ -1,9 +1,9 @@
 import User from '@/models/user.model';
 import Role from '@/models/role.model';
 import redisWrapper from '../middlewares/redis.mdw';
-import { IResult } from '@/modules/shared/interfaces.util';
+import { IResult } from '@/interfaces/common.interface';
 import IRoleDoc from '../interfaces/role.interface';
-import { IUserDoc } from '@/modules/users/user/user.interface';
+import { IUserDoc } from '@/interfaces/user.interface';
 import { matchPermission as matchPermissionUtil } from '@/utils/role.util';
 
 const RBAC_USER_CACHE_KEY = (userId: string) => `rbac:perms:user:${userId}`;

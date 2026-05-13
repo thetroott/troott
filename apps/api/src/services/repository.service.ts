@@ -6,7 +6,7 @@ import {
     UpdateQuery,
 } from 'mongoose';
 import mongoose from 'mongoose';
-import { IResult, IPagination } from '@/modules/shared/interfaces.util';
+import { IResult, IPagination } from '@/interfaces/common.interface';
 
 /**
  * Query options interface

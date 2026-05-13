@@ -9,10 +9,10 @@ import {
 import type { Readable } from 'stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, AWS_BUCKET_NAME } from '../configs/aws.config';
-import { IFile, IResult } from '@/modules/shared/interfaces.util';
+import { IFile, IResult } from '@/interfaces/common.interface';
 
 import { Upload } from '@aws-sdk/lib-storage';
-import { UploadStatus } from '../utils/enums.util';
+import { UploadStatus } from '@/types/upload.enums';
 import { getS3Folder } from '../utils/helpers.util';
 
 class StorageService {
@@ -202,9 +202,88 @@ class StorageService {
     }
 
     /**
+     * Download the full contents of an S3 object as a Buffer.
+     * Useful when you need the entire file in memory (e.g. PDF generation,
+     * email attachments). For large files prefer {@link getObjectStream}.
+     */
+    public async getDocument(key: string): Promise<IResult> {
+        try {
+            const out = await this.s3Client.send(
+                new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+            );
+
+            if (!out.Body) {
+                return {
+                    error: true,
+                    message: 'Empty S3 body',
+                    code: 500,
+                    data: {},
+                };
+            }
+
+            const chunks: Buffer[] = [];
+            for await (const chunk of out.Body as AsyncIterable<Uint8Array>) {
+                chunks.push(Buffer.from(chunk));
+            }
+
+            return {
+                error: false,
+                message: 'Document retrieved successfully',
+                code: 200,
+                data: {
+                    buffer: Buffer.concat(chunks),
+                    contentType: out.ContentType,
+                },
+            };
+        } catch (error: any) {
+            if (
+                error.name === 'NoSuchKey' ||
+                error.$metadata?.httpStatusCode === 404
+            ) {
+                return {
+                    error: true,
+                    message: 'Document not found',
+                    code: 404,
+                    data: {},
+                };
+            }
+            return { error: true, message: error.message, code: 500, data: {} };
+        }
+    }
+
+    /**
+     * Generate a presigned GET URL for an arbitrary bucket and key.
+     * Falls back to 30 minutes if no duration is provided.
+     */
+    public async generatePresignedUrl(
+        bucket: string,
+        key: string,
+        durationSeconds?: number,
+    ): Promise<IResult> {
+        const expiry = durationSeconds ?? 1800;
+        try {
+            const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+            const url = await getSignedUrl(this.s3Client, command, {
+                expiresIn: expiry,
+            });
+
+            return {
+                error: false,
+                message: 'Presigned URL generated successfully',
+                code: 200,
+                data: { url, expiresIn: expiry },
+            };
+        } catch (error: any) {
+            return { error: true, message: error.message, code: 500, data: {} };
+        }
+    }
+
+    /**
      * Stream an object from S3 (for workers reading originals before transcoding).
      */
-    public async getObjectStream(key: string): Promise<IResult & { stream?: Readable }> {
+    public async getObjectStream(
+        key: string,
+    ): Promise<IResult & { stream?: Readable }> {
         let result: IResult & { stream?: Readable } = {
             error: false,
             message: '',

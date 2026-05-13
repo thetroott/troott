@@ -1,28 +1,25 @@
-import { IFile, IResult } from '../utils/interfaces.util';
+import { IFile, IResult } from '@/interfaces/common.interface';
 import type {
     IAudioHLSJobDTO,
     IAudioMetadataJobDTO,
     ISermonDoc,
-} from '@/modules/core/sermon/sermon.interface';
+} from '@/interfaces/core/sermon.interface';
 import StorageService from '@/services/storage.service';
-import {
-    UploadStatus,
-    S3Folder,
-    ContentStatus,
-    UploadStepType,
-    UserType,
-} from '../utils/enums.util';
-import { PublishSermonDTO } from '@/dtos/sermon.dto';
+import { ContentStatus } from '@/types/common.enum';
+import { UploadStatus, UploadStepType } from '@/types/upload.enums';
+import { S3Folder } from '@/interfaces/common.interface';
+import { UserType } from '@/interfaces/user.interface';
+import { PublishSermonDTO } from '@/dtos/core/sermon.dto';
 import { Upload } from '@aws-sdk/lib-storage';
-import sermonRepository from '@/repository/sermon.repository';
-import Sermon from '@/models/sermon.model';
-import Minister from '@/models/minister.model';
+import sermonRepository from '@/repository/core/sermon.repository';
+import Sermon from '@/models/core/sermon.model';
+import Minister from '@/models/core/minister.model';
 import mongoose from 'mongoose';
-import { AWS_BUCKET_NAME, s3 } from '../configs/aws.config';
-import { mediaConfig } from '../configs/media.config';
-import { addJob } from '../tasks/jobs/job';
-import { JobChannel, QueueChannel } from '../queues/channel.queue';
-import logger from '../utils/logger.util';
+import { AWS_BUCKET_NAME, s3 } from '@/configs/aws.config';
+import { mediaConfig } from '@/configs/media.config';
+import { addJob } from '@/tasks/jobs/job';
+import { JobChannel, QueueChannel } from '@/queues/channel.queue';
+import logger from '@/utils/logger.util';
 
 class SermonService {
     private s3Client = s3;
@@ -345,8 +342,8 @@ class SermonService {
                 sermon,
                 image,
                 size,
-                releaseDate,
-                releaseYear,
+                preachedAt,
+                preachedYear,
                 topic,
                 tags,
                 isPublic,
@@ -378,8 +375,8 @@ class SermonService {
                         sermon,
                         image,
                         size,
-                        releaseDate,
-                        releaseYear,
+                        preachedAt,
+                        preachedYear,
                         topic,
                         tags,
                         isPublic,
@@ -433,12 +430,12 @@ class SermonService {
         } else if (!data.duration) {
             result.error = true;
             result.message = 'Duration is required';
-        } else if (!data.releaseDate) {
+        } else if (!data.preachedAt) {
             result.error = true;
-            result.message = 'Release date is required';
-        } else if (!data.releaseYear) {
+            result.message = 'Preached date is required';
+        } else if (!data.preachedYear) {
             result.error = true;
-            result.message = 'Release year is required';
+            result.message = 'Preached year is required';
         } else if (!data.sermon) {
             result.error = true;
             result.message = 'Sermon File is required';
