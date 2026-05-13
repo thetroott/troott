@@ -112,4 +112,5 @@ export enum TransactionLabel {
     CREATOR_PAYOUT = 'Creator payout',
 }
 
+export type { ITransactionDoc };
 export default ITransactionDoc;

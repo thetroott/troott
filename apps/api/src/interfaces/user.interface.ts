@@ -1,8 +1,8 @@
 import { Document, Types } from 'mongoose';
 import IPermissionDoc from './permission.interface';
 import IRoleDoc from './role.interface';
-import IListenerDoc from './listener.interface';
-import IMinisterDoc from './minister.interface';
+import IListenerDoc from './core/listener.interface';
+import IMinisterDoc from './core/minister.interface';
 import { IAPIKey, ICountry, Upload } from './common.interface';
 import { Nullable } from '@/types/common.types';
 
@@ -253,6 +253,13 @@ export enum OnboardStatus {
     COMPLETED = 'completed',
 }
 
+/** Named stage within the onboarding flow. */
+export enum OnboardStage {
+    TOPICS = 'topics',
+    MINISTERS = 'ministers',
+    SKIPPED = 'skipped',
+}
+
 /** Status of a user invitation. */
 export enum InviteStatus {
     PENDING = 'pending',
@@ -277,4 +284,5 @@ export enum DeviceType {
     WINDOWS = 'windows',
 }
 
+export type { IUserDoc };
 export default IUserDoc;

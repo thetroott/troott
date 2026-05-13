@@ -1,6 +1,8 @@
-import { UploadDTO } from '@/dtos/sermon.dto';
-import { SeriesDTO, UpdateSeriesDTO } from '@/dtos/series.dto';
-import { ISeriesDoc } from '@/modules/core/series/series.interface';
+import { UploadDTO } from '@/dtos/core/sermon.dto';
+import { SeriesDTO, UpdateSeriesDTO } from '@/dtos/core/series.dto';
+import { ISeriesDoc } from '@/interfaces/core/series.interface';
+import type IMinisterDoc from '@/interfaces/core/minister.interface';
+import type ISermonDoc from '@/interfaces/core/sermon.interface';
 
 class SeriesMapper {
     constructor() {}
@@ -11,36 +13,20 @@ class SeriesMapper {
      * @returns SeriesDTO
      * @description Converts a series document into a DTO for API responses.
      */
-    public async mapSeriesDTO(series: ISeriesDoc): Promise<SeriesDTO> {
-        const result: SeriesDTO = {
+    public async mapSeriesDTO(series: ISeriesDoc): Promise<Partial<SeriesDTO>> {
+        const banner = series.banner;
+        const result: Partial<SeriesDTO> = {
             id: series.id.toString(),
             title: series.title,
             description: series.description,
-            image: {
-                thumbnailUrl: series.image.thumbnailUrl,
-                originalUrl: series.image.originalUrl,
-            },
+            banner: banner
+                ? { item: banner.item, width: banner.width, height: banner.height }
+                : undefined,
 
-            ministers: series.ministers.map((minister) => ({
-                id: minister.id,
-                ministerialName: minister.ministerialName,
+            ministers: series.ministers.map((minister: IMinisterDoc) => ({
+                id: String(minister.id),
+                name: minister.profile?.ministerialName ?? '',
             })),
-            sermons: series.sermons.map((sermon) => ({
-                id: sermon.id,
-                title: sermon.title,
-                sermon: {
-                    cdnUrl: sermon.sermon.cdnUrl,
-                    originalUrl: sermon.sermon.originalUrl,
-                },
-                image: {
-                    thumbnailUrl: sermon.image.thumbnailUrl,
-                    originalUrl: sermon.image.originalUrl,
-                },
-            })),
-            ownerId: {
-                id: series.ownerId.id,
-                ministerialName: series.ownerId.ministerialName,
-            },
 
             status: series.status,
             totalDuration: series.totalDuration,
@@ -57,30 +43,16 @@ class SeriesMapper {
 
     public async mapSeriesUpdate(series: ISeriesDoc): Promise<UpdateSeriesDTO> {
         const result: UpdateSeriesDTO = {
-            id: series.id.toString(),
             title: series.title,
             description: series.description,
-            image: {
-                thumbnailUrl: series.image.thumbnailUrl,
-                originalUrl: series.image.originalUrl,
-            },
+            banner: series.banner
+                ? { item: series.banner.item, width: series.banner.width, height: series.banner.height }
+                : undefined,
 
-            ministers: series.ministers.map((minister) => ({
-                id: minister.id,
-                ministerialName: minister.ministerialName,
-            })),
-            sermons: series.sermons.map((sermon) => ({
-                id: sermon.id,
-                title: sermon.title,
-            })),
-            ownerId: {
-                id: series.ownerId.id,
-                ministerialName: series.ownerId.ministerialName,
-            },
+            ministers: series.ministers.map((minister: IMinisterDoc) => String(minister.id)),
+            sermons: (series as any).sermons?.map((sermon: ISermonDoc) => String(sermon.id)) ?? [],
 
             status: series.status,
-            totalDuration: series.totalDuration,
-            numberOfSermons: series.numberOfSermons,
 
             topic: series.topic,
             tags: series.tags,
@@ -91,11 +63,12 @@ class SeriesMapper {
     }
 
     public async mapUploadSeriesImage(series: ISeriesDoc): Promise<UploadDTO> {
+        const banner = series.banner;
         const result: UploadDTO = {
-            id: series.image.uploadId,
-            uploadRef: series.image.uploadId,
-            uploadedBy: series.image.uploadedBy,
-            file: series.image.thumbnailUrl,
+            id: banner?.itemId ?? '',
+            uploadRef: banner?.itemId ?? '',
+            uploadedBy: banner?.uploadedBy != null ? String(banner.uploadedBy) : '',
+            file: banner?.item ?? '',
         };
 
         return result;

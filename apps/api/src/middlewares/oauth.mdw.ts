@@ -4,7 +4,7 @@ import { Strategy as GitHubStrategy } from 'passport-github';
 import { Strategy as AppleStrategy } from 'passport-apple';
 import userRepository from '@/repository/user.repository';
 import userService from '@/services/user.service';
-import { OAuthProvider } from '../modules/authentication/auth/auth.enums';
+import { OAuthProvider } from '@/types/common.enum';
 
 const {
     GOOGLE_CLIENT_ID,

@@ -1,5 +1,5 @@
 import { UserDTO, UserProfileDTO } from '@/dtos/user.dto';
-import { IUserDoc } from '@/modules/users/user/user.interface';
+import { IUserDoc } from '@/interfaces/user.interface';
 
 class UserMapper {
     constructor() {}
@@ -12,6 +12,8 @@ class UserMapper {
     public async mapUser(user: IUserDoc): Promise<UserDTO> {
         const result: UserDTO = {
             id: user.id.toString(),
+            code: user.code,
+            slug: user.slug,
 
             firstName: user.firstName,
             lastName: user.lastName,
@@ -27,7 +29,10 @@ class UserMapper {
             userType: user.userType,
             isSuper: user.isSuper,
             isAdmin: user.isAdmin,
-            isOrganisation: false,
+            isUser: user.isUser,
+            isListener: user.isListener,
+            isMinister: user.isMinister,
+            isCreator: user.isCreator,
 
             isActive: user.isActive,
             isLocked: user.isLocked,
@@ -45,6 +50,7 @@ class UserMapper {
     public async mapUserProfile(user: IUserDoc): Promise<UserProfileDTO> {
         const result: UserProfileDTO = {
             id: user.id.toString(),
+            code: user.code,
 
             firstName: user.firstName,
             lastName: user.lastName,

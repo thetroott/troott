@@ -3,8 +3,8 @@ import {
     MapRegisteredUserDTO,
     MapUserDTO,
 } from '@/dtos/auth.dto';
-import type { IUserDoc } from '@/modules/users/user/user.interface';
-import { UserType } from '@/modules/users/user/user.interface';
+import type { IUserDoc } from '@/interfaces/user.interface';
+import { UserType, OnboardStatus } from '@/interfaces/user.interface';
 
 class AuthMapper {
     constructor() {}
@@ -19,6 +19,8 @@ class AuthMapper {
     ): Promise<MapRegisteredUserDTO> {
         const result: MapRegisteredUserDTO = {
             id: user.id.toString(),
+            code: user.code,
+            slug: user.slug,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
@@ -32,6 +34,7 @@ class AuthMapper {
 
             isSuper: user.isSuper,
             isAdmin: user.isAdmin,
+            isUser: user.isUser,
             isMinister: user.userType === UserType.MINISTER,
             isCreator: user.userType === UserType.CREATOR,
             isListener: user.userType === UserType.LISTENER,
@@ -41,11 +44,18 @@ class AuthMapper {
             lockedUntil: user.lockedUntil,
             isActivated: user.isActivated,
             isDeactivated: user.isDeactivated,
+            isSuspended: user.isSuspended,
             roles: (user.roles || []).map((r: any) =>
                 typeof r === 'string'
                     ? r
                     : (r?.slug ?? r?.name ?? r?._id?.toString?.() ?? ''),
             ),
+
+            onboard: {
+                step: user.onboard?.step ?? 1,
+                stage: user.onboard?.stage ?? '',
+                status: user.onboard?.status ?? OnboardStatus.NOT_STARTED,
+            },
         };
 
         return result;

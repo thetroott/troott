@@ -122,4 +122,5 @@ export enum BillingFrequency {
     YEARLY = 'yearly',
 }
 
+export type { ISubscriptionDoc };
 export default ISubscriptionDoc;

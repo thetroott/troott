@@ -3,23 +3,8 @@ import {
     SermonPlaybackDTO,
     UpdateSermonDTO,
     UploadDTO,
-} from '@/dtos/sermon.dto';
-import type { ISermonDoc } from '@/modules/core/sermon/sermon.interface';
-import type { IMinisterDoc, ISeriesDoc } from '@/utils/interfaces.util';
-
-function ministerPayload(minister: unknown): Partial<IMinisterDoc> {
-    if (minister == null) return {};
-    const m = minister as {
-        _id?: unknown;
-        id?: unknown;
-        ministerialName?: string;
-    };
-    const id = m._id ?? m.id;
-    return {
-        id: id as Partial<IMinisterDoc>['id'],
-        ministerialName: m.ministerialName,
-    };
-}
+} from '@/dtos/core/sermon.dto';
+import type { ISermonDoc } from '@/interfaces/core/sermon.interface';
 
 class SermonMapper {
     constructor() {}
@@ -33,12 +18,13 @@ class SermonMapper {
     public async mapSermonPlayback(
         sermon: ISermonDoc,
     ): Promise<SermonPlaybackDTO> {
-        const audio = sermon.sermon;
+        const audio = sermon.item;
         const result: SermonPlaybackDTO = {
             id: String(sermon.id ?? sermon._id),
             sermon: {
-                cdnUrl: audio?.cdnUrl ?? '',
-                originalUrl: audio?.originalUrl ?? '',
+                item: audio?.item ?? '',
+                duration: audio?.duration ?? 0,
+                size: audio?.size ?? 0,
             },
         };
 
@@ -54,11 +40,11 @@ class SermonMapper {
     public async mapUploadSermonImage(sermon: ISermonDoc): Promise<UploadDTO> {
         const img = sermon.image;
         const result: UploadDTO = {
-            id: img?.uploadId ?? '',
-            uploadRef: img?.uploadId ?? '',
+            id: img?.itemId ?? '',
+            uploadRef: img?.itemId ?? '',
             uploadedBy:
                 img?.uploadedBy != null ? String(img.uploadedBy) : '',
-            file: img?.thumbnailUrl ?? '',
+            file: img?.item ?? '',
         };
 
         return result;
@@ -71,21 +57,15 @@ class SermonMapper {
      * @description Converts a sermon document into a DTO for API responses.
      */
     public async mapUploadSermonFile(sermon: ISermonDoc): Promise<UploadDTO> {
-        const sum = sermon.uploadSummary as
-            | {
-                  uploadId?: string;
-                  uploadedBy?: { toString(): string };
-                  rawFile?: string;
-              }
-            | undefined;
+        const audio = sermon.item;
         const result: UploadDTO = {
-            id: sum?.uploadId ?? '',
-            uploadRef: sum?.uploadId ?? '',
-            uploadedBy: sum?.uploadedBy?.toString() ?? '',
+            id: audio?.itemId ?? '',
+            uploadRef: audio?.itemId ?? '',
+            uploadedBy: audio?.uploadedBy != null ? String(audio.uploadedBy) : '',
             file:
-                sum?.rawFile ??
-                sermon.hlsMasterUrl ??
-                sermon.sermonUrl ??
+                sermon.manifestUrl ??
+                sermon.playbackUrl ??
+                audio?.item ??
                 '',
         };
 
@@ -94,7 +74,7 @@ class SermonMapper {
 
     //mapSermonUpload
     public async mapSermonUpdate(sermon: ISermonDoc): Promise<UpdateSermonDTO> {
-        const audio = sermon.sermon;
+        const audio = sermon.item;
         const img = sermon.image;
         const sr = sermon.series as { _id?: unknown; id?: unknown; title?: string } | undefined;
 
@@ -102,9 +82,8 @@ class SermonMapper {
             id: String(sermon.id ?? sermon._id),
             title: sermon.title,
             description: sermon.description,
-            shareableUrl: audio?.shareableUrl ?? sermon.shareableUrl,
-            releaseDate: sermon.releaseDate?.toISOString?.() ?? '',
-            releaseYear: String(sermon.releaseYear ?? ''),
+            preachedAt: sermon.preachedAt ?? '',
+            preachedYear: String(sermon.preachedYear ?? ''),
 
             topic: sermon.topic,
             tags: sermon.tags,
@@ -113,25 +92,19 @@ class SermonMapper {
             allowComment: sermon.allowComment,
 
             isSeries: sermon.isSeries,
-            seriesId: sr
-                ? ({
-                      _id: sr._id ?? sr.id,
-                      title: sr.title ?? '',
-                  } as Partial<ISeriesDoc>)
+            series: sr
+                ? String(sr._id ?? sr.id ?? '')
                 : undefined,
 
-            sermon: {
-                cdnUrl: audio?.cdnUrl,
-                originalUrl: audio?.originalUrl,
-            },
-            image: {
-                thumbnailUrl: img?.thumbnailUrl,
-                originalUrl: img?.originalUrl,
-            },
-            minister: ministerPayload(sermon.minister),
+            sermon: audio
+                ? { item: audio.item, duration: audio.duration, size: audio.size }
+                : undefined,
+            image: img
+                ? { item: img.item, width: img.width, height: img.height }
+                : undefined,
+            minister: sermon.minister?.map?.((m: any) => String(m._id ?? m.id ?? m)),
 
             status: sermon.status,
-            state: sermon.state,
             isPublished: sermon.isPublished,
             publishedBy: sermon.publishedBy as unknown as string,
             publishedAt: sermon.publishedAt,
@@ -146,29 +119,31 @@ class SermonMapper {
      * @returns SermonDTO
      * @description Converts a sermon document into a DTO for API responses.
      */
-    public async mapSermon(sermon: ISermonDoc): Promise<SermonDTO> {
-        const audio = sermon.sermon;
+    public async mapSermon(sermon: ISermonDoc): Promise<Partial<SermonDTO>> {
+        const audio = sermon.item;
         const img = sermon.image;
 
-        const result: SermonDTO = {
+        const result: Partial<SermonDTO> = {
             id: String(sermon._id),
 
             title: sermon.title,
             description: sermon.description,
             duration: sermon.duration ?? audio?.duration ?? 0,
 
-            image: {
-                thumbnailUrl: img?.thumbnailUrl ?? '',
-                originalUrl: img?.originalUrl ?? '',
-            },
-            minister: ministerPayload(sermon.minister),
+            image: img
+                ? { item: img.item, width: img.width, height: img.height }
+                : undefined,
+            minister: sermon.minister?.map?.((m: any) => ({
+                id: String(m._id ?? m.id ?? ''),
+                name: m.profile?.ministerialName ?? m.ministerialName ?? '',
+            })),
 
             topic: sermon.topic,
             tags: sermon.tags,
             isPublic: sermon.isPublic,
-            releaseDate: sermon.releaseDate?.toISOString?.() ?? '',
-            releaseYear: sermon.releaseYear,
-            shareableUrl: audio?.shareableUrl ?? sermon.shareableUrl ?? '',
+            preachedAt: sermon.preachedAt ?? '',
+            preachedYear: sermon.preachedYear,
+            shareableUrl: sermon.shareableUrl ?? '',
         };
 
         return result;

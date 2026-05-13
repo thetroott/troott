@@ -1,9 +1,9 @@
 import { RedisClientType } from 'redis';
-import { IData, IRedisOptions } from '@/modules/shared/interfaces.util';
+import { IData, IRedisOptions } from '@/interfaces/common.interface';
 import { createClient } from 'redis';
 import { REDIS_CONFIG } from '../configs/redis.config';
 import colors from 'colors';
-import { ENVType } from '../utils/enums.util';
+import { ENVType } from '@/types/common.enum';
 
 class redisHandler {
     public client: RedisClientType | null = null;
