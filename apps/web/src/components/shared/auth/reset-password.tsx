@@ -3,9 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
+import type { ResetPasswordDTO } from '@/dtos/auth.dto';
 import { usePasswordUtils } from '@/hooks/shared/useValidaton';
-import useAuth from '@/hooks/useAuth';
-import storage from '@/utils/storage.util';
+import useAuth from '@/hooks/app/useAuth';
+import storage from '@/api/services/local-storage';
+import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
+import { useNavigate } from 'react-router-dom';
+import { AUTH_ROUTES } from '@/constants/auth-routes';
+import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
+import { toast } from 'sonner';
 
 const ResetPasswordForm = () => {
     const [formData, setFormData] = useState({
@@ -16,9 +22,11 @@ const ResetPasswordForm = () => {
     const [touched, setTouched] = useState<Record<string, boolean>>({});
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const { validatePassword, calculateStrength } = usePasswordUtils();
-    const { ResetPassword } = useAuth();
+    const { resetPassword } = useAuth();
+    const navigate = useNavigate();
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -70,13 +78,37 @@ const ResetPasswordForm = () => {
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length === 0) {
+            const email = cleanStoredEmail(storage.getUserEmail());
+            if (!email) {
+                toast.error(
+                    'We could not find your email for this session. Use forgot password again.',
+                );
+                navigate(AUTH_ROUTES.forgotPassword);
+                return;
+            }
+            const payload: ResetPasswordDTO = {
+                email,
+                newPassword: formData.newPassword,
+            };
+            setSubmitting(true);
             try {
-                await ResetPassword.mutateAsync({
-                    email: storage.getUserEmail() || '',
-                    newPassword: formData.newPassword,
-                });
-            } catch (error) {
-                console.error('Reset password error:', error);
+                const res = await resetPassword(payload);
+                if (res.error) {
+                    if (!isApiHttp2xxErrorEnvelope(res)) {
+                        toast.error(res.message || 'Could not reset password.');
+                    }
+                    return;
+                }
+                toast.success(res.message || 'Password updated. You can sign in.');
+                navigate(AUTH_ROUTES.login);
+            } catch (err) {
+                toast.error(
+                    err instanceof Error
+                        ? err.message
+                        : 'Could not reset password.',
+                );
+            } finally {
+                setSubmitting(false);
             }
         }
     };
@@ -185,11 +217,9 @@ const ResetPasswordForm = () => {
             <Button
                 type="submit"
                 className="w-full"
-                disabled={
-                    ResetPassword.isPending || Object.keys(errors).length > 0
-                }
+                disabled={submitting}
             >
-                {ResetPassword.isPending ? (
+                {submitting ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Resetting...

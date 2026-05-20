@@ -85,7 +85,7 @@ const DocumentUploadWrapper = ({
                 {documentOptions.map((option) => (
                     <div
                         key={option.type}
-                        className="cursor-pointer hover:shadow-md transition-shadow border rounded-lg p-4 bg-white"
+                        className="cursor-pointer rounded-lg border border-border bg-card p-4 text-card-foreground transition-shadow hover:shadow-md"
                         onClick={() => setDocumentType(option.type)}
                     >
                         <div className="pb-3">

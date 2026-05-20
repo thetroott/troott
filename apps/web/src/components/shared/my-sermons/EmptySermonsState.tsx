@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { features } from '@/_data/mysermonFeatures';
 import { useNavigate } from 'react-router-dom';
-import { useUpload } from '@/context/upload/upload.context';
+import { useUpload } from '@/context/upload/uploadState';
 import UploadEntryStepModal from '@/components/shared/upload/UploadEntryStepModal';
 import { applySelectedAudioToUpload } from '@/utils/upload-audio-selection.util';
 

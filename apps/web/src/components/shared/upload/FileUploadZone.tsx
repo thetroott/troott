@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { useUpload, uploadActions } from '@/context/upload/uploadState';
 import UploadEntryStepModal from '@/components/shared/upload/UploadEntryStepModal';
 import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
 

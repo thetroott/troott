@@ -1,11 +1,15 @@
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import OnboardingItems from '@/_data/onboarding';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
+import { runGetStartedCheckpoint } from '@/services/get-started-checkpoint';
+import { toast } from 'sonner';
 
 const ProgressButtons = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const [busy, setBusy] = useState(false);
 
     const stepGroup = OnboardingItems.find((item) =>
         location.pathname.startsWith(item.action),
@@ -15,33 +19,37 @@ const ProgressButtons = () => {
     const currentIndex = steps.findIndex((path) => location.pathname === path);
 
     const handleBack = () => {
+        if (location.pathname === '/get-started/tour-guide') {
+            navigate('/get-started/ministry-input');
+            return;
+        }
         if (currentIndex > 0) {
             const previousStep = steps[currentIndex - 1];
             if (previousStep) navigate(previousStep);
-        } else {
-            // Special case: navigate from MinistryInput to HomeAddressForm
-            if (location.pathname === '/get-started/ministry-input') {
-                navigate('/get-started/home-address');
-            }
         }
     };
 
-    const handleContinue = () => {
-        if (currentIndex < steps.length - 1) {
-            const nextStep = steps[currentIndex + 1];
-            if (nextStep) navigate(nextStep);
-        } else {
-            // Special case: navigate from HomeAddressForm to MinistryInput
-            if (location.pathname === '/get-started/home-address') {
-                navigate('/get-started/ministry-input');
+    const handleContinue = async () => {
+        setBusy(true);
+        try {
+            const checkpoint = await runGetStartedCheckpoint(location.pathname);
+            if (!checkpoint.ok) {
+                toast.error(checkpoint.message ?? 'Could not save this step.');
+                return;
+            }
+
+            if (currentIndex < steps.length - 1) {
+                const nextStep = steps[currentIndex + 1];
+                if (nextStep) navigate(nextStep);
+            } else if (location.pathname === '/get-started/tour-guide') {
+                navigate('/upload-sermon');
             } else {
-                // Final step: navigate to completion or dashboard
                 navigate('/get-started');
             }
+        } finally {
+            setBusy(false);
         }
     };
-
-    //if (!steps.length || currentIndex === -1) return null;
 
     return (
         <div>
@@ -49,16 +57,22 @@ const ProgressButtons = () => {
                 <Button
                     variant="ghost"
                     onClick={handleBack}
+                    disabled={
+                        busy ||
+                        (currentIndex <= 0 &&
+                            location.pathname !== '/get-started/tour-guide')
+                    }
                     className="px-6 py-2 transition-colors cursor-pointer"
                 >
                     <ChevronLeft size={16} />
                     Back
                 </Button>
                 <Button
-                    onClick={handleContinue}
+                    onClick={() => void handleContinue()}
+                    disabled={busy}
                     className="px-12 cursor-pointer transition-colors"
                 >
-                    Continue
+                    {busy ? 'Saving…' : 'Continue'}
                 </Button>
             </div>
         </div>

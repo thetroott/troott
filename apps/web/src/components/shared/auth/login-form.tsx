@@ -4,38 +4,51 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { IForm } from '@/utils/interfaces.util';
 import { Eye, EyeOff, Loader2, LockIcon, Mail } from 'lucide-react';
-import useAuth from '@/hooks/useAuth';
+import useAuth from '@/hooks/app/useAuth';
 import { usePasswordUtils } from '@/hooks/shared/useValidaton';
-import { useLoginStore } from '@/store/login-store';
+import { useMemo, useState } from 'react';
+import type { LoginDTO } from '@/dtos/auth.dto';
+import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
+import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
+import { AUTH_ROUTES } from '@/constants/auth-routes';
 
 const LoginForm = (data: IForm) => {
     const { className, ...props } = data;
 
-    const {
-        formData,
-        errors,
-        touched,
-        showPassword,
-        passwordStrength,
-        setField,
-        setTouched,
-        setErrors,
-        togglePassword,
-        setPasswordStrength,
-    } = useLoginStore();
+    const [formData, setFormData] = useState<LoginDTO>({
+        email: '',
+        password: '',
+    });
+    const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+        {},
+    );
+    const [touched, setTouched] = useState<{
+        email?: boolean;
+        password?: boolean;
+    }>({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const { validateEmail, validatePassword, calculateStrength } =
         usePasswordUtils();
-    const { Login } = useAuth();
+    const { login } = useAuth();
+
+    const passwordStrength = useMemo(
+        () => calculateStrength(formData.password),
+        [formData.password, calculateStrength],
+    );
+
+    const setField = (field: keyof LoginDTO, value: string) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Mark all fields as touched
-        setTouched('email');
-        setTouched('password');
+        setTouched({ email: true, password: true });
 
-        const newErrors: any = {};
+        const newErrors: { email?: string; password?: string } = {};
         const emailErr = validateEmail(formData.email);
         const passErr = validatePassword(formData.password);
 
@@ -44,8 +57,33 @@ const LoginForm = (data: IForm) => {
 
         setErrors(newErrors);
 
-        if (Object.keys(newErrors).length === 0) {
-            await Login.mutate(formData);
+        if (Object.keys(newErrors).length > 0) return;
+
+        setSubmitting(true);
+        try {
+            const res = await login(formData);
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Sign in failed.');
+                }
+                return;
+            }
+            if (res.status === 206) {
+                toast.info(
+                    res.message ||
+                        'Activate your account with the code we sent to your email.',
+                );
+                return;
+            }
+            if (res.status === 200) {
+                toast.success(res.message || 'Signed in successfully.');
+            }
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : 'Sign in failed.',
+            );
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -70,10 +108,13 @@ const LoginForm = (data: IForm) => {
                                     setField('email', e.target.value)
                                 }
                                 onBlur={() => {
-                                    setTouched('email');
+                                    setTouched((t) => ({ ...t, email: true }));
                                     const err = validateEmail(formData.email);
                                     if (err)
-                                        setErrors({ ...errors, email: err });
+                                        setErrors((prev) => ({
+                                            ...prev,
+                                            email: err,
+                                        }));
                                 }}
                                 className={cn(
                                     'pl-9',
@@ -112,12 +153,12 @@ const LoginForm = (data: IForm) => {
                     <div className="grid gap-2">
                         <div className="flex items-center">
                             <Label htmlFor="password">Password</Label>
-                            <a
-                                href="/forgot-password"
+                            <Link
+                                to={AUTH_ROUTES.forgotPassword}
                                 className="ml-auto text-sm underline-offset-4 hover:underline"
                             >
                                 Forgot your password?
-                            </a>
+                            </Link>
                         </div>
 
                         <div className="relative">
@@ -128,17 +169,20 @@ const LoginForm = (data: IForm) => {
                                 value={formData.password}
                                 onChange={(e) => {
                                     setField('password', e.target.value);
-                                    setPasswordStrength(
-                                        calculateStrength(e.target.value),
-                                    );
                                 }}
                                 onBlur={() => {
-                                    setTouched('password');
+                                    setTouched((t) => ({
+                                        ...t,
+                                        password: true,
+                                    }));
                                     const err = validatePassword(
                                         formData.password,
                                     );
                                     if (err)
-                                        setErrors({ ...errors, password: err });
+                                        setErrors((prev) => ({
+                                            ...prev,
+                                            password: err,
+                                        }));
                                 }}
                                 className={cn(
                                     'pl-9',
@@ -165,7 +209,7 @@ const LoginForm = (data: IForm) => {
                                 variant="ghost"
                                 size="sm"
                                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={togglePassword}
+                                onClick={() => setShowPassword((s) => !s)}
                                 aria-label={
                                     showPassword
                                         ? 'Hide password'
@@ -251,9 +295,9 @@ const LoginForm = (data: IForm) => {
                     <Button
                         type="submit"
                         className="w-full h-12"
-                        disabled={Login.isPending}
+                        disabled={submitting}
                     >
-                        {Login.isPending ? (
+                        {submitting ? (
                             <>
                                 <Loader2 className="animate-spin h-5 w-5 mr-2" />
                                 Signing in...
@@ -309,12 +353,12 @@ const LoginForm = (data: IForm) => {
                 </div>
                 <div className="text-center text-sm">
                     Don&apos;t have an account?{' '}
-                    <a
-                        href="/register"
+                    <Link
+                        to={AUTH_ROUTES.register}
                         className="underline underline-offset-4"
                     >
                         Sign up
-                    </a>
+                    </Link>
                 </div>
             </form>
         </>

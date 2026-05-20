@@ -18,11 +18,13 @@ import type {
     ResendOtpDTO,
     VerifyOtpDTO,
 } from '@/dtos/auth.dto';
-import apiCall from '@/api/config';
+import api from '@/api/config';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { OtpType } from '@/utils/enums.util';
+import { OtpType } from '@/api/enums';
 import { handleMutationError } from '@/utils/helpers.util';
+import { setVerificationEmail } from '@/api/services/local-storage';
+import { AUTH_ROUTES } from '@/constants/auth-routes';
 
 function ForgotPasswordForm(data: IForm) {
     const { className, onStepChange, ...props } = data;
@@ -94,13 +96,22 @@ function ForgotPasswordForm(data: IForm) {
         otpType: OtpType.FORGOTPASSWORD,
     });
 
+    const buildResendPayload = (): ResendOtpDTO => ({
+        email: formData.email as string,
+        otpType: OtpType.FORGOTPASSWORD,
+    });
+
     // mutations
 
     const sendOtpMutation = useMutation({
         mutationFn: async (payload: ForgotPasswordDTO) => {
-            return apiCall.auth.forgotPassword(payload);
+            return api.auth.forgotPassword(payload);
         },
         onSuccess: (data: IAPIResponse) => {
+            if (data.error) {
+                return;
+            }
+            setVerificationEmail(formData.email);
             toast.success(data.message);
 
             updateStep('otp');
@@ -112,9 +123,12 @@ function ForgotPasswordForm(data: IForm) {
 
     const verifyOtpMutation = useMutation({
         mutationFn: async (payload: VerifyOtpDTO) => {
-            return apiCall.auth.verifyOTP(payload);
+            return api.auth.verifyOTP(payload);
         },
         onSuccess: (data: IAPIResponse) => {
+            if (data.error) {
+                return;
+            }
             toast.success(data.message);
             updateStep('success');
         },
@@ -123,9 +137,12 @@ function ForgotPasswordForm(data: IForm) {
 
     const resendOtpMutation = useMutation({
         mutationFn: async (payload: ResendOtpDTO) => {
-            return apiCall.auth.resendOTP(payload);
+            return api.auth.resendOTP(payload);
         },
-        onSuccess: () => {
+        onSuccess: (data: IAPIResponse) => {
+            if (data.error) {
+                return;
+            }
             setFormData((prev) => ({ ...prev, otp: Array(6).fill('') }));
             setErrors({});
             setTouched((prev) => ({ ...prev, otp: false }));
@@ -235,7 +252,7 @@ function ForgotPasswordForm(data: IForm) {
     const handleResendOTP = async () => {
         if (resendCountdown > 0) return;
 
-        resendOtpMutation.mutate(buildOtpPayload());
+        resendOtpMutation.mutate(buildResendPayload());
     };
 
     const handleBackToEmail = () => {
@@ -309,7 +326,10 @@ function ForgotPasswordForm(data: IForm) {
 
                 <div className="text-center text-sm">
                     Remember your password?{' '}
-                    <a href="/login" className="underline underline-offset-4">
+                    <a
+                        href={AUTH_ROUTES.login}
+                        className="underline underline-offset-4"
+                    >
                         Back to login
                     </a>
                 </div>
@@ -470,14 +490,14 @@ function ForgotPasswordForm(data: IForm) {
             </div>
 
             <Button
-                onClick={() => navigate('/reset-password')}
+                onClick={() => navigate(AUTH_ROUTES.resetPassword)}
                 className="w-full"
             >
                 Create new password
             </Button>
 
             <Button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate(AUTH_ROUTES.login)}
                 variant="outline"
                 className="w-full"
             >

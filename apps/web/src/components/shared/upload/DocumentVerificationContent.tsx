@@ -55,7 +55,7 @@ const DocumentVerificationContent: React.FC<
                         return (
                             <div key={field.id} className="space-y-1">
                                 <div
-                                    className={`${file ? 'border-0' : 'border border-dashed border-gray-300'} rounded-lg p-7 text-center hover:border-gray-400 transition-colors h-48`}
+                                    className={`${file ? 'border-0' : 'border border-dashed border-muted-foreground/40'} h-48 rounded-lg p-7 text-center transition-colors hover:border-muted-foreground/60`}
                                 >
                                     <input
                                         type="file"
@@ -70,7 +70,7 @@ const DocumentVerificationContent: React.FC<
                                         id={`${field.id}-upload`}
                                     />
                                     {file ? (
-                                        <div className="w-full h-full bg-white rounded-lg overflow-hidden">
+                                        <div className="h-full w-full overflow-hidden rounded-lg bg-card">
                                             <img
                                                 src={URL.createObjectURL(file)}
                                                 alt={field.alt}
@@ -83,10 +83,10 @@ const DocumentVerificationContent: React.FC<
                                             className="cursor-pointer flex flex-col items-center space-y-1"
                                         >
                                             <Icon className="h-6 w-6 text-gray-400" />
-                                            <span className="text-xs text-gray-600">
+                                            <span className="text-xs text-muted-foreground">
                                                 {field.uploadText}
                                             </span>
-                                            <span className="text-[10px] text-gray-500">
+                                            <span className="text-[10px] text-muted-foreground">
                                                 {field.acceptedFormats
                                                     .map(
                                                         (f) =>

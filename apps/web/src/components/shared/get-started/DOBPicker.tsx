@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,11 +11,52 @@ import {
 import { days, months, years } from '@/utils/helpers.util';
 import type { IDOBPicker } from '@/utils/interfaces.util';
 
+function parseInitial(iso?: string | null): {
+    year: string;
+    month: string;
+    day: string;
+} {
+    if (!iso || typeof iso !== 'string') {
+        return { year: '', month: '', day: '' };
+    }
+    const part = iso.split('T')[0] ?? '';
+    const [y, m, d] = part.split('-');
+    if (!y || !m || !d) return { year: '', month: '', day: '' };
+    return {
+        year: y,
+        month: m.padStart(2, '0'),
+        day: d.padStart(2, '0'),
+    };
+}
+
 export default function DateOfBirthPicker(data: IDOBPicker) {
-    const { label = 'Date of Birth', id, className = '' } = data;
-    const [year, setYear] = useState('');
-    const [month, setMonth] = useState('');
-    const [day, setDay] = useState('');
+    const {
+        label = 'Date of Birth',
+        id,
+        className = '',
+        initialIsoDate,
+        onDateIsoChange,
+    } = data;
+    const init = parseInitial(initialIsoDate);
+    const [year, setYear] = useState(init.year);
+    const [month, setMonth] = useState(init.month);
+    const [day, setDay] = useState(init.day);
+
+    useEffect(() => {
+        const next = parseInitial(initialIsoDate);
+        setYear(next.year);
+        setMonth(next.month);
+        setDay(next.day);
+    }, [initialIsoDate]);
+
+    useEffect(() => {
+        if (!onDateIsoChange) return;
+        if (!year || !month || !day) {
+            onDateIsoChange(null);
+            return;
+        }
+        onDateIsoChange(`${year}-${month}-${day}`);
+    }, [year, month, day, onDateIsoChange]);
 
     return (
         <div className={cn('space-y-2', className)}>

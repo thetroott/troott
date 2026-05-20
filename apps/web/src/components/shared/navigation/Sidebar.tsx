@@ -15,7 +15,7 @@ import {
 import { SearchForm } from '../dialog/Search.tsx';
 import { Link, useLocation } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator.tsx';
-import type { UserType } from '@troott/api-client';
+import type { UserType } from '@/models/User.model';
 
 interface ISideBar {
     userRole: UserType;
@@ -84,8 +84,7 @@ const AppSidebar = (data: ISideBar) => {
                           hover:bg-muted
 
                           /* active backgrounds */
-                          data-[active=true]:bg-neutral-800
-                          dark:data-[active=true]:bg-neutral-50
+                          data-[active=true]:bg-white/10
 
                           /* collapsed‑icon tweaks */
                           group-data-[collapsible=icon]:w-9
@@ -104,28 +103,15 @@ const AppSidebar = (data: ISideBar) => {
                                                             size={22}
                                                             aria-hidden="true"
                                                             className={`
-                                /* default icon color */
-                                text-neutral-900/70 dark:text-neutral-400
-
-
-                                /* when active in light: white */
+                                text-neutral-400
                                 group-data-[active=true]/menu-button:text-white
-
-                                /* when active in dark: dark neutral (900) */
-                                dark:group-data-[active=true]/menu-button:text-neutral-900
                               `}
                                                         />
                                                     )}
                                                     <span
                                                         className={`
-                              /* default text color */
-                              text-neutral-900 dark:text-neutral-50
-
-                              /* when active in light: white */
+                              text-neutral-50
                               group-data-[active=true]/menu-button:text-white
-
-                              /* when active in dark: dark neutral (900) */
-                              dark:group-data-[active=true]/menu-button:text-neutral-900
                             `}
                                                     >
                                                         {item.title}

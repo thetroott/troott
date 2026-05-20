@@ -5,15 +5,29 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { OtpType } from '@/utils/enums.util';
-import type { VerifyOtpDTO } from '@/dtos/auth.dto';
-import storage from '@/utils/storage.util';
-import useAuth from '@/hooks/useAuth';
+import type { ActivateDTO } from '@/dtos/auth.dto';
+import { OtpType } from '@/api/enums';
+import storage, { persistAuthFromResponse } from '@/api/services/local-storage';
+import useAuth from '@/hooks/app/useAuth';
+import useContextType from '@/hooks/shared/useContextType';
+import { useNavigate } from 'react-router-dom';
+import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
+import { toast } from 'sonner';
+import { UserType } from '@/models/User.model';
+import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
+import { AUTH_ROUTES } from '@/constants/auth-routes';
+import {
+    isStudioPortalUserType,
+    navigateToStudioPortal,
+} from '@/utils/studio-portal.util';
 
 const ActivateUserForm = (data: IForm) => {
     const { className, email, onSuccess, onResend, ...props } = data;
 
-    const { ActivateUser } = useAuth();
+    const navigate = useNavigate();
+    const { userContext } = useContextType();
+    const { activateAccount, resendOtp } = useAuth();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [otp, setOtp] = useState(Array(6).fill(''));
     const [errors, setErrors] = useState<IOtpFormErrors>({});
@@ -21,8 +35,60 @@ const ActivateUserForm = (data: IForm) => {
     const [resendCountdown, setResendCountdown] = useState(0);
     const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const validateOTP = (otp: string[]): string | undefined => {
-        const otpString = otp.join('');
+    const resolvedEmail =
+        cleanStoredEmail(email) ||
+        cleanStoredEmail(storage.getUserEmail() ?? '');
+
+    const buildActivatePayload = (
+        digits: string[] = otp,
+    ): ActivateDTO => ({
+        email: resolvedEmail,
+        otp: Number(digits.join('')),
+        otpType: OtpType.REGISTER,
+    });
+
+    const runActivate = async (payload: ActivateDTO) => {
+        if (!payload.email?.trim()) {
+            toast.error('Missing email. Register again.');
+            navigate(AUTH_ROUTES.register);
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const res = await activateAccount(payload);
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Activation failed.');
+                }
+                return;
+            }
+            persistAuthFromResponse(res);
+            const data = res.data as { user?: { userType?: string } } | undefined;
+            const ut = data?.user?.userType;
+            if (ut) {
+                userContext.setUserType(ut);
+            }
+
+            toast.success(res.message || 'Account activated.');
+
+            if (isStudioPortalUserType(ut) && storage.checkToken()) {
+                await navigateToStudioPortal((path) => navigate(path));
+            } else {
+                navigate('/dashboard');
+            }
+            onSuccess?.();
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : 'Activation failed.',
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const validateOTP = (digits: string[]): string | undefined => {
+        const otpString = digits.join('');
         if (!otpString) return 'OTP is required';
         if (otpString.length !== 6) return 'Please enter all 6 digits';
         if (!/^\d+$/.test(otpString)) return 'OTP must contain only numbers';
@@ -50,29 +116,6 @@ const ActivateUserForm = (data: IForm) => {
                 return prev - 1;
             });
         }, 1000);
-    };
-
-    const userEmail = storage.getUserEmail() as string;
-    const buildOtpPayload = (): VerifyOtpDTO => {
-        const otpString = otp.join('');
-        // Clean email by removing extra quotes if present and parsing JSON if needed
-        let cleanEmail = userEmail || '';
-
-        // If the email is JSON stringified, parse it
-        if (cleanEmail.startsWith('"') && cleanEmail.endsWith('"')) {
-            try {
-                cleanEmail = JSON.parse(cleanEmail);
-            } catch (e) {
-                // If parsing fails, just remove the quotes
-                cleanEmail = cleanEmail.replace(/^"(.*)"$/, '$1');
-            }
-        }
-
-        return {
-            email: cleanEmail,
-            otp: Number(otpString),
-            otpType: OtpType.REGISTER,
-        };
     };
 
     const handleOTPChange = (index: number, value: string) => {
@@ -242,11 +285,7 @@ const ActivateUserForm = (data: IForm) => {
                 const otpError = validateOTP(otp);
                 if (!otpError) {
                     setErrors({});
-                    try {
-                        ActivateUser.mutateAsync(buildOtpPayload());
-                    } catch (error) {
-                        console.error('Submit error:', error);
-                    }
+                    void runActivate(buildActivatePayload());
                 } else {
                     setErrors({ otp: otpError });
                 }
@@ -302,32 +341,7 @@ const ActivateUserForm = (data: IForm) => {
             const otpError = validateOTP(newOtp);
             if (!otpError) {
                 setErrors({});
-                // Create payload with the new OTP array directly instead of using buildOtpPayload()
-                const userEmail = storage.getUserEmail() as string;
-                let cleanEmail = userEmail || '';
-
-                // If the email is JSON stringified, parse it
-                if (cleanEmail.startsWith('"') && cleanEmail.endsWith('"')) {
-                    try {
-                        cleanEmail = JSON.parse(cleanEmail);
-                    } catch (e) {
-                        // If parsing fails, just remove the quotes
-                        cleanEmail = cleanEmail.replace(/^"(.*)"$/, '$1');
-                    }
-                }
-
-                const payload = {
-                    email: cleanEmail,
-                    otp: Number(newOtp.join('')),
-                    otpType: OtpType.REGISTER,
-                };
-
-                // Handle auto-submit with proper error handling
-                try {
-                    ActivateUser.mutateAsync(payload);
-                } catch (error) {
-                    console.error('Auto-submit error:', error);
-                }
+                void runActivate(buildActivatePayload(newOtp));
             } else {
                 setErrors({ otp: otpError });
             }
@@ -350,15 +364,37 @@ const ActivateUserForm = (data: IForm) => {
 
         setErrors({});
 
-        try {
-            await ActivateUser.mutateAsync(buildOtpPayload());
-        } catch (error) {
-            console.error('Activation error:', error);
-            // The error will be handled by the mutation's onError callback
-        }
+        await runActivate(buildActivatePayload());
     };
 
     const handleResendOTP = async () => {
+        if (!resolvedEmail) {
+            toast.error('Missing email. Register again.');
+            navigate(AUTH_ROUTES.register);
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const res = await resendOtp({
+                email: resolvedEmail,
+                otpType: OtpType.REGISTER,
+            });
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Could not resend code.');
+                }
+                return;
+            }
+            toast.success(res.message || 'A new code was sent.');
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : 'Could not resend code.',
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
+
         setOtp(Array(6).fill(''));
         setErrors({});
         setTouched(false);
@@ -374,11 +410,11 @@ const ActivateUserForm = (data: IForm) => {
             {...props}
         >
             <div className="grid gap-6">
-                {email && (
+                {resolvedEmail && (
                     <div className="text-center text-sm text-muted-foreground">
                         <p>We sent a verification code to</p>
                         <p className="font-medium text-foreground">
-                            {maskEmail(email)}
+                            {maskEmail(resolvedEmail)}
                         </p>
                     </div>
                 )}
@@ -450,7 +486,7 @@ const ActivateUserForm = (data: IForm) => {
                             <button
                                 type="button"
                                 onClick={handleResendOTP}
-                                disabled={ActivateUser.isPending}
+                                disabled={isSubmitting}
                                 className="text-primary underline underline-offset-4 hover:no-underline disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Resend code
@@ -462,9 +498,9 @@ const ActivateUserForm = (data: IForm) => {
                 <Button
                     type="submit"
                     className="w-full h-12 "
-                    disabled={ActivateUser.isPending}
+                    disabled={isSubmitting}
                 >
-                    {ActivateUser.isPending ? (
+                    {isSubmitting ? (
                         <>
                             <Loader2 className="animate-spin h-4 w-4" />
                             Verifying...

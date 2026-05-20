@@ -2,8 +2,9 @@ import type { Sermon } from '@/_data/dummySermons';
 import { useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
-import { useUpload } from '@/context/upload/upload.context';
+import { useUpload } from '@/context/upload/uploadState';
 import UploadEntryStepModal from '@/components/shared/upload/UploadEntryStepModal';
 import { applySelectedAudioToUpload } from '@/utils/upload-audio-selection.util';
 import {
@@ -43,14 +44,13 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import apiCall from '@/api/config';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
-import type { MinisterSermonListParams } from '@/constants/sermon-query-keys';
 import {
-    isDevLocalUploadDraftId,
-    removeDevUploadDraft,
-} from '@/utils/dev-upload-drafts.util';
-
+    fetchSermonDetail,
+    useMoveSermonToBinMutation,
+    useUpdateSermonMutation,
+} from '@/hooks/app/useSermon';
+import type { MinisterSermonListParams } from '@/constants/sermon-query-keys';
 export type { Sermon };
 
 const VIEW_MODE_STORAGE_KEY = 'troott_my_sermons_view_mode';
@@ -166,6 +166,8 @@ const SermonsTable = ({
 }: SermonsTableProps) => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const updateSermonMutation = useUpdateSermonMutation();
+    const moveSermonToBinMutation = useMoveSermonToBinMutation();
     const { dispatch, state: uploadState } = useUpload();
     const [entryModalOpen, setEntryModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<MainTab>('Sermon');
@@ -266,7 +268,16 @@ const SermonsTable = ({
             return;
         }
         try {
-            await apiCall.sermon.updateSermon(renameTarget.id, { title });
+            const res = await updateSermonMutation.mutateAsync({
+                id: renameTarget.id,
+                payload: { title },
+            });
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Could not rename sermon.');
+                }
+                return;
+            }
             toast.success('Sermon renamed.');
             setRenameOpen(false);
             setRenameTarget(null);
@@ -278,7 +289,12 @@ const SermonsTable = ({
                     : 'Could not rename sermon.',
             );
         }
-    }, [renameTarget, renameInput, invalidateMinisterLists]);
+    }, [
+        renameTarget,
+        renameInput,
+        invalidateMinisterLists,
+        updateSermonMutation,
+    ]);
 
     const handleRename = useCallback(
         (sermonId: string) => {
@@ -309,9 +325,10 @@ const SermonsTable = ({
 
     const handleDownload = useCallback(async (sermonId: string) => {
         try {
-            const res = await apiCall.sermon.getSermonById(sermonId);
-            const body = res.data as { data?: Record<string, unknown> };
-            const d = body?.data;
+            const body = await fetchSermonDetail(sermonId);
+            const d = (
+                body as { data?: Record<string, unknown> } | undefined
+            )?.data;
             const url =
                 d && typeof d.sermonUrl === 'string' ? d.sermonUrl : null;
             if (!url) {
@@ -334,13 +351,15 @@ const SermonsTable = ({
                 return;
             }
             try {
-                if (isDevLocalUploadDraftId(sermonId)) {
-                    removeDevUploadDraft(sermonId);
-                    toast.success('Removed from your dev list.');
-                    await invalidateMinisterLists();
+                const res = await moveSermonToBinMutation.mutateAsync({
+                    id: sermonId,
+                });
+                if (res.error) {
+                    if (!isApiHttp2xxErrorEnvelope(res)) {
+                        toast.error(res.message || 'Could not move sermon.');
+                    }
                     return;
                 }
-                await apiCall.sermon.moveSermonToBin(sermonId);
                 toast.success('Sermon moved to trash.');
                 await invalidateMinisterLists();
             } catch (e: unknown) {
@@ -351,7 +370,7 @@ const SermonsTable = ({
                 );
             }
         },
-        [invalidateMinisterLists],
+        [invalidateMinisterLists, moveSermonToBinMutation],
     );
 
     const uncontrolledFiltered = useMemo(() => {

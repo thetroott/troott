@@ -4,30 +4,52 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { IForm, IRegisterFormErrors } from '@/utils/interfaces.util';
 import { Eye, EyeOffIcon, Loader2, LockIcon, Mail, User } from 'lucide-react';
-import useAuth from '@/hooks/useAuth';
+import useAuth from '@/hooks/app/useAuth';
 import { usePasswordUtils } from '@/hooks/shared/useValidaton';
 import type { RegisterUserDTO } from '@/dtos/auth.dto';
-import { useRegisterStore } from '@/store/register-store';
+import { UserType } from '@/models/User.model';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AUTH_ROUTES } from '@/constants/auth-routes';
+import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
+import { toast } from 'sonner';
+import {
+    setVerificationEmail,
+} from '@/api/services/local-storage';
+
+const REGISTER_FORM_DEFAULT = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+};
 
 const RegisterForm = (data: IForm) => {
-    const { className, ...props } = data;
-    const {
-        formData,
-        errors,
-        touched,
-        showPassword,
-        passwordStrength,
-        setField,
-        setTouched,
-        setErrors,
-        togglePassword,
-        setPasswordStrength,
-    } = useRegisterStore();
+    const { className, registrationUserType, ...props } = data;
+    const navigate = useNavigate();
+    const [formData, setFormData] =
+        useState<typeof REGISTER_FORM_DEFAULT>(REGISTER_FORM_DEFAULT);
+    const [errors, setErrors] = useState<IRegisterFormErrors>({});
+    const [touched, setTouched] = useState<
+        Partial<
+            Record<keyof Omit<RegisterUserDTO, 'userType'>, boolean>
+        >
+    >({});
+    const [showPassword, setShowPassword] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    const setField = (
+        field: keyof Omit<RegisterUserDTO, 'userType'>,
+        value: string,
+    ) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
 
     const { validateName, validateEmail, validatePassword, calculateStrength } =
         usePasswordUtils();
+    const { register } = useAuth();
 
-    const { Register } = useAuth();
+    const passwordStrength = calculateStrength(formData.password);
 
     const validators = {
         firstName: (value: string) => validateName(value, 'First Name'),
@@ -56,22 +78,20 @@ const RegisterForm = (data: IForm) => {
             const value = e.target.value;
             setField(field, value);
 
-            if (field === 'password') {
-                setPasswordStrength(calculateStrength(value));
-            }
-
             if (errors[field]) {
-                setErrors({ [field]: undefined });
+                setErrors((prev) => {
+                    const next = { ...prev };
+                    delete next[field];
+                    return next;
+                });
             }
         };
 
     const handleBlur = (field: keyof typeof validators) => () => {
-        // mark the field as touched
-        setTouched(field, true);
+        setTouched((prev) => ({ ...prev, [field]: true }));
 
-        // validate field and update error
         const error = validators[field](formData[field]);
-        setErrors({ [field]: error });
+        setErrors((prev) => ({ ...prev, [field]: error }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -79,12 +99,36 @@ const RegisterForm = (data: IForm) => {
 
         // mark all fields touched
         (Object.keys(validators) as Array<keyof typeof validators>).forEach(
-            (field) => setTouched(field, true),
+            (field) =>
+                setTouched((prev) => ({ ...prev, [field]: true })),
         );
 
         if (!validateForm()) return;
 
-        await Register.mutate(formData);
+        setSubmitting(true);
+        try {
+            const res = await register({
+                ...formData,
+                userType: registrationUserType ?? UserType.MINISTER,
+            });
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Registration failed.');
+                }
+                return;
+            }
+            setVerificationEmail(formData.email);
+            toast.success(
+                res.message || 'We sent a code to your email. Activate your account next.',
+            );
+            navigate(AUTH_ROUTES.activateAccount);
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : 'Registration failed.',
+            );
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -221,12 +265,12 @@ const RegisterForm = (data: IForm) => {
                 <div className="grid gap-2">
                     <div className="flex items-center">
                         <Label htmlFor="password">Password</Label>
-                        <a
-                            href="/forgot-password"
+                        <Link
+                            to={AUTH_ROUTES.forgotPassword}
                             className="ml-auto text-sm underline-offset-4 hover:underline"
                         >
                             Forgot your password?
-                        </a>
+                        </Link>
                     </div>
                     <div className="relative">
                         <LockIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -261,7 +305,7 @@ const RegisterForm = (data: IForm) => {
                             variant="ghost"
                             size="sm"
                             className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={togglePassword}
+                            onClick={() => setShowPassword((p) => !p)}
                             aria-label={
                                 showPassword ? 'Hide password' : 'Show password'
                             }
@@ -345,9 +389,9 @@ const RegisterForm = (data: IForm) => {
                 <Button
                     type="submit"
                     className="w-full h-12"
-                    disabled={Register.isPending}
+                    disabled={submitting}
                 >
-                    {Register.isPending ? (
+                    {submitting ? (
                         <>
                             <Loader2 className="animate-spin h-4 w-4" />
                             Creating account...
@@ -403,9 +447,12 @@ const RegisterForm = (data: IForm) => {
             </div>
             <div className="text-center text-sm">
                 Already have an account?{' '}
-                <a href="/login" className="underline underline-offset-4">
+                <Link
+                    to={AUTH_ROUTES.login}
+                    className="underline underline-offset-4"
+                >
                     Sign in
-                </a>
+                </Link>
             </div>
         </form>
     );

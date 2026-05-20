@@ -1,5 +1,5 @@
 import { SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
-import storage from '@/utils/storage.util';
+import storage from '@/api/services/local-storage';
 import React from 'react';
 
 const Trigger = () => {

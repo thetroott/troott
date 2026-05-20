@@ -1,51 +1,70 @@
 import { useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import type {
-    IAPIResponse,
-    IForm,
-    IOtpFormErrors,
-} from '@/utils/interfaces.util';
+import type { IForm, IOtpFormErrors } from '@/utils/interfaces.util';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { useMutation } from '@tanstack/react-query';
-import type { VerifyOtpDTO } from '@/dtos/auth.dto';
-import apiCall from '@/api/config';
 import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
-import { OtpType } from '@/utils/enums.util';
-import { handleMutationError } from '@/utils/helpers.util';
-import storage from '@/utils/storage.util';
+import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
+import { toast } from 'sonner';
+import type { VerifyOtpDTO } from '@/dtos/auth.dto';
+import useAuth from '@/hooks/app/useAuth';
+import storage from '@/api/services/local-storage';
+import { OtpType } from '@/api/enums';
+import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
+import { AUTH_ROUTES } from '@/constants/auth-routes';
+import { Link } from 'react-router-dom';
 
 const OtpForm = (data: IForm) => {
     const { className, email, onSuccess, onResend, ...props } = data;
 
     const navigate = useNavigate();
 
+    const { verifyOtp, resendOtp } = useAuth();
+
     const [otp, setOtp] = useState(Array(6).fill(''));
     const [errors, setErrors] = useState<IOtpFormErrors>({});
     const [touched, setTouched] = useState(false);
     const [resendCountdown, setResendCountdown] = useState(0);
+    const [pending, setPending] = useState(false);
     const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-    const otpMutation = useMutation({
-        mutationFn: (payload: VerifyOtpDTO) => {
-            return apiCall.auth.verifyOTP(payload);
-        },
-        onSuccess: (data: IAPIResponse) => {
-            toast.success(data.message);
-            navigate('/login');
-            onSuccess?.();
-        },
-        onError: handleMutationError,
-    });
+    const resolvedEmail =
+        cleanStoredEmail(email) ||
+        cleanStoredEmail(storage.getUserEmail() ?? '');
 
-    const validateOTP = (otp: string[]): string | undefined => {
-        const otpString = otp.join('');
+    const validateOTP = (digits: string[]): string | undefined => {
+        const otpString = digits.join('');
         if (!otpString) return 'OTP is required';
         if (otpString.length !== 6) return 'Please enter all 6 digits';
         if (!/^\d+$/.test(otpString)) return 'OTP must contain only numbers';
+    };
+
+    const submitVerification = async (payload: VerifyOtpDTO) => {
+        if (!payload.email) {
+            toast.error('Missing email. Register again or sign in.');
+            return;
+        }
+        setPending(true);
+        try {
+            const res = await verifyOtp(payload);
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Verification failed.');
+                }
+                return;
+            }
+            toast.success(res.message || 'OTP verified.');
+            navigate(AUTH_ROUTES.login);
+            onSuccess?.();
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : 'Verification failed.',
+            );
+        } finally {
+            setPending(false);
+        }
     };
 
     const maskEmail = (email: string): string => {
@@ -72,27 +91,11 @@ const OtpForm = (data: IForm) => {
         }, 1000);
     };
 
-    const userEmail = storage.getUserEmail() as string;
-    const buildOtpPayload = (): VerifyOtpDTO => {
-        // Clean email by removing extra quotes if present and parsing JSON if needed
-        let cleanEmail = userEmail || '';
-
-        // If the email is JSON stringified, parse it
-        if (cleanEmail.startsWith('"') && cleanEmail.endsWith('"')) {
-            try {
-                cleanEmail = JSON.parse(cleanEmail);
-            } catch (e) {
-                // If parsing fails, just remove the quotes
-                cleanEmail = cleanEmail.replace(/^"(.*)"$/, '$1');
-            }
-        }
-
-        return {
-            email: cleanEmail,
-            otp: Number(otp.join('')),
-            otpType: OtpType.REGISTER,
-        };
-    };
+    const buildOtpPayload = (): VerifyOtpDTO => ({
+        email: resolvedEmail,
+        otp: Number(otp.join('')),
+        otpType: OtpType.REGISTER,
+    });
 
     const handleOTPChange = (index: number, value: string) => {
         // Remove non-digit characters immediately
@@ -157,7 +160,11 @@ const OtpForm = (data: IForm) => {
             const otpError = validateOTP(newOtp);
             if (!otpError) {
                 setErrors({});
-                otpMutation.mutate(buildOtpPayload());
+                void submitVerification({
+                    email: resolvedEmail,
+                    otp: Number(newOtp.join('')),
+                    otpType: OtpType.REGISTER,
+                });
             } else {
                 setErrors({ otp: otpError });
             }
@@ -177,10 +184,34 @@ const OtpForm = (data: IForm) => {
 
         setErrors({});
 
-        await otpMutation.mutate(buildOtpPayload());
+        await submitVerification(buildOtpPayload());
     };
 
     const handleResendOTP = async () => {
+        if (!resolvedEmail) {
+            toast.error('Missing email. Register again or sign in.');
+            return;
+        }
+        setPending(true);
+        try {
+            const res = await resendOtp({
+                email: resolvedEmail,
+                otpType: OtpType.REGISTER,
+            });
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Could not resend code.');
+                }
+                return;
+            }
+            toast.success(res.message || 'A new code was sent.');
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : 'Could not resend code.',
+            );
+        } finally {
+            setPending(false);
+        }
         setOtp(Array(6).fill(''));
         setErrors({});
         setTouched(false);
@@ -196,11 +227,11 @@ const OtpForm = (data: IForm) => {
             {...props}
         >
             <div className="grid gap-6">
-                {email && (
+                {resolvedEmail && (
                     <div className="text-center text-sm text-muted-foreground">
                         <p>We sent a verification code to</p>
                         <p className="font-medium text-foreground">
-                            {maskEmail(email)}
+                            {maskEmail(resolvedEmail)}
                         </p>
                     </div>
                 )}
@@ -263,7 +294,7 @@ const OtpForm = (data: IForm) => {
                             <button
                                 type="button"
                                 onClick={handleResendOTP}
-                                disabled={otpMutation.isPending}
+                                disabled={pending}
                                 className="text-primary underline underline-offset-4 hover:no-underline disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Resend code
@@ -272,12 +303,22 @@ const OtpForm = (data: IForm) => {
                     </p>
                 </div>
 
+                <p className="text-center text-sm text-muted-foreground">
+                    Activating a new account?{' '}
+                    <Link
+                        to={AUTH_ROUTES.activateAccount}
+                        className="text-primary underline underline-offset-4 hover:no-underline"
+                    >
+                        Continue on activate account
+                    </Link>
+                </p>
+
                 <Button
                     type="submit"
                     className="w-full h-12 "
-                    disabled={otpMutation.isPending}
+                    disabled={pending}
                 >
-                    {otpMutation.isPending ? (
+                    {pending ? (
                         <>
                             <Loader2 className="animate-spin h-4 w-4" />
                             Verifying...
