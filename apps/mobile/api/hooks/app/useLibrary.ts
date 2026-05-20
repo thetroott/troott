@@ -1,59 +1,34 @@
-import { useQuery } from '@tanstack/react-query';
-
-import { httpClient } from '@/api/http-client';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, ApiErrorType } from '@/api/errors';
-import { API_BASE_PATH } from '@/api/config';
-import { QueryKeys } from '@/utils/enums.util';
-import { useContextType } from '@/state/app-state';
+import { useContextType } from '@/context/apps/useContextType';
+import api from '../../api';
+import { libraryKeys, queryKeys } from '../../utils/query-keys';
 import type { IAPIResponse } from '@/utils/interface.utl';
 
-function parseApi<T>(raw: unknown): T {
-    const r = raw as { error?: boolean; message?: string; data?: unknown };
-    if (r && typeof r === 'object' && r.error) {
-        throw new Error(r.message || 'Request failed');
-    }
-    if (r && typeof r === 'object' && 'data' in r && r.data !== undefined) {
-        return r.data as T;
-    }
-    return raw as T;
-}
-
-/** Internal tooling listing — app uses {@link useUserLibraryQuery}. */
-function parseApiMaybeEmpty(raw: unknown): unknown | null {
-    const r = raw as { error?: boolean; message?: string; data?: unknown };
-    if (r && typeof r === 'object' && r.error) {
-        const msg = String(r.message ?? '').toLowerCase();
+function parseLibraryResponse(res: IAPIResponse): Record<string, unknown> | null {
+    if (res.error) {
+        const msg = String(res.message ?? '').toLowerCase();
         if (msg.includes('library not found')) {
             return null;
         }
-        throw new Error(r.message || 'Request failed');
+        throw new Error(res.message || 'Request failed');
     }
-    if (r && typeof r === 'object' && 'data' in r && r.data !== undefined) {
-        return r.data;
-    }
-    return raw;
+    return (res.data as Record<string, unknown>) ?? null;
 }
 
-/**
- * Current user's library (`GET /library/user/:userId`).
- * Returns `null` when no library document exists yet (404).
- */
 export function useUserLibraryQuery(enabled = true) {
     const { userContext } = useContextType();
     const userId = (userContext.user as { id?: string } | null)?.id;
 
     return useQuery({
-        queryKey: [QueryKeys.Libraries, userId],
+        queryKey: libraryKeys.user(userId ?? ''),
         queryFn: async () => {
             if (!userId) {
                 throw new Error('Not signed in');
             }
             try {
-                const raw = await httpClient.get<IAPIResponse>(
-                    `${API_BASE_PATH}/library/user/${encodeURIComponent(userId)}`,
-                );
-                const parsed = parseApiMaybeEmpty(raw);
-                return parsed as Record<string, unknown> | null;
+                const res = await api.library.getLibraryByUser(userId);
+                return parseLibraryResponse(res);
             } catch (e) {
                 if (
                     e instanceof ApiError &&
@@ -70,17 +45,48 @@ export function useUserLibraryQuery(enabled = true) {
     });
 }
 
+export function useUpdateLibraryMutation() {
+    const queryClient = useQueryClient();
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
+
+    return useMutation({
+        mutationFn: (payload: Record<string, unknown>) => {
+            if (!userId) {
+                throw new Error('Not signed in');
+            }
+            return api.library.updateLibrary(userId, payload);
+        },
+        onSuccess: () => {
+            if (userId) {
+                queryClient.invalidateQueries({
+                    queryKey: libraryKeys.user(userId),
+                });
+            }
+        },
+    });
+}
+
 export function usePlaylistsQuery(enabled = true) {
     const { userContext } = useContextType();
     const userId = (userContext.user as { id?: string } | null)?.id;
 
     return useQuery({
-        queryKey: [QueryKeys.Playlists, userId],
+        queryKey: queryKeys.playlist.user(userId ?? ''),
         queryFn: async () => {
-            const raw = await httpClient.get<IAPIResponse>(`${API_BASE_PATH}/playlist`);
-            return parseApi<unknown>(raw);
+            const res = await api.playlist.getAllPlaylists();
+            if (res.error) {
+                throw new Error(res.message || 'Request failed');
+            }
+            return res.data;
         },
         enabled: enabled && !!userId,
         retry: 1,
     });
 }
+
+export const useLibrary = () => ({
+    useUserLibraryQuery,
+    useUpdateLibraryMutation,
+    usePlaylistsQuery,
+});

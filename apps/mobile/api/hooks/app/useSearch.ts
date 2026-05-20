@@ -1,14 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
-import { httpClient } from '@/api/http-client';
-import { API_BASE_PATH } from '@/api/config';
+import api from '../../api';
 import {
     mapSermonDocsToItems,
     ministerDocToRow,
 } from '@/engine/utils/library-map';
 import type { SermonItemDTO } from '@/types/sermon';
-import { QueryKeys } from '@/utils/enums.util';
+import { queryKeys } from '../../utils/query-keys';
 import { queryClient } from '@/api/services/query-client';
 import {
     canonicalSearchQuery,
@@ -61,7 +60,9 @@ function pickPrefixPlaceholder(
 
     const queries = queryClient.getQueryCache().findAll({
         predicate: (q) =>
-            q.queryKey[0] === QueryKeys.CatalogSearch &&
+            Array.isArray(q.queryKey) &&
+            q.queryKey[0] === 'search' &&
+            q.queryKey[1] === 'catalog' &&
             typeof q.queryKey[1] === 'string',
     });
 
@@ -100,13 +101,16 @@ export function useCatalogSearchQuery(q: string, enabled: boolean) {
         canonical.length >= SEARCH_MIN_QUERY_LENGTH;
 
     return useQuery({
-        queryKey: [QueryKeys.CatalogSearch, canonical],
-        queryFn: async ({ signal }): Promise<CatalogSearchResult> => {
-            const raw = await httpClient.get<IAPIResponse>(
-                `${API_BASE_PATH}/search?q=${encodeURIComponent(canonical)}&scope=all`,
-                { signal, skipAuth: true },
-            );
-            const data = parseApiData(raw) as {
+        queryKey: queryKeys.search.catalog(canonical),
+        queryFn: async (): Promise<CatalogSearchResult> => {
+            const res = await api.search.searchCatalog({
+                q: canonical,
+                scope: 'all',
+            });
+            if (res.error) {
+                throw new Error(res.message || 'Search failed');
+            }
+            const data = parseApiData(res) as {
                 sermons?: unknown;
                 ministers?: unknown;
             };

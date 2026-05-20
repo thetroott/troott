@@ -5,7 +5,8 @@ import { toast } from '@/components/ui/toast';
 import { useRegisterStore } from '@/stores/register-store';
 import { useForgotPasswordStore } from '@/stores/otp-store';
 import { handleMutationError } from '@/utils/helpers.util';
-import { useContextType } from '@/state/app-state';
+import { useContextType } from '@/context/apps/useContextType';
+import { GET_LOGGEDIN_USER } from '@/context/types';
 import useGoTo from '../shared/useGoTo';
 import secureStorage from '../../services/secure-storage';
 import {
@@ -13,61 +14,25 @@ import {
     storage,
     storeToken,
 } from '../../services/mmkv-storage';
-import { authService } from '../../clients/auth';
+import api from '../../api';
 import type {
     ActivateDTO,
     ChangePasswordDTO,
     ForgotPasswordDTO,
     LoginDTO,
-    MapRegisteredUserDTO,
     RegisterUserDTO,
     ResendOtpDTO,
     ResetPasswordDTO,
     VerifyOtpDTO,
 } from '../../dtos/auth.dto';
 import { queryKeys } from '../../utils/query-keys';
+import { mapApiUserToContext } from '../../utils/map-api-user';
 import { removeCatalogSearchQueries } from '@/lib/catalog-search-cache';
 
-const authKeys = {
-    all: ['auth'] as const,
-    user: () => [...authKeys.all, 'user'] as const,
-};
-
-/**
- * Maps API user fields into the shape stored in app auth context.
- * @param {Record<string, unknown>} payload Raw user object from the session envelope.
- */
-function mapApiUserToContext(payload: Record<string, unknown>) {
-    return {
-        id: String(payload.id ?? ''),
-        email: String(payload.email ?? ''),
-        firstName: String(payload.firstName ?? ''),
-        lastName: String(payload.lastName ?? ''),
-        userType: payload.userType,
-        isActive: payload.isActive,
-        isTalent: payload.isTalent,
-        isAdmin: payload.isAdmin,
-        isSuper: payload.isSuper,
-        isOrganisation: payload.isOrganisation,
-        isLocked: payload.isLocked,
-        roles: payload.roles,
-        status: payload.status,
-        onboard: payload.onboard,
-    };
-}
-
-/**
- * Auth flows backed by {@link authService} and React Query `useMutation`.
- *
- * @name useAuth
- * @description Returns OTP refs, register/login/activate, password recovery, change password, and logout mutations with toast, navigation, and session persistence.
- * @returns {object} `otpRefs` plus `RegisterMutation`, `ActivateMutation`, `LoginMutation`, `SendOtpMutation`, `VerifyOtpMutation`, `ResendOtpMutation`, `ResetPasswordMutation`, `ChangePasswordMutation`, and `LogoutMutation` (each a TanStack Query mutation result).
- */
 export const useAuth = () => {
     const { goTo } = useGoTo();
     const { reset } = useRegisterStore();
     const { userContext } = useContextType();
-    const { setUser, setUserType } = userContext;
     const { setFormData, setErrors, setTouched, setResendCountdown, setStep } =
         useForgotPasswordStore();
 
@@ -86,261 +51,161 @@ export const useAuth = () => {
         }, 1000);
     };
 
-    /**
-     * Persists access token and user snapshot to secure store, MMKV, auth context, and React Query cache.
-     * @param {LoginResponse} payload Session token and user returned inside the API `data` envelope.
-     */
-    const persistSession = async (payload: any) => {
-        await storeToken({ token: payload.token });
-        const u = payload.user as unknown as Record<string, unknown>;
+    const persistSession = async (payload: {
+        token?: string;
+        user?: Record<string, unknown>;
+    }) => {
+        if (payload.token) {
+            await storeToken({ token: payload.token });
+        }
+        const u = (payload.user ?? {}) as Record<string, unknown>;
         storage.setUserEmail(String(u.email ?? ''));
         storage.setUserId(String(u.id ?? ''));
         storage.setUserType(String(u.userType ?? ''));
-        setUser(mapApiUserToContext(u));
-        setUserType(String(u.userType ?? ''));
-        queryClient.setQueryData(queryKeys.auth.user(), payload.user);
+        const mapped = mapApiUserToContext(u);
+        userContext.setResource(GET_LOGGEDIN_USER, mapped);
+        userContext.setUserType(String(u.userType ?? ''));
+        queryClient.setQueryData(queryKeys.auth.user(), mapped);
     };
 
-    /**
-     * @name registerUser
-     * @description Register a new account; API emails an OTP and returns the mapped user in `data`.
-     * @param {RegisterUserDTO} payload Registration request body.
-     * @param {string} payload.firstName User given name.
-     * @param {string} payload.lastName User family name.
-     * @param {string} payload.email Account email.
-     * @param {string} payload.password Account password.
-     * @param {string} [payload.userType] Optional Troott user role.
-     * @returns {Promise<IAPIResponse>} API envelope; on success `mutate` resolves with user in `data`.
-     */
     const RegisterMutation = useMutation({
         mutationFn: (payload: RegisterUserDTO) =>
-            authService.registerUser(payload),
+            api.auth.registerUser(payload),
         onSuccess: (payload: IAPIResponse) => {
-            if (
-                payload.error ||
-                payload.data == null ||
-                typeof payload.data !== 'object'
-            ) {
-                toast.error(payload.message || 'Registration failed');
+            if (payload.error || !payload.data) {
+                handleMutationError(payload);
                 return;
             }
-            const u = payload.data as MapRegisteredUserDTO;
-            storage.setUserEmail(u.email);
-            storage.setUserId(u.id);
-            storage.setUserType(String(u.userType));
-
-            setUser({
-                id: u.id,
-                firstName: u.firstName,
-                lastName: u.lastName,
-                email: u.email,
-                userType: u.userType,
-            });
-
-            toast.success(payload.message || 'Registered');
+            toast.success(payload.message || 'Registration successful');
             reset();
-            goTo('/activate');
+            goTo('/verify-email');
         },
         onError: handleMutationError,
-        retry: 0,
-        gcTime: 0,
     });
 
-    /**
-     * @name activateUser
-     * @description Activate a user account after registration using an OTP code.
-     * @param {ActivateDTO} payload Data for activating the account.
-     * @param {string} payload.email The email tied to the OTP.
-     * @param {number} payload.otp The one-time code sent to the user (numeric).
-     * @param {string} payload.otpType Which OTP flow this code belongs to (see `OtpType` in `@/models/User.model`).
-     * @returns {Promise<IAPIResponse>} Confirmation of activation; `data` includes user and token on success.
-     */
     const ActivateMutation = useMutation({
-        mutationFn: (payload: ActivateDTO) =>
-            authService.activateUser(payload),
+        mutationFn: (payload: ActivateDTO) => api.auth.activateUser(payload),
         onSuccess: async (payload: IAPIResponse) => {
-            if (
-                payload.error ||
-                payload.data == null ||
-                typeof payload.data !== 'object'
-            ) {
-                toast.error(payload.message || 'Activation failed');
+            if (payload.error || !payload.data) {
+                handleMutationError(payload);
                 return;
             }
-            const body = payload.data as { user?: unknown; token?: string };
-            if (!body.token || !body.user) {
-                toast.error(payload.message || 'Activation failed');
-                return;
-            }
-            const session = {
-                token: body.token,
-                user: body.user
+            const data = payload.data as {
+                token?: string;
+                user?: Record<string, unknown>;
             };
-            toast.success(
-                payload.message || 'Account activated successfully',
-            );
-            await persistSession(session);
-            removeCatalogSearchQueries(queryClient);
-            goTo('/home');
+            await persistSession(data);
+            toast.success(payload.message || 'Account activated');
+            goTo('/(onboarding)/select-interests');
         },
         onError: handleMutationError,
     });
 
-    /**
-     * @name loginUser
-     * @description Sign in with email and password; on success the API returns user and token in `data`.
-     * @param {LoginDTO} payload Login request body.
-     * @param {string} payload.email Account email.
-     * @param {string} payload.password Account password.
-     * @returns {Promise<IAPIResponse>} API envelope with session payload in `data` when credentials are valid.
-     */
     const LoginMutation = useMutation({
-        mutationFn: (payload: LoginDTO) => authService.loginUser(payload),
+        mutationFn: (payload: LoginDTO) => api.auth.loginUser(payload),
         onSuccess: async (payload: IAPIResponse) => {
-            if (
-                payload.error ||
-                payload.data == null ||
-                typeof payload.data !== 'object'
-            ) {
-                toast.error(payload.message || 'Login failed');
+            if (payload.error || !payload.data) {
+                handleMutationError(payload);
                 return;
             }
-            const body = payload.data as { user?: unknown; token?: string };
-            if (!body.token || !body.user) {
-                toast.error(payload.message || 'Login failed');
-                return;
-            }
-            const session = {
-                token: body.token,
-                user: body.user,
+            const data = payload.data as {
+                token?: string;
+                user?: Record<string, unknown>;
             };
-            toast.success(payload.message || 'User logged in successfully.');
-            await persistSession(session);
-            removeCatalogSearchQueries(queryClient);
-            goTo('/home');
+            await persistSession(data);
+            toast.success(payload.message || 'Welcome back');
+            goTo('/(tabs)/home');
         },
         onError: handleMutationError,
     });
 
-    /**
-     * @name forgotPassword
-     * @description Request a password-reset OTP for the given email.
-     * @param {ForgotPasswordDTO} payload Forgot-password request body.
-     * @param {string} payload.email Email that should receive the reset OTP.
-     * @returns {Promise<IAPIResponse>} API envelope confirming the OTP send attempt.
-     */
     const SendOtpMutation = useMutation({
         mutationFn: (payload: ForgotPasswordDTO) =>
-            authService.forgotPassword(payload),
+            api.auth.forgotPassword(payload),
         onSuccess: (payload: IAPIResponse) => {
-            toast.success(payload.message);
-            setStep('otp');
+            if (payload.error) {
+                handleMutationError(payload);
+                return;
+            }
             startResendCountdown();
-            setTimeout(() => otpRefs.current[0]?.focus(), 100);
+            toast.success(payload.message || 'OTP sent');
+            setStep('otp');
         },
         onError: handleMutationError,
     });
 
-    /**
-     * @name verifyOTP
-     * @description Validate an OTP for the given email and purpose (e.g. password reset).
-     * @param {VerifyOtpDTO} payload OTP verification body.
-     * @param {string} payload.email Email the OTP was sent to.
-     * @param {number} payload.otp Numeric OTP entered by the user.
-     * @param {string} payload.otpType Purpose of the OTP (see `OtpType`).
-     * @returns {Promise<IAPIResponse>} API envelope with verification outcome message.
-     */
     const VerifyOtpMutation = useMutation({
-        mutationFn: (payload: VerifyOtpDTO) => authService.verifyOTP(payload),
+        mutationFn: (payload: VerifyOtpDTO) => api.auth.verifyOTP(payload),
         onSuccess: (payload: IAPIResponse) => {
-            toast.success(payload.message);
+            if (payload.error) {
+                handleMutationError(payload);
+                return;
+            }
+            toast.success(payload.message || 'OTP verified');
             setStep('success');
         },
         onError: handleMutationError,
     });
 
-    /**
-     * @name resendOTP
-     * @description Ask the API to send a new OTP for the same email and purpose.
-     * @param {ResendOtpDTO} payload Resend request body.
-     * @param {string} payload.email Email to resend to.
-     * @param {string} payload.otpType Which OTP template to send (see `OtpType`).
-     * @returns {Promise<IAPIResponse>} API envelope for the resend request.
-     */
     const ResendOtpMutation = useMutation({
-        mutationFn: (payload: ResendOtpDTO) => authService.resendOTP(payload),
-        onSuccess: () => {
-            setFormData({ otp: Array(6).fill('') });
-            setErrors({});
-            setTouched({ otp: false });
+        mutationFn: (payload: ResendOtpDTO) => api.auth.resendOTP(payload),
+        onSuccess: (payload: IAPIResponse) => {
+            if (payload.error) {
+                handleMutationError(payload);
+                return;
+            }
             startResendCountdown();
-            otpRefs.current[0]?.focus();
+            toast.success(payload.message || 'OTP resent');
         },
         onError: handleMutationError,
     });
 
-    /**
-     * @name resetPassword
-     * @description Set a new password after the reset OTP flow (server-dependent ordering).
-     * @param {ResetPasswordDTO} payload Reset-password body.
-     * @param {string} payload.email Account email.
-     * @param {string} payload.newPassword New password meeting API rules.
-     * @returns {Promise<IAPIResponse>} API envelope confirming the password update.
-     */
     const ResetPasswordMutation = useMutation({
         mutationFn: (payload: ResetPasswordDTO) =>
-            authService.resetPassword(payload),
+            api.auth.resetPassword(payload),
         onSuccess: (payload: IAPIResponse) => {
-            toast.success(payload.message);
+            if (payload.error) {
+                handleMutationError(payload);
+                return;
+            }
+            toast.success(payload.message || 'Password reset');
+            setFormData({ email: '', otp: Array(6).fill('') });
+            setErrors({});
+            setTouched({});
             goTo('/login');
         },
         onError: handleMutationError,
     });
 
-    /**
-     * @name changePassword
-     * @description Change password for the authenticated user (Bearer required).
-     * @param {ChangePasswordDTO} payload Change-password body.
-     * @param {string} payload.currentPassword Existing password.
-     * @param {string} payload.newPassword Replacement password.
-     * @returns {Promise<IAPIResponse>} API envelope confirming the change.
-     */
     const ChangePasswordMutation = useMutation({
         mutationFn: (payload: ChangePasswordDTO) =>
-            authService.changePassword(payload),
+            api.auth.changePassword(payload),
         onSuccess: (payload: IAPIResponse) => {
-            toast.success(payload.message);
+            if (payload.error) {
+                handleMutationError(payload);
+                return;
+            }
+            toast.success(payload.message || 'Password updated');
         },
         onError: handleMutationError,
     });
 
-    /**
-     * @name logout
-     * @description Clear local session, call logout endpoint, invalidate queries, and navigate to login.
-     * @returns {Promise<IAPIResponse>} API envelope from the logout request (client clears state even on error).
-     */
     const LogoutMutation = useMutation({
-        mutationFn: () => authService.logout(),
+        mutationFn: () => api.auth.logoutUser(),
         onSuccess: async () => {
-            setUser({});
-            setUserType('');
             await clearTokens();
-            queryClient.invalidateQueries({ queryKey: authKeys.user() });
-            queryClient.clear();
+            await secureStorage.resetAllData();
+            userContext.setResource(GET_LOGGEDIN_USER, null);
+            userContext.setUserType('');
             removeCatalogSearchQueries(queryClient);
-            secureStorage.resetAllData();
+            queryClient.clear();
             goTo('/login');
         },
-        onError: async (error: unknown) => {
-            setUser({});
-            setUserType('');
+        onError: async () => {
             await clearTokens();
-            queryClient.invalidateQueries({ queryKey: authKeys.user() });
+            userContext.setResource(GET_LOGGEDIN_USER, null);
             queryClient.clear();
-            removeCatalogSearchQueries(queryClient);
-            secureStorage.resetAllData();
             goTo('/login');
-            handleMutationError(error);
         },
     });
 
@@ -355,5 +220,6 @@ export const useAuth = () => {
         ResetPasswordMutation,
         ChangePasswordMutation,
         LogoutMutation,
+        persistSession,
     };
 };

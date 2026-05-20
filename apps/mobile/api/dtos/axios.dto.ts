@@ -33,4 +33,6 @@ export interface CallApiDTO {
     payload?: unknown;
     /** Optional abort signal for cancellation / timeouts. */
     signal?: AbortSignal;
+    /** Query string parameters for GET (and other methods when needed). */
+    params?: Record<string, unknown>;
 }

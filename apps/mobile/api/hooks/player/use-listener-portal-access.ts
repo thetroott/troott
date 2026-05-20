@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useContextType } from '@/state/app-state';
+import { useContextType } from '@/context/apps/useContextType';
 import { useUser } from '@/api/hooks/app/useUser';
 
 /** Types accepted as listener-facing mobile app users (see ADR 0001 / profile module). */
@@ -32,10 +32,7 @@ export function useListenerPortalAccess() {
         (cachedUser?.userType as string | undefined) ?? persistedType,
     );
 
-    const { profileMeQuery: profileQuery } = useUser({
-        me: { enabled: false },
-        users: { enabled: false },
-    });
+    const profileQuery = useUser().useCurrentUserQuery(false);
 
     return useMemo(() => {
         const profile = profileQuery.data;

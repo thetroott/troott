@@ -1,6 +1,8 @@
 /**
- * Playback / streaming DTOs aligned with `apps/api/src/dtos/core/playback.dto.ts`.
- * Uses `@/models` for documents and playback enums.
+ * Playback / streaming DTOs — aligned with `apps/api/src/dtos/core/playback.dto.ts`
+ * and `interfaces/core/playback.interface.ts` (+ session / sermon streaming fields).
+ *
+ * Used by listener playback and by minister/admin tooling that inspects sessions.
  */
 import type Listener from '@/models/Listener.model';
 import type PlaybackSession from '@/models/PlaybackSession.model';

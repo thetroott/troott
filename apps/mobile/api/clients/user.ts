@@ -1,62 +1,46 @@
-/**
- * User account API (`/user`).
- *
- * Partner / legacy Pacepard user routes are not part of Troott; use
- * {@link listenerService} for listener profile updates.
- */
 import type { IAPIResponse } from '@/utils/interface.utl';
 
-import { userEndpoints } from '../config/endpoints';
+import { URL_USER, URL_USER_DEACTIVATE, URL_USER_LIST } from '../config/path';
 import { BaseService } from '../config/api-call';
-
-export class UsersService extends BaseService {
-    /**
-     * Staff user list (`GET /user/list`).
-     */
-    async getUsers(params?: { limit?: number; offset?: number }): Promise<IAPIResponse> {
-        const queryParams = new URLSearchParams();
-        if (params?.limit) {
-            queryParams.append('limit', params.limit.toString());
-        }
-        if (params?.offset) {
-            queryParams.append('offset', params.offset.toString());
-        }
-
-        const endpoint = queryParams.toString()
-            ? `${userEndpoints.list}?${queryParams.toString()}`
-            : userEndpoints.list;
-
+export class UserService extends BaseService {
+    getUsers(params?: {
+        limit?: number;
+        offset?: number;
+    }): Promise<IAPIResponse> {
         return this.call({
             method: 'GET',
             type: 'default',
-            path: endpoint,
+            path: URL_USER_LIST,
+            isAuth: true,
+            params: params as Record<string, unknown> | undefined,
+        });
+    }
+
+    getCurrentUser(): Promise<IAPIResponse> {
+        return this.call({
+            method: 'GET',
+            type: 'default',
+            path: URL_USER,
             isAuth: true,
         });
     }
 
-    /**
-     * Current authenticated user (`GET /user`).
-     */
-    async getCurrentUser(): Promise<IAPIResponse> {
+    updateProfile(payload: Record<string, unknown>): Promise<IAPIResponse> {
         return this.call({
-            method: 'GET',
+            method: 'PUT',
             type: 'default',
-            path: userEndpoints.me,
+            path: URL_USER,
             isAuth: true,
+            payload,
         });
     }
 
-    /**
-     * Deactivate the signed-in account (`DELETE /user/deactivate`).
-     */
-    async deleteMe(): Promise<IAPIResponse> {
+    deleteMe(): Promise<IAPIResponse> {
         return this.call({
             method: 'DELETE',
             type: 'default',
-            path: userEndpoints.deactivate,
+            path: URL_USER_DEACTIVATE,
             isAuth: true,
         });
     }
 }
-
-export const usersService = new UsersService();

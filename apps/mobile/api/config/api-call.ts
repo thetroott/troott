@@ -4,12 +4,36 @@
  */
 
 import type { CallApiDTO } from '../dtos/axios.dto';
-import { httpClient, RequestConfig } from '../http-client';
+import { httpClient, RequestConfig, type TroottHttpClient } from '../http-client';
 import type { ApiResponse, IAPIResponse } from '@/utils/interface.utl';
 
 
+function appendQueryParams(
+    path: string,
+    params?: Record<string, unknown>,
+): string {
+    if (!params || Object.keys(params).length === 0) {
+        return path;
+    }
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+        if (value === undefined || value === null) {
+            continue;
+        }
+        if (Array.isArray(value)) {
+            for (const item of value) {
+                search.append(key, String(item));
+            }
+        } else {
+            search.append(key, String(value));
+        }
+    }
+    const qs = search.toString();
+    return qs ? `${path}${path.includes('?') ? '&' : '?'}${qs}` : path;
+}
+
 export abstract class BaseService {
-    constructor(protected readonly http = httpClient) {}
+    constructor(protected readonly http: TroottHttpClient = httpClient) {}
 
     /**
      * Single HTTP entry point for domain services.
@@ -46,8 +70,10 @@ export abstract class BaseService {
             signal: params.signal,
         };
 
+        const pathWithQuery = appendQueryParams(params.path, params.params);
+
         const raw = await this.http.request<IAPIResponse>(
-            params.path,
+            pathWithQuery,
             requestInit,
         );
         return this.normalizeIAPIResponse(raw);

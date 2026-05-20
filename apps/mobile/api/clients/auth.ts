@@ -5,7 +5,17 @@
 
 import type { IAPIResponse } from '@/utils/interface.utl';
 
-import { authEndpoints } from '../config/endpoints';
+import {
+    URL_ACTIVATE,
+    URL_CHANGE_PASSWORD,
+    URL_FORGOT_PASSWORD,
+    URL_LOGIN,
+    URL_LOGOUT,
+    URL_REGISTER,
+    URL_RESEND_OTP,
+    URL_RESET_PASSWORD,
+    URL_VERIFY_OTP,
+} from '../config/path';
 import type {
     ActivateDTO,
     ChangePasswordDTO,
@@ -20,14 +30,13 @@ import type {
 import { clearTokens } from '../services/mmkv-storage';
 import { storage as sessionKv } from '../services/mmkv-storage';
 import { BaseService } from '../config/api-call';
-
 export class AuthService extends BaseService {
     /** `POST /auth/register` */
     registerUser(payload: RegisterUserDTO): Promise<IAPIResponse> {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.register,
+            path: URL_REGISTER,
             isAuth: false,
             payload,
         });
@@ -38,7 +47,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.login,
+            path: URL_LOGIN,
             isAuth: false,
             payload,
         });
@@ -49,7 +58,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.activate,
+            path: URL_ACTIVATE,
             isAuth: false,
             payload,
         });
@@ -60,7 +69,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.verifyOtp,
+            path: URL_VERIFY_OTP,
             isAuth: false,
             payload,
         });
@@ -71,7 +80,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.resendOtp,
+            path: URL_RESEND_OTP,
             isAuth: false,
             payload,
         });
@@ -82,7 +91,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.forgotPassword,
+            path: URL_FORGOT_PASSWORD,
             isAuth: false,
             payload,
         });
@@ -93,7 +102,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.resetPassword,
+            path: URL_RESET_PASSWORD,
             isAuth: false,
             payload,
         });
@@ -104,7 +113,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.changePassword,
+            path: URL_CHANGE_PASSWORD,
             isAuth: true,
             payload,
         });
@@ -119,7 +128,7 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.logout,
+            path: URL_LOGOUT,
             isAuth: false,
             payload: {},
         });
@@ -130,11 +139,9 @@ export class AuthService extends BaseService {
         return this.call({
             method: 'POST',
             type: 'default',
-            path: authEndpoints.logout,
+            path: URL_LOGOUT,
             isAuth: true,
             payload: payload.userId ? { userId: payload.userId } : {},
         });
     }
 }
-
-export const authService = new AuthService();

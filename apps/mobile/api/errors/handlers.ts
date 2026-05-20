@@ -4,7 +4,7 @@
  * Error handling utilities and logic.
  */
 
-import { apiConfig } from '../config';
+import { apiConfig } from '../config/index';
 import { ApiError, ApiErrorType } from './types';
 import { getBugsnag } from '../monitoring/bugsnag';
 

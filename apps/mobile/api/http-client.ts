@@ -3,7 +3,11 @@
  * deduplication, circuit breaker, and response handling.
  */
 
-import { apiConfig, DEFAULT_API_REQUEST_HEADERS, features } from './config';
+import {
+    apiConfig,
+    DEFAULT_API_REQUEST_HEADERS,
+    features,
+} from './config/index';
 import {
     ApiError,
     ApiErrorType,

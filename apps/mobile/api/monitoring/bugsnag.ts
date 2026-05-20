@@ -5,7 +5,7 @@
  * Configured for React Native Expo.
  */
 
-import { getEnvironment } from '../config';
+import { getEnvironment } from '../config/index';
 
 type BugsnagStatic = {
     start: (opts: Record<string, unknown>) => void;

@@ -1,56 +1,133 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useContextType } from '@/context/apps/useContextType';
+import api from '../../api';
+import { playlistKeys } from '../../utils/query-keys';
+import type {
+    AddPlaylistItemDTO,
+    CreatePlaylistDTO,
+    RemovePlaylistItemDTO,
+    UpdatePlaylistDTO,
+} from '../../dtos/playlist.dto';
 
-import { httpClient } from '@/api/http-client';
-import { API_BASE_PATH } from '@/api/config';
-import { QueryKeys } from '@/utils/enums.util';
-import { useContextType } from '@/state/app-state';
-import type { IAPIResponse } from '@/utils/interface.utl';
+export function usePlaylistByIdQuery(id: string, enabled = true) {
+    return useQuery({
+        queryKey: playlistKeys.detail(id),
+        queryFn: async () => {
+            const res = await api.playlist.getPlaylistById(id);
+            if (res.error) {
+                throw new Error(res.message || 'Request failed');
+            }
+            return res.data;
+        },
+        enabled: enabled && !!id,
+    });
+}
 
-function parseApi<T>(raw: unknown): T {
-    const r = raw as { error?: boolean; message?: string; data?: unknown };
-    if (r && typeof r === 'object' && r.error) {
-        throw new Error(r.message || 'Request failed');
-    }
-    if (r && typeof r === 'object' && 'data' in r && r.data !== undefined) {
-        return r.data as T;
-    }
-    return raw as T;
+export function useCreatePlaylistMutation() {
+    const queryClient = useQueryClient();
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
+
+    return useMutation({
+        mutationFn: (payload: CreatePlaylistDTO) =>
+            api.playlist.createPlaylist(payload),
+        onSuccess: () => {
+            if (userId) {
+                queryClient.invalidateQueries({
+                    queryKey: playlistKeys.user(userId),
+                });
+            }
+            queryClient.invalidateQueries({ queryKey: playlistKeys.all });
+        },
+    });
+}
+
+export function useUpdatePlaylistMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            id,
+            payload,
+        }: {
+            id: string;
+            payload: UpdatePlaylistDTO;
+        }) => api.playlist.updatePlaylist(id, payload),
+        onSuccess: (_res, vars) => {
+            queryClient.invalidateQueries({
+                queryKey: playlistKeys.detail(vars.id),
+            });
+        },
+    });
+}
+
+export function useDeletePlaylistMutation() {
+    const queryClient = useQueryClient();
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
+
+    return useMutation({
+        mutationFn: (id: string) => api.playlist.deletePlaylist(id),
+        onSuccess: () => {
+            if (userId) {
+                queryClient.invalidateQueries({
+                    queryKey: playlistKeys.user(userId),
+                });
+            }
+        },
+    });
 }
 
 export type AddSermonToPlaylistVars = {
     playlistId: string;
     sermonId: string;
-    /** Must equal the target playlist's `playlistType` on the server. */
-    playlistItemType: string;
 };
 
-/**
- * PATCH `/api/v1/playlist/:playlistId/add` — persists a sermon id into a user playlist.
- */
 export function useAddSermonToPlaylistMutation() {
     const queryClient = useQueryClient();
     const { userContext } = useContextType();
     const userId = (userContext.user as { id?: string } | null)?.id;
 
     return useMutation({
-        mutationFn: async ({
-            playlistId,
-            sermonId,
-            playlistItemType,
-        }: AddSermonToPlaylistVars) => {
-            const raw = await httpClient.patch<IAPIResponse>(
-                `${API_BASE_PATH}/playlist/${encodeURIComponent(playlistId)}/add`,
-                {
-                    itemId: sermonId,
-                    type: playlistItemType,
-                },
-            );
-            return parseApi<unknown>(raw);
+        mutationFn: ({ playlistId, sermonId }: AddSermonToPlaylistVars) => {
+            const payload: AddPlaylistItemDTO = { itemId: sermonId };
+            return api.playlist.addItem(playlistId, payload);
         },
-        onSuccess: async () => {
+        onSuccess: async (_res, vars) => {
             await queryClient.invalidateQueries({
-                queryKey: [QueryKeys.Playlists, userId],
+                queryKey: playlistKeys.detail(vars.playlistId),
+            });
+            if (userId) {
+                await queryClient.invalidateQueries({
+                    queryKey: playlistKeys.user(userId),
+                });
+            }
+        },
+    });
+}
+
+export function useRemovePlaylistItemMutation() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            playlistId,
+            payload,
+        }: {
+            playlistId: string;
+            payload: RemovePlaylistItemDTO;
+        }) => api.playlist.removeItem(playlistId, payload),
+        onSuccess: (_res, vars) => {
+            queryClient.invalidateQueries({
+                queryKey: playlistKeys.detail(vars.playlistId),
             });
         },
     });
 }
+
+export const usePlaylist = () => ({
+    usePlaylistByIdQuery,
+    useCreatePlaylistMutation,
+    useAddSermonToPlaylistMutation,
+    useRemovePlaylistItemMutation,
+});

@@ -107,4 +107,4 @@ export const API_BASE_PATH = `/api/${API_VERSION}`;
 
 // Export endpoints
 export * from './default-headers';
-export * from './endpoints';
+export * from './path';
