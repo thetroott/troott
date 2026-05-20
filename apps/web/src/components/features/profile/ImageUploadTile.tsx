@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Camera, UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { resolveAssetUrl } from '@/utils/asset-url.util';
-import apiCall from '@/api/config';
+import api from '@/api/config';
 import type { Asset } from '@/app/profile/profile.types';
 
 type Variant = 'cover' | 'avatar';
@@ -75,7 +75,7 @@ export function ImageUploadTile({
             setState('uploading');
             setProgress(0);
             try {
-                const res = await apiCall.storage.uploadImage(
+                const res = await api.storage.uploadImage(
                     file,
                     (p: number) => setProgress(p),
                 );

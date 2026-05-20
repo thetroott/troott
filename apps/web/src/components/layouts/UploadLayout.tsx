@@ -1,7 +1,7 @@
 import React from 'react';
 import UploadOptions from '@/components/shared/upload/UploadOptions';
 import FeedSection from '@/components/shared/upload/FeedSection';
-import { useUpload } from '@/context/upload/upload.context';
+import { useUpload } from '@/context/upload/uploadState';
 
 interface UploadLayoutProps {
     children: React.ReactNode;

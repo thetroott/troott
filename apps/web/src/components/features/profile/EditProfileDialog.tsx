@@ -177,7 +177,7 @@ export function EditProfileDialog({
                                             e.target.value,
                                         )
                                     }
-                                    placeholder="e.g. Pastor Sam Adeyemi"
+                                    placeholder="e.g. Minister Sam Adeyemi"
                                 />
                             </Field>
                             <Field label="Ministry Name">

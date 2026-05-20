@@ -7,7 +7,7 @@
  * (node 11745:106250) both branch off `userType`.
  */
 
-import { UserType } from '@troott/api-client';
+import { UserType } from '@/models/User.model';
 export { UserType };
 
 export interface Asset {

@@ -188,7 +188,7 @@ function UserProfile() {
                             <button
                                 type="button"
                                 onClick={() => setEditOpen(true)}
-                                className="inline-flex h-9 shrink-0 items-center gap-2 self-end rounded-lg bg-white px-4 text-sm font-medium text-[#292929] shadow hover:bg-white/95"
+                                className="inline-flex h-9 shrink-0 items-center gap-2 self-end rounded-lg border border-[#707070] bg-transparent px-4 text-sm font-medium text-[#eaeaea] shadow-none hover:bg-white/10"
                                 aria-label="Edit profile"
                             >
                                 <SquarePen className="h-4 w-4" />

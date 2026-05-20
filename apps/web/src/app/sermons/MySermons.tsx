@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import EmptySermonsState from '@/components/shared/my-sermons/EmptySermonsState';
 import SermonsTable from '@/components/shared/my-sermons/SermonsTable';
-import apiCall from '@/api/config';
-import { useContextType } from '@/state/app-state';
+import api from '@/api/config';
+import useContextType from '@/hooks/shared/useContextType';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,
@@ -15,58 +15,13 @@ import {
     mapApiSermonToTableRow,
     parseMinisterSermonsResponse,
 } from '@/utils/sermon-list-map.util';
-import { devUploadDraftRowsToMinisterListDocs } from '@/utils/dev-upload-drafts.util';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-
-/** Same token rules as API minister list search: every trimmed word must appear in title/description/topic/tags (case-insensitive). */
-function rawDocMatchesSearchTerms(
-    doc: Record<string, unknown>,
-    q: string,
-): boolean {
-    const terms = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
-    if (!terms.length) return true;
-    const parts: string[] = [
-        String(doc.title ?? '').toLowerCase(),
-        String(doc.description ?? '').toLowerCase(),
-        String(doc.topic ?? '').toLowerCase(),
-    ];
-    if (Array.isArray(doc.tags)) {
-        for (const t of doc.tags) parts.push(String(t).toLowerCase());
-    }
-    const hay = parts.join(' ');
-    return terms.every((t) => hay.includes(t));
-}
-
-function sortRawSermonDocs(
-    docs: Record<string, unknown>[],
-    sort: string,
-): Record<string, unknown>[] {
-    const desc = sort.startsWith('-');
-    const field = desc ? sort.slice(1) : sort;
-    const dir = desc ? -1 : 1;
-    return [...docs].sort((a, b) => {
-        if (field === 'title') {
-            const ta = String(a.title ?? '').toLowerCase();
-            const tb = String(b.title ?? '').toLowerCase();
-            return ta < tb ? -dir : ta > tb ? dir : 0;
-        }
-        const da = new Date(
-            String(a[field] ?? a.updatedAt ?? a.createdAt ?? 0),
-        ).getTime();
-        const db = new Date(
-            String(b[field] ?? b.updatedAt ?? b.createdAt ?? 0),
-        ).getTime();
-        return (da - db) * dir;
-    });
-}
 
 const Sermons = () => {
     const { userContext } = useContextType();
     const user = userContext.user as Record<string, unknown> | null;
     const ministerId = useMemo(() => resolveMinisterId(user), [user]);
-    const isDev = import.meta.env.DEV;
-    const queryEnabled = Boolean(ministerId) || isDev;
 
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -81,6 +36,14 @@ const Sermons = () => {
         dateTo: DEFAULT_MINISTER_LIST_PARAMS.dateTo,
     });
 
+    const listParamsWithQ: MinisterSermonListParams = useMemo(
+        () => ({
+            ...listParams,
+            q: debouncedSearch,
+        }),
+        [listParams, debouncedSearch],
+    );
+
     useEffect(() => {
         const t = window.setTimeout(
             () => setDebouncedSearch(searchInput.trim()),
@@ -93,156 +56,35 @@ const Sermons = () => {
         setListParams((p) => (p.page === 1 ? p : { ...p, page: 1 }));
     }, [debouncedSearch]);
 
-    const devDocs = useMemo(
-        () => (isDev ? devUploadDraftRowsToMinisterListDocs() : []),
-        [isDev],
-    );
-
-    const useDevMerge = Boolean(isDev && devDocs.length && ministerId);
-
     const listQueryKey = useMemo(
         () =>
-            [
-                ...sermonQueryKeys.all,
-                'minister',
-                ministerId || '__dev__',
-                listParams.page,
-                listParams.limit,
-                listParams.sort,
-                debouncedSearch,
-                listParams.status,
-                listParams.dateFrom,
-                listParams.dateTo,
-                useDevMerge,
-            ] as const,
-        [
-            ministerId,
-            listParams.page,
-            listParams.limit,
-            listParams.sort,
-            debouncedSearch,
-            listParams.status,
-            listParams.dateFrom,
-            listParams.dateTo,
-            useDevMerge,
-        ],
+            ministerId
+                ? sermonQueryKeys.ministerList(ministerId, listParamsWithQ)
+                : (['sermons', 'minister', 'none'] as const),
+        [ministerId, listParamsWithQ],
     );
 
     const { data, isLoading, isError, error, refetch, isFetching } = useQuery({
         queryKey: listQueryKey,
-        enabled: queryEnabled,
-        queryFn: async ({ queryKey }) => {
-            const ministerKey = String(queryKey[2] ?? '');
-            const effectiveMinisterId =
-                ministerKey === '__dev__' ? '' : ministerKey;
-
-            const page = Number(queryKey[3]) || 1;
-            const limit = Number(queryKey[4]) || MY_SERMONS_PAGE_SIZE;
-            const sort = String(queryKey[5] ?? '-updatedAt');
-            const q = String(queryKey[6] ?? '');
-            const status = queryKey[7] as MinisterSermonListParams['status'];
-            const dateFrom = String(queryKey[8] ?? '');
-            const dateTo = String(queryKey[9] ?? '');
-            const devMergeFlag = Boolean(queryKey[10]);
-
-            const apiParamsBase = {
-                sort,
-                q: q || undefined,
-                status: status === 'all' ? undefined : status,
-                dateFrom: dateFrom || undefined,
-                dateTo: dateTo || undefined,
-            };
-
-            const devDocsFresh = isDev
-                ? devUploadDraftRowsToMinisterListDocs()
-                : [];
-
-            if (!effectiveMinisterId) {
-                const devRows = q.trim()
-                    ? devDocsFresh.filter((d) => rawDocMatchesSearchTerms(d, q))
-                    : devDocsFresh;
-                return { rows: devRows, total: devRows.length };
-            }
-
-            if (devMergeFlag && isDev) {
-                try {
-                    const res = await apiCall.sermon.getSermonsByMinister(
-                        effectiveMinisterId,
-                        {
-                            page: 1,
-                            limit: 150,
-                            ...apiParamsBase,
-                        },
-                    );
-                    const { list: apiList } = parseMinisterSermonsResponse(res);
-
-                    const apiIds = new Set(
-                        apiList
-                            .map((d) => String(d.id ?? d._id ?? ''))
-                            .filter(Boolean),
-                    );
-                    const devOnly = devDocsFresh
-                        .filter((d) => {
-                            const sid = d.sermonId;
-                            if (
-                                typeof sid === 'string' &&
-                                sid &&
-                                apiIds.has(sid)
-                            ) {
-                                return false;
-                            }
-                            return !apiIds.has(String(d.id ?? d._id ?? ''));
-                        })
-                        .filter((d) => rawDocMatchesSearchTerms(d, q));
-                    const merged = [...devOnly, ...apiList];
-                    const sorted = sortRawSermonDocs(merged, sort);
-                    const total = sorted.length;
-                    const start = (page - 1) * MY_SERMONS_PAGE_SIZE;
-                    const slice = sorted.slice(
-                        start,
-                        start + MY_SERMONS_PAGE_SIZE,
-                    );
-                    return { rows: slice, total };
-                } catch {
-                    const devSubset = devDocsFresh.filter((d) =>
-                        rawDocMatchesSearchTerms(d, q),
-                    );
-                    const sorted = sortRawSermonDocs(devSubset, sort);
-                    const total = sorted.length;
-                    const start = (page - 1) * MY_SERMONS_PAGE_SIZE;
-                    return {
-                        rows: sorted.slice(start, start + MY_SERMONS_PAGE_SIZE),
-                        total,
-                    };
-                }
-            }
-
-            try {
-                const res = await apiCall.sermon.getSermonsByMinister(
-                    effectiveMinisterId,
-                    {
-                        page,
-                        limit,
-                        ...apiParamsBase,
-                    },
-                );
-                const { list, total } = parseMinisterSermonsResponse(res);
-                return { rows: list, total };
-            } catch (e) {
-                if (isDev && devDocsFresh.length) {
-                    const devSubset = devDocsFresh.filter((d) =>
-                        rawDocMatchesSearchTerms(d, q),
-                    );
-                    const sorted = sortRawSermonDocs(devSubset, sort);
-                    const total = sorted.length;
-                    const start = (page - 1) * MY_SERMONS_PAGE_SIZE;
-                    return {
-                        rows: sorted.slice(start, start + MY_SERMONS_PAGE_SIZE),
-                        total,
-                    };
-                }
-                throw e;
-            }
+        enabled: Boolean(ministerId),
+        queryFn: async () => {
+            const res = await api.sermon.getSermonsByMinister(
+                ministerId!,
+                {
+                    page: listParamsWithQ.page,
+                    limit: listParamsWithQ.limit,
+                    sort: listParamsWithQ.sort,
+                    q: listParamsWithQ.q || undefined,
+                    status:
+                        listParamsWithQ.status === 'all'
+                            ? undefined
+                            : listParamsWithQ.status,
+                    dateFrom: listParamsWithQ.dateFrom || undefined,
+                    dateTo: listParamsWithQ.dateTo || undefined,
+                },
+            );
+            const { list, total } = parseMinisterSermonsResponse(res);
+            return { rows: list, total };
         },
     });
 
@@ -277,7 +119,7 @@ const Sermons = () => {
         setListParams((prev) => ({ ...prev, dateTo, page: 1 }));
     }, []);
 
-    if (!ministerId && !isDev) {
+    if (!ministerId) {
         return (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                 <p className="text-muted-foreground max-w-md">

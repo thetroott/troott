@@ -29,15 +29,10 @@ const OnboardingItems = [
                 title: 'Document Verification',
                 action: '/get-started/verify-account/verify-document/document1',
             },
-            // {
-            //   id: "5",
-            //   title: "Upload your documents",
-            //   action: "/get-started/verify-account/verify-document/upload",
-            // },
             {
-                id: '6',
+                id: '5',
                 title: 'Document Verification',
-                action: '/get-started/verify-account/verify-document/document1',
+                action: '/get-started/verify-account/verify-document/upload',
             },
         ],
     },
@@ -45,13 +40,18 @@ const OnboardingItems = [
         id: '2',
         icon: DotIcon,
         title: 'Complete your profile',
-        text: 'Fill out your ministry information and upload a profile photo to help your audience connect with you.',
+        text: 'Fill out your home address and ministry information so listeners can connect with you.',
         button: 'Complete profile',
-        action: '/get-started/complete-profile',
+        action: '/get-started/home-address',
         steps: [
             {
                 id: '1',
-                title: 'Minstry Input',
+                title: 'Home address',
+                action: '/get-started/home-address',
+            },
+            {
+                id: '2',
+                title: 'Ministry profile',
                 action: '/get-started/ministry-input',
             },
         ],
@@ -63,6 +63,13 @@ const OnboardingItems = [
         text: 'Take a guided tour of the dashboard using Troott. It helps you discover important tools and how to use them effectively.',
         button: 'Tour & Tutorial',
         action: '/get-started/tour-guide',
+        steps: [
+            {
+                id: '1',
+                title: 'Tour',
+                action: '/get-started/tour-guide',
+            },
+        ],
     },
     {
         id: '4',

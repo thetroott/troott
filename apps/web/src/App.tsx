@@ -1,6 +1,9 @@
 import { BrowserRouter as Router } from 'react-router-dom';
 import AppRoutes from '@/routes/AppRoutes';
 import { AppProvider } from '@/context/apps/app.context';
+import AppState from '@/context/app/appState';
+import { Toaster } from '@/components/ui/sonner';
+import ReactQueryProvider from '@/services/tanstack/ReactQueryProvider';
 import useVersionCheck from './hooks/shared/useVersionCheck';
 
 const App = () => {
@@ -8,13 +11,18 @@ const App = () => {
     useVersionCheck();
 
     return (
-        <AppProvider>
-            <Router>
-                <div className="flex min-h-dvh min-w-0 flex-1 flex-col">
-                    <AppRoutes />
-                </div>
-            </Router>
-        </AppProvider>
+        <AppState>
+            <Toaster richColors  position="top-right" />
+            <ReactQueryProvider>
+                <AppProvider>
+                    <Router>
+                        <div className="flex min-h-dvh min-w-0 flex-1 flex-col bg-background">
+                            <AppRoutes />
+                        </div>
+                    </Router>
+                </AppProvider>
+            </ReactQueryProvider>
+        </AppState>
     );
 };
 

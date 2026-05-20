@@ -1,23 +1,24 @@
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import UploadLayout from '@/components/layouts/UploadLayout';
+import { DraftProvider } from '@/context/draft/draftState';
 import {
     UploadProvider,
     useUpload,
     uploadActions,
-} from '@/context/upload/upload.context';
+} from '@/context/upload/uploadState';
 import FileUploadZone from '@/components/shared/upload/FileUploadZone';
 import UploadModal from '@/components/shared/upload/UploadModal';
-import apiCall from '@/api/config';
-import { useContextType } from '@/state/app-state';
+import useContextType from '@/hooks/shared/useContextType';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,
-    sermonQueryKeys,
 } from '@/constants/sermon-query-keys';
-import { parseMinisterSermonsResponse } from '@/utils/sermon-list-map.util';
+import {
+    fetchSermonDetail,
+    useMinisterSermonsQuery,
+} from '@/hooks/app/useSermon';
 import type { ISermonUpload } from '@/utils/interfaces.util.tsx';
 
 const UploadContent: React.FC = () => {
@@ -33,23 +34,17 @@ const UploadContent: React.FC = () => {
     const user = userContext.user as Record<string, unknown> | null;
     const ministerId = useMemo(() => resolveMinisterId(user), [user]);
 
-    const { data: ministerSermonsRaw } = useQuery({
-        queryKey: sermonQueryKeys.ministerList(ministerId || 'unknown', {
-            ...DEFAULT_MINISTER_LIST_PARAMS,
-            page: 1,
-            limit: 50,
-        }),
-        enabled: Boolean(ministerId),
-        queryFn: async () => {
-            const res = await apiCall.sermon.getSermonsByMinister(ministerId, {
-                page: 1,
-                limit: 50,
-                sort: DEFAULT_MINISTER_LIST_PARAMS.sort,
-            });
-            const { list } = parseMinisterSermonsResponse(res);
-            return list;
-        },
-    });
+    const listParams = {
+        ...DEFAULT_MINISTER_LIST_PARAMS,
+        page: 1,
+        limit: 50,
+    };
+
+    const { data: ministerSermonsRaw } = useMinisterSermonsQuery(
+        ministerId,
+        listParams,
+        { enabled: Boolean(ministerId) },
+    );
 
     const hasSermonsOnRecord =
         Array.isArray(ministerSermonsRaw) && ministerSermonsRaw.length > 0;
@@ -81,9 +76,8 @@ const UploadContent: React.FC = () => {
         let cancelled = false;
         void (async () => {
             try {
-                const res = await apiCall.sermon.getSermonById(sid);
-                const body = res.data as { data?: Record<string, unknown> };
-                const d = body?.data;
+                const body = await fetchSermonDetail(sid);
+                const d = (body as { data?: Record<string, unknown> })?.data;
                 if (cancelled || !d) {
                     return;
                 }
@@ -166,9 +160,11 @@ const UploadContent: React.FC = () => {
 
 const Dashboard: React.FC = () => {
     return (
-        <UploadProvider>
-            <UploadContent />
-        </UploadProvider>
+        <DraftProvider>
+            <UploadProvider>
+                <UploadContent />
+            </UploadProvider>
+        </DraftProvider>
     );
 };
 
