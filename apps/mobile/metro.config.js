@@ -157,6 +157,7 @@ module.exports = (() => {
         extraNodeModules: {
             ...resolver.extraNodeModules,
             buffer: bufferPackageRoot,
+            '@troott/api': path.resolve(monorepoRoot, 'apps/api'),
         },
         nodeModulesPaths: [
             path.resolve(projectRoot, 'node_modules'),

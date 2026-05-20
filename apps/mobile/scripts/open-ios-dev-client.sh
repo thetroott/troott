@@ -30,11 +30,11 @@ done
 echo "OpenURL retry exhausted; relaunching app then retrying once..."
 
 if [ "${DEVICE_UDID}" = "booted" ]; then
-    xcrun simctl terminate booted com.dmlscript.troottclient >/dev/null 2>&1 || true
-    xcrun simctl launch booted com.dmlscript.troottclient >/dev/null 2>&1 || true
+    xcrun simctl terminate booted com.troott.app >/dev/null 2>&1 || true
+    xcrun simctl launch booted com.troott.app >/dev/null 2>&1 || true
 else
-    xcrun simctl terminate "${DEVICE_UDID}" com.dmlscript.troottclient >/dev/null 2>&1 || true
-    xcrun simctl launch "${DEVICE_UDID}" com.dmlscript.troottclient >/dev/null 2>&1 || true
+    xcrun simctl terminate "${DEVICE_UDID}" com.troott.app >/dev/null 2>&1 || true
+    xcrun simctl launch "${DEVICE_UDID}" com.troott.app >/dev/null 2>&1 || true
 fi
 
 sleep "${RETRY_DELAY_SECS}"

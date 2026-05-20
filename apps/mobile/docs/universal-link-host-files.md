@@ -14,7 +14,7 @@ Replace `TEAMID` and verify `paths` against your Expo / Xcode associated domains
         "apps": [],
         "details": [
             {
-                "appID": "TEAMID.com.dmlscript.troottclient",
+                "appID": "TEAMID.com.troott.app",
                 "paths": ["/sermon/*", "/playlist/*", "/minister/*"]
             }
         ]
@@ -32,7 +32,7 @@ Replace `RELEASE_SHA256` with your **Play App Signing** or upload key cert finge
         "relation": ["delegate_permission/common.handle_all_urls"],
         "target": {
             "namespace": "android_app",
-            "package_name": "com.dmlscript.troottclient",
+            "package_name": "com.troott.app",
             "sha256_cert_fingerprints": ["RELEASE_SHA256"]
         }
     }

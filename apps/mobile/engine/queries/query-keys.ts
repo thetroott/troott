@@ -1,6 +1,6 @@
 import { PlayerQueryKeys } from '../types/queries-type';
 import type { SermonItemDTO } from '@/types/sermon';
-import { QueryKeys } from '@/utils/enums.util';
+import { catalogUserDataKey } from '@/api/utils/query-keys';
 
 export const ACTIVE_INDEX_QUERY_KEY = [PlayerQueryKeys.ActiveIndex];
 
@@ -19,4 +19,4 @@ export const SHUFFLED_QUERY_KEY = [PlayerQueryKeys.Shuffled];
 export const UserDataQueryKey = (
     user: { id: string } | null | undefined,
     item: SermonItemDTO,
-) => [QueryKeys.UserData, user?.id as string, item.id as string];
+) => catalogUserDataKey(user?.id as string, item.id as string);

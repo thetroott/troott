@@ -1,4 +1,4 @@
-import type { UserType } from '@troott/api-client';
+import type { UserType } from '@/models/User.model';
 
 export interface registerUserPayload {
     firstName: string;

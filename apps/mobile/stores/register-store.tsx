@@ -1,6 +1,6 @@
 import { create } from '@/lib/zstore';
 
-import { UserType } from '@troott/api-client';
+import { UserType } from '@/models/User.model';
 import type { RegisterUserDTO } from '@/api/dtos/auth.dto';
 
 interface PasswordStrength {
