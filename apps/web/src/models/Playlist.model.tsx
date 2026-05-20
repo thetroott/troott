@@ -1,96 +1,63 @@
-import Listener from './Listener.model';
-import Minister from './Minister.model';
-import Series from './Series.model';
-import Sermon from './Sermon.model';
-import User from './User.model';
+import {
+    PlaylistOwnerType,
+    PlaylistStatus,
+    PlaylistType,
+    PlaylistVisibility,
+} from '@/dtos/api-domain';
 
-interface Playlist {
-    // Identity
+export interface PlaylistItemMedia {
+    id: string;
+    title: string;
+    imageUrl?: string;
+    duration?: number;
+    minister?: string;
+}
+
+export interface PlaylistItem {
+    id: string;
+    item: PlaylistItemMedia;
+    position: number;
+    addedAt: string;
+}
+
+export interface PlaylistOwnerRef {
+    id: string;
+    name: string;
+}
+
+export interface Playlist {
+    id: string;
     code: string;
     slug: string;
-
-    // Basic Information
     title: string;
     description: string;
     banner: string;
-
-    // Content
-    items: Array<PlaylistItem>;
+    items: PlaylistItem[];
     itemsCount: number;
     totalDurationMs: number;
-
-    // Visibility and Status
     status: PlaylistStatus;
     visibility: PlaylistVisibility;
-    playlistType: PlaylistType; // What kind of playlist is this?
-
-    // Ownership
-    ownerType: PlaylistOwnerType; // Who owns this playlist?
-    owner: User | any; // If created by the system admin or super admin
-    listener: Listener | any;
-    minister: Minister | any;
-
-    // Collaboration
+    playlistType: PlaylistType;
+    ownerType: PlaylistOwnerType;
+    owner?: PlaylistOwnerRef;
+    listener?: PlaylistOwnerRef;
+    minister?: PlaylistOwnerRef;
     isCollaborative: boolean;
-    collaborators: Array<User | any>;
-
-    // Engagement
     likesCount: number;
     savesCount: number;
     followersCount: number;
     sharesCount: number;
     playsCount: number;
-
-    // Flags
     isPublic: boolean;
-    isFeatured: boolean; // promote dby the platform
+    isFeatured: boolean;
     isPinned: boolean;
-
-    // Personalization
-    tags: Array<string>;
-    genres: Array<string>;
-    languages: Array<string>;
-
-    user: User | any;
-    createdBy: User | any;
-
+    tags: string[];
+    genres: string[];
+    languages: string[];
     createdAt: string;
     updatedAt: string;
-    _version: number;
-    _id: string;
-    id: string;
-}
-
-export interface PlaylistItem {
-    item: Sermon | Series | any;
-    position: number;
-    addedAt: string;
-    addedBy: User | any;
-}
-
-export enum PlaylistType {
-    MINISTER = 'minister',
-    LISTENER = 'listener',
-    SYSTEM = 'system',
-    RECOMMENDATION = 'recommendation',
-}
-
-export enum PlaylistOwnerType {
-    LISTENER = 'listener',
-    MINISTER = 'minister',
-    SYSTEM = 'system',
-}
-
-export enum PlaylistVisibility {
-    PUBLIC = 'public',
-    PRIVATE = 'private',
-    UNLISTED = 'unlisted',
-}
-
-export enum PlaylistStatus {
-    ACTIVE = 'active',
-    ARCHIVED = 'archived',
-    DELETED = 'deleted',
+    _version?: number;
+    _id?: string;
 }
 
 export default Playlist;

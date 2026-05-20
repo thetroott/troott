@@ -1,43 +1,42 @@
-import Subscription, { IDebitCard } from "./Subscription.model";
-import Talent from "./Listener.model";
+import { TransactionStatus, TransactionType } from '@/dtos/api-domain';
 
-interface Transaction {
+export interface TransactionCard {
+    cardLast: string;
+    expiryMonth: string;
+    expiryYear: string;
+}
 
-    type: string,
-    label: string,
-    resource: string,
-    reference: string,
-    currency: string,
-    providerRef: string,
-    providerName: string,
-    description: string,
-    narration: string,
-    amount: number,
-    unitAmount: number,
-    fee: number,
-    unitFee: number,
-    status: string,
-    reason: string,
-    message: string,
-    providerData: any,
-    metadata: Array<any>
-    channel: string,
-    slug: string,
-    card: IDebitCard,
-    policed: number
-
-    // relationships
-    talent: Talent | any;
-    subscription: Subscription | any;
-
-    // time stamps
+export interface Transaction {
+    id: string;
+    type: TransactionType;
+    label: string;
+    reference: string;
+    currency: string;
+    providerRef: string;
+    providerName: string;
+    description: string;
+    amount: number;
+    unitAmount: number;
+    fee: number;
+    unitFee: number;
+    status: TransactionStatus;
+    reason: string;
+    message: string;
+    channel: string;
+    slug: string;
+    card: TransactionCard;
     completedAt: string;
     createdAt: string;
     updatedAt: string;
-    _version: number;
-    _id: string;
-    id: string;
-
+    talent?: unknown;
+    subscription?: unknown;
+    resource?: string;
+    narration?: string;
+    providerData?: unknown[];
+    metadata?: unknown[];
+    policed?: number;
+    _version?: number;
+    _id?: string;
 }
 
 export default Transaction;

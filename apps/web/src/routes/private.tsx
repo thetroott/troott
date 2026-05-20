@@ -6,7 +6,6 @@ import Sermons from '@/app/sermons/MySermons';
 import Analytics from '@/app/analytics/Analytics';
 import InnerLayout from '@/components/layouts/InnerLayout';
 import UserAccount from '@/app/account/GetVerified';
-import HomeProfile from '@/app/account/HomeAddressInfo';
 import PersonalInfo from '@/app/account/VerifyUserInfo';
 import VerifyDocument from '@/app/account/VerifyDocument';
 import SelectDocumentType from '@/components/shared/get-started/SelectDocumentType';
@@ -17,7 +16,10 @@ import { UploadDocumentWrapper } from '@/components/shared/upload';
 import HomeAddressPage from '@/app/account/HomeAddressInfo';
 import MinistryInputPage from '@/app/account/MinistryInfo';
 import UserProfile from '@/app/profile/UserProfile';
-import { Outlet } from 'react-router-dom';
+import ChangePassword from '@/app/auth/ChangePassword';
+import TourGuidePage from '@/app/get-started/TourGuidePage';
+import StudioPortal from '@/app/studio/StudioPortal';
+import { Navigate } from 'react-router-dom';
 import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
 
 export const privateRoutes = [
@@ -53,48 +55,48 @@ export const privateRoutes = [
                         element: <VerifyDocument />,
                         children: [
                             {
-                                path: 'verify-account/verify-document',
-                                element: <VerifyDocument />,
-                                children: [
-                                    {
-                                        index: true,
-                                        path: '',
-                                        element: <SelectDocumentType />,
-                                    },
-                                    {
-                                        path: 'document1',
-                                        element: <VerifyDocument1 />,
-                                    },
-                                    {
-                                        path: 'select',
-                                        element: <VerifyDocumentForm />,
-                                    },
-                                    {
-                                        path: 'upload',
-                                        element: <UploadDocumentWrapper />,
-                                    },
-                                ],
+                                index: true,
+                                element: <SelectDocumentType />,
+                            },
+                            {
+                                path: 'document1',
+                                element: <VerifyDocument1 />,
+                            },
+                            {
+                                path: 'select',
+                                element: <VerifyDocumentForm />,
+                            },
+                            {
+                                path: 'upload',
+                                element: <UploadDocumentWrapper />,
                             },
                         ],
                     },
 
                     {
                         path: 'complete-profile',
-                        element: <HomeProfile />,
+                        element: (
+                            <Navigate
+                                to="/get-started/home-address"
+                                replace
+                            />
+                        ),
                     },
                     { path: 'home-address', element: <HomeAddressPage /> },
                     { path: 'ministry-input', element: <MinistryInputPage /> },
+                    { path: 'tour-guide', element: <TourGuidePage /> },
                 ],
-            },
-
-            {
-                path: 'get-started/tour-guide',
-                element: <Outlet />,
             },
 
             {
                 path: 'dashboard',
                 element: <Dashboard />,
+                roles: INTERNAL_PORTAL_ROLES,
+            },
+
+            {
+                path: 'studio/:studioCode',
+                element: <StudioPortal />,
                 roles: INTERNAL_PORTAL_ROLES,
             },
 
@@ -117,6 +119,11 @@ export const privateRoutes = [
             {
                 path: 'profile',
                 element: <UserProfile />,
+                roles: INTERNAL_PORTAL_ROLES,
+            },
+            {
+                path: 'profile/change-password',
+                element: <ChangePassword />,
                 roles: INTERNAL_PORTAL_ROLES,
             },
         ],

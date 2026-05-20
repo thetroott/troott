@@ -1,6 +1,6 @@
-// src/components/ErrorBoundary.tsx
 import React, { Component, ReactNode } from 'react';
-import posthog from 'posthog-js';
+
+import { errorLogger } from '@/services/error/ErrorLoggingService';
 
 interface Props {
 	children: ReactNode;
@@ -19,42 +19,13 @@ class PosthogErrorBoundary extends Component<Props, State> {
 	};
 
 	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-		const errorId = `err_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+		const errorId = errorLogger.logError(error, errorInfo, {
+			framework: 'React',
+			reactVersion: React.version,
+			env: import.meta.env.VITE_APP_ENVIRONMENT || 'unknown',
+		});
 
 		this.setState({ hasError: true, errorId });
-
-		const performanceData = window.performance?.timing;
-		const memoryData = (window.performance as any)?.memory;
-
-		const errorPayload = {
-			event_type: '$exception',
-			message: error.message,
-			name: error.name,
-			stack: error.stack,
-			componentStack: errorInfo.componentStack,
-			url: window.location.href,
-			userAgent: navigator.userAgent,
-			timestamp: new Date().toISOString(),
-			errorId,
-			network: {
-				online: navigator.onLine,
-				connection: (navigator as any)?.connection?.effectiveType || 'unknown',
-			},
-			performance: {
-				loadTime: performanceData ? performanceData.loadEventEnd - performanceData.navigationStart : undefined,
-			},
-			memory: memoryData
-				? {
-						jsHeapUsedSize: memoryData.usedJSHeapSize,
-						jsHeapTotalSize: memoryData.totalJSHeapSize,
-					}
-				: undefined,
-			framework: 'React',
-			reactVersion: (React as any).version,
-			env: import.meta.env.VITE_APP_ENVIRONMENT || 'unknown',
-		};
-
-		posthog.capture('$exception', errorPayload);
 	}
 
 	render() {

@@ -1,60 +1,34 @@
-import Plan, { IPlanTrial } from "./Plan.model";
-import Talent from "./Listener.model";
-import Transaction from "./Transaction.model";
+import type { IPlanTrial } from '@/dtos/api-domain';
+import {
+    BillingFrequency,
+    Currency,
+    IBilling,
+    SubscriptionStatus,
+} from '@/dtos/api-domain';
 
-interface Subscription {
+export interface SubscriptionCard {
+    cardLast: string;
+    expiryMonth: string;
+    expiryYear: string;
+}
 
-    code: string,
-    status: string,
-    billing: IBilling,
-    card: IDebitCard,
-    slug: string,
-    currency: string,
-    trial: IPlanTrial,
-
-    // relationships
-    talent: Talent | any,
-    plan: Plan | any,
-    transactions: Array<Transaction | any>,
-
-    // time stamps
+export interface Subscription {
+    id: string;
+    code: string;
+    slug: string;
+    currency: Currency;
+    status: SubscriptionStatus;
+    billing: IBilling;
+    card: SubscriptionCard;
+    trial: IPlanTrial;
+    planId: string;
+    planName: string;
+    listenerId: string;
+    metadata: Record<string, unknown>;
     createdAt: string;
     updatedAt: string;
-    _version: number;
-    _id: string;
-    id: string;
-
+    _version?: number;
+    _id?: string;
 }
-
-export interface IBilling {
-    retries: number,
-    startAt: any,
-    paidAt: any,
-    dueAt: any,
-    graceAt: any,
-    amount: number,
-    frequency: string,
-    isPaid: boolean
-}
-
-export interface IDebitCard {
-    authCode: string,
-    cardBin: string,
-    cardLast: string,
-    expiryMonth: string,
-    expiryYear: string,
-    cardPan: string
-}
-
-
-// entitlements: {
-//     canPlayAds: boolean;
-//     canDownload: boolean;
-//     maxBitrate: number;
-//     audioQuality: MediaQuality;
-//     skipAds: boolean;
-//     //subscriptionStatus: SubscriptionStatus;
-//    // subscriptionType: SubscriptionType;
-// }
 
 export default Subscription;

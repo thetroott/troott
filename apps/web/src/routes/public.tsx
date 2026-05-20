@@ -1,4 +1,9 @@
 import ActivateAccount from '@/app/auth/ActivateAccount';
+import { AuthRootRedirect } from '@/components/shared/auth/AuthRootRedirect';
+import {
+    AUTH_ROUTE_ACTIVATE_LEGACY,
+    AUTH_ROUTES,
+} from '@/constants/auth-routes';
 import { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
 
@@ -12,31 +17,36 @@ const Preview = lazy(() => import('../app/Preview'));
 export const publicRoutes = [
     {
         path: '/',
-        element: <Navigate to="/login" replace />,
+        element: <AuthRootRedirect />,
     },
-
     {
-        path: '/register',
+        path: AUTH_ROUTES.register,
         element: <Register />,
     },
     {
-        path: '/activate',
+        path: AUTH_ROUTES.activateAccount,
         element: <ActivateAccount />,
     },
     {
-        path: '/verify-otp',
+        path: AUTH_ROUTE_ACTIVATE_LEGACY,
+        element: (
+            <Navigate to={AUTH_ROUTES.activateAccount} replace />
+        ),
+    },
+    {
+        path: AUTH_ROUTES.verifyOtp,
         element: <Verification />,
     },
     {
-        path: '/login',
+        path: AUTH_ROUTES.login,
         element: <Login />,
     },
     {
-        path: '/forgot-password',
+        path: AUTH_ROUTES.forgotPassword,
         element: <ForgotPassword />,
     },
     {
-        path: '/reset-password',
+        path: AUTH_ROUTES.resetPassword,
         element: <ResetPassword />,
     },
     {

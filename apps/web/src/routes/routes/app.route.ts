@@ -65,9 +65,23 @@ const appRoutes: Array<IRoute> = [
         content: {},
     },
     {
+        name: 'forgot-password',
+        url: '/forgot-password',
+        isAuth: false,
+        params: [],
+        content: {},
+    },
+    {
         name: 'reset-password',
         url: '/reset-password',
         isAuth: false,
+        params: [],
+        content: {},
+    },
+    {
+        name: 'change-password',
+        url: '/profile/change-password',
+        isAuth: true,
         params: [],
         content: {},
     },

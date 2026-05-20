@@ -1,6 +1,10 @@
-import { NodeEnv } from '@/types';
+import type { ErrorInfo } from 'react';
+import type { Scope } from '@sentry/react';
 import * as Sentry from '@sentry/react';
 import posthog from 'posthog-js';
+
+const isObservabilityProd =
+	import.meta.env.VITE_APP_ENVIRONMENT === 'prod';
 
 /**
  * ErrorLoggingService provides centralized error logging functionality
@@ -8,7 +12,7 @@ import posthog from 'posthog-js';
  */
 export class ErrorLoggingService {
 	private static instance: ErrorLoggingService;
-	private isProd = import.meta.env.VITE_APP_ENVIRONMENT === NodeEnv.PROD;
+	private isProd = isObservabilityProd;
 
 	private constructor() {
 		// Private constructor for singleton pattern
@@ -27,7 +31,11 @@ export class ErrorLoggingService {
 	/**
 	 * Log an error with contextual information to all configured services
 	 */
-	public logError(error: Error, errorInfo?: React.ErrorInfo, additionalData?: Record<string, any>): string {
+	public logError(
+		error: Error,
+		errorInfo?: ErrorInfo,
+		additionalData?: Record<string, unknown>,
+	): string {
 		// Generate a unique error ID for tracking
 		const errorId = `err_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
@@ -67,7 +75,7 @@ export class ErrorLoggingService {
 
 		// Log to Sentry in production
 		if (this.isProd) {
-			Sentry.withScope((scope) => {
+			Sentry.withScope((scope: Scope) => {
 				scope.setExtra('errorId', errorId);
 				scope.setExtra('componentStack', errorInfo?.componentStack);
 

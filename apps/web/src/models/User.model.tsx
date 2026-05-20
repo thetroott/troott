@@ -1,74 +1,55 @@
-import { IAPIKey, ICountry, IUserPermission } from '../utils/interfaces.util';
-import Listener from './Listener.model';
-import Minister from './Minister.model';
+import type { ICountry } from '@/utils/interfaces.util';
+import type { ILocation, Upload } from '@/dtos/common-fields';
 
-interface User {
-    code: string; // user public ID
 
+export interface User {
+    id: string;
+    code: string;
     firstName: string;
     lastName: string;
-    middleName: string;
-    gender: string;
-    dateOfBirth: Date;
-    phoneNumber: string;
-    phoneCode: string;
-    countryPhone: string;
-    country: ICountry;
-    homeCountry: ICountry;
-
-    avatar: string;
-    banner: string;
+    middleName?: string;
+    email: string;
     slug: string;
-    email: string; // the registration email of the minister
-
-    altPhone: string;
-    passwordType: string;
-    userType: string;
-    login: {
-        last: string;
-        method: string;
-    };
-    onboard: {
-        step: number;
-        stage: string;
-    };
-    status: {
-        profile: string;
-    };
-    inviteStatus: string;
-    apiKey: IAPIKey;
-    keys: Array<IAPIKey>;
-
+    phoneNumber?: string;
+    phoneCode?: string;
+    countryPhone?: string;
+    altPhone?: string;
+    country?: ICountry;
+    homeCountry?: ICountry;
+    location?: ILocation;
+    avatar?: Upload;
+    banner?: Upload;
+    gender?: string;
+    dateOfBirth?: Date;
+    userType: UserType;
     isSuper: boolean;
     isAdmin: boolean;
     isUser: boolean;
     isListener: boolean;
     isMinister: boolean;
+    isCreator: boolean;
+    isActive: boolean;
     isActivated: boolean;
     isDeactivated: boolean;
     isSuspended: boolean;
-    isActive: boolean;
-    loginLimit: number;
     isLocked: boolean;
-
-    followers: Array<User | any>;
-    followings: Array<User | any>;
-
-    // relationships
-    roles: Array<any>;
-    permissions: Array<IUserPermission>;
-    verification: any;
-    notifications: Array<any>;
-    devices: Array<any>;
-    listener: Listener | any;
-    minister: Minister | any;
-
-    // time stamps
+    lockedUntil: Date | null;
+    roles?: string[];
+    inviteStatus?: string;
     createdAt: string;
     updatedAt: string;
-    _version: number;
-    _id: string;
-    id: string;
+    _version?: number;
+    _id?: string;
+    onboard?: { step?: number; stage?: string; status?: string };
+}
+
+export enum UserType {
+    USER = 'user',
+    LISTENER = 'listener',
+    MINISTER = 'minister',
+    CREATOR = 'creator',
+    ADMIN = 'admin',
+    SUPER = 'superadmin',
 }
 
 export default User;
