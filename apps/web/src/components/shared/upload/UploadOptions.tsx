@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { useUpload, uploadActions } from '@/context/upload/uploadState';
 import { cn } from '@/lib/utils';
 import { UPLOAD_OPTIONS_BAR } from '@/components/shared/upload/upload-studio-ui';
 

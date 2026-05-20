@@ -103,10 +103,11 @@ export const UPLOAD_OPTIONS_BAR = {
         'flex min-h-[70px] w-[207px] shrink-0 cursor-pointer flex-row items-center gap-2 rounded-lg border px-4 py-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:pointer-events-none disabled:opacity-50',
     chipInactive:
         'border-[#545454]/50 bg-[#1a1a1a] text-[#eaeaea] hover:bg-[#242325]',
-    chipActive: 'border-[#545454]/50 bg-white text-[#1a1a1a] hover:bg-white/90',
+    chipActive:
+        'border-[#08ffdb]/40 bg-[#08ffdb]/15 text-[#eaeaea] hover:bg-[#08ffdb]/25',
     label: 'min-w-0 flex-1 font-matter-medium text-[12px] leading-[18px] tracking-wide whitespace-normal text-left line-clamp-2',
     labelInactive: 'text-[#eaeaea]',
-    labelActive: 'text-[#1a1a1a]',
+    labelActive: 'text-[#eaeaea]',
     icon: 'h-8 w-8 shrink-0 object-contain',
 } as const;
 

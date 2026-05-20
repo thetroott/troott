@@ -8,7 +8,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { useUpload, uploadActions } from '@/context/upload/uploadState';
 
 const ListenerSettings: React.FC = () => {
     const { state, dispatch } = useUpload();

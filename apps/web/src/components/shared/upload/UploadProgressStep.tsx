@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileAudio, Loader2, Trash2 } from 'lucide-react';
-import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { useUpload, uploadActions } from '@/context/upload/uploadState';
 import {
     Dialog,
     DialogContent,
@@ -11,16 +11,13 @@ import {
 } from '@/components/ui/dialog';
 import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
-import apiCall from '@/api/config';
+import { useStartSermonUploadMutation } from '@/hooks/app/useSermon';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
-import { useContextType } from '@/state/app-state';
+import useContextType from '@/hooks/shared/useContextType';
 import { resolveMinisterId } from '@/utils/minister-id.util';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
-import { shouldMockSermonUpload } from '@/utils/upload-dev-mock.util';
-import { recordDevUploadAfterAudioComplete } from '@/utils/dev-upload-drafts.util';
-import { probeAudioFileDurationSec } from '@/utils/audio-file-duration.util';
 
 /**
  * Upload progress UI — Figma 4530:20801 (0%), 4530:21351 (in progress), 4555:6094 (finalizing),
@@ -29,13 +26,12 @@ import { probeAudioFileDurationSec } from '@/utils/audio-file-duration.util';
  */
 const UploadProgressStep: React.FC = () => {
     const queryClient = useQueryClient();
+    const startUploadMutation = useStartSermonUploadMutation();
     const { userContext } = useContextType();
     const user = userContext.user as Record<string, unknown> | null;
     const ministerId = resolveMinisterId(user);
     const { state, dispatch } = useUpload();
     const { uploadData, progress, uploadComplete, isLoading } = state;
-    const uploadSnapshotRef = useRef(uploadData);
-    uploadSnapshotRef.current = uploadData;
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [uploadError, setUploadError] = useState(false);
@@ -52,95 +48,30 @@ const UploadProgressStep: React.FC = () => {
         dispatch(uploadActions.setLoading(true));
         dispatch(uploadActions.setProgress(0));
 
-        const mockUpload = shouldMockSermonUpload();
-
         void (async () => {
             try {
-                if (mockUpload) {
-                    for (let p = 0; p <= 100; p += 12) {
-                        if (cancelled) return;
-                        dispatch(uploadActions.setProgress(Math.min(100, p)));
-                        await new Promise<void>((resolve) => {
-                            setTimeout(resolve, 90);
-                        });
-                    }
-                    if (cancelled) return;
-                    dispatch(
-                        uploadActions.setUploadData({
-                            sermonId: 'dev-mock-sermon-id',
-                            uploadRef: 'dev-mock-upload-ref',
-                        }),
-                    );
-                    dispatch(uploadActions.setUploadComplete(true));
-                    dispatch(uploadActions.setProgress(100));
-                    const snap = uploadSnapshotRef.current;
-                    const durationSec = await probeAudioFileDurationSec(file);
-                    recordDevUploadAfterAudioComplete({
-                        title: snap.title,
-                        description: snap.description,
-                        category: snap.category,
-                        tags: snap.tags,
-                        isPublic: snap.isPublic,
-                        sermonId: 'dev-mock-sermon-id',
-                        sourceFileName: file.name,
-                        durationSec,
-                    });
-                    void queryClient.invalidateQueries({
-                        queryKey: sermonQueryKeys.all,
-                    });
-                    if (ministerId) {
-                        void queryClient.invalidateQueries({
-                            queryKey:
-                                sermonQueryKeys.ministerListRoot(ministerId),
-                        });
-                    }
-                    return;
-                }
-
                 const formData = new FormData();
                 formData.append('file', file);
 
-                const res = await apiCall.sermon.startUpload(
+                const result = await startUploadMutation.mutateAsync({
                     formData,
-                    (pct: number) => {
+                    onProgress: (pct: number) => {
                         if (!cancelled)
                             dispatch(uploadActions.setProgress(pct));
                     },
-                    ac.signal,
-                );
+                    signal: ac.signal,
+                });
 
                 if (cancelled) return;
 
-                const payload = res.data?.data as
-                    | { id?: string; uploadRef?: string }
-                    | undefined;
-
-                if (!payload?.id) {
-                    throw new Error(
-                        'Upload response did not include a sermon id.',
-                    );
-                }
-
                 dispatch(
                     uploadActions.setUploadData({
-                        sermonId: payload.id,
-                        uploadRef: payload.uploadRef,
+                        sermonId: result.sermonId,
+                        uploadRef: result.uploadRef,
                     }),
                 );
                 dispatch(uploadActions.setUploadComplete(true));
                 dispatch(uploadActions.setProgress(100));
-                const snap = uploadSnapshotRef.current;
-                const durationSec = await probeAudioFileDurationSec(file);
-                recordDevUploadAfterAudioComplete({
-                    title: snap.title,
-                    description: snap.description,
-                    category: snap.category,
-                    tags: snap.tags,
-                    isPublic: snap.isPublic,
-                    sermonId: payload.id,
-                    sourceFileName: file.name,
-                    durationSec,
-                });
                 void queryClient.invalidateQueries({
                     queryKey: sermonQueryKeys.all,
                 });
@@ -173,7 +104,15 @@ const UploadProgressStep: React.FC = () => {
             cancelled = true;
             ac.abort();
         };
-    }, [uploadData.file, uploadComplete, retryToken, dispatch, queryClient]);
+    }, [
+        uploadData.file,
+        uploadComplete,
+        retryToken,
+        dispatch,
+        queryClient,
+        ministerId,
+        startUploadMutation,
+    ]);
 
     const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 Bytes';

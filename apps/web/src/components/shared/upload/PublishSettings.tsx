@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Calendar, Globe, Lock, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { useUpload, uploadActions } from '@/context/upload/uploadState';
 
 const PublishSettings: React.FC = () => {
     const { state, dispatch } = useUpload();

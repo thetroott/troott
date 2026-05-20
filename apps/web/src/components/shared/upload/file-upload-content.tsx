@@ -167,7 +167,7 @@ const FileUploadContent = ({
                                             id={`${field.id}-upload`}
                                         />
                                         {file ? (
-                                            <div className="w-full h-20 bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                            <div className="h-20 w-full overflow-hidden rounded-lg border border-border bg-card">
                                                 <img
                                                     src={URL.createObjectURL(
                                                         file,

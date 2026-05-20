@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
-import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { useUpload, uploadActions } from '@/context/upload/uploadState';
 import type { IUploadFormErrors } from '@/utils/interfaces.util';
 
 const SermonDetailsForm: React.FC = () => {
@@ -868,10 +868,10 @@ const SermonDetailsForm: React.FC = () => {
                                         onMouseDown={handleCropStart}
                                     >
                                         {/* Crop corners */}
-                                        <div className="absolute -top-1 -left-1 w-3 h-3 bg-white border border-gray-400 cursor-nw-resize"></div>
-                                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-white border border-gray-400 cursor-ne-resize"></div>
-                                        <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-white border border-gray-400 cursor-sw-resize"></div>
-                                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-white border border-gray-400 cursor-se-resize"></div>
+                                        <div className="absolute -left-1 -top-1 h-3 w-3 cursor-nw-resize border border-neutral-500 bg-neutral-700"></div>
+                                        <div className="absolute -right-1 -top-1 h-3 w-3 cursor-ne-resize border border-neutral-500 bg-neutral-700"></div>
+                                        <div className="absolute -bottom-1 -left-1 h-3 w-3 cursor-sw-resize border border-neutral-500 bg-neutral-700"></div>
+                                        <div className="absolute -bottom-1 -right-1 h-3 w-3 cursor-se-resize border border-neutral-500 bg-neutral-700"></div>
                                     </div>
                                 )}
 

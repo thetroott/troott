@@ -1,5 +1,7 @@
-import { createContext } from 'react'
+import { createContext } from 'react';
 
-const AppContext = createContext<any>({})
+import type { IAppContext } from './types';
+
+const AppContext = createContext<IAppContext | null>(null);
 
 export default AppContext;

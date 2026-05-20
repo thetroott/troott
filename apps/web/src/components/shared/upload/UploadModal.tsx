@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Icon } from '@iconify/react';
 import { Loader2, X } from 'lucide-react';
-import { useUpload, uploadActions } from '@/context/upload/upload.context';
+import { useUpload, uploadActions } from '@/context/upload/uploadState';
 import {
     UPLOAD_SHELL,
     UPLOAD_STEP_TABS,
