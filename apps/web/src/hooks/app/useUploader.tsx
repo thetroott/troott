@@ -1,159 +1,150 @@
-import { useCallback, useEffect, useState } from 'react'
-import { IAPIResponse, IFileUpload } from '../../utils/interfaces.util'
-import useContextType from '../useContextType'
-import AxiosService from '../../services/axios.service'
-import { URL_STORAGE } from '../../utils/path.util'
-import useNetwork from '../useNetwork'
-import { UploadFormat } from '../../utils/types.util'
-import { apiresponse } from '../../_data/seed'
-import { UploadFormatEnum } from '../../utils/enums.util'
+import { useCallback, useEffect, useState } from 'react';
+
+import api from '@/api/config';
+import type { IAPIResponse } from '@/api/types';
+import type { IFileUpload } from '@/utils/interfaces.util';
+import { UploadFormatEnum, type UploadFormat } from '@/utils/enums.util';
+
+import useAuth from './useAuth';
+import useNetwork from '../shared/useNetwork';
 
 interface IUploadFile {
-    type: 'image' | 'pdf',
-    file: IFileUpload | null,
-    format: UploadFormat,
-    name?: string,
+    type: 'image' | 'pdf';
+    file: IFileUpload | null;
+    format: UploadFormat;
+    name?: string;
 }
 
 const useUploader = () => {
+    const { popNetwork } = useNetwork(false);
+    const { logout } = useAuth();
 
-    const { appContext } = useContextType()
-    const { popNetwork } = useNetwork(false)
-    const {
-        setResource,
-    } = appContext
-
-    useEffect(() => {
-
-    }, [])
+    useEffect(() => {}, []);
 
     const [loading, setLoading] = useState<boolean>(false);
 
     /**
      * @name uploadFile
      */
-    const uploadFile = useCallback(async (data: IUploadFile) => {
+    const uploadFile = useCallback(
+        async (data: IUploadFile) => {
+            const { file, format, type, name } = data;
 
-        const { file, format, type, name } = data;
-        let response: IAPIResponse = apiresponse;
+            if (format === UploadFormatEnum.RAW_FILE && file?.raw) {
+                setLoading(true);
+                const formData = new FormData();
+                formData.append('file', file.raw);
+                formData.append('format', format);
+                formData.append('type', type);
+                formData.append('name', name ?? '');
 
-        if (format === UploadFormatEnum.BASE64) {
-
-            setLoading(true)
-
-            response = await AxiosService.call({
-                type: 'default',
-                method: 'POST',
-                isAuth: true,
-                path: `${URL_STORAGE}/upload`,
-                payload: {
-                    type: type,
-                    format: format,
-                    name: name ? name : '',
-                    base64: file?.base64 || ''
+                try {
+                    const axiosRes = await api.storage.uploadImage(formData);
+                    setLoading(false);
+                    return {
+                        error: false,
+                        status: axiosRes.status,
+                        data: axiosRes.data,
+                        message: '',
+                        errors: [],
+                    } satisfies IAPIResponse;
+                } catch (e) {
+                    setLoading(false);
+                    const msg =
+                        e instanceof Error ? e.message : 'Upload failed';
+                    return {
+                        error: true,
+                        status: 0,
+                        data: null,
+                        message: msg,
+                        errors: [],
+                    } satisfies IAPIResponse;
                 }
-            })
-
-        }
-
-        if (format === UploadFormatEnum.RAW_FILE) {
-
-            const formData = new FormData();
-
-            // append key/value
-            formData.append('file', file?.raw || null)
-            formData.append('format', format);
-            formData.append('type', type)
-            formData.append('name', name ? name : '')
-
-            setLoading(true)
-
-            response = await AxiosService.call({
-                type: 'default',
-                method: 'POST',
-                isAuth: true,
-                path: `${URL_STORAGE}/upload`,
-                payload: formData
-            })
-
-        }
-
-
-        if (response.error === false) {
-            if (response.status === 200) {
-                setLoading(false)
-            }
-        }
-
-        if (response.error === true) {
-
-            setLoading(false)
-
-            if (response.status === 401) {
-                AxiosService.logout()
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not upload file ${response.data}`)
             }
 
-        }
+            if (format === UploadFormatEnum.BASE64 && file?.base64) {
+                setLoading(true);
+                try {
+                    const rawB64 = file.base64.includes(',')
+                        ? file.base64.split(',')[1] ?? file.base64
+                        : file.base64;
+                    const byteString = atob(rawB64);
+                    const ab = new ArrayBuffer(byteString.length);
+                    const ia = new Uint8Array(ab);
+                    for (let i = 0; i < byteString.length; i += 1) {
+                        ia[i] = byteString.charCodeAt(i);
+                    }
+                    const blob = new Blob([ab], {
+                        type: 'application/octet-stream',
+                    });
+                    const uploadFileObj = new File(
+                        [blob],
+                        name ?? 'upload.bin',
+                        {
+                            type: 'application/octet-stream',
+                        },
+                    );
+                    const axiosRes = await api.storage.uploadImage(
+                        uploadFileObj,
+                    );
+                    setLoading(false);
+                    return {
+                        error: false,
+                        status: axiosRes.status,
+                        data: axiosRes.data,
+                        message: '',
+                        errors: [],
+                    } satisfies IAPIResponse;
+                } catch (e) {
+                    setLoading(false);
+                    const msg =
+                        e instanceof Error ? e.message : 'Upload failed';
+                    return {
+                        error: true,
+                        status: 0,
+                        data: null,
+                        message: msg,
+                        errors: [],
+                    } satisfies IAPIResponse;
+                }
+            }
 
-        return response
-
-    }, [setLoading])
+            return {
+                error: true,
+                status: 400,
+                data: null,
+                message: 'Unsupported upload format',
+                errors: [],
+            } satisfies IAPIResponse;
+        },
+        [],
+    );
 
     /**
-     * @name 
+     * @name checkUploadedFile
      */
-    const checkUploadedFile = useCallback(async (data: { name: string, platform: string }) => {
-
-        const { name, platform } = data;
-
-        setLoading(true)
-
-        const response = await AxiosService.call({
-            type: 'default',
-            method: 'POST',
-            isAuth: true,
-            path: `${URL_STORAGE}/check`,
-            payload: {
-                name: name,
-                platform: platform
-            }
-        })
-
-
-        if (response.error === false) {
-            if (response.status === 200) {
-                setLoading(false)
-            }
-        }
-
-        if (response.error === true) {
-
-            setLoading(false)
-
-            if (response.status === 401) {
-                AxiosService.logout()
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not check uploaded file ${response.data}`)
-            }
-
-        }
-
-        return response
-
-    }, [setLoading])
+    const checkUploadedFile = useCallback(
+        async (data: { name: string; platform: string }) => {
+            void data;
+            void logout;
+            void popNetwork;
+            setLoading(false);
+            return {
+                error: true,
+                status: 501,
+                data: null,
+                message: 'Not supported',
+                errors: [],
+            } satisfies IAPIResponse;
+        },
+        [logout, popNetwork],
+    );
 
     return {
         loading,
-
         uploadFile,
-        checkUploadedFile
-    }
-}
+        checkUploadedFile,
+    };
+};
 
-export default useUploader
+export default useUploader;

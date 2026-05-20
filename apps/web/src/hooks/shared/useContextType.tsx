@@ -1,21 +1,31 @@
-// import React, { useContext, useEffect, useState } from 'react'
-// import { IAppContext, IUserContext } from '../utils/interfaces.util'
-// import UserContext from '../context/user/userContext'
-// import AppContext from '../context/app/appContext'
+import { useContext, useEffect } from 'react';
 
-// const useContextType = () => {
+import type { IAppContext } from '@/context/app/types';
+import type { IUserContextValue } from '@/context/user/types';
+import UserContext from '../../context/user/userContext';
+import AppContext from '../../context/app/appContext';
 
-//     const userContext = useContext<IUserContext>(UserContext)
-//     const appContext = useContext<IAppContext>(AppContext)
+const useContextType = () => {
+    const userContextValue = useContext(UserContext);
+    const appContextValue = useContext(AppContext);
 
-//     useEffect(() => {
+    if (appContextValue === null) {
+        throw new Error('AppState provider is missing above this component.');
+    }
 
-//     }, [])
+    if (userContextValue === null) {
+        throw new Error('UserState provider is missing above this component.');
+    }
 
-//     return {
-//         userContext,
-//         appContext
-//     }
-// }
+    const appContext: IAppContext = appContextValue;
+    const userContext: IUserContextValue = userContextValue;
 
-// export default useContextType
+    useEffect(() => {}, []);
+
+    return {
+        userContext,
+        appContext,
+    };
+};
+
+export default useContextType;

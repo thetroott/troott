@@ -1,33 +1,63 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
-import useContextType from '../useContextType'
-import storage from '../../utils/storage.util'
-import AxiosService from '../../services/axios.service'
-import { URL_LOGGEDIN_USER, URL_TALENTS, URL_USERS } from '../../utils/path.util'
-import { GET_LOGGEDIN_USER, GET_TALENT, GET_TALENTS, GET_USER, GET_USERS, SET_ITEMS } from '../../context/types'
-import { ICollection, IListQuery } from '../../utils/interfaces.util'
-import useNetwork from '../useNetwork'
-import useAuth from './useAuth'
+import { useCallback, useMemo } from 'react';
 
-interface ISendUsersUpdate {
-    title: string,
-    content: string,
-    users: Array<string>
+import api from '@/api/config';
+import storage from '@/api/services/local-storage';
+import {
+    GET_LOGGEDIN_USER,
+    GET_USERS,
+    SET_ITEMS,
+} from '@/context/types';
+import type { IAPIResponse } from '@/api/types';
+import type { ICollection, IListQuery } from '@/utils/interfaces.util';
+import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
+
+import useAuth from './useAuth';
+import useContextType from '../shared/useContextType';
+import useNetwork from '../shared/useNetwork';
+
+const INTERNAL_PORTAL_USER_TYPES = new Set<string>(
+    INTERNAL_PORTAL_ROLES as unknown as string[],
+);
+
+function normalizeUserType(raw: string): string {
+    return String(raw || '')
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, '-');
 }
 
-interface IInviteTalent {
-    title: string,
-    content: string,
-    email: string,
-    firstName: string,
-    lastName: string,
-    callbackUrl: string
+/**
+ * Web portal gate: super-admin, admin, minister, creator vs listener / generic user.
+ */
+export function useWebPortalEligibility() {
+    const { userContext } = useContextType();
+    const persistedType = userContext.userType;
+    const user = userContext.user as { userType?: string } | null;
+    const effective = normalizeUserType(
+        (user?.userType as string | undefined) ?? persistedType,
+    );
+
+    return useMemo(() => {
+        const hasType = effective.length > 0;
+        const isInternal =
+            hasType && INTERNAL_PORTAL_USER_TYPES.has(effective);
+        const isListenerLike =
+            effective === 'listener' || effective === 'user';
+
+        return {
+            userType: effective,
+            isEligible: isInternal,
+            isListenerLike,
+            isHydratingUserType: !hasType,
+        };
+    }, [effective]);
 }
 
 const useUser = () => {
-
     const { userContext } = useContextType();
-    const { logout } = useAuth()
-    const { popNetwork } = useNetwork();
+    const { logout } = useAuth();
+    const { popNetwork } = useNetwork(false);
+
     const {
         users,
         user,
@@ -39,251 +69,123 @@ const useUser = () => {
         setLoading,
         unsetLoading,
         setCollection,
-        setResource
+        setResource,
     } = userContext;
 
-    useEffect(() => {
-
-    }, [])
-
-    const setItems = (data: Array<any>) => {
-        setResource(SET_ITEMS, data);
-    }
-
-    /**
-     * @name getFullname
-     * @param data 
-     * @returns 
-     */
-    const getFullname = (data: any) => {
-        let result: string = '--'
-
-        if (data && "firstName" in data && "lastName" in data) {
-            result = `${data.firstName} ${data.lastName}`
+    const getFullname = useCallback((data: unknown) => {
+        if (
+            data &&
+            typeof data === 'object' &&
+            'firstName' in data &&
+            'lastName' in data
+        ) {
+            const o = data as { firstName?: string; lastName?: string };
+            const name = `${o.firstName ?? ''} ${o.lastName ?? ''}`.trim();
+            return name.length > 0 ? name : '--';
         }
+        return '--';
+    }, []);
 
-        return result;
-    }
+    const setItems = useCallback(
+        (data: Array<unknown>) => {
+            setResource(SET_ITEMS, data);
+        },
+        [setResource],
+    );
 
-    const getUsers = useCallback(async (data: IListQuery, all: boolean = false) => {
+    const onUnauthorized = useCallback(() => {
+        void logout();
+    }, [logout]);
 
-        const { limit, page, select, order, cache, type } = data;
-        let q = `limit=${limit ? limit.toString() : 25}&page=${page ? page.toString() : 1}&order=${order ? order : 'desc'}`;
+    const getUsers = useCallback(
+        async (data: IListQuery, all = false) => {
+            const { limit, page, order, select, ...rest } = data;
+            setLoading({ option: 'resource', type: GET_USERS });
 
-        if(cache !== undefined){
-            q = cache === true ? q + `&cache=true` : q + `&cache=false`
-        }
+            const res: IAPIResponse = await api.user.getUsers(
+                {
+                    limit,
+                    page,
+                    order,
+                    select,
+                    ...rest,
+                } as IListQuery,
+                all,
+            );
 
-        if(type !== undefined && ['talent', 'business'].includes(type)){
-            q = q + `&type=${type}`
-        }
-        
-
-        setLoading({ option: 'resource', type: GET_USERS });
-
-        const response = await AxiosService.call({
-            type: 'backend',
-            method: 'GET',
-            isAuth: true,
-            path: all? `${URL_USERS}/all?${q}` : `${URL_USERS}?${q}`
-        });
-
-        if (!response.error) {
-
-            if (response.status === 200) {
-
+            if (!res.error && res.status === 200) {
+                const list = Array.isArray(res.data) ? res.data : [];
                 const result: ICollection = {
-                    count: response.count!,
-                    total: response.total!,
-                    data: response.data,
-                    pagination: response.pagination!,
+                    count: res.count ?? list.length,
+                    total: res.total ?? list.length,
+                    data: list,
+                    pagination: res.pagination ?? {
+                        next: { page: 1, limit: 25 },
+                        prev: { page: 1, limit: 25 },
+                    },
                     loading: false,
-                    message: response.data.length > 0 ? `displaying ${response.count!} users` : 'There are no users currently'
+                    message:
+                        list.length > 0
+                            ? `displaying ${res.count ?? list.length} users`
+                            : 'There are no users currently',
+                };
+                setCollection(GET_USERS, result);
+            } else {
+                unsetLoading({
+                    option: 'default',
+                    message: res.message ?? 'Request failed',
+                });
+                if (res.status === 401) {
+                    onUnauthorized();
+                } else if (res.message === 'Error: Network Error') {
+                    popNetwork();
                 }
-                setCollection(GET_USERS, result)
-
             }
+        },
+        [
+            setLoading,
+            unsetLoading,
+            setCollection,
+            onUnauthorized,
+            popNetwork,
+        ],
+    );
 
-        } else {
-            unsetLoading({ option: 'default', message: response.message })
-        }
+    const getUser = useCallback(
+        async (id?: string) => {
+            const userId = id ? id : storage.getUserID();
+            setLoading({ option: 'default' });
 
-    }, [setLoading, unsetLoading, setResource])
+            const res: IAPIResponse = await api.user.getUser(userId);
 
-    /**
-     * @name getUser
-     */
-    const getUser = useCallback(async (id?: string) => {
+            if (!res.error) {
+                setResource(GET_LOGGEDIN_USER, res.data);
+                await unsetLoading({
+                    option: 'default',
+                    message: 'data fetched successfully',
+                });
+            } else {
+                setResource(GET_LOGGEDIN_USER, {});
+                await unsetLoading({
+                    option: 'default',
+                    message: res.message ?? 'Request failed',
+                });
 
-        const userId = id ? id : storage.getUserID();
-
-        setLoading({ option: 'default' });
-
-        const response = await AxiosService.call({
-            type: 'backend',
-            method: 'GET',
-            isAuth: true,
-            path: `${URL_LOGGEDIN_USER}/${userId}`
-        });
-
-        if (!response.error) {
-            setResource(GET_LOGGEDIN_USER, response.data)
-            unsetLoading({ option: 'default', message: 'data fetched successfully' })
-        } else {
-            setResource(GET_LOGGEDIN_USER, {})
-            unsetLoading({ option: 'default', message: response.message })
-
-            if (response.status === 401) {
-                AxiosService.logout()
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not get careers ${response.data}`)
-            }
-        }
-
-    }, [setLoading, unsetLoading, setResource])
-
-    /**
-     * @name getTalents
-     */
-    const getTalents = useCallback(async (data: IListQuery) => {
-
-        const { limit, page, select, order } = data;
-        const q = `limit=${limit ? limit.toString() : 25}&page=${page ? page.toString() : 1}&order=${order ? order : 'desc'}`;
-
-        setLoading({ option: 'resource', type: GET_TALENTS });
-
-        const response = await AxiosService.call({
-            type: 'backend',
-            method: 'GET',
-            isAuth: true,
-            path: `${URL_TALENTS}?${q}`
-        });
-
-        if (!response.error) {
-
-            if (response.status === 200) {
-
-                const result: ICollection = {
-                    count: response.count!,
-                    total: response.total!,
-                    data: response.data,
-                    pagination: response.pagination!,
-                    loading: false,
-                    message: response.data.length > 0 ? `displaying ${response.count!} talents` : 'There are no talents currently'
+                if (res.status === 401) {
+                    onUnauthorized();
+                } else if (res.message === 'Error: Network Error') {
+                    popNetwork();
                 }
-                setCollection(GET_TALENTS, result)
-
             }
-
-        } else {
-            unsetLoading({ option: 'default', message: response.message })
-        }
-
-    }, [setLoading, unsetLoading, setResource])
-
-    /**
-     * @name getTalent
-     */
-    const getTalent = useCallback(async (id?: string) => {
-
-        const userId = id ? id : storage.getUserID();
-
-        setLoading({ option: 'default' });
-
-        const response = await AxiosService.call({
-            type: 'backend',
-            method: 'GET',
-            isAuth: true,
-            path: `${URL_TALENTS}/${userId}`
-        });
-
-        if (!response.error) {
-            setResource(GET_TALENT, response.data)
-            unsetLoading({ option: 'default', message: 'data fetched successfully' })
-        } else {
-            setResource(GET_TALENT, {})
-            unsetLoading({ option: 'default', message: response.message })
-
-            if (response.status === 401) {
-                AxiosService.logout()
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not get talents ${response.data}`)
-            }
-        }
-
-    }, [setLoading, unsetLoading, setResource])
-
-    /**
-     * @name sendUsersUpdate
-     */
-    const sendUsersUpdate = useCallback(async (data: ISendUsersUpdate) => {
-
-        setLoading({ option: 'loader' });
-
-        const response = await AxiosService.call({
-            type: 'backend',
-            method: 'POST',
-            isAuth: true,
-            path: `${URL_USERS}/send-update`,
-            payload: { ...data }
-        });
-
-        if (!response.error) {
-            unsetLoading({ option: 'loader', message: 'successful' })
-        } else {
-            unsetLoading({ option: 'loader', message: response.message })
-
-            if (response.status === 401) {
-                logout
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not send verification code ${response.data}`)
-            }
-        }
-
-        return response;
-
-    }, [setLoading, unsetLoading])
-
-    /**
-     * @name inviteTalent
-     */
-    const inviteTalent = useCallback(async (data: IInviteTalent) => {
-
-        setLoading({ option: 'loader' });
-
-        const response = await AxiosService.call({
-            type: 'backend',
-            method: 'POST',
-            isAuth: true,
-            path: `${URL_USERS}/invite-talent`,
-            payload: { ...data }
-        });
-
-        if (!response.error) {
-            unsetLoading({ option: 'loader', message: 'successful' })
-        } else {
-            unsetLoading({ option: 'loader', message: response.message })
-
-            if (response.status === 401) {
-                logout
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not send invite talent ${response.data}`)
-            }
-        }
-
-        return response;
-
-    }, [setLoading, unsetLoading]);
-
-
+        },
+        [
+            setLoading,
+            unsetLoading,
+            setResource,
+            onUnauthorized,
+            popNetwork,
+        ],
+    );
 
     return {
         users,
@@ -299,12 +201,7 @@ const useUser = () => {
 
         getUsers,
         getUser,
-        getTalents,
-        getTalent,
+    };
+};
 
-        sendUsersUpdate,
-        inviteTalent
-    }
-}
-
-export default useUser
+export default useUser;

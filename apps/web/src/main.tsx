@@ -1,32 +1,22 @@
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import '@/api/config';
 import App from './App.tsx';
-import { NODE_ENV, NodeEnv } from './utils/types.util.tsx';
-import SentryProvider from './services/sentry/SentryProvider.tsx';
 import PosthogWrapper from './services/posthog/PosthogProvider.tsx';
+import SentryProvider from './services/sentry/SentryProvider.tsx';
+import VercelSpeedInsights from './services/vercel/vercel.tsx';
 
-
-const isProd = NODE_ENV === NodeEnv.PROD;
+const isProd = import.meta.env.VITE_APP_ENVIRONMENT === 'prod';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <div>
-    {isProd ? (
+    isProd ? (
         <SentryProvider>
             <PosthogWrapper>
                 <App />
-            
+                <VercelSpeedInsights />
             </PosthogWrapper>
         </SentryProvider>
     ) : (
         <App />
-    )}
-</div>,
-    // <StrictMode>
-    //     <QueryProvider>
-    //         <TroottStateProvider>
-    //             <App />
-    //             <Toaster richColors position="top-right" />
-    //         </TroottStateProvider>
-    //     </QueryProvider>
-    // </StrictMode>,
+    ),
 );

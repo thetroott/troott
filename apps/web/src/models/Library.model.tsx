@@ -1,75 +1,42 @@
-import Listener from './Listener.model';
-import Minister from './Minister.model';
-import Playlist from './Playlist.model';
-import Series from './Series.model';
-import Sermon from './Sermon.model';
-import User from './User.model';
+import { LibraryItemAddedFrom, LibraryItemType } from '@/dtos/api-domain';
 
-interface Library {
-    // Identity
-    code: string;
-    slug: string;
-
-    // Ownership
-    listener: Listener | any;
-
-    // User-curated collections
-    items: Array<LibraryItem>;
-
-    // Quick filters (cached)
-    sermonCount: number;
-    playlistCount: number;
-    seriesCount: number;
-    ministerCount: number;
-
-    // Sync
-    lastSyncedAt: string;
-    syncVersion: number;
-
-    createdBy: User | any;
-
-    createdAt: string;
-    updatedAt: string;
-    _version: number;
-    _id: string;
+export interface LibraryItemMedia {
     id: string;
+    title: string;
+    imageUrl?: string;
+    duration?: number;
 }
 
-export enum LibraryItemType {
-    SERMON = 'sermon',
-    PLAYLIST = 'playlist',
-    SERIES = 'series',
-    MINISTER = 'minister',
-}
-
-export enum LibraryItemAddedFrom {
-    SEARCH = 'search',
-    PLAYLIST = 'playlist',
-    RECOMMENDATION = 'recommendation',
-    MANUAL = 'manual',
+export interface LibraryItemFlags {
+    liked: boolean;
+    downloaded: boolean;
+    pinned: boolean;
+    favourite: boolean;
 }
 
 export interface LibraryItem {
     id: string;
     type: LibraryItemType;
-
-    // references (only one will be used depending on type)
-    sermon: Sermon;
-    playlist: Playlist;
-    series: Series;
-    minister: Minister;
-
-    // metadata for sorting/filtering
+    item: LibraryItemMedia;
     addedAt: string;
     addedFrom: LibraryItemAddedFrom;
     sortOrder: number;
+    flags: LibraryItemFlags;
+}
 
-    flags: {
-        liked: boolean;
-        downloaded: boolean;
-        pinned: boolean;
-        favourite: boolean;
-    };
+export interface Library {
+    id: string;
+    code: string;
+    sermonCount: number;
+    playlistCount: number;
+    seriesCount: number;
+    ministerCount: number;
+    items: LibraryItem[];
+    lastSyncedAt: string;
+    syncVersion: number;
+    createdBy?: string;
+    _version?: number;
+    _id?: string;
 }
 
 export default Library;

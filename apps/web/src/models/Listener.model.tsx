@@ -1,64 +1,41 @@
-import { ICountry } from '../utils/interfaces.util';
-import Library from './Library.model';
-import Minister from './Minister.model';
-import Playback from './Playback.model';
-import Playlist from './Playlist.model';
-import Series from './Series.model';
-import Sermon from './Sermon.model';
-import Subscription from './Subscription.model';
-import Topic from './Topic.model';
-import Transaction from './Transaction.model';
-import User from './User.model';
+import type { ICountry } from '@/utils/interfaces.util';
+import type { Upload } from '@/dtos/common-fields';
 
-interface Listener {
-    code: string; // user public ID
-  
+export interface ListenerOnboarding {
+    step: number;
+    status: string;
+}
+
+export interface Listener {
+    id: string;
+    code: string;
     firstName: string;
     lastName: string;
-    middleName: string;
-    gender: string;
-    dateOfBirth: Date;
-    phoneNumber: string;
-    phoneCode: string;
-    countryPhone: string;
-    country: ICountry;
-    homeCountry: ICountry;
-
+    middleName?: string;
     email: string;
     slug: string;
-    avatar: string;
-    banner: string;
-
-    onboarding: {
-        step: number;
-        status: string;
-    };
-
-    // Relationships
-    topics: Array<Topic | any>;
-    ministers: Array<Minister | any>;
-    ministry: string;
-
-    likedSermons: Array<Sermon | any>;
-    LikedSeries: Array<Series | any>;
-    sharedSermons: Array<Sermon | any>;
-    recentlyPlayed: Array<Playback | any>; // the recently played media items by the listener < 20 items / Playback IDs (or MediaItem IDs)
-
-    user: User | any;
-    settings: string | any;
-    Library: Library | any;
-    playlists: Array<Playlist | any>;
-    subscription: Subscription | any;
-    transactions: Array<Transaction | any>;
-
-    createdBy: User | any;
-
-    // time stamps
+    gender?: string;
+    dateOfBirth?: Date;
+    phoneNumber?: string;
+    phoneCode?: string;
+    countryPhone?: string;
+    country?: ICountry;
+    homeCountry?: ICountry;
+    avatar?: Upload;
+    banner?: Upload;
+    onboarding?: ListenerOnboarding;
+    topics?: string[];
+    ministers?: string[];
+    ministry?: string;
     createdAt: string;
     updatedAt: string;
-    _version: number;
-    _id: string;
-    id: string;
+    _version?: number;
+    _id?: string;
+}
+
+/** Legacy LMS group shape (not Troott API) — kept for unused hooks. */
+export interface ITalentGroup {
+    [key: string]: unknown;
 }
 
 export default Listener;

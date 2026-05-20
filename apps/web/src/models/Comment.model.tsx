@@ -1,29 +1,24 @@
-import Sermon from './Sermon.model';
-import User from './User.model';
+export interface CommentAuthor {
+    id: string;
+    name: string;
+    avatar?: string;
+}
 
-interface Comment {
+export interface Comment {
+    id: string;
     code: string;
-    resource: string;
     message: string;
-    slug: string;
     isEnabled: boolean;
-
-    // relationships
-    reactions: Array<{
-        user: User | any;
-        message: string;
-    }>;
-    parent: Comment | any;
-    author: User | any;
-    replies: Array<Comment | any>;
-    mediaItem: Sermon | any;
-
-    // time stamps
+    author: CommentAuthor;
+    reactionsCount: number;
+    repliesCount: number;
+    replies?: Comment[];
+    mediaItemId: string;
+    parentId?: string;
     createdAt: string;
     updatedAt: string;
-    _version: number;
-    _id: string;
-    id: string;
+    _version?: number;
+    _id?: string;
 }
 
 export default Comment;

@@ -1,109 +1,63 @@
-import { VerificationStatus } from '@/utils/enums.util';
-import { ICountry } from '../utils/interfaces.util';
-import Playlist from './Playlist.model';
-import Sermon from './Sermon.model';
-import Transaction from './Transaction.model';
-import User from './User.model';
+import type { ICountry } from '@/utils/interfaces.util';
+import type { ILocation } from '@/dtos/common-fields';
+import { MinisterStatus, VerificationStatus } from '@/dtos/api-domain';
+import type { ISocials } from '@/dtos/api-domain';
 
-interface Minister {
-    code: string; // user public ID
-    
+export interface MinisterProfile {
+    description?: string;
+    ministerialName?: string;
+    ministryName?: string;
+    ministryLogo?: string;
+    ministryType?: string;
+    ministryHQLocation?: Pick<ILocation, 'city' | 'state' | 'address'>;
+    phoneNumber?: string;
+    phoneCode?: string;
+    countryPhone?: string;
+    email?: string;
+    websiteUrl?: string;
+    socials?: ISocials[];
+    languages?: string[];
+}
+
+export interface MinisterVerification {
+    status: VerificationStatus;
+    isVerified: boolean;
+    isPublic: boolean;
+    verifiedAt?: Date;
+}
+
+export interface MinisterOnboarding {
+    step: number;
+    status: string;
+}
+
+export interface Minister {
+    id: string;
+    code: string;
     firstName: string;
     lastName: string;
-    middleName: string;
-    gender: string;
-    dateOfBirth: Date;
-    phoneNumber: string;
-    phoneCode: string;
-    countryPhone: string;
-    country: ICountry;
-    homeCountry: ICountry;
-
-    avatar: string;
-    banner: string;
+    middleName?: string;
+    email: string;
     slug: string;
-    email: string; // the registration email of the minister
-
-    profile: {
-        description: string;
-        ministerialName: string;
-        ministryName: string;
-        ministryLogo: string;
-        ministryType: string; // Pentecostal, Charismatic, etc.
-        ministryHQLocation: ILocation;
-        phoneNumber: string; // the public phone number of the minister
-        phoneCode: string;
-        countryPhone: string; // the publicphone code of the minister
-        email: string; // the public email of the minister
-        websiteUrl: string;
-        socials: Array<ISocials>;
-        languages: Array<string>;
-    };
-    onboarding: {
-        step: number;
-        status: string;
-    };
-
-    verification: {
-        document: DocumentUpload;
-        status: VerificationStatus;
-        verifiedAt: Date;
-        verifiedBy: User | any;
-        isVerified: boolean;
-        isPublic: boolean; // Only set to true AFTER verification
-    };
+    gender?: string;
+    dateOfBirth?: Date;
+    phoneNumber?: string;
+    phoneCode?: string;
+    countryPhone?: string;
+    country?: ICountry;
+    homeCountry?: ICountry;
+    avatar?: string;
+    banner?: string;
+    profile?: MinisterProfile;
+    onboarding?: MinisterOnboarding;
+    verification?: MinisterVerification;
     status: MinisterStatus;
     published: boolean;
-
     monthlyListeners: number;
-
-    settings: string | any;
-    subscription: string | any;
-    user: string | any;
-
-    sermons: Array<Sermon | any>;
-    playlists: Array<Playlist | any>;
-    transactions: Array<Transaction | any>;
-    createdBy: User | any;
-
-    // time stamps
     createdAt: string;
     updatedAt: string;
-
-    // unique ids
-    _version: number;
-    _id: string;
-    id: string;
-}
-
-export interface ISocials {
-    name: string;
-    url: string;
-    username: string;
-}
-
-export interface ILocation {
-    city: string;
-    state: string;
-    address: string;
-};
-
-export enum MinisterStatus {
-    ACTIVE = 'active',
-    INACTIVE = 'inactive',
-    SUSPENDED = 'suspended',
-}
-
-export enum DocumentType {
-    NIN = 'national_identity_number',
-    DRIVERS = 'drivers_license',
-    PASSPORT = 'international_passport',
-}
-
-export interface DocumentUpload {
-    type: DocumentType;
-    frontPage: string;
-    backPage?: string;
+    _version?: number;
+    _id?: string;
 }
 
 export default Minister;
