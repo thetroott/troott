@@ -1,4 +1,4 @@
-import type { ICollection } from '@/state/helpers/interface';
+import type { ICollection } from '@/utils/interfaces.util';
 
 /** Narrows legacy list responses where `IAPIResponse.data` is still `unknown`. */
 export function listCollectionFromResponse(

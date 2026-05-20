@@ -175,8 +175,11 @@ export const EditTaskEnum = {
 
 export const UploadFormatEnum = {
     BASE64: 'base64',
-    RAW_FILE: 'rawfile'
-} as const
+    RAW_FILE: 'rawfile',
+} as const;
+
+export type UploadFormat =
+    (typeof UploadFormatEnum)[keyof typeof UploadFormatEnum];
 
 export const DurationEnum = {
     DAY: 'day',

@@ -1,4 +1,4 @@
-export type { IListQuery } from '@troott/api-client';
+export type { IListQuery } from './interfaces.util';
 export type {
     IInRoute,
     IRoute,

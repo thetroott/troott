@@ -1,7 +1,5 @@
-import {
-    uploadActions,
-    type UploadDispatch,
-} from '@/context/upload/upload.context';
+import { uploadActions } from '@/context/upload/uploadState';
+import type { UploadDispatch } from '@/context/upload/types';
 
 export function titleFromAudioFilename(file: File): string {
     const fileName = file.name;

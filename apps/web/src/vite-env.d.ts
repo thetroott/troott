@@ -3,8 +3,13 @@
 interface ImportMetaEnv {
     /** API origin (e.g. http://localhost:3000); `/api/v1` is appended in `api/config.tsx`. */
     readonly VITE_APP_API_URL?: string;
-    /** In `vite` dev, set to `"true"` to call the real sermon start-upload instead of the UI mock. */
-    readonly VITE_USE_REAL_API_UPLOAD?: string;
+    /** Injected in `vite.config.ts` from `package.json` `version` (build / dev). */
+    readonly VITE_APP_VERSION?: string;
+    /** When `"prod"`, Sentry, PostHog, and Vercel Speed Insights are enabled in `main.tsx`. */
+    readonly VITE_APP_ENVIRONMENT?: string;
+    readonly VITE_APP_PUBLIC_SENTRY_DSN?: string;
+    readonly VITE_APP_PUBLIC_POSTHOG_KEY?: string;
+    readonly VITE_APP_PUBLIC_POSTHOG_HOST?: string;
     readonly VITE_DEPLOYMENT_REGION?: string;
     readonly VITE_PADDLE_CLIENT_TOKEN: string;
 }

@@ -1,4 +1,4 @@
-import storage from '@/utils/storage.util';
+import storage from '@/api/services/local-storage';
 
 export function resolveMinisterId(
     user: Record<string, unknown> | null | undefined,

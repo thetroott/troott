@@ -1,4 +1,5 @@
 import type { JSX, ReactNode } from 'react';
+import type { UserType } from '@/models/User.model';
 import type {
     LoadingType,
     RouteActionType,
@@ -52,6 +53,30 @@ export interface ICollection<T = unknown> {
     message?: string;
 }
 
+/** List/search query shape used by hooks and resource callers. */
+export interface IListQuery {
+    limit?: number;
+    page?: number;
+    select?: string | string[];
+    order?: string | Record<string, unknown>;
+    resource?: string;
+    resourceId?: string;
+    key?: string;
+    payload?: Record<string, unknown>;
+    paginate?: boolean;
+    report?: boolean;
+    [key: string]: unknown;
+}
+
+export interface IPageSearch {
+    key: string;
+    type: string;
+    hasResult: boolean;
+    refine?: string;
+    payload?: Record<string, unknown>;
+    [key: string]: unknown;
+}
+
 
 export type RouteType = {
     path: string;
@@ -72,6 +97,8 @@ export interface IForm extends React.ComponentProps<'form'> {
     onStepChange?: (step: 'email' | 'otp' | 'success') => void;
     onSuccess?: () => void;
     onResend?: () => void;
+    /** When set, included as `userType` on register (e.g. minister web signup). */
+    registrationUserType?: UserType;
 }
 export interface IAuthLayout {
     children: React.ReactNode;
@@ -335,6 +362,10 @@ export interface IDOBPicker {
     label?: string;
     id?: string;
     className?: string;
+    /** Initial value as `YYYY-MM-DD` (from account API). */
+    initialIsoDate?: string | null;
+    /** Fires when year, month, and day are all selected (`YYYY-MM-DD`). */
+    onDateIsoChange?: (isoDate: string | null) => void;
 }
 
 export interface IOnboarding {
@@ -407,7 +438,6 @@ export interface IUploadContext {
     progress: number;
     uploadComplete: boolean;
     activeOption?: string;
-    backgroundUploadId?: string | null;
 }
 
 export interface IFileUploadZone {

@@ -1,8 +1,8 @@
-import { UserType } from '@troott/api-client';
+import { UserType } from '@/models/User.model';
 
 /** Accounts that use the internal web portal (not listener-first mobile). */
 export const INTERNAL_PORTAL_ROLES: UserType[] = [
-    UserType.SUPERADMIN,
+    UserType.SUPER,
     UserType.ADMIN,
     UserType.MINISTER,
     UserType.CREATOR,

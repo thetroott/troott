@@ -1,4 +1,5 @@
 import type { Sermon } from '@/_data/dummySermons';
+import type { IAPIResponse } from '@/api/types';
 import type { AxiosResponse } from 'axios';
 
 function coalesceDurationSeconds(...candidates: unknown[]): number {
@@ -123,9 +124,24 @@ export function mapApiSermonToTableRow(raw: Record<string, unknown>): Sermon {
 
 /** Normalizes GET /sermon/minister/:id — supports `{ sermons, total }` or legacy array. */
 export function parseMinisterSermonsResponse(
-    res: AxiosResponse<{ data?: unknown }>,
+    res: AxiosResponse<{ data?: unknown }> | IAPIResponse,
 ): { list: Record<string, unknown>[]; total: number } {
-    const raw = res.data?.data;
+    let raw: unknown;
+
+    if (res && typeof res === 'object' && 'error' in res && !('config' in res)) {
+        raw = (res as IAPIResponse).data;
+    } else {
+        const ax = res as AxiosResponse<{ data?: unknown }>;
+        const body = ax.data;
+        if (body && typeof body === 'object' && 'error' in body) {
+            raw = (body as IAPIResponse).data;
+        } else {
+            raw =
+                body && typeof body === 'object' && body !== null && 'data' in body
+                    ? (body as { data?: unknown }).data
+                    : body;
+        }
+    }
     if (Array.isArray(raw)) {
         return { list: raw as Record<string, unknown>[], total: raw.length };
     }
