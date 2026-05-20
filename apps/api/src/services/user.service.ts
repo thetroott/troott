@@ -529,6 +529,31 @@ class UserService {
             }
         }
 
+        if (data.middleName !== undefined) {
+            updateData.middleName = String(data.middleName).trim();
+        }
+        if (data.gender !== undefined) {
+            updateData.gender = data.gender;
+        }
+        if (data.dateOfBirth !== undefined) {
+            updateData.dateOfBirth = data.dateOfBirth;
+        }
+        if (data.countryPhone !== undefined) {
+            updateData.countryPhone = data.countryPhone;
+        }
+        if (data.altPhone !== undefined) {
+            updateData.altPhone = data.altPhone;
+        }
+        if (data.slug !== undefined) {
+            updateData.slug = String(data.slug).trim().toLowerCase();
+        }
+        if (data.country !== undefined) {
+            (updateData as any).country = data.country;
+        }
+        if (data.homeCountry !== undefined) {
+            (updateData as any).homeCountry = data.homeCountry;
+        }
+
         // Update the user
         const updateResult = await userRepository.updateUser(
             userId,

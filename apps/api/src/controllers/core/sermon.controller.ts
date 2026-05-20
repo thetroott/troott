@@ -15,6 +15,15 @@ import { isSermonPublicTeaserEligible } from '@/utils/sermon-teaser.util';
 import redisWrapper from '../../middlewares/redis.mdw';
 import { createHash } from 'crypto';
 import sermonService from '@/services/core/sermon.service';
+import ministerService from '@/services/core/minister.service';
+import ministerRepository from '@/repository/core/minister.repository';
+import { assertStudioWriteForSermonMinisters } from '@/utils/studio-access.util';
+
+async function resolveMinisterRouteParam(
+    param: string,
+): Promise<string | null> {
+    return ministerRepository.resolveMinisterMongoId(param);
+}
 
 const SERMON_CACHE_TTL_DETAIL = 300;
 const SERMON_CACHE_TTL_LIST = 180;
@@ -226,6 +235,21 @@ export const publishSermon = asyncHandler(
             userId: getAuthUserId(req) || undefined,
         });
 
+        const uid = getAuthUserId(req);
+        if (uid) {
+            const onboard = await ministerService.tryCompleteOnboardingAfterFirstPublish(
+                String(uid),
+            );
+            if (!onboard.error) {
+                try {
+                    await redisWrapper.deleteData(`minister:profile:${uid}`);
+                    await redisWrapper.deleteData(`user:profile:${uid}`);
+                } catch {
+                    /* non-fatal */
+                }
+            }
+        }
+
         res.status(200).json({
             error: false,
             errors: [],
@@ -254,6 +278,24 @@ export const updateSermon = asyncHandler(
             return next(
                 new ErrorResponse(sermonExist.message, sermonExist.code!, []),
             );
+        }
+
+        const userIdGuard = getAuthUserId(req);
+        if (userIdGuard) {
+            const docPre = sermonExist.data as Record<string, unknown>;
+            const studioGuard = await assertStudioWriteForSermonMinisters(
+                userIdGuard,
+                docPre.minister,
+            );
+            if (studioGuard.error) {
+                return next(
+                    new ErrorResponse(
+                        studioGuard.message,
+                        studioGuard.code!,
+                        [],
+                    ),
+                );
+            }
         }
 
         const {
@@ -662,9 +704,13 @@ export const getAllSermons = asyncHandler(
  */
 export const getSermonsByminister = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const ministerId = pathParam(req.params.ministerId);
-        if (!ministerId) {
+        const ministerParam = pathParam(req.params.ministerId);
+        if (!ministerParam) {
             return next(new ErrorResponse('ministerId is required', 400, []));
+        }
+        const ministerId = await resolveMinisterRouteParam(ministerParam);
+        if (!ministerId) {
+            return next(new ErrorResponse('Minister not found', 404, []));
         }
         const page = toPositiveInt(req.query.page, 1);
         const limit = toPositiveInt(req.query.limit, 25);
@@ -756,9 +802,13 @@ const getSermonsByMinisterSorted = (
     sortField: 'playCount' | 'likeCount' | 'shareCount' | 'releaseDate',
 ) =>
     asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-        const ministerId = pathParam(req.params.ministerId);
-        if (!ministerId) {
+        const ministerParam = pathParam(req.params.ministerId);
+        if (!ministerParam) {
             return next(new ErrorResponse('ministerId is required', 400, []));
+        }
+        const ministerId = await resolveMinisterRouteParam(ministerParam);
+        if (!ministerId) {
+            return next(new ErrorResponse('Minister not found', 404, []));
         }
         const page = toPositiveInt(req.query.page, 1);
         const limit = toPositiveInt(req.query.limit, 25);

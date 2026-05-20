@@ -124,6 +124,11 @@ const UserSchema = new Schema<IUserDoc>(
         devices: [{ type: Schema.Types.Mixed }],
         listener: { type: Schema.Types.ObjectId, ref: DbModels.LISTENER },
         minister: { type: Schema.Types.ObjectId, ref: DbModels.MINISTER },
+        primaryStudio: {
+            type: Schema.Types.ObjectId,
+            ref: DbModels.STUDIO,
+            index: true,
+        },
         keys: [{ type: Schema.Types.Mixed }],
         createdBy: { type: Schema.Types.ObjectId, ref: DbModels.USER },
     },

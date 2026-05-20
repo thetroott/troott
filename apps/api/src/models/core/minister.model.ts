@@ -87,6 +87,8 @@ const MinisterSchema = new Schema<IMinisterDoc>(
         subscription: { type: Schema.Types.ObjectId, ref: DbModels.SUBSCRIPTION },
         user: { type: Schema.Types.ObjectId, ref: DbModels.USER },
 
+        studio: { type: Schema.Types.ObjectId, ref: DbModels.STUDIO, index: true },
+
         sermons: [{ type: Schema.Types.ObjectId, ref: DbModels.SERMON }],
         playlists: [{ type: Schema.Types.ObjectId, ref: DbModels.PLAYLIST }],
         transactions: [

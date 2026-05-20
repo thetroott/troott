@@ -162,6 +162,9 @@ interface IUserDoc extends Document {
     /** Linked minister profile, if any. */
     minister: IMinisterDoc | any;
 
+    /** Primary producer studio for dashboard context (minister/creator hub). */
+    primaryStudio?: ObjectId | any;
+
     /** The user who created this account (admin-created accounts). */
     createdBy: IUserDoc | any;
 
@@ -258,6 +261,18 @@ export enum OnboardStage {
     TOPICS = 'topics',
     MINISTERS = 'ministers',
     SKIPPED = 'skipped',
+    /** Minister get-started — personal information step */
+    MINISTER_PERSONAL = 'minister_personal',
+    /** Minister get-started — identity document */
+    MINISTER_DOCUMENT = 'minister_document',
+    /** Minister get-started — home address */
+    MINISTER_ADDRESS = 'minister_address',
+    /** Minister get-started — ministry profile */
+    MINISTER_MINISTRY = 'minister_ministry',
+    /** Minister get-started — product tour */
+    MINISTER_TOUR = 'minister_tour',
+    /** Minister get-started — first sermon published */
+    MINISTER_FIRST_SERMON = 'minister_first_sermon',
 }
 
 /** Status of a user invitation. */

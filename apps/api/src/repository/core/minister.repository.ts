@@ -3,6 +3,7 @@ import Minister from '@/models/core/minister.model';
 import { IMinisterDoc } from '@/interfaces/core/minister.interface';
 import RepositoryService from '@/services/repository.service';
 import { IResult } from '@/interfaces/common.interface';
+import { mongoIdFromDoc } from '@/utils/resolve-public-id.util';
 
 class MinisterRepository extends RepositoryService<IMinisterDoc> {
     constructor() {
@@ -14,6 +15,15 @@ class MinisterRepository extends RepositoryService<IMinisterDoc> {
         populate: boolean | Array<{ path: string }> = false,
     ): Promise<IResult> {
         return this.findByIdOrSlug(input, populate);
+    }
+
+    /** Resolve minister path param: Mongo id, public code, then slug. */
+    public async resolveMinisterMongoId(input: string): Promise<string | null> {
+        const trimmed = input?.trim();
+        if (!trimmed) return null;
+        const r = await this.findMinister(trimmed);
+        if (r.error || !r.data) return null;
+        return mongoIdFromDoc(r.data);
     }
 
     public async getMinisters(

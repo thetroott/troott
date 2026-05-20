@@ -119,6 +119,9 @@ interface IMinisterDoc extends Document {
     /** Underlying authentication user. */
     user: IUserDoc | any;
 
+    /** Linked studio channel (producer hub). */
+    studio?: ObjectId | any;
+
     /** Sermons uploaded by this minister. */
     sermons: Array<ISermonDoc | any>;
     /** Playlists curated by this minister. */

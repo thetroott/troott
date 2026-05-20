@@ -62,7 +62,7 @@ class AuthMapper {
             }),
 
             onboard: {
-                step: user.onboard?.step ?? 1,
+                step: user.onboard?.step ?? 0,
                 stage: user.onboard?.stage ?? '',
                 status: user.onboard?.status ?? OnboardStatus.NOT_STARTED,
             },

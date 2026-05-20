@@ -4,10 +4,11 @@ import ErrorResponse from '../utils/error.util';
 import authMapper from '@/mappers/auth.mapper';
 import userService from '@/services/user.service';
 import userRepository from '@/repository/user.repository';
-import { IUserDoc, PasswordType, UserType } from '@/interfaces/user.interface';
+import { EditUserDTO } from '@/dtos/user.dto';
 import redisWrapper from '../middlewares/redis.mdw';
 import { generatePassword } from '../utils/helpers.util';
 import emailService from '@/services/email.service';
+import { IUserDoc, PasswordType, UserType } from '@/interfaces/user.interface';
 /** Get authenticated user id from request (supports both id and _id from lean() documents) */
 const getUserId = (req: Request): string | undefined =>
     (req as any).user?.id ??
@@ -288,13 +289,19 @@ export const editUser: RequestHandler = asyncHandler(
         const userId = getUserId(req);
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const data = req.body;
+        const data = req.body as EditUserDTO;
         const result = await userService.updateUserProfile(userId, data);
 
         if (result.error) {
             return next(
                 new ErrorResponse(result.message, result.code || 400, []),
             );
+        }
+
+        try {
+            await redisWrapper.deleteData(`user:profile:${userId}`);
+        } catch (e) {
+            console.error('Cache invalidation failed:', e);
         }
 
         res.status(200).json({

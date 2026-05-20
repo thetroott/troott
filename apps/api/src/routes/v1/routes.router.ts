@@ -8,6 +8,7 @@ import listenerRoutes from '@/routes/listener.router';
 import ministerRoutes from '@/routes/minister.router';
 import creatorRoutes from '@/routes/creator.router';
 import adminRoutes from '@/routes/admin.router';
+import studioRoutes from '@/routes/studio.router';
 import webhookRoutes from '@/routes/webhook.router';
 import searchRoutes from '@/routes/search.router';
 import discoveryRoutes from '@/routes/discovery.router';
@@ -45,6 +46,7 @@ router.use('/listener', listenerRoutes);
 router.use('/minister', ministerRoutes);
 router.use('/creator', creatorRoutes);
 router.use('/admin', adminRoutes);
+router.use('/studios', studioRoutes);
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
     let enviornemnt = ENVType.DEVELOPMENT;

@@ -79,6 +79,8 @@ const CreatorSchema = new Schema<ICreatorDoc>(
             required: true,
         },
 
+        studio: { type: Schema.Types.ObjectId, ref: DbModels.STUDIO, index: true },
+
         sermons: [{ type: Schema.Types.ObjectId, ref: DbModels.SERMON }],
         playlists: [{ type: Schema.Types.ObjectId, ref: DbModels.PLAYLIST }],
         transactions: [

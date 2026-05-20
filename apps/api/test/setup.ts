@@ -125,7 +125,11 @@ jest.mock('bull', () => {
 
 // Mock queue/worker services
 jest.mock('../src/tasks/workers/worker', () => ({
-    default: jest.fn<() => Promise<boolean>>().mockResolvedValue(true),
+    __esModule: true,
+    default: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+    shutdownQueueProcessors: jest
+        .fn<() => Promise<void>>()
+        .mockResolvedValue(undefined),
 }));
 
 // Create a mock queue instance

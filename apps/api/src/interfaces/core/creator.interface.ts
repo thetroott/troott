@@ -103,6 +103,9 @@ interface ICreatorDoc extends Document {
     /** Underlying authentication user reference. */
     user: string | any;
 
+    /** Linked studio channel (producer hub). */
+    studio?: ObjectId | any;
+
     /** Sermons uploaded by this creator. */
     sermons: Array<ISermonDoc | any>;
     /** Playlists curated by this creator. */

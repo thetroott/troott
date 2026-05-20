@@ -69,6 +69,35 @@ export interface SetMinisterPasswordDTO {
     password: string;
 }
 
+/** Milestone bodies for `POST /minister/onboarding/*` (listener `OnboardTopicsDTO` pattern). */
+export interface OnboardMinisterPersonalCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardMinisterDocumentCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardMinisterAddressCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardMinisterMinistryCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardMinisterTourCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardMinisterFirstSermonCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardMinisterSkipDTO {
+    reason?: string;
+}
+
 export interface SubmitMinisterVerificationDTO {
     document: DocumentUpload;
 }

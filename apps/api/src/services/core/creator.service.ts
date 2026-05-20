@@ -8,6 +8,8 @@ import { VerificationStatus } from '@/interfaces/core/minister.interface';
 import { genSlug } from '../../utils/helpers.util';
 import roleService from '@/services/role.service';
 import PermissionService from '@/services/permission.service';
+import studioService from '@/services/core/studio.service';
+import userRepository from '@/repository/user.repository';
 
 const defaultDob = (): Date => new Date('1990-01-01T00:00:00.000Z');
 
@@ -141,10 +143,29 @@ class CreatorService {
             }
         }
 
+        const creator = createResult.data as ICreatorDoc;
+        const creatorId = String(creator._id || creator.id);
+        const userId = String(userKey);
+
+        await userRepository.updateUser(userId, {
+            isCreator: true,
+        } as any);
+
+        const studioProvision = await studioService.provisionDefaultStudioForCreator(
+            creatorId,
+            userId,
+        );
+        if (studioProvision.error) {
+            result.error = true;
+            result.code = studioProvision.code || 500;
+            result.message = studioProvision.message;
+            return result;
+        }
+
         result.message = 'Creator profile created successfully';
         result.code = 201;
         result.data = {
-            creator: createResult.data as ICreatorDoc,
+            creator,
             user,
         };
         return result;

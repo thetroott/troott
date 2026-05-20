@@ -5,15 +5,25 @@ import seedData from './configs/seeds/seeder.seed';
 import redisHandler from './middlewares/redis.mdw';
 import { REDIS_CONFIG } from './configs/redis.config';
 import startWorkers from './tasks/workers/worker';
+import startScheduler, { shutdownScheduler } from './tasks/scheduler/scheduler';
 
 const PORT = process.env.PORT as string;
 
 const connect = async (): Promise<void> => {
+    // Connect to Database
     await connectDB();
+
+    // Seed Data
     await seedData();
 
+    //Connect to Redis
     await redisHandler.connect(REDIS_CONFIG);
+
+    // Start Workers
     await startWorkers();
+
+    // Start Scheduler (Bull + Cron)
+    await startScheduler();
 };
 
 connect();
@@ -32,6 +42,8 @@ process.on('unhandledRejection', (err: any, promise) => {
 });
 
 process.on('SIGINT', async () => {
-    await redisHandler.disconnect();
+    console.log(colors.yellow('Server shutting down...'));
+    await shutdownScheduler();
+    //await redisHandler.disconnect();
     server.close(() => process.exit(0));
 });

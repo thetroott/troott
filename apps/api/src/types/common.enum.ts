@@ -59,6 +59,7 @@ export enum DbModels {
     SERIES = 'series',
     SERMON = 'sermon',
     SHAREABLE_LINK = 'shareableLink',
+    STUDIO = 'studio',
     SUBSCRIPTION = 'subscription',
     SUBSCRIPTION_INTENT = 'subscriptionIntent',
     TRANSACTION = 'transaction',

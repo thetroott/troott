@@ -11,6 +11,13 @@ import {
     SetMinisterPasswordDTO,
     SubmitMinisterVerificationDTO,
     UpdateMinisterVerificationStatusDTO,
+    OnboardMinisterPersonalCompleteDTO,
+    OnboardMinisterDocumentCompleteDTO,
+    OnboardMinisterAddressCompleteDTO,
+    OnboardMinisterMinistryCompleteDTO,
+    OnboardMinisterTourCompleteDTO,
+    OnboardMinisterFirstSermonCompleteDTO,
+    OnboardMinisterSkipDTO,
 } from '@/dtos/core/minister.dto';
 import { InvitationType } from '../../interfaces/invitation.interface';
 import { InviteTokenDTO } from '@/dtos/invitation.dto';
@@ -616,6 +623,7 @@ export const updateMinister: RequestHandler = asyncHandler(
 
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (cacheError) {
             console.error('Cache invalidation failed:', cacheError);
         }
@@ -755,7 +763,7 @@ export const submitMinisterVerification: RequestHandler = asyncHandler(
 
         const result = await ministerService.submitVerification(
             String(userId),
-            [document] as any,
+            document,
         );
         if (result.error) {
             return next(
@@ -765,10 +773,225 @@ export const submitMinisterVerification: RequestHandler = asyncHandler(
 
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);
         }
 
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardMinisterPersonalComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardMinisterPersonalCompleteDTO;
+        void _body;
+        const result = await ministerService.onboardingPersonalComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        try {
+            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
+        } catch (e) {
+            console.error('Cache invalidation failed:', e);
+        }
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardMinisterDocumentComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardMinisterDocumentCompleteDTO;
+        void _body;
+        const result = await ministerService.onboardingDocumentComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        try {
+            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
+        } catch (e) {
+            console.error('Cache invalidation failed:', e);
+        }
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardMinisterAddressComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardMinisterAddressCompleteDTO;
+        void _body;
+        const result = await ministerService.onboardingAddressComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        try {
+            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
+        } catch (e) {
+            console.error('Cache invalidation failed:', e);
+        }
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardMinisterMinistryComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardMinisterMinistryCompleteDTO;
+        void _body;
+        const result = await ministerService.onboardingMinistryComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        try {
+            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
+        } catch (e) {
+            console.error('Cache invalidation failed:', e);
+        }
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardMinisterTourComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardMinisterTourCompleteDTO;
+        void _body;
+        const result = await ministerService.onboardingTourComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        try {
+            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
+        } catch (e) {
+            console.error('Cache invalidation failed:', e);
+        }
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardMinisterFirstSermonComplete: RequestHandler =
+    asyncHandler(
+        async (req: Request, res: Response, next: NextFunction) => {
+            const userId = (req as any).user?.id;
+            if (!userId)
+                return next(new ErrorResponse('Unauthorized', 401, []));
+            const _body =
+                (req.body || {}) as OnboardMinisterFirstSermonCompleteDTO;
+            void _body;
+            const result =
+                await ministerService.onboardingFirstSermonComplete(
+                    String(userId),
+                );
+            if (result.error) {
+                return next(
+                    new ErrorResponse(result.message, result.code || 400, []),
+                );
+            }
+            try {
+                await redisWrapper.deleteData(`minister:profile:${userId}`);
+                await redisWrapper.deleteData(`user:profile:${userId}`);
+            } catch (e) {
+                console.error('Cache invalidation failed:', e);
+            }
+            res.status(200).json({
+                error: false,
+                errors: [],
+                data: result.data,
+                message: result.message,
+                status: 200,
+            });
+        },
+    );
+
+export const skipMinisterOnboarding: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardMinisterSkipDTO;
+        void _body;
+        const result = await ministerService.skipMinisterOnboarding(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        try {
+            await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`user:profile:${userId}`);
+        } catch (e) {
+            console.error('Cache invalidation failed:', e);
+        }
         res.status(200).json({
             error: false,
             errors: [],
