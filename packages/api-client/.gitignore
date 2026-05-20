@@ -1,7 +1,0 @@
-dist/
-
-# Build emits to dist/ only — never track emitted JS or declarations under src/
-src/**/*.js
-src/**/*.js.map
-src/**/*.d.ts
-src/**/*.d.ts.map
