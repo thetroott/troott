@@ -12,7 +12,7 @@
 import { MutationCache, Query, QueryCache, QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useEffect } from 'react';
-import { apiConfig } from '../config';
+import { apiConfig } from '../config/index';
 import { ApiError, logError } from '../errors';
 import { createMMKVPersister } from './cache';
 import { initializeOfflineQueue } from './offline';

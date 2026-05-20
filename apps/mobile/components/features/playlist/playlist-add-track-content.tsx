@@ -95,7 +95,6 @@ const PlaylistAddTrackContent = forwardRef<
                     await addToPlaylist.mutateAsync({
                         playlistId: id,
                         sermonId: sermonTrackId,
-                        playlistItemType,
                     });
                 } catch (e) {
                     const msg =

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ImageSourcePropType } from 'react-native';
 
-import { useContextType } from '@/state/app-state';
+import { useContextType } from '@/context/apps/useContextType';
 
 export const DEFAULT_PROFILE_AVATAR = require('@/assets/images/4.jpg');
 const DEFAULT_PROFILE_NAME = 'Tobechukwu Obi';

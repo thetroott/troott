@@ -1,4 +1,4 @@
-import { TroottStateProvider } from '@/state/app-state';
+import { TroottProviders } from '@/context/providers';
 import { PlaybackBridge } from '@/engine/state/use-playback-bridge';
 import Constants from 'expo-constants';
 import { AppState, Platform, Share, StyleSheet, View } from 'react-native';
@@ -32,7 +32,6 @@ import { useShareFlow } from '@/stores/app/share';
 import { FullWindowOverlay } from 'react-native-screens';
 import { Portal } from '@/components/ui/portal';
 import { GlobalLoadingPortal } from '@/components/ui/loading-state';
-import { useAuthStore } from '@/stores/auth.store';
 import { initNetworkStoreSync } from '@/stores/app/network';
 import InternetConnectionWatcher from '@/components/features/shared/network-watcehr';
 
@@ -63,26 +62,6 @@ const QUERY_PERSIST_APP_VERSION =
 const RootLayout = () => {
     usePendingDeepLinkBootstrap();
     const pathname = usePathname();
-
-    useEffect(() => {
-        function migrateCanonicalUserType() {
-            try {
-                const u = useAuthStore.getState().user as {
-                    userType?: string;
-                };
-                if (u?.userType === 'superadmin') {
-                    useAuthStore.setState({
-                        user: { ...u, userType: 'super-admin' },
-                    });
-                }
-            } catch {
-                /* ignore */
-            }
-        }
-        migrateCanonicalUserType();
-        const id = setTimeout(migrateCanonicalUserType, 250);
-        return () => clearTimeout(id);
-    }, []);
 
     useEffect(() => {
         const disconnect = initNetworkStoreSync();
@@ -295,7 +274,7 @@ const RootLayout = () => {
                         buster: QUERY_PERSIST_APP_VERSION,
                     }}
                 >
-                    <TroottStateProvider>
+                    <TroottProviders>
                         <PlaybackBridge />
                     <SafeAreaView
                         style={{
@@ -377,7 +356,7 @@ const RootLayout = () => {
                             />
                         </Portal>
                     </SafeAreaView>
-                    </TroottStateProvider>
+                    </TroottProviders>
                 </PersistQueryClientProvider>
             </SafeAreaProvider>
         </GestureHandlerRootView>

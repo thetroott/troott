@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dmlscript.troottclient",
+      "bundleIdentifier": "com.troott.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
@@ -40,7 +40,7 @@
         "CALL_PHONE",
         "CALL_PRIVILEGED"
       ],
-      "package": "com.dmlscript.troottclient"
+      "package": "com.troott.app"
     },
     "web": {
       "output": "static",

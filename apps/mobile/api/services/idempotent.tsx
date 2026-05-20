@@ -1,5 +1,7 @@
-import { createMmkvIdempotencyStorage } from '@troott/api-client';
-import type { IdempotencyKeyStorage } from '@troott/api-client';
+import {
+    createMmkvIdempotencyStorage,
+    type IdempotencyKeyStorage,
+} from './idempotency-mmkv';
 
 let storage: IdempotencyKeyStorage | null = null;
 

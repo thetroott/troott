@@ -1,76 +1,95 @@
 import {
-    FlatList,
     Image,
-    ImageSourcePropType,
     KeyboardAvoidingView,
-    ScrollView,
     StyleSheet,
     TouchableOpacity,
     View,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
-
+import React, { useMemo, useState } from 'react';
 import { SearchNormal, TickCircle } from 'iconsax-react-nativejs';
 import { theme } from '@/constants/theme';
-import image1 from '@/assets/images/1.jpg';
-import image2 from '@/assets/images/2.jpg';
-import image3 from '@/assets/images/3.jpg';
-import image4 from '@/assets/images/4.jpg';
-import image5 from '@/assets/images/5.jpg';
-import image6 from '@/assets/images/6.jpg';
-import image7 from '@/assets/images/7.jpg';
-import image8 from '@/assets/images/8.jpg';
-import image9 from '@/assets/images/9.jpg';
-
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { router } from 'expo-router';
 import { FlashList } from '@shopify/flash-list';
-import { string } from 'zod';
 import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import Text from '@/components/ui/text';
+import { toast } from '@/components/ui/toast';
+import { replaceWithPendingTargetOrHome } from '@/lib/deep-link/replace-with-pending-or-home';
+import {
+    useOnboardMinistersMutation,
+    useOnboardingMinistersQuery,
+    useSkipOnboardingMutation,
+} from '@/api/hooks/app/useListenerOnboarding';
+import { ministerDocToRow } from '@/engine/utils/library-map';
 
-// Simple UUID generator function
-const generateUUID = (): string => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(
-        /[xy]/g,
-        function (c) {
-            const r = (Math.random() * 16) | 0;
-            const v = c == 'x' ? r : (r & 0x3) | 0x8;
-            return v.toString(16);
-        },
-    );
+type MinisterRow = {
+    id: string;
+    name: string;
+    image?: string;
 };
 
-const FavoriteMinisters = () => {
-    const pastors = [
-        { id: generateUUID(), name: 'Apostle Joshua Selman', image: image1 },
-        { id: generateUUID(), name: 'Pastor Sam Adeyemi', image: image2 },
-        { id: generateUUID(), name: 'Pastor Bolaji Idowu', image: image3 },
-        { id: generateUUID(), name: 'Pastor Chris Oyakhilome', image: image4 },
-        { id: generateUUID(), name: 'Pastor Paul Adefarasin', image: image5 },
-        { id: generateUUID(), name: 'Pastor David Ibiyeomie', image: image6 },
-        { id: generateUUID(), name: 'Pastor Jerry Eze', image: image7 },
-        { id: generateUUID(), name: 'Pastor Nathaniel Bassey', image: image8 },
-        { id: generateUUID(), name: 'Pastor Folorunso Kumuyi', image: image9 },
-        { id: generateUUID(), name: 'Pastor David Ibiyeomie', image: image6 },
-        { id: generateUUID(), name: 'Pastor Jerry Eze', image: image7 },
-        { id: generateUUID(), name: 'Pastor Nathaniel Bassey', image: image8 },
-        { id: generateUUID(), name: 'Pastor Folorunso Kumuyi', image: image9 },
-    ];
-
-    const [selectedPastors, setSelectedPastors] = useState<string[]>([]);
-    const [data, setData] = useState(pastors);
-    function handleCardPress(id: string) {
-        if (selectedPastors.find((i) => i === id)) {
-            setSelectedPastors((prev) => prev.filter((i) => i !== id));
-            return;
+function mapMinisters(data: unknown): MinisterRow[] {
+    if (!Array.isArray(data)) {
+        return [];
+    }
+    const out: MinisterRow[] = [];
+    for (const doc of data) {
+        const row = ministerDocToRow(doc);
+        if (row?.id) {
+            out.push({
+                id: row.id,
+                name: row.name,
+                image: row.image,
+            });
         }
-        setSelectedPastors((prev) => [...prev, id]);
     }
-    function handleSkip() {
-        router.push('/select-interests');
-    }
+    return out;
+}
+
+const FavoriteMinisters = () => {
+    const { data, isLoading } = useOnboardingMinistersQuery();
+    const onboardMinisters = useOnboardMinistersMutation();
+    const skipOnboarding = useSkipOnboardingMutation();
+    const ministers = useMemo(() => mapMinisters(data), [data]);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [filter, setFilter] = useState('');
+
+    const filtered = useMemo(() => {
+        const q = filter.trim().toLowerCase();
+        if (!q) return ministers;
+        return ministers.filter((m) => m.name.toLowerCase().includes(q));
+    }, [ministers, filter]);
+
+    const toggle = (id: string) => {
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+        );
+    };
+
+    const handleFinish = async () => {
+        try {
+            await onboardMinisters.mutateAsync({
+                ministerIds: selectedIds,
+            });
+            await replaceWithPendingTargetOrHome();
+        } catch (e) {
+            toast.error(
+                e instanceof Error ? e.message : 'Could not save ministers',
+            );
+        }
+    };
+
+    const handleSkip = async () => {
+        try {
+            await skipOnboarding.mutateAsync();
+            await replaceWithPendingTargetOrHome();
+        } catch (e) {
+            toast.error(
+                e instanceof Error ? e.message : 'Could not skip onboarding',
+            );
+        }
+    };
+
     return (
         <KeyboardAvoidingView style={{ flex: 1 }}>
             <View style={styles.container}>
@@ -82,35 +101,35 @@ const FavoriteMinisters = () => {
                         />
                     }
                     placeholder="Search ministers"
-                    onChangeText={(e) => {
-                        setData(pastors.filter((i) => i.name.includes(e)));
-                    }}
+                    value={filter}
+                    onChangeText={setFilter}
                 />
-
                 <FlashList
-                    data={data}
-                    extraData={{ selectedPastors, data }}
+                    data={filtered}
+                    extraData={selectedIds}
                     keyExtractor={(item) => item.id}
                     renderItem={({ item, index }) => (
                         <Animated.View
-                            key={index}
                             entering={FadeInDown.delay(100 * index).duration(
                                 200,
                             )}
                         >
                             <PastorCard
-                                {...item}
-                                selected={
-                                    selectedPastors.find((i) => i == item.id) !=
-                                    undefined
-                                }
-                                onPress={() => {
-                                    handleCardPress(item.id);
-                                }}
+                                name={item.name}
+                                imageUri={item.image}
+                                selected={selectedIds.includes(item.id)}
+                                onPress={() => toggle(item.id)}
                             />
                         </Animated.View>
                     )}
                     numColumns={3}
+                    ListEmptyComponent={
+                        isLoading ? (
+                            <Text>Loading ministers...</Text>
+                        ) : (
+                            <Text>No ministers found</Text>
+                        )
+                    }
                     contentContainerStyle={{
                         paddingBottom: theme.sizes.screen.height * 0.2,
                     }}
@@ -119,35 +138,45 @@ const FavoriteMinisters = () => {
             </View>
             <View style={styles.bottomContainer}>
                 <Button
-                    label="Choose Interests"
-                    disabled={selectedPastors.length < 5}
-                    onPress={() => {
-                        router.push('/select-interests');
-                    }}
+                    label="Finish"
+                    isLoading={onboardMinisters.isPending}
+                    onPress={() => void handleFinish()}
                 />
-                <Button label="Skip" variant="ghost" onPress={handleSkip} />
+                <Button
+                    label="Skip"
+                    variant="ghost"
+                    isLoading={skipOnboarding.isPending}
+                    onPress={() => void handleSkip()}
+                />
             </View>
         </KeyboardAvoidingView>
     );
 };
 
-interface PastorCardProps {
+function PastorCard({
+    name,
+    imageUri,
+    selected,
+    onPress,
+}: {
     name: string;
-    image: ImageSourcePropType;
+    imageUri?: string;
     selected?: boolean;
     onPress?: () => void;
-}
-const CARD_SIZE = theme.sizes.screen.width * 0.3 - 10;
-
-function PastorCard({ name, image, selected, onPress }: PastorCardProps) {
+}) {
+    const CARD_SIZE = theme.sizes.screen.width * 0.3 - 10;
     return (
         <TouchableOpacity style={styles.cardContainer} onPress={onPress}>
-            <Image style={styles.image} source={image} />
-            {selected && (
+            {imageUri ? (
+                <Image style={styles.image} source={{ uri: imageUri }} />
+            ) : (
+                <View style={[styles.image, styles.imagePlaceholder]} />
+            )}
+            {selected ? (
                 <View style={styles.tick}>
                     <TickCircle color={theme.colors.grey[100]} variant="Bold" />
                 </View>
-            )}
+            ) : null}
             <Text
                 style={{ textAlign: 'center', color: theme.colors.grey[100] }}
             >
@@ -167,15 +196,17 @@ const styles = StyleSheet.create({
     cardContainer: {
         gap: 10,
         alignSelf: 'flex-start',
-        width: CARD_SIZE,
+        width: theme.sizes.screen.width * 0.3 - 10,
         alignItems: 'center',
         marginTop: theme.sizes.spacing.lg,
     },
     image: {
-        width: CARD_SIZE,
-        height: CARD_SIZE,
-        objectFit: 'cover',
+        width: theme.sizes.screen.width * 0.3 - 10,
+        height: theme.sizes.screen.width * 0.3 - 10,
         borderRadius: theme.sizes.radius.sm,
+    },
+    imagePlaceholder: {
+        backgroundColor: theme.colors.grey[800],
     },
     tick: {
         position: 'absolute',

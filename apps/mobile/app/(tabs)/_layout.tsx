@@ -4,12 +4,14 @@ import { theme } from '@/constants/theme';
 import FullPlayerTrackDetails from '../sermon/[id]';
 import { TabBar } from '@/components/features/navigation';
 import { useIsNowPlayingStackRouteFocused } from '@/api/hooks/player/now-playing-route';
+import { useOnboardingGuard } from '@/api/hooks/app/useOnboardingGuard';
 
 const FullPlayerInTabs = FullPlayerTrackDetails as React.ComponentType<{
     embedInTabsShell?: boolean;
 }>;
 
 const TabsLayout = () => {
+    useOnboardingGuard();
     /** Avoid two `FullPlayerTrackDetails` trees (tabs embed + `track` modal) fighting the same store/effects. */
     const nowPlayingModalFocused = useIsNowPlayingStackRouteFocused();
 

@@ -14,7 +14,7 @@ import {
     useSearchHistory,
     type SearchHistoryEntry,
 } from '@/api/hooks/app/useSearch';
-import { useContextType } from '@/state/app-state';
+import { useContextType } from '@/context/apps/useContextType';
 
 type RecentSearchesProps = {
     /** Optional vertical spacing above the section (handled by parent when omitted). */

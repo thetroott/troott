@@ -55,7 +55,7 @@ import {
     usePlaylistsQuery,
     useUserLibraryQuery,
 } from '@/api/hooks/app/useLibrary';
-import { useContextType } from '@/state/app-state';
+import { useContextType } from '@/context/apps/useContextType';
 import {
     getLibraryArrayField,
     playlistDocToRow,

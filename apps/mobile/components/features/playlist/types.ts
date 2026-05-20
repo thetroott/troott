@@ -148,7 +148,7 @@ export enum PasswordType {
     RESET = 'reset',
 }
 
-import type { UserType } from '@troott/api-client';
+import type { UserType } from '@/models/User.model';
 export type { UserType };
 
 export interface IUser {

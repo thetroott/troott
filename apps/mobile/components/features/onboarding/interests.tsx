@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Add, SearchNormal } from 'iconsax-react-nativejs';
 import { theme } from '@/constants/theme';
 import Animated, {
@@ -9,13 +9,83 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import { SolidIcons } from '@/assets/icons';
+import { router } from 'expo-router';
 import { replaceWithPendingTargetOrHome } from '@/lib/deep-link/replace-with-pending-or-home';
 import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import Text from '@/components/ui/text';
-import { topics } from '@/_data/topics';
+import { toast } from '@/components/ui/toast';
+import {
+    useOnboardTopicsMutation,
+    useOnboardingTopicsQuery,
+    useSkipOnboardingMutation,
+} from '@/api/hooks/app/useListenerOnboarding';
+
+const MIN_TOPICS = 5;
+
+function flattenTopics(data: unknown): { id: string; name: string }[] {
+    if (!Array.isArray(data)) {
+        return [];
+    }
+    const out: { id: string; name: string }[] = [];
+    for (const row of data) {
+        if (!row || typeof row !== 'object') continue;
+        const r = row as Record<string, unknown>;
+        const id = String(r._id ?? r.id ?? '');
+        const name = String(r.name ?? r.title ?? '');
+        if (id) {
+            out.push({ id, name });
+        }
+    }
+    return out;
+}
 
 const Interests = () => {
+    const { data, isLoading } = useOnboardingTopicsQuery();
+    const onboardTopics = useOnboardTopicsMutation();
+    const skipOnboarding = useSkipOnboardingMutation();
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [filter, setFilter] = useState('');
+
+    const topics = useMemo(() => flattenTopics(data), [data]);
+    const filtered = useMemo(() => {
+        const q = filter.trim().toLowerCase();
+        if (!q) return topics;
+        return topics.filter((t) => t.name.toLowerCase().includes(q));
+    }, [topics, filter]);
+
+    const toggle = (id: string) => {
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+        );
+    };
+
+    const handleContinue = async () => {
+        if (selectedIds.length < MIN_TOPICS) {
+            toast.error(`Select at least ${MIN_TOPICS} topics`);
+            return;
+        }
+        try {
+            await onboardTopics.mutateAsync({ topicIds: selectedIds });
+            router.push('/(onboarding)/select-ministers');
+        } catch (e) {
+            toast.error(
+                e instanceof Error ? e.message : 'Could not save topics',
+            );
+        }
+    };
+
+    const handleSkip = async () => {
+        try {
+            await skipOnboarding.mutateAsync();
+            await replaceWithPendingTargetOrHome();
+        } catch (e) {
+            toast.error(
+                e instanceof Error ? e.message : 'Could not skip onboarding',
+            );
+        }
+    };
+
     return (
         <View style={styles.container}>
             <Input
@@ -23,80 +93,50 @@ const Interests = () => {
                     <SearchNormal size={20} color={theme.colors.grey[100]} />
                 }
                 placeholder="Search for more interests"
+                value={filter}
+                onChangeText={setFilter}
             />
             <ScrollView
                 style={{ flex: 1 }}
                 contentContainerStyle={styles.scrollContainer}
             >
-                {topics.map((interest, index) => (
-                    <InterestGroup
-                        title={interest.name}
-                        key={interest.id}
-                        items={interest.items}
-                    />
-                ))}
+                {isLoading ? (
+                    <Text>Loading topics...</Text>
+                ) : (
+                    filtered.map((item) => (
+                        <InterestItem
+                            key={item.id}
+                            name={item.name}
+                            id={item.id}
+                            selected={selectedIds.includes(item.id)}
+                            onPress={() => toggle(item.id)}
+                        />
+                    ))
+                )}
             </ScrollView>
             <View style={styles.bottomContainer}>
                 <Button
                     containerStyle={styles.buttonStyle}
-                    // disabled={selectedPastors.length < 5}
-                    onPress={() => {
-                        void replaceWithPendingTargetOrHome();
-                    }}
+                    disabled={
+                        selectedIds.length < MIN_TOPICS ||
+                        onboardTopics.isPending
+                    }
+                    isLoading={onboardTopics.isPending}
+                    onPress={() => void handleContinue()}
                 >
                     <SolidIcons.PlayIcon />
-                    <Text color={theme.colors.grey[900]}>Start Playing</Text>
+                    <Text color={theme.colors.grey[900]}>Continue</Text>
                 </Button>
                 <Button
                     label="Skip"
                     variant="ghost"
-                    onPress={() => {
-                        void replaceWithPendingTargetOrHome();
-                    }}
+                    isLoading={skipOnboarding.isPending}
+                    onPress={() => void handleSkip()}
                 />
             </View>
         </View>
     );
 };
-
-interface InterestGroupProps {
-    title: string;
-    items: {
-        name: string;
-        id: string;
-    }[];
-}
-function InterestGroup({ title, items }: InterestGroupProps) {
-    const [selectedItems, setSelectedItems] = useState<string[]>([]);
-    function handlepress(id: string) {
-        if (selectedItems.some((i) => i === id)) {
-            setSelectedItems((prev) => prev.filter((i) => i !== id));
-            return;
-        }
-        setSelectedItems((prev) => [...prev, id]);
-    }
-    return (
-        <View style={styles.groupContainer}>
-            <Text size="md" weight="semiBold">
-                {title}
-            </Text>
-            <View style={styles.itemsContainer}>
-                {items.map((item, index) => {
-                    return (
-                        <InterestItem
-                            {...item}
-                            selected={selectedItems.some((i) => i === item.id)}
-                            key={item.id}
-                            onPress={() => {
-                                handlepress(item.id);
-                            }}
-                        />
-                    );
-                })}
-            </View>
-        </View>
-    );
-}
 
 interface ItemProp {
     name: string;
@@ -107,7 +147,8 @@ interface ItemProp {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 const AnimatedAddIcon = Animated.createAnimatedComponent(Add);
-function InterestItem({ name, id, selected, onPress }: ItemProp) {
+
+function InterestItem({ name, selected, onPress }: ItemProp) {
     const selectProgress = useSharedValue(0);
     const rotateProgress = useSharedValue('0deg');
     const animatedStyles = useAnimatedStyle(() => ({
@@ -118,36 +159,24 @@ function InterestItem({ name, id, selected, onPress }: ItemProp) {
         ),
     }));
     const animatedIconStyles = useAnimatedStyle(() => ({
-        transform: [{ rotateZ: rotateProgress.value }],
+        transform: [{ rotate: rotateProgress.value }],
     }));
-    useEffect(() => {
-        if (!selected) {
-            selectProgress.value = withTiming(0);
-            rotateProgress.value = withTiming('0deg', { duration: 400 });
-            return;
-        }
-        selectProgress.value = withTiming(1);
-        rotateProgress.value = withTiming('45deg', { duration: 400 });
-    }, [selected]);
+
+    React.useEffect(() => {
+        selectProgress.value = withTiming(selected ? 1 : 0);
+        rotateProgress.value = withTiming(selected ? '45deg' : '0deg');
+    }, [selected, selectProgress, rotateProgress]);
+
     return (
         <AnimatedPressable
-            style={[styles.interestItem, animatedStyles]}
             onPress={onPress}
+            style={[styles.interestItem, animatedStyles]}
         >
-            <Text
-                color={
-                    selected ? theme.colors.grey[700] : theme.colors.grey[300]
-                }
-            >
-                {name}
-            </Text>
-
+            <Text size="sm">{name}</Text>
             <AnimatedAddIcon
+                size={16}
+                color={theme.colors.white[100]}
                 style={animatedIconStyles}
-                size={20}
-                color={
-                    selected ? theme.colors.grey[900] : theme.colors.grey[300]
-                }
             />
         </AnimatedPressable>
     );
@@ -158,43 +187,30 @@ export default Interests;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        gap: theme.sizes.spacing.xl,
-    },
-    itemsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
         gap: theme.sizes.spacing.md,
     },
-    interestItem: {
-        paddingHorizontal: theme.sizes.spacing.base,
-        paddingVertical: theme.sizes.spacing.sm,
-        borderWidth: 1,
-        borderColor: theme.colors.grey[700],
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: theme.sizes.spacing.sm,
-        borderRadius: theme.sizes.radius.sm,
-    },
     scrollContainer: {
-        gap: theme.sizes.spacing.lg,
-        paddingBottom: 150,
-    },
-    groupContainer: {
-        gap: theme.sizes.spacing.base,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 10,
+        paddingVertical: theme.sizes.spacing.md,
     },
     bottomContainer: {
-        position: 'absolute',
-        gap: 20,
-        bottom: 0,
-        padding: theme.sizes.spacing.base,
-        backgroundColor: '#000000',
-        left: 0,
-        right: 0,
-        opacity: 0.9,
+        gap: theme.sizes.spacing.sm,
+        paddingBottom: theme.sizes.spacing.lg,
     },
     buttonStyle: {
         flexDirection: 'row',
+        gap: 8,
         alignItems: 'center',
-        gap: theme.sizes.spacing.sm,
+        justifyContent: 'center',
+    },
+    interestItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderRadius: theme.sizes.radius.full,
     },
 });
