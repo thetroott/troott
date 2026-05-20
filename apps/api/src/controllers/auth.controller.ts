@@ -306,7 +306,16 @@ export const loginUser = asyncHandler(
  */
 export const logoutUser = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = (req as any).user.id as IUserDoc;
+        const userId = (req as any).user?.id as string | undefined;
+
+        if (!userId) {
+            return res.status(200).json({
+                error: false,
+                errors: [],
+                message: 'Signed out.',
+                status: 200,
+            });
+        }
 
         const user = await User.findById(userId);
         if (!user) {

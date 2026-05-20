@@ -48,7 +48,6 @@ export const shutdownScheduler = async (): Promise<void> => {
         // Close specific scheduler queues
         await BullQueue.closeQueue(QueueChannel.Reminders);
         await BullQueue.closeQueue(QueueChannel.Cleanup);
-        await BullQueue.closeQueue(QueueChannel.Marketing);
         await BullQueue.closeQueue(QueueChannel.Invitations);
 
         logger.log({

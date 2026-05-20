@@ -4,7 +4,6 @@ import { QueueChannel, JobChannel } from '../../queues/channel.queue';
 import logger from '../../utils/logger.util';
 import processReminderJob from '../jobs/reminder.job';
 import processCleanupJob from '../jobs/cleanup.job';
-import processMarketingJob from '../jobs/marketing.job';
 import processInvitationJob from '../jobs/invitation.job';
 
 /**
@@ -61,17 +60,6 @@ export const startSchedulerWorkers = async (): Promise<void> => {
             processCleanupJob as any,
         );
 
-        // Create worker for marketing queue
-        const marketingWorkerConfig: CreateWorkerDTO = {
-            queueName: QueueChannel.Marketing,
-            jobName: JobChannel.SendHackathonsThisWeek,
-            concurrency: 1, // Process 1 marketing job at a time to avoid overwhelming the email service
-        };
-
-        const marketingQueue = await BullQueue.addProcessor(
-            marketingWorkerConfig,
-            processMarketingJob as any,
-        );
 
         const invitationWorkerConfig: CreateWorkerDTO = {
             queueName: QueueChannel.Invitations,

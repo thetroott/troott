@@ -4,25 +4,39 @@ import startAudioHLSWorker from './audio-processing.worker';
 import startEmailWorker from './email.worker';
 
 const startWorkers = async () => {
-    const audioMetadataWorker = await startAudioMetadataWorker();
-    const audioHLSWorker = await startAudioHLSWorker();
+
     const emailWorker = await startEmailWorker();
 
-    const shutdown = async (signal: string) => {
+    const audioMetadataWorker = await startAudioMetadataWorker();
+    const audioHLSWorker = await startAudioHLSWorker();
+
+    process.on('SIGTERM', async () => {
         await Promise.all([
+            emailWorker.close(),
             audioMetadataWorker.close(),
             audioHLSWorker.close(),
-            emailWorker.close(),
         ]);
         logger.log({
-            data: `[${signal}]: Shutdown all Queue listeners`,
+            data: '[SIGTERM]: Shutdown all Queue listeners',
             label: 'worker',
             type: 'info',
         });
-    };
+    });
 
-    process.on('SIGTERM', () => void shutdown('SIGTERM'));
-    process.on('SIGINT', () => void shutdown('SIGINT'));
+    process.on('SIGINT', async () => {
+        await Promise.all([
+            emailWorker.close(),
+            audioMetadataWorker.close(),
+            audioHLSWorker.close(),
+        ]);
+        logger.log({
+            data: '[SIGINT]: Shutdown all Queue listeners',
+            label: 'worker',
+            type: 'info',
+        });
+    });
+
+    //    await startScheduler();
 };
 
 export default startWorkers;

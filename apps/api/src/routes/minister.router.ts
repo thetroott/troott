@@ -12,6 +12,13 @@ import {
     revokeMinisterInvitation,
     submitMinisterVerification,
     updateMinisterVerificationStatus,
+    onboardMinisterPersonalComplete,
+    onboardMinisterDocumentComplete,
+    onboardMinisterAddressComplete,
+    onboardMinisterMinistryComplete,
+    onboardMinisterTourComplete,
+    onboardMinisterFirstSermonComplete,
+    skipMinisterOnboarding,
 } from '../controllers/core/minister.controller';
 
 const ministerRoutes: Router = Router({ mergeParams: true });
@@ -26,6 +33,38 @@ ministerRoutes.put(
     Protect,
     updateMinisterVerificationStatus,
 );
+
+ministerRoutes.post(
+    '/onboarding/personal-complete',
+    Protect,
+    onboardMinisterPersonalComplete,
+);
+ministerRoutes.post(
+    '/onboarding/document-complete',
+    Protect,
+    onboardMinisterDocumentComplete,
+);
+ministerRoutes.post(
+    '/onboarding/address-complete',
+    Protect,
+    onboardMinisterAddressComplete,
+);
+ministerRoutes.post(
+    '/onboarding/ministry-complete',
+    Protect,
+    onboardMinisterMinistryComplete,
+);
+ministerRoutes.post(
+    '/onboarding/tour-complete',
+    Protect,
+    onboardMinisterTourComplete,
+);
+ministerRoutes.post(
+    '/onboarding/first-sermon-complete',
+    Protect,
+    onboardMinisterFirstSermonComplete,
+);
+ministerRoutes.post('/onboarding/skip', Protect, skipMinisterOnboarding);
 
 ministerRoutes.post('/invite', Protect, inviteMinister);
 ministerRoutes.post('/invite/bulk', Protect, bulkInviteMinisters);

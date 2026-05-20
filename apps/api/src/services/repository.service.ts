@@ -156,7 +156,19 @@ class RepositoryService<T extends Document> {
 
             let query = isObjectId
                 ? this.model.findById(inputStr)
-                : this.model.findOne({ slug: inputStr } as FilterQuery<T>);
+                : this.model.findOne({ code: inputStr } as FilterQuery<T>);
+
+            if (!isObjectId) {
+                const byCode = await query.lean();
+                if (byCode) {
+                    result.message = `${this.modelName} found`;
+                    result.data = byCode;
+                    return result;
+                }
+                query = this.model.findOne({
+                    slug: inputStr,
+                } as FilterQuery<T>);
+            }
 
             if (populate) {
                 const dataPop = Array.isArray(populate) ? populate : [];

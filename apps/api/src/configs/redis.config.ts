@@ -43,7 +43,7 @@ switch (process.env.APP_ENV) {
             user: process.env.REDIS_USER!,
             password: process.env.REDIS_PASSWORD_DEV!,
             db: Number(process.env.REDIS_DB!),
-            managed: false,
+            managed: process.env.REDIS_CONFIG === 'true',
             tls: {
                 rejectUnauthorized:
                     (process.env.REDIS_TLS_REJECT_UNAUTHORIZED as string) ===

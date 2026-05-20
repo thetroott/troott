@@ -8,7 +8,9 @@ import logger from '../../utils/logger.util';
  * Bull worker for adaptive **HLS packaging** (`audio:processing` queue).
  */
 const startAudioHLSWorker = async () => {
+
     const queueName: JobChannel = JobChannel.processAudio;
+    
     const jobName: QueueChannel = QueueChannel.AUDIOPROCESSING;
 
     const audioWorkerConfig: CreateWorkerDTO = {

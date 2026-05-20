@@ -16,7 +16,7 @@ class redisHandler {
                     host: REDIS_CONFIG.host,
                     port: REDIS_CONFIG.port,
                     connectTimeout: 30000,
-                    tls: true,
+               //     tls: true,
                     rejectUnauthorized: REDIS_CONFIG.tls.rejectUnauthorized,
                     minVersion: 'TLSv1.2',
                 },
@@ -24,10 +24,15 @@ class redisHandler {
                 username: REDIS_CONFIG.user,
                 password: REDIS_CONFIG.password,
             });
+
+            await this.client.connect();
+            
         } else {
             this.client = createClient({
                 url: `rediss://${REDIS_CONFIG.user}:${REDIS_CONFIG.password}@${REDIS_CONFIG.host}:${REDIS_CONFIG.port}/${REDIS_CONFIG.db}`,
             });
+
+         //   await this.client.connect();
         }
 
         if (process.env.APP_ENV === ENVType.DEVELOPMENT) {

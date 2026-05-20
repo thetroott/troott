@@ -13,6 +13,7 @@ import {
     verifyOTP,
 } from '@/controllers/auth.controller';
 import passport from 'passport';
+import optionalAuth from '@/middlewares/optionalAuth.mdw';
 
 const authRouter = Router({ mergeParams: true });
 
@@ -25,7 +26,7 @@ authRouter.post('/forgot-password', forgotPassword);
 authRouter.post('/reset-password', resetPassword);
 authRouter.post('/change-password', changePassword);
 authRouter.post('/token', refreshToken);
-authRouter.post('/logout', logoutUser);
+authRouter.post('/logout', optionalAuth, logoutUser);
 
 authRouter.get('/google', passport.authenticate('google'));
 authRouter.get('/github', passport.authenticate('github'));

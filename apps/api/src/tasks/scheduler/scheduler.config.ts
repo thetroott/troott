@@ -1,7 +1,6 @@
 import { ScheduledJobConfig } from '@/services/scheduler.service';
 import startReminderJobs from './reminder';
 import startCleanupJobs from './tmp-cleanup';
-import startMarketingJobs from './marketing.schedular';
 import startInvitationJobs from './invitation.schedular';
 
 /**
@@ -29,9 +28,6 @@ export const startScheduledJobs = (): void => {
 
     // Start cleanup jobs
     startCleanupJobs();
-
-    // Start marketing jobs
-    startMarketingJobs();
 
     // Start invitation jobs
     startInvitationJobs();

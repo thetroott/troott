@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../../middlewares/async.mdw';
 import ErrorResponse from '../../utils/error.util';
 import searchService from '@/services/core/search.service';
+import ministerRepository from '@/repository/core/minister.repository';
 import { SearchScope, SearchQueryOptions } from '@/dtos/core/search.dto';
 
 function parseScope(raw: unknown): SearchScope {
@@ -154,7 +155,15 @@ export const searchTopics = asyncHandler(
 
 export const searchWithinMinister = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { ministerId } = req.params;
+        const ministerParam = String(req.params.ministerId ?? '').trim();
+        if (!ministerParam) {
+            return next(new ErrorResponse('ministerId is required', 400, []));
+        }
+        const ministerId =
+            await ministerRepository.resolveMinisterMongoId(ministerParam);
+        if (!ministerId) {
+            return next(new ErrorResponse('Minister not found', 404, []));
+        }
         const q = (req.query.q as string) || '';
         if (!q.trim()) {
             return next(
