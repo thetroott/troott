@@ -36,7 +36,7 @@ This document is the **canonical contract** for Troott listener sharing and univ
 Place on the **HTTPS origin users tap** (not the API origin unless they are the same):
 
 1. **Apple:** `/.well-known/apple-app-site-association` (JSON, no extension). Paths must match the app’s associated domains and entitlements.
-2. **Android:** `/.well-known/assetlinks.json` with package name `com.dmlscript.troottclient` (see `apps/mobile/app.json`) and signing cert SHA-256.
+2. **Android:** `/.well-known/assetlinks.json` with package name `com.troott.app` (see `apps/mobile/app.json`) and signing cert SHA-256.
 
 Example templates live in [`apps/mobile/docs/universal-link-host-files.md`](../apps/mobile/docs/universal-link-host-files.md) (copy to your web server).
 
