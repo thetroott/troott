@@ -1,100 +1,82 @@
-import { useCallback, useEffect } from 'react'
-import { IListQuery } from '../../utils/interfaces.util'
-import useContextType from '../useContextType'
-import { GET_CORE } from '../../context/types'
-import AxiosService from '../../services/axios.service'
-import { URL_CONFIG } from '../../utils/path.util'
-import useNetwork from '../useNetwork'
-import useGoTo from '../useGoTo'
+import { useCallback, useEffect, useState, type SyntheticEvent } from 'react';
+
+import api from '@/api/config';
+import type { IListQuery } from '@/utils/interfaces';
+import type { IAPIResponse } from '@/api/types';
+
+import useContextType from '../shared/useContextType';
+import useGoTo from '../shared/useGoTo';
+import useNetwork from '../shared/useNetwork';
+
+type DiscoveryHomeData = {
+    banners?: unknown;
+    shelves?: unknown;
+    [key: string]: unknown;
+};
 
 const useApp = () => {
+    const { appContext } = useContextType();
+    const { toDetailRoute } = useGoTo();
+    const { popNetwork } = useNetwork(false);
+    const { loading, setLoading, unsetLoading } = appContext;
 
-    const { appContext } = useContextType()
-    const { toDetailRoute } = useGoTo()
-    const { popNetwork } = useNetwork(false)
-    const {
-        core,
-        loading,
-        setCollection,
-        setResource,
-        setLoading,
-        unsetLoading
-    } = appContext
+    const [discovery, setDiscovery] = useState<DiscoveryHomeData>({});
 
-    useEffect(() => {
+    useEffect(() => {}, []);
 
-    }, [])
+    const toggleAddResource = (e: SyntheticEvent | null, type: string) => {
+        if (e) {
+            e.preventDefault();
+        }
+        toDetailRoute(e, { route: 'core', name: `create-${type}` });
+    };
 
+    const loadDiscoveryHome = useCallback(
+        async (data: IListQuery) => {
+            const { limit, page, order } = data;
+            const params = {
+                limit: limit ?? 25,
+                page: page ?? 1,
+                ...(order !== undefined && { order }),
+            } as IListQuery;
 
-    const toggleAddResource = (e: any, type: string) => {
-        if (e) { e.preventDefault(); }
-        toDetailRoute(e, { route: 'core', name: `create-${type}` })
-    }
+            await setLoading({ option: 'default' });
 
-    /**
-     * @name getCoreResources
-     */
-    const getCoreResources = useCallback(async (data: IListQuery) => {
+            const response: IAPIResponse = await api.discovery.getHome(params);
 
-        const { limit, page, select, order } = data;
-        const q = `limit=${limit ? limit.toString() : 25}&page=${page ? page.toString() : 1}&order=${order ? order : 'desc'}`;
-
-        setLoading({ option: 'default' })
-
-        const response = await AxiosService.call({
-            type: 'default',
-            method: 'GET',
-            isAuth: true,
-            path: `${URL_CONFIG}/core?${q}`
-        })
-
-        if (response.error === false) {
-
-            if (response.status === 200) {
-
-                setResource(GET_CORE, {
-                    industries: response.data.industries,
-                    careers: response.data.careers,
-                    fields: response.data.fields,
-                    skills: response.data.skills,
-                    topics: response.data.topics,
-                })
-
-                unsetLoading({
+            if (response.error === false && response.status === 200) {
+                const body =
+                    response.data && typeof response.data === 'object'
+                        ? (response.data as Record<string, unknown>)
+                        : {};
+                setDiscovery(body);
+                await unsetLoading({
                     option: 'default',
-                    message: response.message ? response.message : ''
-                })
-
+                    message: response.message ? response.message : '',
+                });
+            } else if (response.error === true) {
+                await unsetLoading({
+                    option: 'default',
+                    message: response.message
+                        ? response.message
+                        : String(response.data),
+                });
+                if (response.status === 401) {
+                    await api.auth.logout();
+                } else if (response.message === 'Error: Network Error') {
+                    popNetwork();
+                }
             }
-
-        }
-
-        if (response.error === true) {
-
-            unsetLoading({
-                option: 'default',
-                message: response.message ? response.message : response.data
-            })
-
-            if (response.status === 401) {
-                AxiosService.logout()
-            } else if (response.message && response.message === 'Error: Network Error') {
-                popNetwork();
-            } else if (response.data) {
-                console.log(`Error! Could not get core resources ${response.data}`)
-            }
-
-        }
-
-    }, [setLoading, unsetLoading, setResource])
+        },
+        [setLoading, unsetLoading, popNetwork],
+    );
 
     return {
-        core,
+        discovery,
         loading,
-
         toggleAddResource,
-        getCoreResources,
-    }
-}
+        getDiscoveryHome: loadDiscoveryHome,
+    };
+};
 
-export default useApp
+export default useApp;

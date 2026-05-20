@@ -1,5 +1,7 @@
 import { createContext } from 'react';
 
-const UserContext = createContext<any>({});
+import type { IUserContextValue } from './types';
+
+const UserContext = createContext<IUserContextValue | null>(null);
 
 export default UserContext;
