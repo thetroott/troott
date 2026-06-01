@@ -1,5 +1,7 @@
 # Web: Sermon library, view, update, and trash (studio library)
 
+> **Canonical feature spec:** [feat-0006](./feature/feat-0006/PRODUCT.md) (PRODUCT) and [feat-0006 TECH](./feature/feat-0006/TECH.md) — library read, bin delete lifecycle, `/studio/{studioCode}/bin`. This file keeps detailed **UC-V*** use cases.
+
 This document specifies **My Sermon (View)**—the minister’s audio sermon hub—plus **update** flows and the **Trash** experience. The mental model is **YouTube Studio for audio**: a primary **full-page** list, with **modals** for upload/draft/update, and a **separate full page** for Trash.
 
 **Companion:** upload, draft, publish (modal flows) — [`04 - sermon-upload-draft.md`](./04%20-%20sermon-upload-draft.md).

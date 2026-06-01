@@ -1,5 +1,7 @@
 # Web: Sermon upload, draft, and publish (studio flow)
 
+> **Canonical feature spec:** [feat-0006](./feature/feat-0006/PRODUCT.md) (PRODUCT) and [feat-0006 TECH](./feature/feat-0006/TECH.md) — studio routes `/studio/{studioCode}/sermons/…`, CRUD API map, minister + creator, first-time publish. This file keeps detailed **UC-U*** use cases.
+
 This document specifies **upload**, **draft**, and **publish** flows that run as **modals** on top of **My Sermon (View)** in Troott Studio. The mental model is **YouTube Studio for audio**: one primary asset (the audio file), rich metadata, visibility, and a clear path from **draft** to **published**.
 
 **Studio URLs and page vs modal** (Trash is a **full page**): [`05 -  sermon-view-trash.md` — Troott Studio routing](./05%20-%20%20sermon-view-trash.md#studio-routing).
@@ -50,7 +52,7 @@ This document specifies **upload**, **draft**, and **publish** flows that run as
 ### Draft audio in the UI (View list + modal)
 
 - **No audio yet:** For a draft with **no** uploaded asset, the **audio / file** presentation is **empty** (placeholder text or blank slot—not a fake filename). Title/metadata may still show from local or saved form data.
-- **After first successful upload:** As soon as `start-upload` completes (or the server exposes `uploadSummary.fileName` / equivalent), the **draft automatically shows the file** (name, and duration/size when available) on **My Sermon (View)** and inside the **modal**—no separate “attach file” confirmation step beyond the upload itself.
+- **After first successful upload:** As soon as `start-upload` completes (response includes `id`, `uploadRef` / `item.itemId`, and `item` subdoc), the **draft automatically shows the file** (name, and duration/size when available) on **My Sermon (View)** and inside the **modal**—no separate “attach file” confirmation step beyond the upload itself.
 - **Subsequent uploads ([UC-U4](#uc-u4)):** Replacing audio updates the same draft row in place; the **new** file name (and metadata) appears **automatically** after the new upload succeeds, same as the first upload.
 
 ---

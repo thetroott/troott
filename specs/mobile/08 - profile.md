@@ -1,5 +1,7 @@
 # Profile and account settings (listener)
 
+**Feature contract:** [`feature/feat-0009/PRODUCT.md`](feature/feat-0009/PRODUCT.md) · [`feature/feat-0009/TECH.md`](feature/feat-0009/TECH.md)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Listener identity after Home, feedback (§9), security/session (§3, `00 - security.md`), no guest model (master intro).
 
 **Scope:** **Profile** tab: view/edit profile, **taste and preferences**, notifications, legal, sign out, account danger zone. All screens assume **signed-in** user.

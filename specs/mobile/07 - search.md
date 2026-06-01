@@ -1,5 +1,7 @@
 # Search and discover (find sermons)
 
+**Feature contract:** [`feature/feat-0006/PRODUCT.md`](feature/feat-0006/PRODUCT.md) · [`feature/feat-0006/TECH.md`](feature/feat-0006/TECH.md)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Browse / discover (§5D), empty and error states (§8), navigation (§2), cross-flow (§6).
 
 **Scope:** Search tab or modal, **topic/category** browsing, filters. User-facing only. Signed-in users may get personalized suggestions; **no guest** — if search requires auth, unauthenticated users see **Sign in** before results.
