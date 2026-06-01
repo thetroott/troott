@@ -7,41 +7,28 @@ import { SeeMore } from '@/components/features/navigation';
 import { router } from 'expo-router';
 import SermonCard from '@/components/features/search/sermon-card';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
-import type { SermonItemDTO } from '@/types/sermon';
-import { tracks } from '@/_data/_mock/tracks';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
+import { useDiscoveryHomeRails } from '@/engine/hooks/useDiscoveryHomeRails';
 
 type CatalogRow = Parameters<typeof catalogRowToSermonItem>[0] & {
     artist?: string | null;
 };
 
 const MoreFromMinister = () => {
-    const { data: sermons, isLoading } = useSermonsCatalog();
+    const { featuredMinister, mostPlayed, isLoading } = useDiscoveryHomeRails();
 
-    // Use fallback data if sermons are not loaded
-    const dataSource: CatalogRow[] =
-        sermons && sermons.length > 0 ? sermons : (tracks as CatalogRow[]);
+    const ministerName = featuredMinister?.name ?? 'Featured minister';
+    const ministerImage =
+        featuredMinister?.image != null && featuredMinister.image.length > 0
+            ? { uri: featuredMinister.image }
+            : require('@/assets/images/2.jpg');
 
-    // Filter sermons by a specific minister (Apostle Joshua Selman in this case)
-    const ministerSermons =
-        dataSource?.filter((sermon) =>
-            (sermon.artist || sermon.minister)?.includes(
-                'Apostle Joshua Selman',
-            ),
-        ) || [];
-
-    const ministerName =
-        ministerSermons.length > 0
-            ? ministerSermons[0].artist || ministerSermons[0].minister
-            : 'Pastor Sam Adeyemi';
-
-    const sermonsToShow = useMemo(
-        () =>
-            ministerSermons.length > 0
-                ? ministerSermons.slice(0, 6)
-                : dataSource?.slice(0, 6) || [],
-        [ministerSermons, dataSource],
-    );
+    const sermonsToShow = useMemo((): CatalogRow[] => {
+        if (featuredMinister && featuredMinister.sermons.length > 0) {
+            return featuredMinister.sermons.slice(0, 6) as CatalogRow[];
+        }
+        return (mostPlayed.slice(0, 6) as CatalogRow[]) ?? [];
+    }, [featuredMinister, mostPlayed]);
 
     const tracklistDtos: SermonItemDTO[] = useMemo(
         () =>
@@ -57,15 +44,12 @@ const MoreFromMinister = () => {
         [sermonsToShow],
     );
 
-    if (isLoading && (!dataSource || dataSource.length === 0)) {
+    if (isLoading && sermonsToShow.length === 0) {
         return (
             <View style={styles.container}>
                 <View style={styles.titleContainer}>
                     <View style={styles.imageContainer}>
-                        <Image
-                            style={styles.image}
-                            source={require('@/assets/images/2.jpg')}
-                        />
+                        <Image style={styles.image} source={ministerImage} />
                         <View style={{ gap: theme.sizes.spacing.sm }}>
                             <Text>More From</Text>
                             <Text
@@ -94,14 +78,30 @@ const MoreFromMinister = () => {
         );
     }
 
+    if (!isLoading && sermonsToShow.length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text size="md" weight="semiBold" color={theme.colors.white[50]}>
+                    More from ministers
+                </Text>
+                <Text
+                    style={{
+                        color: theme.colors.grey[300],
+                        textAlign: 'center',
+                        paddingVertical: 20,
+                    }}
+                >
+                    No minister sermons available yet.
+                </Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.titleContainer}>
                 <View style={styles.imageContainer}>
-                    <Image
-                        style={styles.image}
-                        source={require('@/assets/images/2.jpg')}
-                    />
+                    <Image style={styles.image} source={ministerImage} />
                     <View style={{ gap: theme.sizes.spacing.sm }}>
                         <Text>More From</Text>
                         <Text

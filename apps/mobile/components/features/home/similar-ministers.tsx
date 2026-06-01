@@ -11,6 +11,7 @@ import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
+import { useDiscoveryHomeRails } from '@/engine/hooks/useDiscoveryHomeRails';
 
 export type SimilarMinisterItem = {
     id: string;
@@ -47,10 +48,32 @@ const defaultItems: SimilarMinisterItem[] = [
 export default function SimilarMinisters({
     title = 'Similar Ministers',
     ctaLabel = 'See More',
-    items = defaultItems,
+    items: itemsProp,
     onPressSeeMore,
     onPressItem,
 }: SimilarMinistersProps) {
+    const { similarMinisters, isLoading } = useDiscoveryHomeRails();
+    const items =
+        itemsProp ??
+        (similarMinisters.length > 0 ? similarMinisters : defaultItems);
+
+    if (isLoading && similarMinisters.length === 0 && !itemsProp) {
+        return (
+            <View style={styles.container}>
+                <Text size="md" weight="semiBold" color={theme.colors.white[50]}>
+                    {title}
+                </Text>
+                <Text size="sm" color={theme.colors.grey[300]}>
+                    Loading ministers...
+                </Text>
+            </View>
+        );
+    }
+
+    if (items.length === 0) {
+        return null;
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.header}>

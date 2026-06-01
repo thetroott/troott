@@ -1,6 +1,6 @@
 import SermonCard from '@/components/features/search/sermon-card';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
@@ -8,10 +8,8 @@ import { theme } from '@/constants/theme';
 import { SeeMore } from '@/components/features/navigation';
 
 import { ISermonTrack } from '@/api/dtos/sermon.dto';
-import { tracks } from '@/_data/_mock/tracks';
-import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
+import { useDiscoveryHomeRails } from '@/engine/hooks/useDiscoveryHomeRails';
 import { FlashList } from '@shopify/flash-list';
-import { TransformArray } from '@/utils/transform-array';
 import Text from '@/components/ui/text';
 
 const styles = StyleSheet.create({
@@ -41,10 +39,17 @@ const styles = StyleSheet.create({
 
 const SermonsForYou = () => {
     const ROWS_PER_SWIPE = 4;
-    const { data: sermons, isLoading, error } = useSermonsCatalog();
+    const {
+        popularRecentlyPlayed,
+        recentlyPublished,
+        isLoading,
+        error,
+    } = useDiscoveryHomeRails();
 
     const sermonsData =
-        sermons && sermons.length > 0 ? sermons : (tracks as ISermonTrack[]);
+        popularRecentlyPlayed.length > 0
+            ? popularRecentlyPlayed
+            : recentlyPublished;
 
     const tracklistDtos: SermonItemDTO[] = useMemo(
         () =>
@@ -55,6 +60,14 @@ const SermonsForYou = () => {
             ),
         [sermonsData],
     );
+
+    const grouped = useMemo(() => {
+        const result: ISermonTrack[][] = [];
+        for (let i = 0; i < sermonsData.length; i += ROWS_PER_SWIPE) {
+            result.push(sermonsData.slice(i, i + ROWS_PER_SWIPE));
+        }
+        return result;
+    }, [sermonsData]);
 
     const SectionHeader = () => (
         <View style={styles.headerRow}>
@@ -111,11 +124,6 @@ const SermonsForYou = () => {
             </View>
         );
     }
-
-    const grouped = TransformArray(
-        sermonsData,
-        ROWS_PER_SWIPE,
-    ) as ISermonTrack[][];
 
     return (
         <View style={styles.section}>

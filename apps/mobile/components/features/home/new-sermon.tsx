@@ -13,7 +13,7 @@ import {
 import { SolidIcons } from '@/assets/icons';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 export type NewSermonProps = {
     sermons?: SermonItemDTO[];

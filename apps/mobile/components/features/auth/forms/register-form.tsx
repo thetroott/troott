@@ -1,32 +1,73 @@
 import { StyleSheet, View } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import FormInput from '@/components/ui/forminput';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Sms, User } from 'iconsax-react-nativejs';
 import { theme } from '@/constants/theme';
 import Button from '@/components/ui/button';
-import { router } from 'expo-router';
 import { SignupSchema, SignupSchemaType } from '@/validation/signup';
-import { useRegisterStore } from '@/stores/register-store';
+import { useRegisterAuth } from '@/context';
 import TermsAndConditions from '@/components/features/auth/TermsConditions';
+import { useAuth } from '@/api/hooks/app/useAuth';
+import { UserType } from '@/models/User.model';
+import storage from '@/api/services/mmkv-storage';
 
 const SignUpform = () => {
-    const { setEmail } = useRegisterStore();
+    const { email, userEmail, setEmail, setField } = useRegisterAuth();
+    const { RegisterMutation } = useAuth();
 
     const form = useForm<SignupSchemaType>({
         defaultValues: {
             first_name: '',
             last_name: '',
-            email: '',
+            email: email || '',
             password: '',
         },
         resolver: zodResolver(SignupSchema),
     });
+
+    useEffect(() => {
+        let cancelled = false;
+
+        void (async () => {
+            let resolved = email?.trim() ?? '';
+            if (!resolved) {
+                resolved = (await storage.getUserEmail()) || '';
+            }
+            if (cancelled || !resolved) return;
+            setEmail(resolved);
+            setField('email', resolved);
+            form.setValue('email', resolved);
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [email, form, setEmail, setField]);
+
+    useEffect(() => {
+        if (email?.trim()) {
+            form.setValue('email', email);
+        }
+    }, [email, form]);
+
     function handleSubmit(data: SignupSchemaType) {
-        setEmail(data.email);
-        console.log(data);
-        router.push('/verify-email');
+        const normalizedEmail = data.email.trim().toLowerCase();
+        setField('firstName', data.first_name.trim());
+        setField('lastName', data.last_name.trim());
+        setField('email', normalizedEmail);
+        setField('password', data.password);
+        setField('userType', UserType.LISTENER);
+        setEmail(normalizedEmail);
+        void storage.setUserEmail(normalizedEmail);
+        RegisterMutation.mutate({
+            firstName: data.first_name.trim(),
+            lastName: data.last_name.trim(),
+            email: normalizedEmail,
+            password: data.password,
+            userType: UserType.LISTENER,
+        });
     }
 
     return (
@@ -52,6 +93,7 @@ const SignUpform = () => {
                 control={form.control}
                 label="Email"
                 leftIcon={<Sms color={theme.colors.grey[400]} size={20} />}
+                editable={!userEmail}
             />
             <FormInput
                 name="password"
@@ -65,9 +107,12 @@ const SignUpform = () => {
 
             <Button
                 onPress={form.handleSubmit(handleSubmit)}
-                disabled={!form.formState.isValid}
+                disabled={
+                    !form.formState.isValid || RegisterMutation.isPending
+                }
+                isLoading={RegisterMutation.isPending}
                 label="Continue"
-            ></Button>
+            />
         </View>
     );
 };
