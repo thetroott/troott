@@ -6,26 +6,36 @@ import {
     mapSermonDocsToItems,
     ministerDocToRow,
 } from '@/engine/utils/library-map';
-import type { SermonItemDTO } from '@/types/sermon';
-import { queryKeys } from '../../utils/query-keys';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
+import { queryKeys } from '../../query-keys';
 import { queryClient } from '@/api/services/query-client';
 import {
     canonicalSearchQuery,
+    normalizeSearchQuery,
     SEARCH_MIN_QUERY_LENGTH,
 } from '@/constants/search-ui';
-import type { IAPIResponse } from '@/utils/interface.utl';
-import {
-    addLibraryRecentSearchEntry,
-    clearLibraryRecentSearches,
-    filterRecentEntriesByPrefix,
-    getLibraryRecentSearchEntries,
-    removeLibraryRecentSearchEntry,
-    SEARCH_HISTORY_FALLBACK_USER_ID,
-    type SearchHistoryEntry,
-    type SearchHistoryType,
-} from '@/lib/library-recent-search-storage';
+import { mmkvStateStorage } from '@/api/services/mmkv-storage';
 
-export type { SearchHistoryEntry, SearchHistoryType };
+const KEY_LEGACY_PREFIX = 'library_recent_search_queries_v1:';
+const KEY_ENTRIES_PREFIX = 'library_recent_search_entries_v2:';
+export const SEARCH_HISTORY_MAX_ITEMS = 18;
+export const SEARCH_HISTORY_FALLBACK_USER_ID = '__troott_local_search__';
+
+let historyIdSeq = 0;
+
+export type SearchHistoryType =
+    | 'sermon'
+    | 'minister'
+    | 'playlist'
+    | 'generic';
+
+export type SearchHistoryEntry = {
+    id: string;
+    query: string;
+    type: SearchHistoryType;
+    timestamp: number;
+    useCount: number;
+};
 
 export type CatalogSearchMinisterHit = {
     id: string;
@@ -38,15 +48,210 @@ export type CatalogSearchResult = {
     ministers: CatalogSearchMinisterHit[];
 };
 
-function parseApiData(raw: unknown): unknown {
-    const r = raw as { error?: boolean; message?: string; data?: unknown };
-    if (r && typeof r === 'object' && r.error) {
-        throw new Error(r.message || 'Request failed');
+function newSearchHistoryEntryId(): string {
+    historyIdSeq += 1;
+    return `srch_${Date.now().toString(36)}_${historyIdSeq.toString(36)}_${Math.random().toString(36).slice(2, 12)}`;
+}
+
+function compareHistoryRank(
+    a: SearchHistoryEntry,
+    b: SearchHistoryEntry,
+): number {
+    const ua = a.useCount;
+    const ub = b.useCount;
+    if (ub !== ua) return ub - ua;
+    return b.timestamp - a.timestamp;
+}
+
+function keyLegacy(userId: string): string {
+    return `${KEY_LEGACY_PREFIX}${userId}`;
+}
+
+function keyEntries(userId: string): string {
+    return `${KEY_ENTRIES_PREFIX}${userId}`;
+}
+
+function readStringSync(storageKey: string): string | null {
+    const v = mmkvStateStorage.getItem(storageKey);
+    if (typeof v === 'string') return v;
+    return null;
+}
+
+function isSearchHistoryEntry(x: unknown): x is SearchHistoryEntry {
+    if (x == null || typeof x !== 'object') return false;
+    const o = x as Record<string, unknown>;
+    const uc = o.useCount;
+    if (
+        uc !== undefined &&
+        (typeof uc !== 'number' || !Number.isFinite(uc) || uc < 1)
+    ) {
+        return false;
     }
-    if (r && typeof r === 'object' && 'data' in r && r.data !== undefined) {
-        return r.data;
+    return (
+        typeof o.id === 'string' &&
+        typeof o.query === 'string' &&
+        typeof o.timestamp === 'number' &&
+        typeof o.type === 'string' &&
+        ['sermon', 'minister', 'playlist', 'generic'].includes(o.type)
+    );
+}
+
+function withDefaultUseCount(e: SearchHistoryEntry): SearchHistoryEntry {
+    const useCount =
+        typeof e.useCount === 'number' && e.useCount >= 1 ? e.useCount : 1;
+    return { ...e, useCount };
+}
+
+function sortAndCap(entries: SearchHistoryEntry[]): SearchHistoryEntry[] {
+    return [...entries]
+        .map(withDefaultUseCount)
+        .sort(compareHistoryRank)
+        .slice(0, SEARCH_HISTORY_MAX_ITEMS);
+}
+
+function migrateLegacyStrings(userId: string): SearchHistoryEntry[] | null {
+    const raw = readStringSync(keyLegacy(userId));
+    if (!raw) return null;
+    try {
+        const parsed = JSON.parse(raw) as unknown;
+        if (!Array.isArray(parsed)) return null;
+        const strings = parsed
+            .filter((x): x is string => typeof x === 'string')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        if (strings.length === 0) return [];
+        const base = Date.now();
+        return strings.map((query, index) => ({
+            id: newSearchHistoryEntryId(),
+            query,
+            type: 'generic' as const,
+            timestamp: base - index,
+            useCount: 1,
+        }));
+    } catch {
+        return null;
     }
-    return raw;
+}
+
+function writeEntries(userId: string, entries: SearchHistoryEntry[]): void {
+    mmkvStateStorage.setItem(keyEntries(userId), JSON.stringify(entries));
+}
+
+function getLibraryRecentSearchEntries(userId: string): SearchHistoryEntry[] {
+    const rawV2 = readStringSync(keyEntries(userId));
+    if (rawV2) {
+        try {
+            const parsed = JSON.parse(rawV2) as unknown;
+            if (Array.isArray(parsed)) {
+                const out: SearchHistoryEntry[] = [];
+                for (const item of parsed) {
+                    if (!isSearchHistoryEntry(item)) continue;
+                    out.push(withDefaultUseCount(item));
+                }
+                const sorted = sortAndCap(out);
+                const ids = (xs: SearchHistoryEntry[]) =>
+                    xs.map((x) => x.id).join(',');
+                const useCountBackfill = out.some(
+                    (p) =>
+                        p.useCount == null || typeof p.useCount !== 'number',
+                );
+                if (
+                    ids(sorted) !== ids(out) ||
+                    useCountBackfill ||
+                    sorted.length !== out.length
+                ) {
+                    writeEntries(userId, sorted);
+                }
+                return sorted;
+            }
+        } catch {
+            /* fall through */
+        }
+    }
+
+    const migrated = migrateLegacyStrings(userId);
+    if (migrated != null) {
+        const capped = sortAndCap(migrated);
+        writeEntries(userId, capped);
+        mmkvStateStorage.removeItem(keyLegacy(userId));
+        return capped;
+    }
+
+    return [];
+}
+
+function addLibraryRecentSearchEntry(
+    userId: string,
+    term: string,
+    type: SearchHistoryType = 'generic',
+): void {
+    const t = term.trim();
+    if (!t) return;
+
+    const prev = getLibraryRecentSearchEntries(userId);
+    const norm = normalizeSearchQuery(t);
+    const idx = prev.findIndex(
+        (e) => normalizeSearchQuery(e.query) === norm,
+    );
+
+    let next: SearchHistoryEntry[];
+    if (idx >= 0) {
+        const existing = prev[idx];
+        const prevCount =
+            typeof existing.useCount === 'number' && existing.useCount >= 1
+                ? existing.useCount
+                : 1;
+        const updated: SearchHistoryEntry = {
+            ...existing,
+            query: t,
+            timestamp: Date.now(),
+            type: type !== 'generic' ? type : existing.type,
+            useCount: prevCount + 1,
+        };
+        next = [...prev.filter((_, i) => i !== idx), updated];
+    } else {
+        next = [
+            ...prev,
+            {
+                id: newSearchHistoryEntryId(),
+                query: t,
+                type,
+                timestamp: Date.now(),
+                useCount: 1,
+            },
+        ];
+    }
+
+    writeEntries(userId, sortAndCap(next));
+}
+
+function removeLibraryRecentSearchEntry(
+    userId: string,
+    entryId: string,
+): void {
+    const prev = getLibraryRecentSearchEntries(userId);
+    const next = prev.filter((e) => e.id !== entryId);
+    if (next.length === 0) {
+        mmkvStateStorage.removeItem(keyEntries(userId));
+    } else {
+        writeEntries(userId, next);
+    }
+}
+
+function filterRecentEntriesByPrefix(
+    items: SearchHistoryEntry[],
+    prefix: string,
+): SearchHistoryEntry[] {
+    const p = prefix.trim().toLowerCase();
+    if (!p) return items;
+    return items.filter((item) =>
+        item.query.toLowerCase().startsWith(p),
+    );
+}
+
+function clearLibraryRecentSearches(userId: string): void {
+    mmkvStateStorage.removeItem(keyLegacy(userId));
+    mmkvStateStorage.removeItem(keyEntries(userId));
 }
 
 /**
@@ -63,13 +268,13 @@ function pickPrefixPlaceholder(
             Array.isArray(q.queryKey) &&
             q.queryKey[0] === 'search' &&
             q.queryKey[1] === 'catalog' &&
-            typeof q.queryKey[1] === 'string',
+            typeof q.queryKey[2] === 'string',
     });
 
     let best: { len: number; data: CatalogSearchResult } | undefined;
 
     for (const q of queries) {
-        const k = q.queryKey[1] as string;
+        const k = q.queryKey[2] as string;
         if (k === canonical) continue;
         if (canonical.startsWith(k) && k.length < canonical.length) {
             const d = q.state.data as CatalogSearchResult | undefined;
@@ -110,7 +315,7 @@ export function useCatalogSearchQuery(q: string, enabled: boolean) {
             if (res.error) {
                 throw new Error(res.message || 'Search failed');
             }
-            const data = parseApiData(res) as {
+            const data = (res.data ?? {}) as {
                 sermons?: unknown;
                 ministers?: unknown;
             };
@@ -201,4 +406,48 @@ export function useSearchHistory(userId: string | undefined) {
         filteredByPrefix,
         bump,
     };
+}
+
+export function useMinisterPickerSearchQuery(q: string, enabled = true) {
+    const trimmed = q.trim();
+    return useQuery({
+        queryKey: queryKeys.search.ministers(trimmed),
+        queryFn: async () => {
+            const res = await api.search.searchMinisters({
+                q: trimmed,
+                limit: 20,
+            });
+            if (res.error) {
+                throw new Error(res.message || 'Search failed');
+            }
+            const docs = Array.isArray(res.data) ? res.data : [];
+            const out: CatalogSearchMinisterHit[] = [];
+            for (const doc of docs) {
+                const row = ministerDocToRow(doc);
+                if (row) {
+                    out.push(row);
+                }
+            }
+            return out;
+        },
+        enabled: enabled && trimmed.length >= 2,
+    });
+}
+
+export function useSeriesPickerSearchQuery(q: string, enabled = true) {
+    const trimmed = q.trim();
+    return useQuery({
+        queryKey: queryKeys.search.series(trimmed),
+        queryFn: async () => {
+            const res = await api.search.searchSeries({
+                q: trimmed,
+                limit: 20,
+            });
+            if (res.error) {
+                throw new Error(res.message || 'Search failed');
+            }
+            return Array.isArray(res.data) ? res.data : [];
+        },
+        enabled: enabled && trimmed.length >= 2,
+    });
 }

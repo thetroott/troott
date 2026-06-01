@@ -41,6 +41,7 @@ export interface SermonDTO {
     duration: number;
     imageUrl: string;
     image: Partial<ImageSource>;
+    item?: Partial<SermonSource>;
     minister: Array<{ id: string; name: string; avatar?: string }>;
 
     playbackUrl: string;

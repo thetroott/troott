@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useContextType } from '@/context/apps/useContextType';
+import { useContextType } from '@/context';
 import { GET_LISTENER } from '@/context/types';
 import api from '../../api';
-import { queryKeys } from '../../utils/query-keys';
+import { queryKeys } from '../../query-keys';
 import type { UpdateListenerDTO } from '../../dtos/listener.dto';
 
 export function useListenerProfileQuery(enabled = true) {

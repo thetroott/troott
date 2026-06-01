@@ -1,17 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useContextType } from '@/context/apps/useContextType';
-import {
-    GET_LISTENER,
-    GET_LOGGEDIN_USER,
-    SET_LISTENER_ONBOARDING,
-} from '@/context/types';
+import { toast } from '@/components/ui/toast';
+import { useContextType } from '@/context';
+import { SET_LISTENER_ONBOARDING } from '@/context/types';
 import api from '../../api';
-import { queryKeys } from '../../utils/query-keys';
+import { queryKeys } from '../../query-keys';
 import type {
     OnboardMinistersDTO,
     OnboardTopicsDTO,
 } from '../../dtos/listener.dto';
-import { mapApiUserToContext } from '../../utils/map-api-user';
+import {
+    apiErrorMessage,
+    replaceWithPendingTargetOrHome,
+} from '@/api/hooks/app/useAuth';
 
 export function useOnboardingTopicsQuery(enabled = true) {
     return useQuery({
@@ -21,9 +21,22 @@ export function useOnboardingTopicsQuery(enabled = true) {
             if (res.error) {
                 throw new Error(res.message || 'Failed to load topics');
             }
-            return res.data;
+            const data = res.data;
+            if (Array.isArray(data)) {
+                return data;
+            }
+            if (
+                data &&
+                typeof data === 'object' &&
+                Array.isArray((data as { topics?: unknown }).topics)
+            ) {
+                return (data as { topics: unknown[] }).topics;
+            }
+            return [];
         },
         enabled,
+        retry: 1,
+        staleTime: 60_000,
     });
 }
 
@@ -38,30 +51,9 @@ export function useOnboardingMinistersQuery(enabled = true) {
             return res.data;
         },
         enabled,
+        retry: 1,
+        staleTime: 60_000,
     });
-}
-
-async function refreshSession(
-    userContext: ReturnType<typeof useContextType>['userContext'],
-    queryClient: ReturnType<typeof useQueryClient>,
-) {
-    const [userRes, listenerRes] = await Promise.all([
-        api.user.getCurrentUser(),
-        api.listener.getCurrentListener(),
-    ]);
-    if (!userRes.error && userRes.data) {
-        const mapped = mapApiUserToContext(
-            userRes.data as Record<string, unknown>,
-        );
-        userContext.setResource(GET_LOGGEDIN_USER, mapped);
-        queryClient.setQueryData(queryKeys.auth.user(), mapped);
-    }
-    if (!listenerRes.error && listenerRes.data) {
-        userContext.setResource(
-            GET_LISTENER,
-            listenerRes.data as Record<string, unknown>,
-        );
-    }
 }
 
 export function useOnboardTopicsMutation() {
@@ -73,13 +65,20 @@ export function useOnboardTopicsMutation() {
             api.listener.onboardTopics(payload),
         onSuccess: async (res) => {
             if (res.error) {
+                toast.error(apiErrorMessage(res));
                 return;
             }
             userContext.setResource(SET_LISTENER_ONBOARDING, {
                 step: 2,
-                status: 'in-progress',
+                status: 'completed',
             });
-            await refreshSession(userContext, queryClient);
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.users.me(),
+            });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.listener.me(),
+            });
+            await replaceWithPendingTargetOrHome(null);
         },
     });
 }
@@ -93,13 +92,19 @@ export function useOnboardMinistersMutation() {
             api.listener.onboardMinisters(payload),
         onSuccess: async (res) => {
             if (res.error) {
+                toast.error(apiErrorMessage(res));
                 return;
             }
             userContext.setResource(SET_LISTENER_ONBOARDING, {
-                step: 3,
-                status: 'completed',
+                step: 1,
+                status: 'in-progress',
             });
-            await refreshSession(userContext, queryClient);
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.users.me(),
+            });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.listener.me(),
+            });
         },
     });
 }
@@ -110,8 +115,28 @@ export function useSkipOnboardingMutation() {
 
     return useMutation({
         mutationFn: () => api.listener.skipOnboarding(),
-        onSuccess: async () => {
-            await refreshSession(userContext, queryClient);
+        onSuccess: async (res) => {
+            if (res.error) {
+                toast.error(apiErrorMessage(res));
+                return;
+            }
+            userContext.setResource(SET_LISTENER_ONBOARDING, {
+                step: 2,
+                status: 'completed',
+                stage: 'skipped',
+            });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.users.me(),
+            });
+            await queryClient.invalidateQueries({
+                queryKey: queryKeys.listener.me(),
+            });
+            await replaceWithPendingTargetOrHome(null);
+        },
+        onError: (error) => {
+            toast.error(
+                error instanceof Error ? error.message : 'Could not skip onboarding',
+            );
         },
     });
 }

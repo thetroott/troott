@@ -1,24 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiError, ApiErrorType } from '@/api/errors';
-import { useContextType } from '@/context/apps/useContextType';
+import { useContextType } from '@/context';
 import api from '../../api';
-import { libraryKeys, queryKeys } from '../../utils/query-keys';
-import type { IAPIResponse } from '@/utils/interface.utl';
+import { libraryKeys, queryKeys } from '../../query-keys';
 
-function parseLibraryResponse(res: IAPIResponse): Record<string, unknown> | null {
-    if (res.error) {
-        const msg = String(res.message ?? '').toLowerCase();
-        if (msg.includes('library not found')) {
-            return null;
-        }
-        throw new Error(res.message || 'Request failed');
-    }
-    return (res.data as Record<string, unknown>) ?? null;
+/** True when session user id exists — gate library/playlist queries (feat-0012). */
+export function useLibrarySessionEnabled(): boolean {
+    const { userContext } = useContextType();
+    const userId = (userContext.user as { id?: string } | null)?.id;
+    return userId != null && String(userId).length > 0;
 }
 
+/** Requires `userContext.user.id` — keep `enabled` false until session is hydrated. */
 export function useUserLibraryQuery(enabled = true) {
     const { userContext } = useContextType();
     const userId = (userContext.user as { id?: string } | null)?.id;
+    const sessionReady = userId != null && String(userId).length > 0;
 
     return useQuery({
         queryKey: libraryKeys.user(userId ?? ''),
@@ -26,21 +22,17 @@ export function useUserLibraryQuery(enabled = true) {
             if (!userId) {
                 throw new Error('Not signed in');
             }
-            try {
-                const res = await api.library.getLibraryByUser(userId);
-                return parseLibraryResponse(res);
-            } catch (e) {
-                if (
-                    e instanceof ApiError &&
-                    (e.statusCode === 404 ||
-                        e.type === ApiErrorType.NOT_FOUND)
-                ) {
+            const res = await api.library.getLibraryByUser(userId);
+            if (res.error) {
+                const msg = String(res.message ?? '').toLowerCase();
+                if (msg.includes('library not found') || res.status === 404) {
                     return null;
                 }
-                throw e;
+                throw new Error(res.message || 'Request failed');
             }
+            return (res.data as Record<string, unknown>) ?? null;
         },
-        enabled: enabled && !!userId,
+        enabled: enabled && sessionReady,
         retry: 1,
     });
 }
@@ -70,17 +62,36 @@ export function useUpdateLibraryMutation() {
 export function usePlaylistsQuery(enabled = true) {
     const { userContext } = useContextType();
     const userId = (userContext.user as { id?: string } | null)?.id;
+    const sessionReady = userId != null && String(userId).length > 0;
 
     return useQuery({
         queryKey: queryKeys.playlist.user(userId ?? ''),
         queryFn: async () => {
-            const res = await api.playlist.getAllPlaylists();
+            if (!userId) {
+                throw new Error('Not signed in');
+            }
+            const res = await api.playlist.getPlaylistsByUser(userId);
             if (res.error) {
                 throw new Error(res.message || 'Request failed');
             }
-            return res.data;
+            const data = res.data;
+            if (data == null) {
+                return [];
+            }
+            if (Array.isArray(data)) {
+                return data;
+            }
+            if (
+                typeof data === 'object' &&
+                data !== null &&
+                'items' in data &&
+                Array.isArray((data as { items: unknown }).items)
+            ) {
+                return (data as { items: unknown[] }).items;
+            }
+            return [];
         },
-        enabled: enabled && !!userId,
+        enabled: enabled && sessionReady,
         retry: 1,
     });
 }

@@ -1,8 +1,16 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { MediaItem } from '@rntp/player';
 
-import type { QueuingType } from '@/utils/enums.util';
-import type { MediaSourceInfo } from '@/utils/interface.utl';
+import type { QueuingType } from '@/api/types';
+
+export interface MediaSourceInfo {
+    Protocol?: string | null;
+    Path?: string | null;
+    Container?: string | null;
+    Size?: number | null;
+    Bitrate?: number | null;
+    HasSegments?: boolean;
+}
 
 /** REST/catalog sermon DTOs (aligned with `apps/api/src/dtos/core/sermon.dto.ts`). */
 export * from './sermon-catalog.dto';
@@ -37,6 +45,11 @@ export interface SermonItemDTO {
 
     /** Local asset id or remote URL for playback */
     url?: string | number | null;
+
+    /** Canonical API playback fields (used when mapping before `url` is set). */
+    playbackUrl?: string | null;
+    manifestUrl?: string | null;
+    item?: { item?: string | null };
 
     /** Cover art URI string or local asset module (require) */
     artwork?: string | number | null;

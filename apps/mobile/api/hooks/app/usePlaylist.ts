@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useContextType } from '@/context/apps/useContextType';
+import { useContextType } from '@/context';
 import api from '../../api';
-import { playlistKeys } from '../../utils/query-keys';
+import { playlistKeys } from '../../query-keys';
 import type {
     AddPlaylistItemDTO,
     CreatePlaylistDTO,
+    PlaylistResponseDTO,
     RemovePlaylistItemDTO,
     UpdatePlaylistDTO,
 } from '../../dtos/playlist.dto';
@@ -17,7 +18,7 @@ export function usePlaylistByIdQuery(id: string, enabled = true) {
             if (res.error) {
                 throw new Error(res.message || 'Request failed');
             }
-            return res.data;
+            return res.data as PlaylistResponseDTO;
         },
         enabled: enabled && !!id,
     });
@@ -90,7 +91,10 @@ export function useAddSermonToPlaylistMutation() {
 
     return useMutation({
         mutationFn: ({ playlistId, sermonId }: AddSermonToPlaylistVars) => {
-            const payload: AddPlaylistItemDTO = { itemId: sermonId };
+            const payload: AddPlaylistItemDTO = {
+                itemId: sermonId,
+                itemType: 'sermon',
+            };
             return api.playlist.addItem(playlistId, payload);
         },
         onSuccess: async (_res, vars) => {

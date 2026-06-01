@@ -1,8 +1,20 @@
+import { useCallback, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useContextType } from '@/context/apps/useContextType';
-import api from '../../api';
-import { libraryKeys } from '../../utils/query-keys';
+import { toast } from '@/components/ui/toast';
+import { useContextType } from '@/context';
 import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
+
+import api from '../../api';
+import { libraryKeys } from '../../query-keys';
+import {
+    favoriteIdsFromLibrary,
+    LibraryNotFoundError,
+    syncLibraryFavorite,
+} from '../../services/sync-library-favorite';
+import { useLibrarySessionEnabled, useUserLibraryQuery } from './useLibrary';
+
+export { useIsSermonFavorite } from '@/engine/state/favorite-sermon-ids-store';
+export { LibraryNotFoundError } from '../../services/sync-library-favorite';
 
 /**
  * Syncs local favorite toggle to listener library (`PUT /library/user/:userId`).
@@ -23,36 +35,7 @@ export function useSyncLibraryFavoriteMutation() {
             if (!userId) {
                 throw new Error('Not signed in');
             }
-            const libRes = await api.library.getLibraryByUser(userId);
-            if (libRes.error) {
-                throw new Error(libRes.message || 'Library not found');
-            }
-            const library = libRes.data as Record<string, unknown>;
-            const items = Array.isArray(library.items) ? library.items : [];
-            const nextItems = items.map((row) => {
-                const item = row as Record<string, unknown>;
-                const ref = item.sermon ?? item.itemId ?? item.id;
-                const id =
-                    typeof ref === 'object' && ref !== null
-                        ? String((ref as Record<string, unknown>)._id ?? (ref as Record<string, unknown>).id ?? '')
-                        : String(ref ?? '');
-                if (id !== sermonId) {
-                    return item;
-                }
-                return {
-                    ...item,
-                    flags: {
-                        ...(typeof item.flags === 'object' && item.flags !== null
-                            ? (item.flags as Record<string, unknown>)
-                            : {}),
-                        favourite,
-                    },
-                };
-            });
-            return api.library.updateLibrary(userId, {
-                ...library,
-                items: nextItems,
-            });
+            await syncLibraryFavorite(userId, sermonId, favourite);
         },
         onSuccess: () => {
             if (userId) {
@@ -66,19 +49,64 @@ export function useSyncLibraryFavoriteMutation() {
 
 export function useToggleFavoriteWithSync() {
     const sync = useSyncLibraryFavoriteMutation();
-    const { toggleFavorite, isFavorite } = useFavoriteSermonIdsStore.getState();
+    const toggleFavorite = useFavoriteSermonIdsStore((s) => s.toggleFavorite);
+    const isFavorite = useFavoriteSermonIdsStore((s) => s.isFavorite);
+    const sessionEnabled = useLibrarySessionEnabled();
+
+    const toggle = useCallback(
+        async (sermonId: string) => {
+            if (!sermonId) {
+                return;
+            }
+
+            const next = !isFavorite(sermonId);
+            toggleFavorite(sermonId);
+
+            if (!sessionEnabled) {
+                return;
+            }
+
+            try {
+                await sync.mutateAsync({ sermonId, favourite: next });
+            } catch (e) {
+                toggleFavorite(sermonId);
+                if (e instanceof LibraryNotFoundError) {
+                    toast.error(
+                        'Your library is not ready yet. Favorite saved on this device only.',
+                    );
+                } else if (e instanceof Error) {
+                    toast.error(e.message || 'Could not sync favorite');
+                }
+            }
+        },
+        [isFavorite, sessionEnabled, toggleFavorite, sync],
+    );
 
     return {
         isFavorite,
-        toggle: async (sermonId: string) => {
-            const next = !isFavorite(sermonId);
-            toggleFavorite(sermonId);
-            try {
-                await sync.mutateAsync({ sermonId, favourite: next });
-            } catch {
-                toggleFavorite(sermonId);
-            }
-        },
+        toggle,
         isPending: sync.isPending,
     };
+}
+
+/** Merge server-favourited sermon ids into local MMKV store after library fetch. */
+export function useHydrateFavoritesFromLibrary() {
+    const sessionEnabled = useLibrarySessionEnabled();
+    const { data: library } = useUserLibraryQuery(sessionEnabled);
+    const mergeIds = useFavoriteSermonIdsStore((s) => s.mergeIds);
+
+    useEffect(() => {
+        if (!library) {
+            return;
+        }
+        const ids = favoriteIdsFromLibrary(library);
+        if (ids.length > 0) {
+            mergeIds(ids);
+        }
+    }, [library, mergeIds]);
+}
+
+export function FavoritesHydrator() {
+    useHydrateFavoritesFromLibrary();
+    return null;
 }

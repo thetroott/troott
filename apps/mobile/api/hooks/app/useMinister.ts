@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api';
-import { queryKeys } from '../../utils/query-keys';
+import { queryKeys } from '../../query-keys';
 
 export function useMinisterByIdQuery(id: string, enabled = true) {
     return useQuery({
