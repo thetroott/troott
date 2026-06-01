@@ -42,7 +42,7 @@ These filenames are referenced historically but **are not present** under `apps/
 
 ## Goals
 
-1. **Single playback API** – Queue, transport, shuffle, repeat, seek, progress: only via `engine/` (core, hooks, queries) + agreed stores (`@/stores/player/queue`, etc.).
+1. **Single playback API** – Queue, transport, shuffle, repeat, seek, progress: only via `engine/` (core, hooks, queries) + agreed stores (`@/engine/state/player-queue-store`, etc.).
 2. **Single setup + listeners** – `startPlayerService()` in `app/_layout.tsx`; optional `Initialize()` after setup; `attachEnginePlaybackListeners()` from `engine/player/background.ts` once bootstrap succeeds (not in `index.ts`). No legacy `updateOptions` during cold setup; use `useUpdateOptions` / `setCommands` when the player is active.
 3. **Continue listening** – `Initialize()` + position persistence; document whether **per-item resume** is required (previously Android RNTP patches). If yes: implement with explicit `seekTo` + MMKV (or app storage), not implicit native behavior alone.
 4. **Reliable Android init** – Player setup when the app is actually foregrounded (retry / `AppState`), avoiding `android_cannot_setup_player_in_background`.
@@ -80,7 +80,7 @@ Source: [`.cursor/rules/react-native-track-player-expo.mdc`](../../../../.cursor
 ### Engine usage
 
 - **Setup**: `engine/player/setup.ts`, `applyTrackPlayerOptions.ts`, `background.ts` (`Event.MediaItemTransition`, `RemotePrevious`, `PlaybackError`).
-- **Queue and state**: `engine/core/queue.ts` (`setMediaItems`, `insertMediaItems`, `addMediaItems`, etc.); `engine/queries/current-track.ts`; `@/stores/player/queue`.
+- **Queue and state**: `engine/core/queue.ts` (`setMediaItems`, `insertMediaItems`, `addMediaItems`, etc.); `engine/queries/current-track.ts`; `@/engine/state/player-queue-store`.
 - **Shuffle / skip**: `engine/core/shuffle.ts`, `engine/core/skip-previous.ts`.
 - **Controls**: `engine/hooks/useControl.ts`. Progress: `engine/queries/playback-queries.ts` (Cast + local).
 - **Track type**: `SermonTrackDTO` / `MediaItem` + `engine/utils/mappers.ts`.
@@ -110,7 +110,7 @@ Source: [`.cursor/rules/react-native-track-player-expo.mdc`](../../../../.cursor
 | Home tab            | `app/(tabs)/home.tsx`                | Uses `useTrackPlayer` **and** direct `TrackPlayer.getQueue` / `TrackPlayer.skip`                                |
 | Home widgets        | `components/containers/tabs/home/*`  | `useTrackPlayer` / `playerService`                                                                              |
 | Old player UI       | `components/containers/player-old/*` | Same                                                                                                            |
-| Cast / engine store | `stores/player/engine.ts`            | `TrackPlayer.pause()` – align with engine + Google Cast strategy                                                |
+| Cast / engine store | `engine/state/player-engine-store.ts`            | `TrackPlayer.pause()` – align with engine + Google Cast strategy                                                |
 
 ### Registration
 
@@ -132,7 +132,7 @@ Screens / features
 ```
 
 - Remove or replace `hooks/useTrackPlayer.tsx` after call sites migrate.
-- Resolve **dual state**: `stores/player-store` vs `usePlayerQueueStore` / query keys – pick one source of truth for now playing + queue (recommended: queue store + engine queries; formalize in [Companion specs](#companion-specs-missing-in-repo)).
+- Resolve **dual state**: `stores/player/track-store` vs `usePlayerQueueStore` / query keys – pick one source of truth for now playing + queue (recommended: queue store + engine queries; formalize in [Companion specs](#companion-specs-missing-in-repo)).
 
 ---
 
@@ -165,7 +165,7 @@ rg 'TrackPlayer\.' apps/mobile --glob '!node_modules' --glob '!**/engine/**'
 | `app/(tabs)/home.tsx`                | `useTrackPlayer`, `TrackPlayer.getQueue` / `skip` | `useLoadNewQueue` / `useAddToQueue`, `useSkip`, store-backed queue reads                    |
 | `components/containers/tabs/home/*`  | `useTrackPlayer` / `playerService`                | Same as home; prefer engine hooks + mappers                                                 |
 | `components/containers/player-old/*` | Legacy UI + direct player                         | Rewrite or remove; use `engine/` + current player components                                |
-| `stores/player/engine.ts`            | `TrackPlayer.pause()` etc.                        | Route through `useControl` / queue APIs; keep Cast branches in sync with `playback-queries` |
+| `engine/state/player-engine-store.ts`            | `TrackPlayer.pause()` etc.                        | Route through `useControl` / queue APIs; keep Cast branches in sync with `playback-queries` |
 
 ---
 

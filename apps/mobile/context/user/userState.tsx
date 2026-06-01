@@ -1,5 +1,6 @@
 import {
     useCallback,
+    useContext,
     useMemo,
     useReducer,
     type ReactNode,
@@ -85,6 +86,16 @@ export function UserState({ children }: { children: ReactNode }) {
     return (
         <UserContext.Provider value={value}>{children}</UserContext.Provider>
     );
+}
+
+export function useUserContext(): IUserContextValue {
+    const ctx = useContext(UserContext);
+    if (!ctx) {
+        throw new Error(
+            'useUserContext must be used within TroottProviders (UserState)',
+        );
+    }
+    return ctx;
 }
 
 export {

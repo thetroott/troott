@@ -15,6 +15,6 @@ export type AppAction =
 
 export interface IAppContextValue extends AppReducerState {
     setFirstTimeUser(value: boolean): void;
-    setLoading(): void;
+    setLoading(option?: 'default' | 'loader'): void;
     unsetLoading(message?: string): void;
 }
