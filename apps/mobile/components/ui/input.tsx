@@ -46,7 +46,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
         }: InputProps,
         ref,
     ) => {
-        const styles = dynamicStyles((disabled = false));
+        const styles = dynamicStyles(disabled ?? false);
 
         const focusProgress = useSharedValue(0);
 
@@ -54,7 +54,7 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
             borderColor: interpolateColor(
                 focusProgress.value,
                 [0, 1],
-                [theme.colors.grey[500], theme.colors.grey[200]],
+                [theme.colors.grey[700], theme.colors.grey[400]],
             ),
         }));
 
@@ -87,9 +87,16 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
                 {leftIcon && leftIcon}
                 <TextInput
                     autoCorrect={false}
-                    placeholderTextColor={theme.colors.grey[400]}
+                    editable={!disabled}
+                    placeholderTextColor={theme.colors.grey[500]}
                     {...props}
-                    ref={ref}
+                    ref={(node) => {
+                        if (typeof ref === 'function') {
+                            ref(node);
+                        } else if (ref) {
+                            ref.current = node;
+                        }
+                    }}
                     style={{
                         ...styles.inputContainer,
                         ...inputcontainerstyles,
@@ -119,6 +126,8 @@ const Input = React.forwardRef<React.ElementRef<typeof TextInput>, InputProps>(
         );
     },
 );
+
+Input.displayName = 'Input';
 
 const dynamicStyles = (disabled: boolean) =>
     StyleSheet.create({

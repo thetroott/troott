@@ -27,18 +27,18 @@ import {
     type SermonAddedToPlaylistInfo,
 } from '@/components/features/playlist/use-add-to-playlist';
 import { getTrackListActions } from '@/components/features/player/controls/actions';
-import type { BaseSermonDtoSlimified, SermonItemDTO } from '@/types/sermon';
-import type { Queue } from '@/types/queue-ref';
-import { usePlayQueue } from '@/stores/player/queue';
+import type { BaseSermonDtoSlimified, SermonItemDTO } from '@/api/dtos/sermon.dto';
+import type { Queue } from '@/api/dtos/queue-client.dto';
+import { usePlayQueue } from '@/engine/state/player-queue-store';
 import { useAddToQueue, useLoadNewQueue } from '@/engine/hooks/useControl';
-import { useNetworkStatus } from '@/stores/app/network';
-import { networkStatusTypes } from '@/types/network-status';
-import { QueuingType } from '@/utils/enums.util';
+import { useNetworkStatus } from '@/lib/state/network-store';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
+import { QueuingType } from '@/api/types';
+import type { ChoosePlaylistListItem } from '@/components/features/playlist/playlist-choose-types';
 import { usePlaylistsQuery } from '@/api/hooks/app/useLibrary';
-import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
 import { resolveMinisterIdFromLabel } from '@/_data/ministers-about';
-import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
-import { useContextType } from '@/context/apps/useContextType';
+import { useToggleFavoriteWithSync } from '@/api/hooks/app/useFavorites';
+import { useContextType } from '@/context';
 
 export type SermonCardVariant = 'small' | 'large';
 
@@ -117,13 +117,41 @@ export default function SermonCard({
     const { userContext } = useContextType();
     const userId = (userContext.user as { id?: string } | null)?.id;
     const { data: playlistsRaw } = usePlaylistsQuery(!!userId);
-    const toggleFavorite = useFavoriteSermonIdsStore((s) => s.toggleFavorite);
+    const { toggle: toggleFavorite } = useToggleFavoriteWithSync();
 
-    const sermonPlaylistItems = useMemo(() => {
-        const mapped = mapPlaylistDocsToChooseItems(playlistsRaw);
-        return mapped.filter(
-            (p) => (p.playlistType ?? '').toLowerCase() === 'sermon',
-        );
+    const sermonPlaylistItems = useMemo((): ChoosePlaylistListItem[] => {
+        if (!Array.isArray(playlistsRaw)) {
+            return [];
+        }
+        const out: ChoosePlaylistListItem[] = [];
+        for (const row of playlistsRaw) {
+            if (row == null || typeof row !== 'object') {
+                continue;
+            }
+            const o = row as Record<string, unknown>;
+            const id =
+                o._id != null
+                    ? String(o._id)
+                    : o.id != null
+                      ? String(o.id)
+                      : '';
+            const title =
+                typeof o.title === 'string'
+                    ? o.title
+                    : typeof o.name === 'string'
+                      ? o.name
+                      : '';
+            const playlistType =
+                typeof o.playlistType === 'string' ? o.playlistType : undefined;
+            if (!id || !title) {
+                continue;
+            }
+            if ((playlistType ?? '').toLowerCase() !== 'sermon') {
+                continue;
+            }
+            out.push({ id, title, playlistType });
+        }
+        return out;
     }, [playlistsRaw]);
 
     const source = useMemo(() => artworkSource(track), [track]);
@@ -205,7 +233,7 @@ export default function SermonCard({
 
     const handleLike = useCallback(() => {
         if (track.id != null && String(track.id).length > 0) {
-            toggleFavorite(String(track.id));
+            void toggleFavorite(String(track.id));
         }
     }, [toggleFavorite, track.id]);
 

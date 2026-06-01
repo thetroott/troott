@@ -11,11 +11,11 @@ import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 import { useLoadNewQueue } from '@/engine/hooks/useControl';
-import { useNetworkStatus } from '@/stores/app/network';
-import { networkStatusTypes } from '@/types/network-status';
-import { QueuingType } from '@/utils/enums.util';
+import { useNetworkStatus } from '@/lib/state/network-store';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
+import { QueuingType } from '@/api/types';
 
 const CARD_SIZE = 148;
 

@@ -4,7 +4,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import type { SearchHistoryEntry } from '@/lib/library-recent-search-storage';
+import type { SearchHistoryEntry } from '@/api/hooks/app/useSearch';
 import SearchArrowRightUp from '@/components/features/search/search-arrow-right-up';
 
 type Props = {

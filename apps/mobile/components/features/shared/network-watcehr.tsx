@@ -8,10 +8,10 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import Text from '@/components/ui/text';
-import { useNetworkStatus } from '@/stores/app/network';
+import { useNetworkStatus } from '@/lib/state/network-store';
 import { sizes } from '@/constants/sizes';
 import { colors } from '@/constants/colors';
-import { networkStatusTypes } from '@/types/network-status';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
 
 const internetConnectionWatcher = {
     NO_INTERNET: 'You are offline',
@@ -25,7 +25,7 @@ const BANNER_OPEN_HEIGHT = sizes.spacing.xl + sizes.spacing.md;
 
 /**
  * Offline / back-online banner driven by {@link useNetworkStatus} (updated from root via
- * {@link initNetworkStoreSync} and `@/utils/network`).
+ * {@link initNetworkStoreSync} and `@/lib/state/network-store`).
  */
 const InternetConnectionWatcher = () => {
     

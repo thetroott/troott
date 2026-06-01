@@ -1,7 +1,11 @@
 export type SearchAnalyticsEvent =
     | 'search_committed'
     | 'search_history_cleared'
-    | 'search_retry_tapped';
+    | 'search_retry_tapped'
+    | 'search_topic_opened'
+    | 'search_empty_topic_tapped'
+    | 'search_discovery_trending_tapped'
+    | 'search_result_played';
 
 type PosthogLike = {
     capture: (event: string, properties?: Record<string, unknown>) => void;

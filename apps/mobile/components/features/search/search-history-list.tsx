@@ -3,7 +3,7 @@ import { FlatList, type ListRenderItem, StyleSheet, View } from 'react-native';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import type { SearchHistoryEntry } from '@/lib/library-recent-search-storage';
+import type { SearchHistoryEntry } from '@/api/hooks/app/useSearch';
 import SearchHistoryItem from '@/components/features/search/search-history-item';
 
 type Props = {
