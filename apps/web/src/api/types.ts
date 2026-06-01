@@ -1,4 +1,4 @@
-import { IAPIReport, IPagination } from '@/utils/interfaces';
+import { IPagination } from "@/utils/interfaces.util";
 
 export interface IAPIResponse {
     error: boolean;

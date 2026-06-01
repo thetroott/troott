@@ -55,6 +55,10 @@ export const URL_STUDIOS = '/studios';
 export const URL_STUDIO_ME = `${URL_STUDIOS}/me`;
 export const URL_STUDIO_MINE_LIST = `${URL_STUDIOS}/mine/list`;
 export const URL_STUDIO_BY_ID = (id: string) => `${URL_STUDIOS}/${id}`;
+export const URL_STUDIO_ANALYTICS_OVERVIEW = (studioCode: string) =>
+    `${URL_STUDIOS}/${encodeURIComponent(studioCode)}/analytics/overview`;
+export const URL_STUDIO_ANALYTICS_BREAKDOWN = (studioCode: string) =>
+    `${URL_STUDIOS}/${encodeURIComponent(studioCode)}/analytics/breakdown`;
 export const URL_STUDIO_INVITES = (studioId: string) =>
     `${URL_STUDIOS}/${studioId}/invites`;
 export const URL_STUDIO_INVITE = (studioId: string, inviteId: string) =>
@@ -73,6 +77,13 @@ export const URL_CREATOR_INVITE_REVOKE = `${URL_CREATOR}/invite/revoke`;
 export const URL_CREATOR_SET_PASSWORD = `${URL_CREATOR}/set-password`;
 export const URL_CREATOR_VERIFICATION = `${URL_CREATOR}/verification`;
 export const URL_CREATOR_VERIFICATION_STATUS = `${URL_CREATOR}/verification/status`;
+export const URL_CREATOR_ONBOARDING_PERSONAL_COMPLETE = `${URL_CREATOR}/onboarding/personal-complete`;
+export const URL_CREATOR_ONBOARDING_DOCUMENT_COMPLETE = `${URL_CREATOR}/onboarding/document-complete`;
+export const URL_CREATOR_ONBOARDING_ADDRESS_COMPLETE = `${URL_CREATOR}/onboarding/address-complete`;
+export const URL_CREATOR_ONBOARDING_MINISTRY_COMPLETE = `${URL_CREATOR}/onboarding/ministry-complete`;
+export const URL_CREATOR_ONBOARDING_TOUR_COMPLETE = `${URL_CREATOR}/onboarding/tour-complete`;
+export const URL_CREATOR_ONBOARDING_FIRST_SERMON_COMPLETE = `${URL_CREATOR}/onboarding/first-sermon-complete`;
+export const URL_CREATOR_ONBOARDING_SKIP = `${URL_CREATOR}/onboarding/skip`;
 
 export const URL_ADMIN = '/admin';
 export const URL_ADMIN_LIST = `${URL_ADMIN}/list`;
@@ -108,6 +119,7 @@ export const URL_SERMON_PUBLISH = (id: string) => `${URL_SERMON}/publish/${id}`;
 export const URL_SERMON_UPDATE = (id: string) => `${URL_SERMON}/update/${id}`;
 export const URL_SERMON_MOVE_TO_BIN = (id: string) =>
     `${URL_SERMON}/move-to-bin/${id}`;
+export const URL_SERMON_RESTORE = (id: string) => `${URL_SERMON}/restore/${id}`;
 export const URL_SERMON_DELETE = (id: string) => `${URL_SERMON}/delete/${id}`;
 export const URL_SERMON_TOPIC = (topic: string) =>
     `${URL_SERMON}/topic/${encodeURIComponent(topic)}`;
@@ -165,8 +177,6 @@ export const URL_SEARCH_RECENT_BY_ID = (id: string) =>
 export const URL_DISCOVERY_HOME = '/discovery/home';
 
 export const URL_SHARE_RESOLVE = '/share/resolve';
-
-export const URL_OPEN_SERMON = (id: string) => `/open/sermon/${id}`;
 
 export const URL_PLAYBACK_SERMON = (sermonId: string) =>
     `${URL_PLAYBACK}/sermon/${sermonId}`;

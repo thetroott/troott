@@ -1,8 +1,16 @@
-import Axios, { AxiosInstance } from 'axios';
+import Axios, { AxiosInstance, type AxiosResponse } from 'axios';
 import { CallApiDTO } from '../../dtos/axios.dto';
 import storage from '@/api/services/local-storage';
 import { toastIfApiEnvelopeError } from '@/api/core/api-envelope-toast';
 import { IAPIResponse } from '../types';
+
+function applyReissuedToken(response: AxiosResponse): void {
+    const raw = response.headers['x-new-token'];
+    const newToken = typeof raw === 'string' ? raw : raw?.[0];
+    if (newToken?.trim()) {
+        storage.setToken(newToken.trim());
+    }
+}
 
 class AxiosService {
     public readonly baseUrl: string;
@@ -26,6 +34,7 @@ class AxiosService {
             return config;
         });
         this.http.interceptors.response.use((response) => {
+            applyReissuedToken(response);
             const status = response.status;
             if (status >= 200 && status < 300 && response.data) {
                 const cfg = response.config as {
@@ -94,6 +103,7 @@ class AxiosService {
             headers: headers,
         })
             .then((resp) => {
+                applyReissuedToken(resp);
                 result = resp.data;
                 if (resp.status >= 200 && resp.status < 300) {
                     toastIfApiEnvelopeError(resp.data, {
@@ -169,14 +179,14 @@ class AxiosService {
     }
 
     public async logout(): Promise<void> {
-        storage.clearAuth();
         await this.call({
             method: 'POST',
             type: 'default',
             path: '/auth/logout',
-            isAuth: false,
+            isAuth: true,
             payload: {},
         });
+        storage.clearAuth();
     }
 }
 

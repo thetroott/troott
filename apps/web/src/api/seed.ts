@@ -1,7 +1,7 @@
-import { IAppMetrics, IPagination, ISidebarProps, IToast } from "@/utils/interfaces";
-import { ICollection, ICoreResource, IHackDomain, IProjectDomain } from "./interface";
-import sidebarRoutes from "../../routes/sidebar.route";
+
+import type { ICollection } from "./interface";
 import { IAPIResponse } from "@/api/types";
+import { IPagination } from "@/utils/interfaces.util";
 
 const pagination: IPagination = {
     next: { page: 1, limit: 25 },
@@ -17,15 +17,15 @@ const collection: ICollection = {
     message: 'There are no data currently'
 }
 
-const sidebar: ISidebarProps = {
+const sidebar: any = {
     collapsed: false,
-    route: sidebarRoutes[0]!,
+    route: [],
     isOpen: false,
     subroutes: [],
     inroutes: []
 }
 
-const toast: IToast = {
+const toast: any = {
     type: 'success',
     show: false,
     message: '',
@@ -34,7 +34,7 @@ const toast: IToast = {
     close: () => { }
 }
 
-const metrics: IAppMetrics = {
+const metrics: any = {
     loading: false,
     message: '',
     type: 'default',
@@ -44,27 +44,6 @@ const metrics: IAppMetrics = {
         resource: { total: 0, disabled: 0, enabled: 0 }
     }
 }
-
-const coreResoruce: ICoreResource = {
-    forms: [],
-    blocks: [],
-    questions: [],
-    responses: []
-}
-
-const hackResource: IHackDomain = {
-    hackathons: [],
-    submissions: [],
-    entries: [],
-    squad: []
-}
-
-const projectResource: IProjectDomain = {
-    projects: [],
-    Teams: [],
-    tasks: []
-}
-
 
 const apiresponse: IAPIResponse = {
     error: false,
@@ -86,15 +65,11 @@ const apiresponse: IAPIResponse = {
 
 
 
-export { 
-    
-    pagination, 
-    collection, 
+export {
+    pagination,
+    collection,
     sidebar,
     apiresponse,
     metrics,
-    toast, 
-    coreResoruce,
-    hackResource,
-    projectResource
-}
+    toast,
+};

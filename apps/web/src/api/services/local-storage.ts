@@ -1,5 +1,5 @@
 import cookieService from "../services/cookies";
-import type { IStorage } from '@/api/interface';
+import type { IStorage } from '@/api/storage.types';
 
 
 const storeAuth = (token: string, id: string, userType: string, email: string, businessType?: string) => {
@@ -63,6 +63,16 @@ const checkToken = () => {
 const getToken = () => {
     return localStorage.getItem('token');
 }
+
+const setToken = (token: string) => {
+    localStorage.setItem('token', token);
+    cookieService.setData({
+        key: 'token',
+        payload: token,
+        expireAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        path: '/',
+    });
+};
 
 const checkUserID = () => {
     return localStorage.getItem('userId') ? true : false;
@@ -142,12 +152,12 @@ const getConfigWithBearer = () => {
 const STUDIO_CODE_KEY = 'studioCode';
 
 const setStudioCode = (code: string) => {
-    const trimmed = code.trim();
-    if (!trimmed) return;
-    localStorage.setItem(STUDIO_CODE_KEY, trimmed);
+    const normalized = code.trim().toLowerCase();
+    if (!normalized) return;
+    localStorage.setItem(STUDIO_CODE_KEY, normalized);
     cookieService.setData({
         key: STUDIO_CODE_KEY,
-        payload: trimmed,
+        payload: normalized,
         expireAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         path: '/',
     });
@@ -155,9 +165,9 @@ const setStudioCode = (code: string) => {
 
 const getStudioCode = (): string => {
     const fromLs = localStorage.getItem(STUDIO_CODE_KEY);
-    if (fromLs?.trim()) return fromLs.trim();
+    if (fromLs?.trim()) return fromLs.trim().toLowerCase();
     const fromCookie = cookieService.getData({ key: STUDIO_CODE_KEY });
-    return typeof fromCookie === 'string' ? fromCookie.trim() : '';
+    return typeof fromCookie === 'string' ? fromCookie.trim().toLowerCase() : '';
 };
 
 const clearAuth = () => {
@@ -298,12 +308,16 @@ export const persistAuthFromResponse = (response: {
     }
 
     const p = payload as Record<string, unknown>;
-    const token =
-        typeof p.token === 'string'
-            ? p.token
-            : typeof response.token === 'string'
-              ? response.token
-              : null;
+    const rawToken = p.token ?? response.token;
+    let token: string | null = null;
+    if (typeof rawToken === 'string' && rawToken.trim()) {
+        token = rawToken;
+    } else if (rawToken && typeof rawToken === 'object') {
+        const nested = (rawToken as Record<string, unknown>).token;
+        if (typeof nested === 'string' && nested.trim()) {
+            token = nested;
+        }
+    }
 
     if (!token) return;
 
@@ -322,6 +336,11 @@ export const persistAuthFromResponse = (response: {
             : undefined;
 
     storeAuth(token, id, ut, email, businessType);
+
+    const studioCode = userObj.studioCode;
+    if (typeof studioCode === 'string' && studioCode.trim()) {
+        setStudioCode(studioCode);
+    }
 };
 
 const storage: IStorage = {
@@ -329,6 +348,7 @@ const storage: IStorage = {
     storeAuth: storeAuth,
     checkToken: checkToken,
     getToken: getToken,
+    setToken: setToken,
     checkUserType: checkUserType,
     getUserType: getUserType,
     checkUserID: checkUserID,
