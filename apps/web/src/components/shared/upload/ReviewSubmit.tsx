@@ -19,17 +19,27 @@ import {
     ArrowUp,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import storage from '@/api/services/local-storage';
+import {
+    PATH_GET_STARTED,
+    PATH_SEG_SERMONS,
+    PATH_STUDIO_PREFIX,
+} from '@/routes/paths';
+import { studioSermonsListPath } from '@/routes/paths';
 import { useQueryClient } from '@tanstack/react-query';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
 import { useUpload, uploadActions } from '@/context/upload/uploadState';
 import { useDraft } from '@/context/draft/draftState';
-import storage from '@/api/services/local-storage';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
 import useContextType from '@/hooks/shared/useContextType';
-import { resolveMinisterId } from '@/utils/minister-id.util';
+import { useCreator } from '@/context/creator/useCreator';
+import { useMinister } from '@/context/minister/useMinister';
+import { uploadSermonCoverForSermon } from '@/services/upload/sermon-cover-upload.service';
+import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
 import { usePublishSermonMutation } from '@/hooks/app/useSermon';
 import type { PublishSermonDTO } from '@/dtos/sermon.dto';
+import { MediaStatus } from '@/dtos/sermon-media.types';
 
 interface ReviewSubmitProps {
     onModalClose?: () => void;
@@ -60,8 +70,14 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { userContext } = useContextType();
+    const { minister } = useMinister();
+    const { creatorId } = useCreator();
     const user = userContext.user as Record<string, unknown> | null;
-    const ministerId = resolveMinisterId(user);
+    const ministerId = resolveStudioSermonOwnerId(
+        user,
+        minister?.id,
+        creatorId,
+    );
     const publishSermonMutation = usePublishSermonMutation();
     const [showMoreFields, setShowMoreFields] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);
@@ -117,9 +133,13 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
     }, [uploadData, updateDraft, dispatch, queryClient, ministerId]);
 
     const buildPublishBody = useCallback(
-        (status: 'published' | 'draft') => {
+        (publishStatus: 'published' | 'draft') => {
             const userId = storage.getUserID();
             const release = uploadData.scheduledDate ?? new Date();
+            const audioRef =
+                uploadData.uploadRef?.trim() ||
+                uploadData.sermonId?.trim() ||
+                '';
 
             return {
                 title: uploadData.title,
@@ -127,17 +147,22 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
                 topic: uploadData.category || '',
                 tags: uploadData.tags ?? [],
                 isPublic: uploadData.isPublic ?? true,
-                minister: userId,
+                minister: ministerId || userId,
                 publishedBy: userId,
+                sermon: audioRef,
                 size: uploadData.file?.size ?? 0,
                 duration: 0,
-                releaseDate: release.toISOString(),
-                releaseYear: release.getFullYear(),
-                state: 'active',
-                status,
+                preachedAt: release.toISOString(),
+                preachedYear: String(release.getFullYear()),
+                isSeries: false,
+                status:
+                    publishStatus === 'published'
+                        ? MediaStatus.PUBLISHED
+                        : MediaStatus.DRAFT,
+                isPublished: publishStatus === 'published',
             } as Record<string, unknown>;
         },
-        [uploadData],
+        [ministerId, uploadData],
     );
 
     const handleSaveDraft = useCallback(async () => {
@@ -169,7 +194,8 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
                 });
                 dispatch(uploadActions.resetUpload());
                 onModalClose?.();
-                navigate('/my-sermon');
+                const code = storage.getStudioCode()?.trim();
+                navigate(code ? studioSermonsListPath(code) : PATH_GET_STARTED);
                 return;
             }
 
@@ -202,7 +228,8 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
                 return;
             }
             onModalClose?.();
-            navigate('/my-sermon');
+            const code = storage.getStudioCode()?.trim();
+            navigate(code ? studioSermonsListPath(code) : PATH_GET_STARTED);
         } catch (error: unknown) {
             toast.error('Failed to save draft', {
                 description: apiErrorMessage(error),
@@ -236,6 +263,17 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
 
         dispatch(uploadActions.setLoading(true));
         try {
+            if (uploadData.thumbnail instanceof File) {
+                try {
+                    await uploadSermonCoverForSermon(
+                        sermonId,
+                        uploadData.thumbnail,
+                    );
+                } catch (coverErr: unknown) {
+                    toast.error(apiErrorMessage(coverErr));
+                    return;
+                }
+            }
             const res = await publishSermonMutation.mutateAsync({
                 id: sermonId,
                 payload:
@@ -257,7 +295,8 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
             }
             dispatch(uploadActions.resetUpload());
             onModalClose?.();
-            navigate('/my-sermon');
+            const code = storage.getStudioCode()?.trim();
+            navigate(code ? studioSermonsListPath(code) : PATH_GET_STARTED);
             toast.success('Sermon published successfully', {
                 description: 'Your sermon metadata has been saved.',
             });

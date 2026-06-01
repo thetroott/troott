@@ -8,7 +8,7 @@ export type MinisterSermonListParams = {
     limit: number;
     sort: string;
     q: string;
-    status: 'all' | 'draft' | 'published';
+    status: 'all' | 'draft' | 'published' | 'bin';
     dateFrom: string;
     dateTo: string;
 };
@@ -30,4 +30,10 @@ export const sermonQueryKeys = {
         [...sermonQueryKeys.all, 'minister', ministerId] as const,
     ministerList: (ministerId: string, params: MinisterSermonListParams) =>
         [...sermonQueryKeys.ministerListRoot(ministerId), params] as const,
+    binList: (ownerId: string, params: Omit<MinisterSermonListParams, 'status'>) =>
+        [
+            ...sermonQueryKeys.ministerListRoot(ownerId),
+            'bin',
+            params,
+        ] as const,
 };

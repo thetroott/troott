@@ -2,6 +2,8 @@ import React from 'react';
 import { useUpload, uploadActions } from '@/context/upload/uploadState';
 import { cn } from '@/lib/utils';
 import { UPLOAD_OPTIONS_BAR } from '@/components/shared/upload/upload-studio-ui';
+import { useCreateSermonEntry } from '@/hooks/upload/useCreateSermonEntry';
+import { useTour } from '@/components/shared/tour/TourProvider';
 
 const UploadIcon: React.FC<{ className?: string }> = ({ className }) => (
     <img
@@ -47,8 +49,14 @@ const CreatorIcon: React.FC<{ className?: string }> = ({ className }) => (
 const UploadOptions: React.FC = () => {
     const { state, dispatch } = useUpload();
     const { activeOption = 'upload' } = state;
+    const { active: tourActive } = useTour();
+    const { startUploadFlow } = useCreateSermonEntry();
 
     const handleOptionClick = (optionId: string) => {
+        if (optionId === 'upload') {
+            startUploadFlow();
+            return;
+        }
         dispatch(uploadActions.setActiveOption(optionId));
     };
 
@@ -96,7 +104,8 @@ const UploadOptions: React.FC = () => {
                     >
                         {options.map((option) => {
                             const IconComponent = option.icon;
-                            const isActive = activeOption === option.id;
+                            const isActive =
+                                !tourActive && activeOption === option.id;
                             return (
                                 <button
                                     key={option.id}
@@ -104,6 +113,11 @@ const UploadOptions: React.FC = () => {
                                     role="tab"
                                     aria-selected={isActive}
                                     aria-pressed={isActive}
+                                    data-tour={
+                                        option.id === 'upload'
+                                            ? 'upload-from-computer'
+                                            : undefined
+                                    }
                                     onClick={() => handleOptionClick(option.id)}
                                     className={cn(
                                         UPLOAD_OPTIONS_BAR.chipBase,

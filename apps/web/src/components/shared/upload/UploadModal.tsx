@@ -22,9 +22,15 @@ import ReviewSubmit from './ReviewSubmit';
 interface UploadModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    /** Full-page studio route: render wizard in layout instead of a portaled dialog. */
+    embedded?: boolean;
 }
 
-const UploadModal: React.FC<UploadModalProps> = ({ open, onOpenChange }) => {
+const UploadModal: React.FC<UploadModalProps> = ({
+    open,
+    onOpenChange,
+    embedded = false,
+}) => {
     const { state, dispatch } = useUpload();
     const { currentStep, uploadData, uploadComplete, progress, isLoading } =
         state;
@@ -227,23 +233,26 @@ const UploadModal: React.FC<UploadModalProps> = ({ open, onOpenChange }) => {
         return false;
     };
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent
-                className={cn(
-                    UPLOAD_SHELL.widthClass,
-                    UPLOAD_SHELL.maxWidthClass,
-                    UPLOAD_SHELL.minHeightClass,
-                    'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl sm:max-w-[827px]',
-                    UPLOAD_SHELL.outerRadius,
-                    UPLOAD_SHELL.outerBorder,
-                    UPLOAD_SHELL.outerBg,
-                )}
-                showCloseButton={false}
-            >
-                <DialogTitle className="sr-only">
-                    Upload sermons — {getStepTitle()}
-                </DialogTitle>
+    const shellClassName = cn(
+        UPLOAD_SHELL.widthClass,
+        UPLOAD_SHELL.maxWidthClass,
+        UPLOAD_SHELL.minHeightClass,
+        'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl sm:max-w-[827px]',
+        UPLOAD_SHELL.outerRadius,
+        UPLOAD_SHELL.outerBorder,
+        UPLOAD_SHELL.outerBg,
+        embedded && 'mx-auto w-full',
+    );
+
+    const wizardTitle = `Upload sermons — ${getStepTitle()}`;
+
+    const wizardBody = (
+        <>
+            {embedded ? (
+                <h2 className="sr-only">{wizardTitle}</h2>
+            ) : (
+                <DialogTitle className="sr-only">{wizardTitle}</DialogTitle>
+            )}
 
                 <DialogHeader className="space-y-0 border-0 bg-transparent p-0">
                     <div
@@ -436,7 +445,7 @@ const UploadModal: React.FC<UploadModalProps> = ({ open, onOpenChange }) => {
                                             UPLOAD_SHELL.footerStatusText
                                         }
                                     >
-                                        Finalizing upload…
+                                        Processing…
                                     </p>
                                 </>
                             ) : uploadBusyOnServer ? (
@@ -572,6 +581,34 @@ const UploadModal: React.FC<UploadModalProps> = ({ open, onOpenChange }) => {
                         )}
                     </div>
                 </div>
+        </>
+    );
+
+    if (embedded) {
+        if (!open) {
+            return null;
+        }
+        return (
+            <div
+                className={shellClassName}
+                role="dialog"
+                aria-label={`Upload sermons — ${getStepTitle()}`}
+            >
+                {wizardBody}
+            </div>
+        );
+    }
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent
+                className={cn(
+                    shellClassName,
+                    'top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]',
+                )}
+                showCloseButton={false}
+            >
+                {wizardBody}
             </DialogContent>
         </Dialog>
     );

@@ -1,4 +1,4 @@
-/** React Query keys for account / current user. */
+ /** React Query keys for account / current user. */
 
 export const accountQueryKeys = {
     all: ['account'] as const,

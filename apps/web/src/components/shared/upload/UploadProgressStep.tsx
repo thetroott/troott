@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { FileAudio, Loader2, Trash2 } from 'lucide-react';
 import { useUpload, uploadActions } from '@/context/upload/uploadState';
@@ -9,27 +9,37 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
-import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
-import { useStartSermonUploadMutation } from '@/hooks/app/useSermon';
-import { sermonQueryKeys } from '@/constants/sermon-query-keys';
 import useContextType from '@/hooks/shared/useContextType';
-import { resolveMinisterId } from '@/utils/minister-id.util';
-import { toast } from 'sonner';
+import { useCreator } from '@/context/creator/useCreator';
+import { useMinister } from '@/context/minister/useMinister';
+import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
+import { buildSermonUploadFileSignature } from '@/utils/sermon-upload-file-signature.util';
+import { useStudioSermonAudioUpload } from '@/hooks/upload/useStudioSermonAudioUpload';
+import { useSermonByIdQuery } from '@/hooks/app/useSermon';
 import { cn } from '@/lib/utils';
+import { formatUploadPipelineLabel } from '@/utils/upload-pipeline-label.util';
+import { UploadStatus } from '@/dtos/sermon-media.types';
 import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
 
 /**
  * Upload progress UI — Figma 4530:20801 (0%), 4530:21351 (in progress), 4555:6094 (finalizing),
  * 4558:8281 (complete + remove). Remove audio control matches details-frame
  * [`4660:6496`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4660-6496). Shell tokens in `UPLOAD_SHELL`.
+ *
+ * feat-0008: one `start-upload` per file via {@link useStudioSermonAudioUpload}.
  */
 const UploadProgressStep: React.FC = () => {
     const queryClient = useQueryClient();
-    const startUploadMutation = useStartSermonUploadMutation();
     const { userContext } = useContextType();
+    const { minister } = useMinister();
+    const { creatorId } = useCreator();
     const user = userContext.user as Record<string, unknown> | null;
-    const ministerId = resolveMinisterId(user);
+    const ministerId = resolveStudioSermonOwnerId(
+        user,
+        minister?.id,
+        creatorId,
+    );
     const { state, dispatch } = useUpload();
     const { uploadData, progress, uploadComplete, isLoading } = state;
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
@@ -37,82 +47,62 @@ const UploadProgressStep: React.FC = () => {
     const [uploadError, setUploadError] = useState(false);
     const [retryToken, setRetryToken] = useState(0);
 
-    useEffect(() => {
-        const file = uploadData.file;
-        if (!file || uploadComplete) return;
+    const file = uploadData.file;
+    const fileSignature = useMemo(
+        () => (file ? buildSermonUploadFileSignature(file) : null),
+        [file],
+    );
 
-        const ac = new AbortController();
-        let cancelled = false;
-        setUploadError(false);
+    const onUploadError = useCallback(() => {
+        setUploadError(true);
+    }, []);
 
-        dispatch(uploadActions.setLoading(true));
-        dispatch(uploadActions.setProgress(0));
+    const sermonIdForPipeline =
+        uploadComplete && uploadData.sermonId?.trim()
+            ? uploadData.sermonId.trim()
+            : undefined;
 
-        void (async () => {
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const result = await startUploadMutation.mutateAsync({
-                    formData,
-                    onProgress: (pct: number) => {
-                        if (!cancelled)
-                            dispatch(uploadActions.setProgress(pct));
-                    },
-                    signal: ac.signal,
-                });
-
-                if (cancelled) return;
-
-                dispatch(
-                    uploadActions.setUploadData({
-                        sermonId: result.sermonId,
-                        uploadRef: result.uploadRef,
-                    }),
-                );
-                dispatch(uploadActions.setUploadComplete(true));
-                dispatch(uploadActions.setProgress(100));
-                void queryClient.invalidateQueries({
-                    queryKey: sermonQueryKeys.all,
-                });
-                if (ministerId) {
-                    void queryClient.invalidateQueries({
-                        queryKey: sermonQueryKeys.ministerListRoot(ministerId),
-                    });
+    const { data: uploadedSermonDetail } = useSermonByIdQuery(
+        sermonIdForPipeline,
+        {
+            enabled: Boolean(sermonIdForPipeline),
+            refetchInterval: (query) => {
+                const item = (
+                    query.state.data as
+                        | { item?: { uploadStatus?: string } }
+                        | undefined
+                )?.item;
+                const status = item?.uploadStatus;
+                if (
+                    status === UploadStatus.COMPLETED ||
+                    status === UploadStatus.FAILED
+                ) {
+                    return false;
                 }
-            } catch (e: unknown) {
-                if (cancelled || axios.isCancel(e)) return;
-                const message =
-                    e &&
-                    typeof e === 'object' &&
-                    'message' in e &&
-                    typeof (e as { message: unknown }).message === 'string'
-                        ? (e as { message: string }).message
-                        : 'Upload failed. Please try again.';
-                toast.error(message);
-                setUploadError(true);
-                dispatch(uploadActions.setProgress(0));
-                dispatch(uploadActions.setUploadComplete(false));
-            } finally {
-                if (!cancelled) {
-                    dispatch(uploadActions.setLoading(false));
-                }
-            }
-        })();
+                return 4000;
+            },
+        },
+    );
 
-        return () => {
-            cancelled = true;
-            ac.abort();
-        };
-    }, [
-        uploadData.file,
+    const pipelineLabel = formatUploadPipelineLabel(
+        (
+            uploadedSermonDetail as
+                | { item?: { uploadStatus?: string } }
+                | undefined
+        )?.item?.uploadStatus,
+    );
+
+    const { clearUploadFlight } = useStudioSermonAudioUpload({
+        file,
+        fileSignature,
         uploadComplete,
+        uploadError,
         retryToken,
         dispatch,
         queryClient,
         ministerId,
-        startUploadMutation,
-    ]);
+        onUploadError,
+    });
 
     const formatFileSize = (bytes: number): string => {
         if (bytes === 0) return '0 Bytes';
@@ -127,6 +117,7 @@ const UploadProgressStep: React.FC = () => {
     };
 
     const handleConfirmRemove = () => {
+        clearUploadFlight();
         dispatch(uploadActions.resetUpload());
         setShowRemoveDialog(false);
     };
@@ -136,11 +127,13 @@ const UploadProgressStep: React.FC = () => {
     };
 
     const handleConfirmCancelUpload = () => {
+        clearUploadFlight();
         setShowCancelDialog(false);
         dispatch(uploadActions.resetUpload());
     };
 
     const handleRetry = () => {
+        clearUploadFlight();
         setUploadError(false);
         setRetryToken((t) => t + 1);
     };
@@ -188,7 +181,7 @@ const UploadProgressStep: React.FC = () => {
                             />
                             <p className="font-matter text-center text-[14px] leading-5 tracking-wide text-[#bdbdbd]">
                                 {showFinalizing
-                                    ? 'Finalizing...'
+                                    ? 'Processing...'
                                     : 'Uploading...'}
                             </p>
                         </div>
@@ -265,6 +258,11 @@ const UploadProgressStep: React.FC = () => {
                             <p className="font-matter text-center text-[12px] text-[#707070]">
                                 {formatFileSize(uploadData.file.size)} · Audio
                             </p>
+                            {pipelineLabel ? (
+                                <p className="font-matter text-center text-[12px] text-[#9a9a9a]">
+                                    {pipelineLabel}
+                                </p>
+                            ) : null}
                         </div>
                         <Button
                             type="button"

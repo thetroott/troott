@@ -1,5 +1,10 @@
 import React, { useRef, useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -96,6 +101,7 @@ const UploadEntryStepModal: React.FC<UploadEntryStepModalProps> = ({
             <DialogContent
                 className={cn(
                     'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl sm:max-w-[827px]',
+                    'top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]',
                     UPLOAD_SHELL.widthClass,
                     UPLOAD_SHELL.maxWidthClass,
                     UPLOAD_SHELL.minHeightClass,
@@ -103,9 +109,13 @@ const UploadEntryStepModal: React.FC<UploadEntryStepModalProps> = ({
                     UPLOAD_SHELL.outerBorder,
                     UPLOAD_SHELL.outerBg,
                 )}
+                overlayClassName="bg-black/40"
                 showCloseButton={false}
             >
                 <DialogTitle className="sr-only">Upload sermons</DialogTitle>
+                <DialogDescription className="sr-only">
+                    Choose an audio file to upload or continue a saved draft.
+                </DialogDescription>
 
                 {/* Header — Figma Frame 1618868173 */}
                 <div className="flex items-center justify-between gap-4 px-4 min-h-[46px] border-b border-[#545454]/50 bg-[#2b2a2c]">
