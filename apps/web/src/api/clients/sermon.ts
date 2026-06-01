@@ -8,6 +8,7 @@ import {
     URL_SERMON_IMAGE_UPLOAD,
     URL_SERMON_MINISTER,
     URL_SERMON_MOVE_TO_BIN,
+    URL_SERMON_RESTORE,
     URL_SERMON_PUBLISH,
     URL_SERMON_START_UPLOAD,
     URL_SERMON_TOPIC,
@@ -85,6 +86,16 @@ class SermonAPI {
             path: URL_SERMON_MOVE_TO_BIN(id),
             isAuth: true,
             payload: payload ?? {},
+        });
+    }
+
+    restoreSermonFromBin(id: string): Promise<IAPIResponse> {
+        return this.axiosService.call({
+            type: 'default',
+            method: 'PUT',
+            path: URL_SERMON_RESTORE(id),
+            isAuth: true,
+            payload: {},
         });
     }
 

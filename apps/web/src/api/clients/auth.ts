@@ -22,7 +22,7 @@ import {
     URL_REGISTER,
     URL_RESEND_OTP,
     URL_RESET_PASSWORD,
-    URL_USER,
+    URL_LOGGEDIN_USER,
     URL_VERIFY_OTP,
 } from '../core/paths';
 
@@ -139,12 +139,12 @@ class AuthAPI {
         });
     }
 
-    /** Current authenticated user (`GET /user`). */
+    /** Current authenticated user (`GET /auth/user`). */
     fetchMe(): Promise<IAPIResponse> {
         return this.axiosService.call({
             type: 'default',
             method: 'GET',
-            path: URL_USER,
+            path: URL_LOGGEDIN_USER,
             isAuth: true,
             payload: {},
         });

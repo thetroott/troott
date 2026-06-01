@@ -8,14 +8,16 @@ import PlaylistAPI from './playlist';
 import PlaybackAPI from './playback';
 import ListenerAPI from './listener';
 import MinisterAPI from './minister';
+import CreatorAPI from './creator';
 import StudioAPI from './studio';
 import PlanAPI from './plan';
 import SubscriptionAPI from './subscription';
 import DiscoveryAPI from './discovery';
 import SearchAPI from './search';
 import InvitationAPI from './invitation';
-import OpenAPI from './open';
 import ShareAPI from './share';
+import AdminAPI from './admin';
+import AnalyticsAPI from './analytics';
 
 export class TroottAPIClient {
     public readonly auth: AuthAPI;
@@ -27,14 +29,16 @@ export class TroottAPIClient {
     public readonly playback: PlaybackAPI;
     public readonly listener: ListenerAPI;
     public readonly minister: MinisterAPI;
+    public readonly creator: CreatorAPI;
     public readonly studio: StudioAPI;
     public readonly plan: PlanAPI;
     public readonly subscription: SubscriptionAPI;
     public readonly discovery: DiscoveryAPI;
     public readonly search: SearchAPI;
     public readonly invitation: InvitationAPI;
-    public readonly open: OpenAPI;
     public readonly share: ShareAPI;
+    public readonly admin: AdminAPI;
+    public readonly analytics: AnalyticsAPI;
 
     constructor(axiosService: AxiosService) {
         this.auth = new AuthAPI(axiosService);
@@ -46,14 +50,16 @@ export class TroottAPIClient {
         this.playback = new PlaybackAPI(axiosService);
         this.listener = new ListenerAPI(axiosService);
         this.minister = new MinisterAPI(axiosService);
+        this.creator = new CreatorAPI(axiosService);
         this.studio = new StudioAPI(axiosService);
         this.plan = new PlanAPI(axiosService);
         this.subscription = new SubscriptionAPI(axiosService);
         this.discovery = new DiscoveryAPI(axiosService);
         this.search = new SearchAPI(axiosService);
         this.invitation = new InvitationAPI(axiosService);
-        this.open = new OpenAPI(axiosService);
         this.share = new ShareAPI(axiosService);
+        this.admin = new AdminAPI(axiosService);
+        this.analytics = new AnalyticsAPI(axiosService);
     }
 }
 

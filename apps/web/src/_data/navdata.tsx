@@ -1,4 +1,13 @@
-import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
+import {
+    PATH_ADMIN_PREFIX,
+    PATH_GET_STARTED,
+    PATH_PROFILE,
+    PATH_SETTINGS,
+    PATH_SEG_ADMIN_SERMONS,
+    PATH_SEG_ADMIN_USERS,
+} from '@/routes/paths';
+import { UserType } from '@/models/User.model';
+import { ADMIN_PORTAL_ROLES, INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
 import {
     BarChart3Icon,
     CloudUploadIcon,
@@ -11,6 +20,7 @@ import {
     PhoneIcon,
     PlaySquare,
     RocketIcon,
+    Settings,
     TrashIcon,
     UsersIcon,
     UserRound,
@@ -25,9 +35,9 @@ export const navItems = {
             items: [
                 {
                     title: 'Get Started',
-                    url: '/get-started',
+                    url: PATH_GET_STARTED,
                     icon: RocketIcon,
-                    roles: INTERNAL_PORTAL_ROLES,
+                    roles: [UserType.MINISTER, UserType.CREATOR],
                     isActive: false,
                     showOnboarding: true,
                 },
@@ -44,12 +54,6 @@ export const navItems = {
                     isActive: false,
                 },
                 {
-                    title: 'Community',
-                    url: '/community',
-                    icon: UsersIcon,
-                    isActive: false,
-                },
-                {
                     title: 'Analytics',
                     url: '/analytics',
                     icon: BarChart3Icon,
@@ -63,8 +67,33 @@ export const navItems = {
                 },
                 {
                     title: 'Profile',
-                    url: '/profile',
+                    url: PATH_PROFILE,
                     icon: UserRound,
+                    isActive: false,
+                },
+                {
+                    title: 'Settings',
+                    url: PATH_SETTINGS,
+                    icon: Settings,
+                    isActive: false,
+                },
+            ],
+        },
+        {
+            title: 'Admin',
+            url: '#',
+            roles: ADMIN_PORTAL_ROLES,
+            items: [
+                {
+                    title: 'Users',
+                    url: `${PATH_ADMIN_PREFIX}/${PATH_SEG_ADMIN_USERS}`,
+                    icon: UsersIcon,
+                    isActive: false,
+                },
+                {
+                    title: 'Sermons',
+                    url: `${PATH_ADMIN_PREFIX}/${PATH_SEG_ADMIN_SERMONS}`,
+                    icon: LucideBookAudio,
                     isActive: false,
                 },
             ],
