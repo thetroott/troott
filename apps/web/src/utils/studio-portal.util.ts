@@ -1,21 +1,35 @@
 import api from '@/api/config';
 import storage from '@/api/services/local-storage';
-import { UserType } from '@/models/User.model';
+import { PATH_GET_STARTED, studioHomePath } from '@/routes/paths';
+import {
+    invalidateStaleSession,
+    isUnauthorizedApiStatus,
+} from '@/utils/auth-session.util';
 
-export function isStudioPortalUserType(
-    userType: string | null | undefined,
-): boolean {
-    return userType === UserType.MINISTER || userType === UserType.CREATOR;
+export function studioPortalPath(studioCode: string): string {
+    return studioHomePath(studioCode);
 }
 
 /**
- * Fetches primary studio from GET /studios/me and navigates to /studio/{code}.
+ * Navigates to /studio/{code}. Uses `preferredCode` when provided (e.g. from StudioContext).
  */
 export async function navigateToStudioPortal(
     goTo: (path: string) => void,
+    preferredCode?: string,
 ): Promise<void> {
+    const cached = preferredCode?.trim() || storage.getStudioCode()?.trim();
+    if (cached) {
+        storage.setStudioCode(cached);
+        goTo(studioPortalPath(cached));
+        return;
+    }
+
     try {
         const res = await api.studio.getMyStudio();
+        if (res.error && isUnauthorizedApiStatus(res.status)) {
+            invalidateStaleSession();
+            return;
+        }
         const studio = res.data?.studio;
         const code =
             studio && typeof studio.code === 'string'
@@ -23,11 +37,11 @@ export async function navigateToStudioPortal(
                 : '';
         if (!res.error && code) {
             storage.setStudioCode(code);
-            goTo(`/studio/${code}`);
+            goTo(studioPortalPath(code));
             return;
         }
     } catch {
-        /* use dashboard fallback */
+        /* fall through */
     }
-    goTo('/dashboard');
+    goTo(PATH_GET_STARTED);
 }

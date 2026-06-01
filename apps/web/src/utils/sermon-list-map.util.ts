@@ -2,6 +2,24 @@ import type { Sermon } from '@/_data/dummySermons';
 import type { IAPIResponse } from '@/api/types';
 import type { AxiosResponse } from 'axios';
 
+/** Canonical audio URL from API sermon document (`playbackUrl` / `manifestUrl` / `item.item`). */
+export function resolveSermonPlaybackUrl(
+    raw: Record<string, unknown> | null | undefined,
+): string | null {
+    if (!raw) return null;
+    if (typeof raw.playbackUrl === 'string' && raw.playbackUrl.trim()) {
+        return raw.playbackUrl.trim();
+    }
+    if (typeof raw.manifestUrl === 'string' && raw.manifestUrl.trim()) {
+        return raw.manifestUrl.trim();
+    }
+    const item = raw.item as Record<string, unknown> | undefined;
+    if (item && typeof item.item === 'string' && item.item.trim()) {
+        return item.item.trim();
+    }
+    return null;
+}
+
 function coalesceDurationSeconds(...candidates: unknown[]): number {
     for (const v of candidates) {
         if (typeof v === 'number' && Number.isFinite(v) && v > 0) {
@@ -21,21 +39,9 @@ function coalesceDurationSeconds(...candidates: unknown[]): number {
 export function pickSermonDurationSeconds(
     raw: Record<string, unknown>,
 ): number {
-    const uploadSummary = raw.uploadSummary as
-        | Record<string, unknown>
-        | undefined;
-    const meta =
-        uploadSummary &&
-        typeof uploadSummary.metadata === 'object' &&
-        uploadSummary.metadata !== null
-            ? (uploadSummary.metadata as Record<string, unknown>)
-            : undefined;
+    const item = raw.item as Record<string, unknown> | undefined;
 
-    return coalesceDurationSeconds(
-        raw.duration,
-        meta?.duration,
-        raw.audioDuration,
-    );
+    return coalesceDurationSeconds(raw.duration, item?.duration);
 }
 
 /**

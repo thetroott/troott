@@ -81,7 +81,7 @@ interface AudioProcessingJobDTO {
 
 Store URLs/keys, not manifest file text:
 
-- `audio.hlsMasterUrl: string`
+- `audio.manifestUrl: string` (HLS master playlist URL)
 - `audio.dashManifestUrl: string`
 - `audio.variants: Array<{ bitrateKbps: number; hlsUrl?: string; dashRepId?: string }>`
 - `audio.processing.status: 'queued' | 'processing' | 'ready' | 'failed'`
