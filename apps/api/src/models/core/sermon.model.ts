@@ -77,7 +77,7 @@ const SermonSchema = new Schema<ISermonDoc>(
             size: { type: Number },
             fileType: { type: String },
             mimetype: { type: String },
-            itemId: { type: String },
+            itemId: { type: String, index: true },
             uploadedBy: { type: Schema.Types.ObjectId, ref: DbModels.USER },
             uploadStatus: {
                 type: String,
@@ -140,6 +140,7 @@ const SermonSchema = new Schema<ISermonDoc>(
 );
 
 SermonSchema.index({ title: 'text', description: 'text' });
+SermonSchema.index({ 'item.itemId': 1 });
 
 const Sermon: Model<ISermonDoc> = mongoose.model<ISermonDoc>(
     DbModels.SERMON,

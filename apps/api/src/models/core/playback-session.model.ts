@@ -31,9 +31,10 @@ const PlaybackSessionSchema = new Schema<IPlaybackSessionDoc>(
         sourceType: {
             type: String,
             enum: Object.values(MediaSourceType),
+            required: true,
             index: true,
         },
-        sourceId: { type: String },
+        sourceId: { type: String, required: true },
 
         queueRef: { type: String },
         queueShuffled: { type: Boolean, default: false },

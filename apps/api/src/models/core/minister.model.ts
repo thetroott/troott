@@ -118,7 +118,7 @@ const MinisterSchema = new Schema<IMinisterDoc>(
 MinisterSchema.index({
     firstName: 'text',
     lastName: 'text',
-    ministerialName: 'text',
+    'profile.ministerialName': 'text',
     email: 'text',
     'profile.description': 'text',
     'profile.ministryName': 'text',

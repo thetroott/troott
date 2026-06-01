@@ -44,6 +44,12 @@ const PlaybackSchema = new Schema<IPlaybackDoc>(
         sourceId: { type: String },
         sourcePosition: { type: Number },
 
+        mediaId: { type: String, index: true },
+        mediaType: {
+            type: String,
+            enum: Object.values(MediaSourceType),
+        },
+
         playedAt: { type: String },
         startedAt: { type: String },
         endedAt: { type: String },

@@ -3,6 +3,7 @@ import {
     ISubscriptionIntentDoc,
     SubscriptionIntentState,
 } from '@/interfaces/subscriptionIntent.interface';
+import { BillingFrequency, Currency } from '@/interfaces/subscription.interface';
 import { DbModels } from '@/types/common.enum';
 
 const SubscriptionIntentSchema = new Schema<ISubscriptionIntentDoc>(
@@ -22,11 +23,13 @@ const SubscriptionIntentSchema = new Schema<ISubscriptionIntentDoc>(
 
         currency: {
             type: String,
+            enum: Object.values(Currency),
             required: true,
         },
 
         interval: {
             type: String,
+            enum: Object.values(BillingFrequency),
             required: true,
         },
 
@@ -57,10 +60,10 @@ const SubscriptionIntentSchema = new Schema<ISubscriptionIntentDoc>(
         toJSON: {
             virtuals: true,
             getters: true,
-            transform(_doc, ret) {
+            transform(_doc, ret: Record<string, unknown>) {
                 return {
                     ...ret,
-                    id: ret._id.toString(),
+                    id: String(ret._id),
                 };
             },
         },

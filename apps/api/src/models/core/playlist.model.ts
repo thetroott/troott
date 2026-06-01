@@ -5,6 +5,7 @@ import {
     PlaylistOwnerType,
     PlaylistVisibility,
     PlaylistStatus,
+    PlaylistItemResourceType,
 } from '@/interfaces/core/playlist.interface';
 import { DbModels } from '@/types/common.enum';
 
@@ -19,7 +20,16 @@ const PlaylistSchema = new Schema<IPlaylistDoc>(
 
         items: [
             {
-                item: { type: Schema.Types.ObjectId, required: true },
+                itemType: {
+                    type: String,
+                    enum: Object.values(PlaylistItemResourceType),
+                    required: true,
+                },
+                item: {
+                    type: Schema.Types.ObjectId,
+                    required: true,
+                    refPath: 'itemType',
+                },
                 position: { type: Number },
                 addedAt: { type: String },
                 addedBy: { type: Schema.Types.ObjectId, ref: DbModels.USER },
@@ -50,6 +60,7 @@ const PlaylistSchema = new Schema<IPlaylistDoc>(
         ownerType: {
             type: String,
             enum: Object.values(PlaylistOwnerType),
+            required: true,
             index: true,
         },
         owner: { type: Schema.Types.ObjectId, ref: DbModels.USER },

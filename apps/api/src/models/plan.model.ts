@@ -1,6 +1,7 @@
 import mongoose, { Model, Schema } from 'mongoose';
 import IPlanDoc, { PlanType } from '@/interfaces/plan.interface';
 import { DbModels } from '@/types/common.enum';
+import { FREE_PLAN_PAYSTACK_CODES } from '@/constants/plan.constants';
 
 const PlanSchema = new Schema<IPlanDoc>(
     {
@@ -16,7 +17,7 @@ const PlanSchema = new Schema<IPlanDoc>(
         name: { type: String, required: true },
         displayName: { type: String, required: true },
         isEnabled: { type: Boolean, default: true },
-        description: { type: String },
+        description: { type: String, required: true },
 
         trial: {
             days: { type: Number, required: true },
@@ -43,10 +44,26 @@ const PlanSchema = new Schema<IPlanDoc>(
         },
 
         paystackPlanCodes: {
-            nairaMonthly: { type: String },
-            nairaYearly: { type: String },
-            dollarMonthly: { type: String },
-            dollarYearly: { type: String },
+            nairaMonthly: {
+                type: String,
+                required: true,
+                default: FREE_PLAN_PAYSTACK_CODES.nairaMonthly,
+            },
+            nairaYearly: {
+                type: String,
+                required: true,
+                default: FREE_PLAN_PAYSTACK_CODES.nairaYearly,
+            },
+            dollarMonthly: {
+                type: String,
+                required: true,
+                default: FREE_PLAN_PAYSTACK_CODES.dollarMonthly,
+            },
+            dollarYearly: {
+                type: String,
+                required: true,
+                default: FREE_PLAN_PAYSTACK_CODES.dollarYearly,
+            },
         },
     },
     {

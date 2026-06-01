@@ -5,6 +5,7 @@ import ISubscriptionDoc, {
     SubscriptionStatus,
 } from '@/interfaces/subscription.interface';
 import { DbModels } from '@/types/common.enum';
+import { debitCardSubSchema } from '@/models/shared-schemas';
 
 const SubscriptionSchema = new Schema<ISubscriptionDoc>(
     {
@@ -26,10 +27,10 @@ const SubscriptionSchema = new Schema<ISubscriptionDoc>(
 
         billing: {
             retries: { type: Number, default: 0 },
-            startAt: { type: Date },
-            paidAt: { type: Date },
-            dueAt: { type: Date },
-            graceAt: { type: Date },
+            startAt: { type: Date, required: true },
+            paidAt: { type: Date, required: true },
+            dueAt: { type: Date, required: true },
+            graceAt: { type: Date, required: true },
             amount: { type: Number, required: true },
             frequency: {
                 type: String,
@@ -39,18 +40,11 @@ const SubscriptionSchema = new Schema<ISubscriptionDoc>(
             isPaid: { type: Boolean, default: false },
         },
 
-        card: {
-            authCode: { type: String, select: false },
-            cardBin: { type: String },
-            cardLast: { type: String },
-            expiryMonth: { type: String },
-            expiryYear: { type: String },
-            cardPan: { type: String, select: false },
-        },
+        card: debitCardSubSchema,
 
         trial: {
-            days: { type: Number },
-            enabled: { type: Boolean },
+            days: { type: Number, required: true },
+            enabled: { type: Boolean, required: true },
         },
 
         listener: {

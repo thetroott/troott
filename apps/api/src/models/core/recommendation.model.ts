@@ -10,6 +10,10 @@ import {
     TimeOfDay,
 } from '@/interfaces/core/recommendation.interface';
 import { DbModels } from '@/types/common.enum';
+import {
+    DeviceType,
+    NetworkType,
+} from '@/interfaces/core/playback.interface';
 
 const ReasonMetadataSchema = new Schema(
     {
@@ -49,8 +53,16 @@ const ContextSchema = new Schema(
             enum: Object.values(TimeOfDay),
             default: TimeOfDay.MORNING,
         },
-        deviceType: { type: String, default: 'unknown' },
-        networkType: { type: String, default: 'unknown' },
+        deviceType: {
+            type: String,
+            enum: [...Object.values(DeviceType), 'unknown'],
+            default: 'unknown',
+        },
+        networkType: {
+            type: String,
+            enum: [...Object.values(NetworkType), 'unknown'],
+            default: 'unknown',
+        },
     },
     { _id: false },
 );

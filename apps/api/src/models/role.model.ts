@@ -20,7 +20,7 @@ const RoleSchema = new mongoose.Schema<IRoleDoc>(
         },
         slug: { type: String, default: '' },
 
-        permissions: [{ type: String, ref: DbModels.PERMISSION }],
+        permissions: [{ type: String }],
         users: [
             {
                 type: Schema.Types.ObjectId,

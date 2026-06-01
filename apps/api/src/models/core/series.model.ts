@@ -1,5 +1,6 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import type ISeriesDoc from '@/interfaces/core/series.interface';
+import { UploadStatus } from '@/interfaces/core/sermon.interface';
 import { DbModels } from '@/types/common.enum';
 
 const SeriesSchema = new Schema<ISeriesDoc>(
@@ -9,7 +10,22 @@ const SeriesSchema = new Schema<ISeriesDoc>(
 
         title: { type: String, required: true, index: true },
         description: { type: String, default: '', maxLength: 1000 },
-        banner: { type: Schema.Types.Mixed },
+        banner: {
+            item: { type: String },
+            width: { type: Number },
+            height: { type: Number },
+            size: { type: Number },
+            fileType: { type: String },
+            mimetype: { type: String },
+            itemId: { type: String },
+            uploadedBy: { type: Schema.Types.ObjectId, ref: DbModels.USER },
+            uploadStatus: {
+                type: String,
+                enum: Object.values(UploadStatus),
+            },
+            createdAt: { type: String },
+            updatedAt: { type: String },
+        },
         totalDuration: { type: Number, default: 0 },
         numberOfSermons: { type: Number, default: 0 },
         tags: [{ type: String, index: true }],
@@ -22,7 +38,11 @@ const SeriesSchema = new Schema<ISeriesDoc>(
                 index: true,
             },
         ],
-        topic: { type: Schema.Types.Mixed },
+        topic: {
+            type: Schema.Types.ObjectId,
+            ref: DbModels.TOPIC,
+            index: true,
+        },
 
         status: { type: String, index: true },
         isPublic: { type: Boolean, default: true, index: true },
