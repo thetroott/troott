@@ -35,6 +35,7 @@
         "start": "expo start --port 8177",
         "start:clear": "expo start --port 8177 -c",
         "android": "expo run:android --port 8177",
+        "android:open-dev-client": "bash ./scripts/open-android-dev-client.sh",
         "ios": "expo run:ios --port 8177",
         "ios:open-dev-client": "bash ./scripts/open-ios-dev-client.sh",
         "ios:resilient": "expo run:ios --port 8177; bash ./scripts/open-ios-dev-client.sh",

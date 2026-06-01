@@ -8,6 +8,12 @@ const { withNativeWind } = require('nativewind/metro');
 
 const projectRoot = __dirname;
 const monorepoRoot = path.resolve(projectRoot, '../..');
+const reactDevToolsSettingsShim = path.resolve(
+    projectRoot,
+    'shims/ReactDevToolsSettingsManager.web.js',
+);
+const reactDevToolsSettingsRe =
+    /[/\\]rndevtools[/\\]ReactDevToolsSettingsManager$/;
 
 // react-native-svg (15.x) imports `buffer`; RN has no Node core — use the npm polyfill.
 const bufferPackageRoot = path.dirname(require.resolve('buffer/package.json'));
@@ -129,6 +135,18 @@ function attachMonorepoResolver(config) {
             if (r) {
                 return r;
             }
+        }
+
+        // RN 0.81 ships ReactDevToolsSettingsManager.ios/.android only; web needs a stub.
+        if (
+            platform === 'web' &&
+            typeof moduleName === 'string' &&
+            (reactDevToolsSettingsRe.test(moduleName) ||
+                moduleName.endsWith(
+                    'rndevtools/ReactDevToolsSettingsManager',
+                ))
+        ) {
+            return { type: 'sourceFile', filePath: reactDevToolsSettingsShim };
         }
 
         return rewriteNestedReactNativeResolution(delegate());

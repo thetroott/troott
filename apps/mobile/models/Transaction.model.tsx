@@ -1,5 +1,6 @@
 import type Subscription from './Subscription.model';
 import type Listener from './Listener.model';
+import type { IDebitCard } from './_api-types';
 
 export enum TransactionType {
     PAYMENT = 'PAYMENT',
