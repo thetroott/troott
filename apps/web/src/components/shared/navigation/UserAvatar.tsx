@@ -2,6 +2,7 @@ import { Avatar, AvatarImage } from '@radix-ui/react-avatar';
 import { AvatarFallback } from '@/components/ui/avatar';
 import { ChevronDown, Settings, LogOut } from 'lucide-react';
 import { FaUser } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,9 +13,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { useState } from 'react';
+import useAuth from '@/hooks/app/useAuth';
+import { PATH_PROFILE, PATH_SETTINGS } from '@/routes/paths';
 
 const UserAvatar = () => {
+    const navigate = useNavigate();
     const [imageError, setImageError] = useState(false);
+    const { logout } = useAuth();
 
     const handleImageError = () => {
         setImageError(true);
@@ -46,16 +51,22 @@ const UserAvatar = () => {
                 <DropdownMenuContent sideOffset={10}>
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={() => navigate(PATH_PROFILE)}
+                    >
                         <FaUser />
                         Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                        onClick={() => navigate(PATH_SETTINGS)}
+                    >
                         <Settings />
                         Settings
                     </DropdownMenuItem>
-                    <DropdownMenuItem variant="destructive">
-                        {' '}
+                    <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => void logout()}
+                    >
                         <LogOut />
                         Logout
                     </DropdownMenuItem>

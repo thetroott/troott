@@ -4,9 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
-import { useUpload } from '@/context/upload/uploadState';
 import UploadEntryStepModal from '@/components/shared/upload/UploadEntryStepModal';
-import { applySelectedAudioToUpload } from '@/utils/upload-audio-selection.util';
+import { useCreateSermonEntry } from '@/hooks/upload/useCreateSermonEntry';
 import {
     ArrowDown,
     ArrowUp,
@@ -18,6 +17,7 @@ import {
     ArrowDownUp,
 } from 'lucide-react';
 import SermonsGridView from './SermonsGridView';
+import { MySermonsEmptyTableSection } from '@/components/shared/my-sermons/MySermonsEmptyShell';
 import SermonsListView from './SermonsListView';
 import MySermonsPagination from './MySermonsPagination';
 import {
@@ -25,6 +25,12 @@ import {
     SermonTitleMicGlyph,
 } from '@/components/shared/my-sermons/my-sermons-ui';
 import { cn } from '@/lib/utils';
+import storage from '@/api/services/local-storage';
+import {
+    PATH_SEG_SERMONS_UPLOAD,
+    studioAnalyticsPath,
+    studioUploadPath,
+} from '@/routes/paths';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -50,6 +56,7 @@ import {
     useMoveSermonToBinMutation,
     useUpdateSermonMutation,
 } from '@/hooks/app/useSermon';
+import { resolveSermonPlaybackUrl } from '@/utils/sermon-list-map.util';
 import type { MinisterSermonListParams } from '@/constants/sermon-query-keys';
 export type { Sermon };
 
@@ -168,8 +175,13 @@ const SermonsTable = ({
     const queryClient = useQueryClient();
     const updateSermonMutation = useUpdateSermonMutation();
     const moveSermonToBinMutation = useMoveSermonToBinMutation();
-    const { dispatch, state: uploadState } = useUpload();
-    const [entryModalOpen, setEntryModalOpen] = useState(false);
+    const {
+        entryModalOpen,
+        setEntryModalOpen,
+        openEntry,
+        onFileSelected,
+        isLoading: uploadEntryLoading,
+    } = useCreateSermonEntry();
     const [activeTab, setActiveTab] = useState<MainTab>('Sermon');
     const [selectedSermons, setSelectedSermons] = useState<Set<string>>(
         new Set(),
@@ -232,9 +244,12 @@ const SermonsTable = ({
 
     const handleEdit = useCallback(
         (sermonId: string) => {
-            navigate('/upload-sermon', {
-                state: { resumeSermonId: sermonId },
-            });
+            const code = storage.getStudioCode()?.trim();
+            if (code) {
+                navigate(studioUploadPath(code, PATH_SEG_SERMONS_UPLOAD), {
+                    state: { resumeSermonId: sermonId },
+                });
+            }
         },
         [navigate],
     );
@@ -329,8 +344,7 @@ const SermonsTable = ({
             const d = (
                 body as { data?: Record<string, unknown> } | undefined
             )?.data;
-            const url =
-                d && typeof d.sermonUrl === 'string' ? d.sermonUrl : null;
+            const url = d ? resolveSermonPlaybackUrl(d) : null;
             if (!url) {
                 toast.error('No audio file is available for this sermon yet.');
                 return;
@@ -341,9 +355,19 @@ const SermonsTable = ({
         }
     }, []);
 
-    const handleAnalytics = useCallback(() => {
-        toast.message('Analytics for this sermon is not available yet.');
-    }, []);
+    const handleAnalytics = useCallback(
+        (sermonId: string) => {
+            const code = storage.getStudioCode()?.trim();
+            if (!code) {
+                toast.error('Studio code not found.');
+                return;
+            }
+            navigate(
+                `${studioAnalyticsPath(code)}?tab=overview&sermonId=${encodeURIComponent(sermonId)}`,
+            );
+        },
+        [navigate],
+    );
 
     const handleMoveToTrash = useCallback(
         async (sermonId: string) => {
@@ -422,6 +446,20 @@ const SermonsTable = ({
 
     const filteredSermons = getFilteredSermons();
     const hasFilteredSermons = filteredSermons.length > 0;
+
+    const hasListFilters = controlled
+        ? Boolean(search.trim()) ||
+          status !== 'all' ||
+          Boolean(dateFrom) ||
+          Boolean(dateTo)
+        : Boolean(debouncedLocalSearch) ||
+          localStatus !== 'all';
+
+    const showEmptyTableShell =
+        !hasFilteredSermons &&
+        !hasListFilters &&
+        activeTab === 'Sermon' &&
+        (controlled ? (totalCountProp ?? 0) === 0 : sermons.length === 0);
 
     const displayPage = controlled ? page : localPage;
 
@@ -512,12 +550,8 @@ const SermonsTable = ({
             <UploadEntryStepModal
                 open={entryModalOpen}
                 onOpenChange={setEntryModalOpen}
-                isLoading={uploadState.isLoading}
-                onFileSelected={(file) => {
-                    applySelectedAudioToUpload(dispatch, file);
-                    setEntryModalOpen(false);
-                    navigate('/upload-sermon');
-                }}
+                isLoading={uploadEntryLoading}
+                onFileSelected={onFileSelected}
             />
             <div className={MY_SERMONS_PAGE.mainColumn}>
                 <div className={MY_SERMONS_PAGE.chromeStack}>
@@ -536,7 +570,7 @@ const SermonsTable = ({
                         <button
                             type="button"
                             className={MY_SERMONS_PAGE.createCta}
-                            onClick={() => setEntryModalOpen(true)}
+                            onClick={openEntry}
                         >
                             <Plus
                                 className="h-5 w-5 shrink-0 "
@@ -810,6 +844,8 @@ const SermonsTable = ({
                                 onPageChange={setPage}
                             />
                         </div>
+                    ) : showEmptyTableShell ? (
+                        <MySermonsEmptyTableSection />
                     ) : (
                         <div className="flex flex-col items-center justify-center py-16">
                             <div className="text-center">

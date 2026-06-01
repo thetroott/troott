@@ -9,7 +9,10 @@ const FeedSection: React.FC<FeedSectionProps> = ({ hasSermons = false }) => {
     return (
         <div className="space-y-6">
             {/* Your feeds section */}
-            <div className="bg-card rounded-xl border border-border/50 p-6">
+            <div
+                className="bg-card rounded-xl border border-border/50 p-6"
+                data-tour="your-feeds"
+            >
                 <h3 className="text-lg font-semibold text-foreground mb-4">
                     Your feeds
                 </h3>
