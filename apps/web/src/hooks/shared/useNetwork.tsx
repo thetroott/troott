@@ -15,7 +15,7 @@ const useNetwork = (trigger: boolean = true) => {
 
     const popNetwork = () => {
         // redirect
-        window.location.href = '/no-network';
+        window.location.href = '/no-network'; // PATH_NO_NETWORK
     };
 
     return { popNetwork };

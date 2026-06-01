@@ -7,6 +7,10 @@ import {
 } from '@tanstack/react-query';
 import type { AxiosResponse } from 'axios';
 import api from '@/api/config';
+import cookieService from '@/api/services/cookies';
+import { UserType } from '@/models/User.model';
+import { normalizeUserType } from '@/utils/auth-redirect.util';
+import { dispatchOnboardingProfileRefresh } from '@/utils/hub-onboarding.util';
 import type { IAPIResponse } from '@/api/types';
 import type { IListQuery } from '@/utils/interfaces';
 import {
@@ -104,8 +108,17 @@ export function usePublishSermonMutation(
                 !data.error &&
                 variables.payload.status === MediaStatus.PUBLISHED
             ) {
-                void api.minister
-                    .onboardingFirstSermonComplete({})
+                const ut = normalizeUserType(cookieService.getUserType() || '');
+                const completeFirstSermon =
+                    ut === UserType.CREATOR.toLowerCase()
+                        ? api.creator.onboardingFirstSermonComplete({})
+                        : api.minister.onboardingFirstSermonComplete({});
+                void completeFirstSermon
+                    .then((res) => {
+                        if (!res.error) {
+                            dispatchOnboardingProfileRefresh();
+                        }
+                    })
                     .catch(() => undefined);
             }
             onSuccess?.(data, variables, onMutateResult, context);
@@ -144,6 +157,36 @@ export function useUpdateSermonMutation(
         ...rest,
         mutationFn: async ({ id, payload }) =>
             api.sermon.updateSermon(id, payload),
+        onSuccess: (data, variables, onMutateResult, context) => {
+            void qc.invalidateQueries({ queryKey: sermonQueryKeys.all });
+            onSuccess?.(data, variables, onMutateResult, context);
+        },
+    });
+}
+
+export function useRestoreSermonMutation(
+    options?: UseMutationOptions<IAPIResponse, Error, { id: string }>,
+) {
+    const qc = useQueryClient();
+    const { onSuccess, ...rest } = options ?? {};
+    return useMutation({
+        ...rest,
+        mutationFn: async ({ id }) => api.sermon.restoreSermonFromBin(id),
+        onSuccess: (data, variables, onMutateResult, context) => {
+            void qc.invalidateQueries({ queryKey: sermonQueryKeys.all });
+            onSuccess?.(data, variables, onMutateResult, context);
+        },
+    });
+}
+
+export function useDeleteSermonMutation(
+    options?: UseMutationOptions<IAPIResponse, Error, { id: string }>,
+) {
+    const qc = useQueryClient();
+    const { onSuccess, ...rest } = options ?? {};
+    return useMutation({
+        ...rest,
+        mutationFn: async ({ id }) => api.sermon.deleteSermon(id),
         onSuccess: (data, variables, onMutateResult, context) => {
             void qc.invalidateQueries({ queryKey: sermonQueryKeys.all });
             onSuccess?.(data, variables, onMutateResult, context);

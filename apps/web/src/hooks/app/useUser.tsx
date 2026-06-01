@@ -14,6 +14,8 @@ import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
 import useAuth from './useAuth';
 import useContextType from '../shared/useContextType';
 import useNetwork from '../shared/useNetwork';
+import { useSession } from '@/context/session/sessionState';
+import cookieService from '@/api/services/cookies';
 
 const INTERNAL_PORTAL_USER_TYPES = new Set<string>(
     INTERNAL_PORTAL_ROLES as unknown as string[],
@@ -31,10 +33,14 @@ function normalizeUserType(raw: string): string {
  */
 export function useWebPortalEligibility() {
     const { userContext } = useContextType();
+    const { isHydratingSession } = useSession();
     const persistedType = userContext.userType;
     const user = userContext.user as { userType?: string } | null;
+    const cookieType = cookieService.getUserType() || '';
     const effective = normalizeUserType(
-        (user?.userType as string | undefined) ?? persistedType,
+        (user?.userType as string | undefined) ??
+            persistedType ??
+            cookieType,
     );
 
     return useMemo(() => {
@@ -48,9 +54,9 @@ export function useWebPortalEligibility() {
             userType: effective,
             isEligible: isInternal,
             isListenerLike,
-            isHydratingUserType: !hasType,
+            isHydratingUserType: isHydratingSession || !hasType,
         };
-    }, [effective]);
+    }, [effective, isHydratingSession]);
 }
 
 const useUser = () => {
@@ -61,8 +67,6 @@ const useUser = () => {
     const {
         users,
         user,
-        talents,
-        talent,
         items,
         loading,
         loader,
@@ -190,8 +194,6 @@ const useUser = () => {
     return {
         users,
         user,
-        talents,
-        talent,
         loading,
         loader,
         items,
