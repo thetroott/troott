@@ -8,8 +8,14 @@ export function ministerSermonDocToDraft(doc: Record<string, unknown>): IDraft {
         ? doc.tags.map((t) => String(t))
         : [];
     const topic = String(doc.topic ?? doc.category ?? '');
-    const img = doc.image as { url?: string } | undefined;
+    const imageSubdoc = doc.image as { item?: string } | undefined;
     const series = doc.series as { id?: string } | undefined;
+    const thumbnailPreview =
+        typeof doc.imageUrl === 'string' && doc.imageUrl.trim()
+            ? doc.imageUrl.trim()
+            : typeof imageSubdoc?.item === 'string' && imageSubdoc.item.trim()
+              ? imageSubdoc.item.trim()
+              : null;
     return {
         id,
         draftId: id,
@@ -22,12 +28,7 @@ export function ministerSermonDocToDraft(doc: Record<string, unknown>): IDraft {
             typeof doc.isPublic === 'boolean' ? doc.isPublic : undefined,
         file: null,
         thumbnail: null,
-        thumbnailPreview:
-            typeof doc.imageUrl === 'string'
-                ? doc.imageUrl
-                : typeof img?.url === 'string'
-                  ? img.url
-                  : null,
+        thumbnailPreview,
         scheduledDate: null,
         seriesId:
             typeof doc.seriesId === 'string'

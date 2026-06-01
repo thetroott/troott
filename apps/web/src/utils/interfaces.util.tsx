@@ -231,12 +231,24 @@ export interface IRouteItem {
     /** Used by sidebar layouts that show a shorter title */
     displayTitle?: string;
     url: string;
+    redirect?: boolean | string;
     isAuth: boolean;
+    path?: string;
+    element?: ReactNode;
+    errorElement?: ReactNode;
+    role?: UserType;
+    /** React Router index route (no path segment). */
+    index?: boolean;
+    /** When set with `isAuth: true`, optional role allow-list for the route row. */
+    roles?: string[];
     iconName?: string;
     action?: RouteActionType;
-    content: {
+    content?: {
         backButton?: boolean;
         collapsed?: boolean;
+        description?: string;
+        maxWidth?: string;
+        onboardingType?: string;
     };
     params?: Array<IRouteParam>;
 }
@@ -247,27 +259,8 @@ export interface IInRoute extends IRouteItem {
 }
 
 export interface IRoute extends IRouteItem {
-    subroutes?: Array<IRouteItem>;
+    subroutes?: Array<IRoute>;
     inroutes?: Array<IInRoute>;
-    /** Optional redirect hint for legacy route tables */
-    redirect?: boolean | string;
-}
-
-/** Helpers exported from `routes/routes/helper.ts` */
-export interface IRoutil {
-    computePath: (route: string) => string;
-    computeSubPath: (route: IRoute, subroute: IRouteItem) => string;
-    computeInPath: (inroute: IInRoute) => string;
-    computeAppRoute: (route: IRoute) => string;
-    inRoute: (payload: {
-        route: string;
-        name: string;
-        params?: Array<IRouteParam>;
-    }) => string;
-    resolveRouteParams: (
-        params: Array<IRouteParam>,
-        stickTo: 'app' | 'page',
-    ) => string;
 }
 
 export interface IState {

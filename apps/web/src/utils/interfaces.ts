@@ -4,5 +4,4 @@ export type {
     IRoute,
     IRouteItem,
     IRouteParam,
-    IRoutil,
 } from './interfaces.util';
