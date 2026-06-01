@@ -26,16 +26,25 @@ export async function startSermonAudioUpload(
         onProgress,
         signal,
     )) as AxiosResponse<{
-        data?: { id?: string; uploadRef?: string };
+        data?: {
+            id?: string;
+            uploadRef?: string;
+            item?: { itemId?: string };
+        };
     }>;
 
     const payload = res.data?.data as
-        | { id?: string; uploadRef?: string }
+        | { id?: string; uploadRef?: string; item?: { itemId?: string } }
         | undefined;
 
     if (!payload?.id) {
         throw new Error('Upload response did not include a sermon id.');
     }
 
-    return { sermonId: payload.id, uploadRef: payload.uploadRef };
+    const uploadRef =
+        payload.uploadRef?.trim() ||
+        payload.item?.itemId?.trim() ||
+        undefined;
+
+    return { sermonId: payload.id, uploadRef };
 }
