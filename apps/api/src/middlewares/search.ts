@@ -183,10 +183,10 @@ const buildSort = (q: ISearchQuery): Record<string, 1 | -1> => {
         const fields = q.queryParam.sort
             .toString()
             .split(',')
-            .filter((field) => field.trim() !== '');
+            .filter((field: string) => field.trim() !== '');
 
         if (fields.length > 0) {
-            fields.forEach((field) => {
+            fields.forEach((field: string) => {
                 sort[field] = order;
             });
         }
@@ -261,7 +261,7 @@ export const search = async (
         q.model.countDocuments(filter),
     ]);
 
-    const pagination: Record<string, any> = {};
+    const pagination: IPagination['pagination'] = {};
     const totalPages = Math.ceil(total / limit);
 
     if (page < totalPages) {

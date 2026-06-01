@@ -3,32 +3,39 @@ import type ICreatorDoc from '@/interfaces/core/creator.interface';
 import { CreatorStatus, DocumentType } from '@/interfaces/core/creator.interface';
 import  { VerificationStatus } from '@/interfaces/core/minister.interface';
 import { DbModels } from '@/types/common.enum';
+import { countrySubSchema } from '@/models/shared-schemas';
 
 const CreatorSchema = new Schema<ICreatorDoc>(
     {
-        code: { type: String, unique: true, sparse: true, index: true },
+        code: {
+            type: String,
+            unique: true,
+            sparse: true,
+            index: true,
+            required: true,
+        },
 
-        firstName: { type: String },
-        lastName: { type: String },
+        firstName: { type: String, required: true },
+        lastName: { type: String, required: true },
         middleName: { type: String },
-        gender: { type: String },
-        dateOfBirth: { type: Date },
-        phoneNumber: { type: String },
-        phoneCode: { type: String, default: '+234' },
-        countryPhone: { type: String },
-        country: { type: Schema.Types.Mixed },
-        homeCountry: { type: Schema.Types.Mixed },
+        gender: { type: String, required: true },
+        dateOfBirth: { type: Date, required: true },
+        phoneNumber: { type: String, required: true },
+        phoneCode: { type: String, default: '+234', required: true },
+        countryPhone: { type: String, required: true },
+        country: countrySubSchema,
+        homeCountry: countrySubSchema,
 
-        avatar: { type: String },
-        banner: { type: String },
-        slug: { type: String, unique: true },
+        avatar: { type: String, required: true },
+        banner: { type: String, required: true },
+        slug: { type: String, unique: true, required: true },
         email: { type: String, required: true, unique: true },
 
         profile: {
-            displayName: { type: String },
-            description: { type: String, maxLength: 500 },
-            username: { type: String },
-            websiteUrl: { type: String },
+            displayName: { type: String, required: true },
+            description: { type: String, maxLength: 500, required: true },
+            username: { type: String, required: true },
+            websiteUrl: { type: String, required: true },
             socials: [
                 {
                     name: { type: String },
@@ -39,8 +46,8 @@ const CreatorSchema = new Schema<ICreatorDoc>(
             languages: [{ type: String }],
         },
         onboarding: {
-            step: { type: Number },
-            status: { type: String },
+            step: { type: Number, required: true },
+            status: { type: String, required: true },
         },
 
         verification: {
@@ -66,13 +73,17 @@ const CreatorSchema = new Schema<ICreatorDoc>(
             type: String,
             enum: Object.values(CreatorStatus),
             default: CreatorStatus.ACTIVE,
+            required: true,
         },
-        published: { type: Boolean, default: false },
+        published: { type: Boolean, default: false, required: true },
 
         monthlyListeners: { type: Number, default: 0 },
 
-        settings: { type: Schema.Types.Mixed },
-        subscription: { type: Schema.Types.Mixed },
+        settings: { type: Schema.Types.ObjectId },
+        subscription: {
+            type: Schema.Types.ObjectId,
+            ref: DbModels.SUBSCRIPTION,
+        },
         user: {
             type: Schema.Types.ObjectId,
             ref: DbModels.USER,

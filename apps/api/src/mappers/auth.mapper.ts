@@ -5,6 +5,68 @@ import {
 } from '@/dtos/auth.dto';
 import type { IUserDoc } from '@/interfaces/user.interface';
 import { UserType, OnboardStatus } from '@/interfaces/user.interface';
+import ministerRepository from '@/repository/core/minister.repository';
+import listenerRepository from '@/repository/core/listener.repository';
+import creatorRepository from '@/repository/core/creator.repository';
+import adminRepository from '@/repository/admin.repository';
+import studioRepository from '@/repository/core/studio.repository';
+
+function userDocId(user: IUserDoc | { _id?: unknown; id?: unknown }): string {
+    const u = user as { _id?: unknown; id?: unknown };
+    if (u._id != null) {
+        return String(u._id);
+    }
+    if (u.id != null) {
+        return String(u.id);
+    }
+    return '';
+}
+
+function refId(ref: unknown): string {
+    if (ref == null) {
+        return '';
+    }
+    if (typeof ref === 'string') {
+        return ref;
+    }
+    if (typeof ref === 'object') {
+        const o = ref as { _id?: unknown; id?: unknown };
+        if (o._id != null) {
+            return String(o._id);
+        }
+        if (o.id != null) {
+            return String(o.id);
+        }
+    }
+    return '';
+}
+
+function codeFromDoc(doc: unknown): string | undefined {
+    if (doc == null || typeof doc !== 'object') {
+        return undefined;
+    }
+    const code = (doc as { code?: string }).code;
+    return typeof code === 'string' && code.trim() ? code.trim() : undefined;
+}
+
+async function resolveCode(
+    ref: unknown,
+    fetchById: (id: string) => Promise<{ error: boolean; data?: unknown }>,
+): Promise<string | undefined> {
+    const inline = codeFromDoc(ref);
+    if (inline) {
+        return inline;
+    }
+    const id = refId(ref);
+    if (!id) {
+        return undefined;
+    }
+    const res = await fetchById(id);
+    if (res.error || !res.data) {
+        return undefined;
+    }
+    return codeFromDoc(res.data);
+}
 
 class AuthMapper {
     constructor() {}
@@ -18,7 +80,7 @@ class AuthMapper {
         user: IUserDoc,
     ): Promise<MapRegisteredUserDTO> {
         const result: MapRegisteredUserDTO = {
-            id: user.id.toString(),
+            id: userDocId(user),
             code: user.code,
             slug: user.slug,
             firstName: user.firstName,
@@ -67,6 +129,45 @@ class AuthMapper {
                 status: user.onboard?.status ?? OnboardStatus.NOT_STARTED,
             },
         };
+
+        const u = user as IUserDoc & {
+            minister?: unknown;
+            listener?: unknown;
+            primaryStudio?: unknown;
+        };
+
+        result.ministerCode =
+            (await resolveCode(u.minister, (id) =>
+                ministerRepository.findById(id),
+            )) ?? null;
+        result.listenerCode =
+            (await resolveCode(u.listener, (id) =>
+                listenerRepository.findById(id),
+            )) ?? null;
+        result.studioCode =
+            (await resolveCode(u.primaryStudio, (id) =>
+                studioRepository.findStudioById(id),
+            )) ?? null;
+
+        if (user.userType === UserType.CREATOR) {
+            const cRes = await creatorRepository.findOne({
+                user: user.id,
+            } as never);
+            result.creatorCode = cRes.error
+                ? null
+                : (codeFromDoc(cRes.data) ?? null);
+        } else {
+            result.creatorCode = null;
+        }
+
+        if (user.isAdmin || user.userType === UserType.ADMIN) {
+            const aRes = await adminRepository.findAdminByUser(userDocId(user));
+            result.adminCode = aRes.error
+                ? null
+                : (codeFromDoc(aRes.data) ?? null);
+        } else {
+            result.adminCode = null;
+        }
 
         return result;
     }

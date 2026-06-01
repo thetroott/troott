@@ -265,14 +265,33 @@ class SermonMapper {
             shareableUrl = sermon.shareableUrl;
         }
 
+        const uploadRef =
+            audio?.itemId != null ? String(audio.itemId) : undefined;
+
         const result: Partial<SermonDTO> = {
             id: String(sermon._id),
+            ...(uploadRef ? { uploadRef } : {}),
 
             title: sermon.title,
             description: sermon.description,
             duration,
 
+            playbackUrl: sermon.playbackUrl ?? '',
+            manifestUrl: sermon.manifestUrl ?? '',
+            imageUrl: sermon.imageUrl ?? '',
+
             image: imageDto,
+            item: audio
+                ? {
+                      item: audio.item,
+                      duration: audio.duration,
+                      size: audio.size,
+                      fileType: audio.fileType,
+                      mimetype: audio.mimetype,
+                      itemId: audio.itemId,
+                      uploadStatus: audio.uploadStatus,
+                  }
+                : undefined,
             minister: ministers,
 
             topic: sermon.topic,
@@ -281,6 +300,8 @@ class SermonMapper {
             preachedAt: sermon.preachedAt ?? '',
             preachedYear: sermon.preachedYear,
             shareableUrl,
+            status: sermon.status,
+            isPublished: sermon.isPublished,
         };
 
         return result;

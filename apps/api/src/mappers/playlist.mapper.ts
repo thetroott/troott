@@ -3,6 +3,7 @@ import type {
     PlaylistResponseDTO,
 } from '@/dtos/core/playlist.dto';
 import type { IPlaylistDoc } from '@/interfaces/core/playlist.interface';
+import { PlaylistItemResourceType } from '@/interfaces/core/playlist.interface';
 import type ISermonDoc from '@/interfaces/core/sermon.interface';
 import type ISeriesDoc from '@/interfaces/core/series.interface';
 import type IUserDoc from '@/interfaces/user.interface';
@@ -91,8 +92,14 @@ const mapPlaylistItem = (row: any): PlaylistItemDTO => {
         duration = (raw as { duration?: number }).duration;
     }
 
+    const itemType =
+        row.itemType === PlaylistItemResourceType.SERIES
+            ? PlaylistItemResourceType.SERIES
+            : PlaylistItemResourceType.SERMON;
+
     return {
-        id: idOf(raw),
+        id: idOf(row._id ?? row.id ?? raw),
+        itemType,
         item: {
             id: idOf(raw),
             title,

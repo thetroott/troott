@@ -53,11 +53,22 @@ function seriesTitleFromRef(series: unknown): string | undefined {
 class SearchMapper {
     public mapSermon(doc: any): SermonSearchCard {
         const minister = firstMinisterFromSearchDoc(doc);
+        const playbackUrl =
+            typeof doc.playbackUrl === 'string' && doc.playbackUrl.trim()
+                ? doc.playbackUrl.trim()
+                : undefined;
+        const manifestUrl =
+            typeof doc.manifestUrl === 'string' && doc.manifestUrl.trim()
+                ? doc.manifestUrl.trim()
+                : undefined;
+
         return {
             id: docId(doc),
             title: doc.title ?? '',
             imageUrl: doc.imageUrl,
             duration: doc.duration,
+            playbackUrl,
+            manifestUrl,
             ministerName: ministerDisplayName(minister),
             seriesTitle: seriesTitleFromRef(doc.series),
             slug: doc.slug,

@@ -55,6 +55,20 @@ const ListenerSchema = new Schema<IListenerDoc>(
         sharedSermons: [{ type: Schema.Types.ObjectId, ref: DbModels.SERMON }],
         recentlyPlayed: [{ type: Schema.Types.Mixed }],
 
+        listeningHistory: [
+            { type: Schema.Types.ObjectId, ref: DbModels.SERMON },
+        ],
+        following: [{ type: Schema.Types.ObjectId, ref: DbModels.MINISTER }],
+        followers: [{ type: Schema.Types.ObjectId, ref: DbModels.USER }],
+        interests: [{ type: Schema.Types.ObjectId, ref: DbModels.TOPIC }],
+        viewedSermonBites: [{ type: Schema.Types.Mixed }],
+        sharedSermonBites: [{ type: Schema.Types.Mixed }],
+        savedSermonBites: [{ type: Schema.Types.Mixed }],
+        badges: [{ type: Schema.Types.Mixed }],
+        subscriptions: [
+            { type: Schema.Types.ObjectId, ref: DbModels.SUBSCRIPTION },
+        ],
+
         user: {
             type: Schema.Types.ObjectId,
             ref: DbModels.USER,

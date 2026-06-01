@@ -78,7 +78,6 @@ const AdminSchema = new Schema<IAdminDoc>(
 
         settings: {
             type: Schema.Types.ObjectId,
-            ref: DbModels.USER,
         },
 
         user: {
@@ -86,6 +85,14 @@ const AdminSchema = new Schema<IAdminDoc>(
             ref: DbModels.USER,
             required: true,
         },
+
+        apiKeys: [
+            {
+                key: { type: String, required: true },
+                createdAt: { type: Date, default: Date.now },
+                lastUsed: { type: Date },
+            },
+        ],
     },
     {
         timestamps: true,

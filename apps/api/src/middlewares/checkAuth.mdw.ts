@@ -53,7 +53,7 @@ const Protect = asyncHandler(
         }
 
         // Check if token needs refresh
-        if (!tokenService.checkTokenValidity(token)) {
+        if (tokenService.shouldReissueToken(token)) {
             const refreshResult = await tokenService.refreshToken(token);
             if (refreshResult.error) {
                 return next(

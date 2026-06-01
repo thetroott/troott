@@ -1,7 +1,38 @@
 import mongoose, { Schema, Model } from 'mongoose';
 import type ILibraryDoc from '@/interfaces/core/library.interface';
-import { LibraryItemType, LibraryItemAddedFrom } from '@/interfaces/core/library.interface';
+import {
+    LibraryItemType,
+    LibraryItemAddedFrom,
+} from '@/interfaces/core/library.interface';
 import { DbModels } from '@/types/common.enum';
+
+function assertLibraryItemDiscriminator(
+    item: Record<string, unknown>,
+): void {
+    const type = item.type as LibraryItemType;
+    const refByType: Record<LibraryItemType, unknown> = {
+        [LibraryItemType.SERMON]: item.sermon,
+        [LibraryItemType.PLAYLIST]: item.playlist,
+        [LibraryItemType.SERIES]: item.series,
+        [LibraryItemType.MINISTER]: item.minister,
+    };
+    const activeRef = refByType[type];
+    const otherRefs = Object.values(LibraryItemType)
+        .filter((t) => t !== type)
+        .map((t) => refByType[t])
+        .filter((v) => v != null);
+
+    if (!activeRef) {
+        throw new Error(
+            `Library item of type "${type}" must set the matching reference field`,
+        );
+    }
+    if (otherRefs.length > 0) {
+        throw new Error(
+            `Library item of type "${type}" must not set other reference fields`,
+        );
+    }
+}
 
 const LibrarySchema = new Schema<ILibraryDoc>(
     {
@@ -66,6 +97,24 @@ const LibrarySchema = new Schema<ILibraryDoc>(
         },
     },
 );
+
+LibrarySchema.pre('validate', function (next) {
+    try {
+        for (const item of this.items ?? []) {
+            const row = item as unknown as Record<string, unknown>;
+            assertLibraryItemDiscriminator({
+                type: row.type,
+                sermon: row.sermon,
+                playlist: row.playlist,
+                series: row.series,
+                minister: row.minister,
+            });
+        }
+        next();
+    } catch (err) {
+        next(err as Error);
+    }
+});
 
 const Library: Model<ILibraryDoc> = mongoose.model<ILibraryDoc>(
     DbModels.LIBRARY,
