@@ -2,10 +2,7 @@
 
 // App + user
 export const GET_ADMINS = 'GET_ADMINS';
-export const GET_AUDITS = 'GET_AUDITS';
 export const GET_LOGGEDIN_USER = 'GET_LOGGEDIN_USER';
-export const GET_TALENT = 'GET_TALENT';
-export const GET_TALENTS = 'GET_TALENTS';
 export const GET_USER = 'GET_USER';
 export const GET_USERS = 'GET_USERS';
 export const SET_BUSINESS_TYPE = 'SET_BUSINESS_TYPE';

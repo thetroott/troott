@@ -56,13 +56,18 @@ const uploadReducer = (
             return { ...state, activeOption: action.payload };
         case RESET_UPLOAD:
             return buildInitialUploadState();
-        case LOAD_FROM_STORAGE:
+        case LOAD_FROM_STORAGE: {
+            const { file: _storedFile, ...draftFields } = action.payload;
             return {
                 ...state,
-                uploadData: { ...state.uploadData, ...action.payload },
+                uploadData: {
+                    ...state.uploadData,
+                    ...draftFields,
+                },
                 progress: 0,
                 uploadComplete: false,
             };
+        }
         case LOAD_FROM_DRAFT:
             return {
                 ...state,

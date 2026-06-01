@@ -7,15 +7,12 @@ import type {
 
 /** Reducer slice for {@link userReducer}. */
 export interface UserReducerState {
-    audits: unknown;
     users: ICollection;
     admins: unknown;
     user: unknown;
     userDetails: unknown;
     userType: string;
     businessType: string;
-    talents: ICollection;
-    talent: unknown;
     items: unknown[];
     sidebar: ISidebarProps;
     toast: Record<string, unknown>;

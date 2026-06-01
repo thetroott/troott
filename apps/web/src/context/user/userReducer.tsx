@@ -1,9 +1,6 @@
 import {
     GET_ADMINS,
-    GET_AUDITS,
     GET_LOGGEDIN_USER,
-    GET_TALENT,
-    GET_TALENTS,
     GET_USER,
     GET_USERS,
     SET_BUSINESS_TYPE,
@@ -31,8 +28,6 @@ const userReducer = (
     action: UserAction,
 ): UserReducerState => {
     switch (action.type) {
-        case GET_AUDITS:
-            return { ...state, audits: action.payload };
         case GET_USERS:
             return { ...state, users: action.payload as UserReducerState['users'] };
         case SET_TOAST:
@@ -81,13 +76,6 @@ const userReducer = (
                 loading: false,
                 message: action.payload as string,
             };
-        case GET_TALENTS:
-            return {
-                ...state,
-                talents: action.payload as UserReducerState['talents'],
-            };
-        case GET_TALENT:
-            return { ...state, talent: action.payload };
         case SET_ITEMS:
             return { ...state, items: action.payload as UserReducerState['items'] };
         default:

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useReducer, type ReactNode } from 'react';
 
-import sidebarRoutes from '@/routes/routes/sidebar.route';
+import sidebarRoutes from '@/routes/sidebar.route';
 import type { IRoute } from '@/utils/interfaces';
 import type {
     ICollection,
@@ -46,15 +46,12 @@ const initialSidebar = (): ISidebarProps => {
 };
 
 const buildInitialUserState = (): UserReducerState => ({
-    audits: undefined,
     users: emptyCollection(),
     admins: undefined,
     user: null,
     userDetails: undefined,
     userType: '',
     businessType: '',
-    talents: emptyCollection(),
-    talent: null,
     items: [],
     sidebar: initialSidebar(),
     toast: {},

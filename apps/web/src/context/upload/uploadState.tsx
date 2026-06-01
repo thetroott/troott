@@ -27,51 +27,52 @@ import {
     UPLOAD_STORAGE_KEY,
     buildInitialUploadState,
     type IUploadContextValue,
+    type UploadAction,
 } from './types';
 
 export const uploadActions = {
-    setStep: (step: string) => ({
+    setStep: (step: string): UploadAction => ({
         type: SET_STEP,
         payload: step,
     }),
-    setFile: (file: File | null) => ({
+    setFile: (file: File | null): UploadAction => ({
         type: SET_FILE,
         payload: file,
     }),
-    setUploadData: (data: Partial<ISermonUpload>) => ({
+    setUploadData: (data: Partial<ISermonUpload>): UploadAction => ({
         type: SET_UPLOAD_DATA,
         payload: data,
     }),
-    setErrors: (errors: IUploadFormErrors) => ({
+    setErrors: (errors: IUploadFormErrors): UploadAction => ({
         type: SET_ERRORS,
         payload: errors,
     }),
-    setLoading: (loading: boolean) => ({
+    setLoading: (loading: boolean): UploadAction => ({
         type: SET_LOADING,
         payload: loading,
     }),
-    setProgress: (progress: number) => ({
+    setProgress: (progress: number): UploadAction => ({
         type: SET_PROGRESS,
         payload: progress,
     }),
-    setUploadComplete: (complete: boolean) => ({
+    setUploadComplete: (complete: boolean): UploadAction => ({
         type: SET_UPLOAD_COMPLETE,
         payload: complete,
     }),
-    setActiveOption: (option: string) => ({
+    setActiveOption: (option: string): UploadAction => ({
         type: SET_ACTIVE_OPTION,
         payload: option,
     }),
-    resetUpload: () => ({ type: RESET_UPLOAD }),
-    loadFromStorage: (data: Partial<ISermonUpload>) => ({
+    resetUpload: (): UploadAction => ({ type: RESET_UPLOAD }),
+    loadFromStorage: (data: Partial<ISermonUpload>): UploadAction => ({
         type: LOAD_FROM_STORAGE,
         payload: data,
     }),
-    loadFromDraft: (data: Partial<ISermonUpload>) => ({
+    loadFromDraft: (data: Partial<ISermonUpload>): UploadAction => ({
         type: LOAD_FROM_DRAFT,
         payload: data,
     }),
-    clearStoredData: () => ({ type: CLEAR_STORED_DATA }),
+    clearStoredData: (): UploadAction => ({ type: CLEAR_STORED_DATA }),
 };
 
 export const useUpload = () => {
@@ -100,10 +101,7 @@ export const UploadProvider: React.FC<{ children: ReactNode }> = ({
         if (saved) {
             try {
                 const parsedData = JSON.parse(saved);
-                dispatch({
-                    type: LOAD_FROM_STORAGE,
-                    payload: parsedData,
-                });
+                dispatch(uploadActions.loadFromStorage(parsedData));
             } catch (error) {
                 console.warn(
                     'Failed to load upload draft from storage:',

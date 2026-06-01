@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-import UserState from '@/context/user/userState';
+import { TroottProviders } from '@/context/providers';
 
-/** Top-level shell: global user context (session + sidebar slice). */
+/** Top-level shell: user, minister, studio, admin, and session hydration. */
 export function AppProvider({ children }: { children: ReactNode }) {
-    return <UserState>{children}</UserState>;
+    return <TroottProviders>{children}</TroottProviders>;
 }

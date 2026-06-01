@@ -20,7 +20,9 @@ import type { DraftAction, IDraft, IDraftContextValue } from './types';
 import DraftContext from './draftContext';
 import draftReducer from './draftReducer';
 import useContextType from '@/hooks/shared/useContextType';
-import { resolveMinisterId } from '@/utils/minister-id.util';
+import { useMinister } from '@/context/minister/useMinister';
+import { useCreator } from '@/context/creator/useCreator';
+import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
 import { parseMinisterSermonsResponse } from '@/utils/sermon-list-map.util';
 import {
     draftFromSermonIdAndPartial,
@@ -77,8 +79,14 @@ export const DraftProvider: React.FC<{
 }> = ({ children, sermonApiOverride }) => {
     const [state, dispatch] = useReducer(draftReducer, initialDraftState);
     const { userContext } = useContextType();
+    const { ministerId: contextMinisterId } = useMinister();
+    const { creatorId } = useCreator();
     const user = userContext.user as Record<string, unknown> | null;
-    const ministerId = useMemo(() => resolveMinisterId(user), [user]);
+    const ministerId = useMemo(
+        () =>
+            resolveStudioSermonOwnerId(user, contextMinisterId, creatorId),
+        [user, contextMinisterId, creatorId],
+    );
 
     const getSermonClient = useCallback(
         () => (sermonApiOverride ?? api.sermon) as typeof api.sermon,
