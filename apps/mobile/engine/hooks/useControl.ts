@@ -11,17 +11,17 @@ import type {
     AddToQueueMutation,
     QueueMutationDTO,
     QueueOrderMutation,
-} from '@/types/player-mutations';
+} from '@/api/dtos/player-mutations.dto';
 import {
     loadQueue,
     playLaterInQueue,
     playNextInQueue,
 } from '@/engine/core/queue';
 import { getAutoplayCatalogAsSermonItems } from '@/engine/core/autoplay-tail';
-import type { ISermonTrack } from '@/types/sermon';
-import { QueuingType } from '@/utils/enums.util';
+import type { ISermonTrack } from '@/api/dtos/sermon.dto';
+import { QueuingType } from '@/api/types';
 import Toast from 'react-native-toast-message';
-import type { SermonTrackDTO } from '@/types/sermon';
+import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { previous, skip } from '@/engine/core/skip-previous';
 import { isUndefined } from 'lodash';
 import { handleDeshuffle, handleShuffle } from '@/engine/core/shuffle';

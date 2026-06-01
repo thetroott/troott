@@ -21,6 +21,7 @@ export default async function Initialize() {
         currentIndex: persistedIndex,
         currentTrack: persistedTrack,
         repeatMode,
+        lastPlayed,
     } = usePlayerQueueStore.getState();
 
     const storedPlayQueue =
@@ -79,6 +80,21 @@ export default async function Initialize() {
                 total: restoredQueue.length,
                 startIndex,
             });
+
+            const active = playable[startIndex];
+            const activeId = active?.item?.id ?? active?.mediaId;
+            if (
+                lastPlayed?.sermonId &&
+                lastPlayed.lastPositionSec > 0.5 &&
+                activeId != null &&
+                String(activeId) === lastPlayed.sermonId
+            ) {
+                const pos = lastPlayed.lastPositionSec;
+                const dur = lastPlayed.durationSec || Infinity;
+                if (pos < dur - 0.5) {
+                    await TrackPlayer.seekTo(pos);
+                }
+            }
         }
     }
 

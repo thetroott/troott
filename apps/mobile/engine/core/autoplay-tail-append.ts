@@ -1,6 +1,6 @@
 import TrackPlayer, { RepeatMode } from '@rntp/player';
-import type { SermonItemDTO, SermonTrackDTO } from '@/types/sermon';
-import { networkStatusTypes } from '@/types/network-status';
+import type { SermonItemDTO, SermonTrackDTO } from '@/api/dtos/sermon.dto';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
 
 import { playLaterInQueue } from '@/engine/core/queue';
 import {

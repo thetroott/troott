@@ -1,9 +1,9 @@
 import type {
     AddToQueueMutation,
     QueueMutationDTO,
-} from '@/types/player-mutations';
-import { networkStatusTypes } from '@/types/network-status';
-import type { ISermonTrack, SermonTrackDTO } from '@/types/sermon';
+} from '@/api/dtos/player-mutations.dto';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
+import type { ISermonTrack, SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { mergeAutoplayTail } from '@/engine/core/autoplay-tail';
 import { usePlayerQueueStore } from '@/engine/state/player-queue-store';
 import { getAudioCache } from '@/engine/utils/offline';
@@ -14,7 +14,7 @@ import {
 import { mapDtoToTrack } from '@/engine/utils/mappers';
 import { resolvePlaybackUrisForTrackPlayer } from '@/engine/utils/resolve-playback-uris';
 import { isPlayableTrackForPlayer } from '@/engine/utils/playable-track';
-import { QueuingType } from '@/utils/enums.util';
+import { QueuingType } from '@/api/types';
 import TrackPlayer from '@rntp/player';
 import { isUndefined } from 'lodash';
 import { getCurrentTrack } from '../queries/current-track';

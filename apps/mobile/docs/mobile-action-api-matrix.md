@@ -18,7 +18,7 @@ Columns: Action | Hook / module | Method | Path | Payload | Response (success) |
 | Action | Hook / module | Method | Path | Payload | Response | Failure | Status |
 |--------|---------------|--------|------|---------|----------|---------|--------|
 | User library | `useUserLibraryQuery` | GET | `/library/user/:userId` | — | Library doc or null | `:userId` = signed-in user id or listener id (must own listener); 404 -> null; other -> throw | **ready** |
-| List playlists | `usePlaylistsQuery` | GET | `/playlists` | — | Playlist docs (array or envelope) | throws | **ready** |
+| List playlists | `usePlaylistsQuery` | GET | `/playlist/user/:userId` | — | Playlist docs (array or envelope) | throws (empty → `[]`) | **ready** |
 
 ## Playlists (mutations)
 
@@ -38,14 +38,38 @@ Columns: Action | Hook / module | Method | Path | Payload | Response (success) |
 
 | Action | Hook / module | Method | Path | Payload | Response | Failure | Status |
 |--------|---------------|--------|------|---------|----------|---------|--------|
-| Toggle favorite | `useFavoriteSermonIdsStore` | — | MMKV persist | sermon id | ids[] updated | — | **ready** (local only) |
-| Sync favorites to API | — | — | — | — | — | — | **frontend blocked** (no wire yet) |
+| Toggle favorite | `useToggleFavoriteWithSync` | GET + POST + PUT | `/library/user/:userId`, `POST /library`, PUT library | upsert item + `flags.favourite` | see [feat-0013](../../specs/mobile/feature/feat-0013/PRODUCT.md) | lazy create on 404 | **ready** |
+
+## Playback & history
+
+| Action | Hook / module | Method | Path | Payload | Response | Failure | Status |
+|--------|---------------|--------|------|---------|----------|---------|--------|
+| Save progress | `useSyncPlaybackProgress` / `PlaybackProgressSync` | POST | `/playback` | `{ sermonId, positionSeconds, durationSeconds? }` | playback row | 401 stop sync | **ready** |
+| Continue listening | `useRecentPlaybackQuery` + `ContinueListeningSection` | GET | `/playback` | — | recent rows | empty ok | **ready** |
+| Listening history list | `useListeningHistoryQuery` (target) | GET | `/listener/listening-history` (proposed) | pagination | sermon summaries | — | **backend blocked** → feat-0015 |
+| Record listen | `useRecordListeningHistoryMutation` (target) | POST | `/listener/listening-history` (proposed) | `{ sermonId }` | updated history | — | **backend blocked** |
+
+## Minister & topic
+
+| Action | Hook / module | Method | Path | Payload | Response | Failure | Status |
+|--------|---------------|--------|------|---------|----------|---------|--------|
+| Minister profile | `useMinisterByIdQuery` | GET | `/minister/:id` (proposed public) | — | minister DTO | 404 | **backend blocked** → feat-0016 |
+| Minister sermons rails | `useMinisterSermonsRails` | GET | `/sermon/minister/:id/most-played`, `/most-liked`, `/recently-published` | — | sermon lists | — | **frontend blocked** |
+| Topic browse | `useSermonsByTopicQuery` (target) | GET | `/sermon/topic/:topic` | topic = browse **label** | sermon list | retry/fallback P1 | **frontend blocked** → feat-0017 |
+| Picker search ministers | `useMinisterPickerSearchQuery` (target) | GET | `/search/ministers` | `q`, `limit` | ministers[] | q≥2 P0 | **frontend blocked** → feat-0019 |
+
+## Invitations
+
+| Action | Hook / module | Method | Path | Payload | Response | Failure | Status |
+|--------|---------------|--------|------|---------|----------|---------|--------|
+| Accept listener invite | `listener.acceptListenerInvitation` (client) | POST | `/listener/invite/accept` | token + invitationId | listener provisioned | invalid token | **frontend blocked** — see [feat-0020](../../specs/mobile/feature/feat-0020/PRODUCT.md) |
+| Invitation lookup | `api.invitation.*` | GET | `/invitation/*` | — | invitation rows | — | **client only** (no listener UI) |
 
 ## Share
 
 | Action | Hook / module | Method | Path | Payload | Response | Failure | Status |
 |--------|---------------|--------|------|---------|----------|---------|--------|
-| Share URL build | `stores/app/share` + `_layout` | — | — | track meta | URL string | — | **ready** |
+| Share URL build | `resolveShareUrl` + `_layout` | GET | `/sermon/:id` (shareableUrl), `/share/resolve` (inbound) | see [feat-0014](../../specs/mobile/feature/feat-0014/PRODUCT.md) | **ready** |
 | Native share | RN `Share` / expo-sharing | — | OS sheet | message + url | user dismiss | — | **ready** |
 
 ## Download

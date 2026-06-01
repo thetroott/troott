@@ -1,10 +1,10 @@
-import { networkStatusTypes } from '@/types/network-status';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
 import type {
     SermonDownload,
     SermonItemDTO,
     SermonTrackDTO,
-} from '@/types/sermon';
-import { QueuingType } from '@/utils/enums.util';
+} from '@/api/dtos/sermon.dto';
+import { QueuingType } from '@/api/types';
 import _, { isEmpty, isNull, isUndefined } from 'lodash';
 import TrackPlayer from '@rntp/player';
 

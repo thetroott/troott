@@ -1,28 +1,44 @@
-import type { ISermonTrack } from '@/types/sermon';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { ISermonTrack } from '@/api/dtos/sermon.dto';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 import { queryClient } from '@/api/services/query-client';
+import { queryKeys } from '@/api/query-keys';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import { tracks as mockTracks } from '@/_data/_mock/tracks';
-
-const SERMONS_QUERY_KEY = ['sermons'] as const;
+import { sermonDocToCatalogRow } from '@/engine/utils/library-map';
 
 function normalizeMinisterName(s: string | null | undefined): string {
     return (s ?? '').trim().toLowerCase();
 }
 
 /**
- * Cached React Query catalog, or mock tracks — same sources as home / {@link useSermonsCatalog}.
+ * Cached discovery home catalog — same source as {@link useDiscoveryHomeRails}.
  */
 export function getAutoplayCatalogAsSermonItems(): SermonItemDTO[] {
-    const cached = queryClient.getQueryData<ISermonTrack[]>(SERMONS_QUERY_KEY);
-    if (cached && cached.length > 0) {
-        return cached.map((r) =>
-            catalogRowToSermonItem({ ...r, id: r.id ?? null }),
-        );
+    const home = queryClient.getQueryData(queryKeys.discovery.home());
+    if (home == null || typeof home !== 'object') {
+        return [];
     }
-    return mockTracks.map((r) =>
-        catalogRowToSermonItem({ ...r, id: r.id ?? null }),
-    );
+
+    const root = home as Record<string, unknown>;
+    const docGroups = [
+        root.popularRecentlyPlayed,
+        root.recentlyPublished,
+        root.mostPlayed,
+    ];
+
+    const items: SermonItemDTO[] = [];
+    const seen = new Set<string>();
+
+    for (const group of docGroups) {
+        if (!Array.isArray(group)) continue;
+        for (const doc of group) {
+            const row = sermonDocToCatalogRow(doc);
+            if (!row?.id || seen.has(row.id)) continue;
+            seen.add(row.id);
+            items.push(catalogRowToSermonItem(row));
+        }
+    }
+
+    return items;
 }
 
 /**

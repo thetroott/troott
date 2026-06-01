@@ -12,8 +12,8 @@ Implements plan section **2.1**: trigger through persistence, feedback, return s
 
 ## Data flow
 
-1. **Fetch playlists** — `usePlaylistsQuery` (`GET /playlists`, authenticated).
-2. **Normalize** — `mapPlaylistDocsToChooseItems` (`lib/playlists-map.ts`) supports array or `{ items: [] }`.
+1. **Fetch playlists** — `usePlaylistsQuery` (`GET /playlist/user/:userId`, authenticated).
+2. **List** — `usePlaylistsQuery` (`GET /playlist/user/:userId`); choose rows built in the component from the returned array.
 3. **Filter for sermons** — UI keeps rows where `playlistType === 'sermon'` (case-insensitive) so PATCH `type` matches server `playlistType`.
 4. **Pick row** — `ChoosePlaylistSheet` -> `PlaylistAddTrackContent.onPickPlaylist`.
 5. **Persist** — If `sermonTrackId` set: `useAddSermonToPlaylistMutation` -> `PATCH /playlists/:playlistId/add` body `{ itemId: sermonId, type: row.playlistType }`.

@@ -1,7 +1,7 @@
 import Toast from 'react-native-toast-message';
 import TrackPlayer from '@rntp/player';
 import { isUndefined } from 'lodash';
-import type { SermonTrackDTO } from '@/types/sermon';
+import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { usePlayerQueueStore } from '@/engine/state/player-queue-store';
 import { shuffleSermonTracks } from '../helpers/helpers';
 import { removeUpcomingMediaItems } from '@/engine/core/rntp-queue-helpers';
