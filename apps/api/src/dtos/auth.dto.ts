@@ -111,6 +111,13 @@ export interface MapRegisteredUserDTO {
         stage: string;
         status: string;
     };
+
+    /** Public profile codes when linked documents exist. */
+    ministerCode?: string | null;
+    creatorCode?: string | null;
+    listenerCode?: string | null;
+    adminCode?: string | null;
+    studioCode?: string | null;
 }
 
 export interface MapActivatedUserDTO {

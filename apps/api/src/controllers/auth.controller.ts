@@ -343,9 +343,10 @@ export const logoutUser = asyncHandler(
 
 /**
  * @name RefreshToken
- * @description Automatically generates a new token for a user if the current token is near expiry
+ * @description Explicit JWT reissue when near expiry (deprecated for product clients — prefer X-New-Token on Protect routes)
  * @route POST /auth/token
  * @access Private
+ * @deprecated Client apps should rely on X-New-Token response header
  */
 export const refreshToken = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -499,6 +500,10 @@ export const resetPassword = asyncHandler(
         }
 
         await AuthService.encryptUserPassword(user, newPassword);
+        user.markModified('password');
+        await user.save();
+
+        await tokenService.bumpTokenVersion(user);
 
         const sendEmail =
             await emailService.sendPasswordResetNotificationEmail(user);
@@ -576,6 +581,10 @@ export const changePassword = asyncHandler(
         }
 
         await AuthService.encryptUserPassword(user, newPassword);
+        user.markModified('password');
+        await user.save();
+
+        await tokenService.bumpTokenVersion(user);
 
         const sendEmail =
             await emailService.sendPasswordChangeNotificationEmail(user);
@@ -584,8 +593,6 @@ export const changePassword = asyncHandler(
                 new ErrorResponse(sendEmail.message, sendEmail.code, []),
             );
         }
-
-        await user.save();
 
         res.status(200).json({
             error: false,
@@ -724,6 +731,35 @@ export const socialAuthCallback = asyncHandler(
             errors: [],
             data: responseData,
             message: 'User logged in successfully',
+            status: 200,
+        });
+    },
+);
+
+/**
+ * @name getAuthUser
+ * @description Current session user (mapped DTO with optional profile codes)
+ * @route GET /auth/user
+ * @access Private
+ */
+export const getAuthUser = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const result = await AuthService.getLoggedInUser({
+            req,
+            isAdmin: false,
+        });
+
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code ?? 401, []),
+            );
+        }
+
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: 'User retrieved successfully',
             status: 200,
         });
     },

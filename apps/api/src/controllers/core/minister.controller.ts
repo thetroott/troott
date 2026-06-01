@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import asyncHandler from '../../middlewares/async.mdw';
 import ErrorResponse from '../../utils/error.util';
+import { pathParam } from '../../utils/route-params.util';
 import ministerService from '@/services/core/minister.service';
 import ministerRepository from '@/repository/core/minister.repository';
 import {
@@ -510,6 +511,42 @@ export const getMinister: RequestHandler = asyncHandler(
             { key: cacheKey, value: result.data },
             cacheTTL,
         );
+
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+/**
+ * @name getMinisterById
+ * @route GET /api/v1/minister/:ministerId
+ * @access Public
+ */
+export const getMinisterById: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const ministerId = pathParam(req.params.ministerId);
+        if (!ministerId) {
+            return next(new ErrorResponse('ministerId is required', 400, []));
+        }
+
+        const result = await ministerService.getPublicMinisterProfile(
+            ministerId,
+        );
+
+        if (result.error || !result.data) {
+            return next(
+                new ErrorResponse(
+                    result.message || 'Minister profile not found',
+                    result.code || 404,
+                    [],
+                ),
+            );
+        }
 
         res.status(200).json({
             error: false,

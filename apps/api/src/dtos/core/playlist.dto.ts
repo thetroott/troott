@@ -3,6 +3,7 @@ import {
     PlaylistOwnerType,
     PlaylistVisibility,
     PlaylistStatus,
+    PlaylistItemResourceType,
 } from '@/interfaces/core/playlist.interface';
 
 export interface CreatePlaylistDTO {
@@ -33,6 +34,7 @@ export interface UpdatePlaylistDTO {
 
 export interface AddPlaylistItemDTO {
     itemId: string;
+    itemType: PlaylistItemResourceType;
     position?: number;
 }
 
@@ -47,6 +49,7 @@ export interface ReorderPlaylistItemDTO {
 
 export interface PlaylistItemDTO {
     id: string;
+    itemType: PlaylistItemResourceType;
     item: {
         id: string;
         title: string;

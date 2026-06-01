@@ -73,6 +73,35 @@ export interface SetCreatorPasswordDTO {
     password: string;
 }
 
+/** Milestone bodies for `POST /creator/onboarding/*`. */
+export interface OnboardCreatorPersonalCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardCreatorDocumentCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardCreatorAddressCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardCreatorMinistryCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardCreatorTourCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardCreatorFirstSermonCompleteDTO {
+    acknowledged?: boolean;
+}
+
+export interface OnboardCreatorSkipDTO {
+    reason?: string;
+}
+
 export interface SubmitCreatorVerificationDTO {
     document: DocumentUpload;
 }

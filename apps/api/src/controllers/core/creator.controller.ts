@@ -11,6 +11,13 @@ import {
     SetCreatorPasswordDTO,
     SubmitCreatorVerificationDTO,
     UpdateCreatorVerificationStatusDTO,
+    OnboardCreatorPersonalCompleteDTO,
+    OnboardCreatorDocumentCompleteDTO,
+    OnboardCreatorAddressCompleteDTO,
+    OnboardCreatorMinistryCompleteDTO,
+    OnboardCreatorTourCompleteDTO,
+    OnboardCreatorFirstSermonCompleteDTO,
+    OnboardCreatorSkipDTO,
 } from '@/dtos/core/creator.dto';
 import { InvitationType } from '../../interfaces/invitation.interface';
 import { InviteTokenDTO } from '@/dtos/invitation.dto';
@@ -23,6 +30,15 @@ import authService from '@/services/auth.service';
 import redisWrapper from '../../middlewares/redis.mdw';
 import { PasswordType, UserType, IUserDoc } from '@/interfaces/user.interface';
 import { VerificationStatus } from '@/interfaces/core/minister.interface';
+
+async function invalidateCreatorSessionCache(userId: string): Promise<void> {
+    try {
+        await redisWrapper.deleteData(`creator:profile:${userId}`);
+        await redisWrapper.deleteData(`user:profile:${userId}`);
+    } catch (e) {
+        console.error('Cache invalidation failed:', e);
+    }
+}
 
 export const inviteCreator: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -566,12 +582,183 @@ export const submitCreatorVerification: RequestHandler = asyncHandler(
             );
         }
 
-        try {
-            await redisWrapper.deleteData(`creator:profile:${userId}`);
-        } catch (e) {
-            console.error('Cache invalidation failed:', e);
-        }
+        await invalidateCreatorSessionCache(String(userId));
 
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardCreatorPersonalComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardCreatorPersonalCompleteDTO;
+        void _body;
+        const result = await creatorService.onboardingPersonalComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        await invalidateCreatorSessionCache(String(userId));
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardCreatorDocumentComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardCreatorDocumentCompleteDTO;
+        void _body;
+        const result = await creatorService.onboardingDocumentComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        await invalidateCreatorSessionCache(String(userId));
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardCreatorAddressComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardCreatorAddressCompleteDTO;
+        void _body;
+        const result = await creatorService.onboardingAddressComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        await invalidateCreatorSessionCache(String(userId));
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardCreatorMinistryComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardCreatorMinistryCompleteDTO;
+        void _body;
+        const result = await creatorService.onboardingMinistryComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        await invalidateCreatorSessionCache(String(userId));
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardCreatorTourComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardCreatorTourCompleteDTO;
+        void _body;
+        const result = await creatorService.onboardingTourComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        await invalidateCreatorSessionCache(String(userId));
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const onboardCreatorFirstSermonComplete: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardCreatorFirstSermonCompleteDTO;
+        void _body;
+        const result = await creatorService.onboardingFirstSermonComplete(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        await invalidateCreatorSessionCache(String(userId));
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: result.data,
+            message: result.message,
+            status: 200,
+        });
+    },
+);
+
+export const skipCreatorOnboarding: RequestHandler = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const userId = (req as any).user?.id;
+        if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
+        const _body = (req.body || {}) as OnboardCreatorSkipDTO;
+        void _body;
+        const result = await creatorService.skipCreatorOnboarding(
+            String(userId),
+        );
+        if (result.error) {
+            return next(
+                new ErrorResponse(result.message, result.code || 400, []),
+            );
+        }
+        await invalidateCreatorSessionCache(String(userId));
         res.status(200).json({
             error: false,
             errors: [],

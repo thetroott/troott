@@ -6,6 +6,7 @@ import { getAuthUserId } from '../../utils/auth-request.util';
 import type { ILibraryDoc } from '@/interfaces/core/library.interface';
 import libraryRepository from '@/repository/core/library.repository';
 import libraryService from '@/services/core/library.service';
+import playlistService from '@/services/core/playlist.service';
 import Listener from '@/models/core/listener.model';
 
 /**
@@ -160,12 +161,32 @@ export const getLibraryByUser = asyncHandler(
             return next(new ErrorResponse(library.message, library.code, []));
         }
 
+        const playlistResult = await playlistService.getUserPlaylists(actorId);
+        const userPlaylists = Array.isArray(playlistResult.data)
+            ? playlistResult.data
+            : [];
+
+        const libPayload =
+            library.data != null && typeof library.data === 'object'
+                ? {
+                      ...(typeof (library.data as { toObject?: () => object }).toObject ===
+                      'function'
+                          ? (library.data as { toObject: () => object }).toObject()
+                          : library.data),
+                      userPlaylists,
+                      ownedPlaylistCount: userPlaylists.length,
+                  }
+                : {
+                      userPlaylists,
+                      ownedPlaylistCount: userPlaylists.length,
+                  };
+
         res.status(200).json({
             error: false,
             errors: [],
             message: 'Library fetched successfully',
             status: 200,
-            data: library.data,
+            data: libPayload,
         });
     },
 );

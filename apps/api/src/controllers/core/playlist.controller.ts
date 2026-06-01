@@ -15,6 +15,7 @@ import {
     PlaylistOwnerType,
     PlaylistType,
     PlaylistVisibility,
+    PlaylistItemResourceType,
 } from '@/interfaces/core/playlist.interface';
 
 function asUserDoc(userId: string): IUserDoc {
@@ -325,8 +326,24 @@ export const addItemToPlaylist = asyncHandler(
             return next(new ErrorResponse('itemId is required', 400, []));
         }
 
+        const itemTypeRaw = String(body.itemType ?? '').trim();
+        if (
+            itemTypeRaw !== PlaylistItemResourceType.SERMON &&
+            itemTypeRaw !== PlaylistItemResourceType.SERIES
+        ) {
+            return next(
+                new ErrorResponse(
+                    'itemType is required and must be "sermon" or "series"',
+                    400,
+                    [],
+                ),
+            );
+        }
+        const itemType = itemTypeRaw as PlaylistItemResourceType;
+
         const dto: AddPlaylistItemDTO = {
             itemId,
+            itemType,
             position:
                 body.position !== undefined && body.position !== ''
                     ? Number(body.position)

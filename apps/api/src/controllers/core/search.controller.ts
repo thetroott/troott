@@ -4,6 +4,7 @@ import ErrorResponse from '../../utils/error.util';
 import searchService from '@/services/core/search.service';
 import ministerRepository from '@/repository/core/minister.repository';
 import { SearchScope, SearchQueryOptions } from '@/dtos/core/search.dto';
+import { pathParam } from '../../utils/route-params.util';
 
 function parseScope(raw: unknown): SearchScope {
     const s = typeof raw === 'string' ? raw.toLowerCase() : 'all';
@@ -80,13 +81,10 @@ export const searchSermons = asyncHandler(
 export const searchMinisters = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const q = (req.query.q as string) || '';
-        if (!q.trim()) {
-            return next(
-                new ErrorResponse('Query parameter q is required', 400, []),
-            );
-        }
         const options = buildOptions(req.query);
-        const result = await searchService.searchMinisters(q, options);
+        const result = q.trim()
+            ? await searchService.searchMinisters(q, options)
+            : await searchService.listActiveMinistersForOnboarding(options);
         res.status(result.code).json({
             error: result.error,
             message: result.message,
@@ -137,13 +135,10 @@ export const searchPlaylists = asyncHandler(
 export const searchTopics = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const q = (req.query.q as string) || '';
-        if (!q.trim()) {
-            return next(
-                new ErrorResponse('Query parameter q is required', 400, []),
-            );
-        }
         const options = buildOptions(req.query);
-        const result = await searchService.searchTopics(q, options);
+        const result = q.trim()
+            ? await searchService.searchTopics(q, options)
+            : await searchService.listActiveInterestTopics(options);
         res.status(result.code).json({
             error: result.error,
             message: result.message,
@@ -187,8 +182,13 @@ export const searchWithinMinister = asyncHandler(
 
 export const searchWithinSeries = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const { seriesId } = req.params;
+        const seriesId = pathParam(req.params.seriesId);
         const q = (req.query.q as string) || '';
+        if (!seriesId) {
+            return next(
+                new ErrorResponse('seriesId is required', 400, []),
+            );
+        }
         if (!q.trim()) {
             return next(
                 new ErrorResponse('Query parameter q is required', 400, []),
@@ -314,7 +314,7 @@ export const clearRecentSearches = asyncHandler(
 );
 
 export const deleteRecentSearch = asyncHandler(
-    async (req: Request, res: Response, _next: NextFunction) => {
+    async (req: Request, res: Response, next: NextFunction) => {
         const listenerId = (req as any).user?.listenerId || (req as any).user?.listener;
         if (!listenerId) {
             return res.status(401).json({
@@ -324,7 +324,10 @@ export const deleteRecentSearch = asyncHandler(
                 data: {},
             });
         }
-        const { id } = req.params;
+        const id = pathParam(req.params.id);
+        if (!id) {
+            return next(new ErrorResponse('id is required', 400, []));
+        }
         const result = await searchService.deleteRecentSearch(listenerId, id);
         res.status(result.code).json({
             error: result.error,

@@ -11,18 +11,27 @@ import type { ISermonDoc } from '@/interfaces/core/sermon.interface';
 import { MediaStatus } from '@/interfaces/core/sermon.interface';;
 import sermonMapper from '@/mappers/sermon.mapper';
 import { canAccessSermonDocument } from '@/utils/sermon-access.util';
-import { isSermonPublicTeaserEligible } from '@/utils/sermon-teaser.util';
 import redisWrapper from '../../middlewares/redis.mdw';
 import { createHash } from 'crypto';
 import sermonService from '@/services/core/sermon.service';
 import ministerService from '@/services/core/minister.service';
 import ministerRepository from '@/repository/core/minister.repository';
+import creatorService from '@/services/core/creator.service';
+import creatorRepository from '@/repository/core/creator.repository';
 import { assertStudioWriteForSermonMinisters } from '@/utils/studio-access.util';
 
 async function resolveMinisterRouteParam(
     param: string,
 ): Promise<string | null> {
-    return ministerRepository.resolveMinisterMongoId(param);
+    const fromMinister = await ministerRepository.resolveMinisterMongoId(param);
+    if (fromMinister) {
+        return fromMinister;
+    }
+    const trimmed = param?.trim();
+    if (trimmed && /^[a-fA-F0-9]{24}$/.test(trimmed)) {
+        return trimmed;
+    }
+    return null;
 }
 
 const SERMON_CACHE_TTL_DETAIL = 300;
@@ -118,7 +127,13 @@ export const uploadSermonCover = asyncHandler(
             return next(new ErrorResponse('No file found in request', 400, []));
         }
 
-        const upload = await sermonService.handleUploadImage(file);
+        const sermonId =
+            typeof req.body?.sermonId === 'string'
+                ? req.body.sermonId.trim()
+                : '';
+        const upload = sermonId
+            ? await sermonService.attachCoverToSermon(sermonId, file)
+            : await sermonService.handleUploadImage(file);
         if (upload.error || !upload.data) {
             return next(new ErrorResponse(upload.message, 500, []));
         }
@@ -237,13 +252,35 @@ export const publishSermon = asyncHandler(
 
         const uid = getAuthUserId(req);
         if (uid) {
-            const onboard = await ministerService.tryCompleteOnboardingAfterFirstPublish(
-                String(uid),
-            );
+            const userKey = String(uid);
+            const ministerLookup = await ministerRepository.findOne({
+                user: userKey,
+            });
+            const creatorLookup = await creatorRepository.findOne({
+                user: userKey,
+            });
+            const onboard = !ministerLookup.error && ministerLookup.data
+                ? await ministerService.tryCompleteOnboardingAfterFirstPublish(
+                      userKey,
+                  )
+                : !creatorLookup.error && creatorLookup.data
+                  ? await creatorService.tryCompleteOnboardingAfterFirstPublish(
+                        userKey,
+                    )
+                  : { error: true };
             if (!onboard.error) {
                 try {
-                    await redisWrapper.deleteData(`minister:profile:${uid}`);
-                    await redisWrapper.deleteData(`user:profile:${uid}`);
+                    if (!ministerLookup.error && ministerLookup.data) {
+                        await redisWrapper.deleteData(
+                            `minister:profile:${userKey}`,
+                        );
+                    }
+                    if (!creatorLookup.error && creatorLookup.data) {
+                        await redisWrapper.deleteData(
+                            `creator:profile:${userKey}`,
+                        );
+                    }
+                    await redisWrapper.deleteData(`user:profile:${userKey}`);
                 } catch {
                     /* non-fatal */
                 }
@@ -375,6 +412,61 @@ export const updateSermon = asyncHandler(
  * @access Public
  * @returns {Object} updated sermon
  */
+/**
+ * @name restoreSermonFromBin
+ * @description Restores a soft-deleted sermon to the active library as draft.
+ * @route PUT /api/v1/sermon/restore/:id
+ * @access Private
+ */
+export const restoreSermonFromBin = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        const id = pathParam(req.params.id);
+        if (!id) {
+            return next(new ErrorResponse('id is required', 400, []));
+        }
+        const sermonExist = await sermonRepository.findBySermonId(id);
+        if (sermonExist.error) {
+            return next(
+                new ErrorResponse(sermonExist.message, sermonExist.code!, []),
+            );
+        }
+        const doc = sermonExist.data as Record<string, unknown>;
+        const userId = getAuthUserId(req);
+        if (!userId) {
+            return next(new ErrorResponse('Unauthorized', 401, []));
+        }
+        const isOwner = await sermonService.isSermonOwnedByUser(
+            userId,
+            doc.minister,
+        );
+        if (!isOwner) {
+            return next(new ErrorResponse('Forbidden', 403, []));
+        }
+
+        const restored = await sermonRepository.restoreSermonFromBin(id);
+        if (restored.error) {
+            return next(
+                new ErrorResponse(restored.message, restored.code || 500, []),
+            );
+        }
+
+        await invalidateSermonDetailCache(id, userId);
+        await invalidateCommonSermonListCaches({
+            ministerId: String(doc?.minister || '').trim(),
+            topic: String(doc?.topic || '').trim(),
+            userId,
+        });
+
+        res.status(200).json({
+            error: false,
+            errors: [],
+            data: restored.data,
+            message: 'Sermon restored successfully',
+            status: 200,
+        });
+    },
+);
+
 export const moveSermonToBin = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const id = pathParam(req.params.id);
@@ -507,7 +599,7 @@ export const deleteSermon = asyncHandler(
  * @name getSermonById
  * @description Get a sermon and its metadata by ID
  * @route GET /api/v1/sermon/:id
- * @access Public
+ * @access Private
  */
 export const getSermonById = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -517,18 +609,13 @@ export const getSermonById = asyncHandler(
         }
 
         const userId = getAuthUserId(req);
-        const viewerScope = userId ? `user:${userId}` : 'public';
+        const viewerScope = `user:${userId}`;
         const cacheKey = sermonDetailKey(id, viewerScope);
         const cached = await redisWrapper.fetchData<{
             data: unknown;
-            teaserEligible: boolean;
         }>(cacheKey);
         if (cached) {
-            if (cached.teaserEligible) {
-                res.setHeader('Cache-Control', 'public, max-age=120');
-            } else {
-                res.setHeader('Cache-Control', 'private, no-store');
-            }
+            res.setHeader('Cache-Control', 'private, no-store');
             return res.status(200).json({
                 error: false,
                 errors: [],
@@ -548,18 +635,13 @@ export const getSermonById = asyncHandler(
             return next(new ErrorResponse('sermon not found', 404, []));
         }
 
-        if (isSermonPublicTeaserEligible(doc)) {
-            res.setHeader('Cache-Control', 'public, max-age=120');
-        } else {
-            res.setHeader('Cache-Control', 'private, no-store');
-        }
+        res.setHeader('Cache-Control', 'private, no-store');
 
         await redisWrapper.keepData(
             {
                 key: cacheKey,
                 value: {
                     data: sermon.data,
-                    teaserEligible: isSermonPublicTeaserEligible(doc),
                 },
             },
             SERMON_CACHE_TTL_DETAIL,
@@ -597,7 +679,7 @@ export const getSermonsByTopic = asyncHandler(
             limit,
             skip,
             sort,
-            populate: 'minister series topic',
+            populate: 'minister series',
         };
 
         const cacheKey = sermonListKey('topic', {
@@ -657,7 +739,7 @@ export const getAllSermons = asyncHandler(
             limit,
             skip,
             sort,
-            populate: 'minister series topic',
+            populate: 'minister series',
         };
 
         const cacheKey = sermonListKey('all', { page, limit, sort });
@@ -737,7 +819,7 @@ export const getSermonsByminister = asyncHandler(
             limit,
             skip,
             sort,
-            populate: 'minister series topic',
+            populate: 'minister series',
             publicationStatus,
             search,
             dateFrom,
@@ -817,7 +899,7 @@ const getSermonsByMinisterSorted = (
         const options = {
             limit,
             skip,
-            populate: 'minister series topic',
+            populate: 'minister series',
             recentOnly: sortField === 'releaseDate',
         };
 
@@ -935,7 +1017,7 @@ const getSermonsAllSorted = (
         const options = {
             limit,
             skip,
-            populate: 'minister series topic',
+            populate: 'minister series',
             recentOnly: sortField === 'releaseDate',
         };
 
