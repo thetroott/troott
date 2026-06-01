@@ -27,11 +27,12 @@ import {
     LibrarySeriesCategory,
     LibrarySermonCategory,
 } from '@/components/features/library/library-category-bodies';
+import { LibraryErrorState } from '@/components/features/library/library-states';
 import {
     usePlaylistsQuery,
     useUserLibraryQuery,
 } from '@/api/hooks/app/useLibrary';
-import { useContextType } from '@/context/apps/useContextType';
+import { useContextType } from '@/context';
 import { getLibraryArrayField } from '@/engine/utils/library-map';
 
 type CategoryKey = 'All' | 'Playlists' | 'Sermon' | 'Series' | 'Minister';
@@ -63,11 +64,13 @@ const Library = () => {
     const {
         data: lib,
         isLoading: libLoading,
+        isError: libError,
         refetch: refetchLibrary,
         isRefetching: refetchingLibrary,
     } = useUserLibraryQuery(!!userId);
     const {
         data: playlistApiData,
+        isError: playlistsError,
         refetch: refetchPlaylists,
         isRefetching: refetchingPlaylists,
     } = usePlaylistsQuery(!!userId);
@@ -293,6 +296,12 @@ const Library = () => {
     return (
         <ScreenView>
             <LibraryHeader />
+            {(libError || playlistsError) && !lib && !playlistApiData ? (
+                <LibraryErrorState
+                    message="Could not load your library."
+                    onRetry={() => void onRefresh()}
+                />
+            ) : null}
             <ScrollView
                 contentContainerStyle={{
                     gap: theme.sizes.spacing.lg,

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
 
 import FullPlayerScreen from '@/components/features/player/full-player/full-player-screen';
-import { useTrackStore } from '@/stores/player-store';
+import { useTrackStore } from '@/engine/state/player-ui-store';
 
 /**
  * Keep `showFullPlayer` in sync while this modal is focused so the mini player

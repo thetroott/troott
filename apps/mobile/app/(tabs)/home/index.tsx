@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import React from 'react';
 import ScreenView from '@/components/ui/screenview';
 import { theme } from '@/constants/theme';
@@ -11,18 +11,31 @@ import {
 } from '@/components/features/home';
 import UserWelcome from '@/components/features/home/UserWelcome';
 import SermonsForYou from '@/components/features/home/sermons-for-you';
+import ContinueListeningSection from '@/components/features/home/continue-listening-section';
+import { useProfileIdentity } from '@/components/features/profile/use-profile-identity';
+import { useHomeScreen } from '@/engine/hooks/useHomeScreen';
 
 const Home = () => {
+    const { firstName } = useProfileIdentity();
+    const { isRefreshing, refresh } = useHomeScreen();
+
     return (
         <ScreenView>
             <ScrollView
                 style={styles.scrollContainer}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                    paddingBottom: 100,
-                }}
+                contentContainerStyle={styles.scrollContent}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefreshing}
+                        onRefresh={refresh}
+                        tintColor={theme.colors.teal[500]}
+                        colors={[theme.colors.teal[500]]}
+                    />
+                }
             >
-                <UserWelcome firstName="Damola" />
+                <UserWelcome firstName={firstName} />
+                <ContinueListeningSection />
                 <View style={{ gap: theme.sizes.spacing.xl }}>
                     <View
                         style={{
@@ -58,6 +71,10 @@ const styles = StyleSheet.create({
     scrollContainer: {
         flex: 1,
         paddingTop: theme.sizes.spacing.sm,
+    },
+    scrollContent: {
+        paddingBottom: 100,
+        gap: theme.sizes.spacing.xl,
     },
     seeMore: {
         borderRadius: theme.sizes.radius.full,

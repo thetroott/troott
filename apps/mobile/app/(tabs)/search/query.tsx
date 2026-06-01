@@ -42,26 +42,25 @@ import { useCommittedSearchTerm } from '@/api/hooks/shared/use-committed-search-
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
 import { useLoadNewQueue } from '@/engine/hooks/useControl';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import { useNetworkStatus } from '@/stores/app/network';
-import { networkStatusTypes } from '@/types/network-status';
-import { QueuingType } from '@/utils/enums.util';
-import { tracks } from '@/_data/_mock/tracks';
+import { useNetworkStatus } from '@/lib/state/network-store';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
+import { QueuingType } from '@/api/types';
 import {
     filterBundledCatalogByQuery,
     mergeSermonSearchResults,
 } from '@/engine/utils/catalog-local-search';
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { ISermonTrack, SermonItemDTO } from '@/api/dtos/sermon.dto';
 import {
     usePlaylistsQuery,
     useUserLibraryQuery,
 } from '@/api/hooks/app/useLibrary';
-import { useContextType } from '@/context/apps/useContextType';
+import { useContextType } from '@/context';
 import {
     getLibraryArrayField,
     playlistDocToRow,
     sermonDocToCatalogRow,
 } from '@/engine/utils/library-map';
-import type { SearchHistoryEntry } from '@/lib/library-recent-search-storage';
+import type { SearchHistoryEntry } from '@/api/hooks/app/useSearch';
 import {
     canonicalSearchQuery,
     SEARCH_FIELD_FILL,
@@ -217,10 +216,7 @@ export default function SearchQueryScreen() {
     } = useCatalogSearchQuery(committedSearch, searchEnabled);
 
     const bundledRows = useMemo<ISermonTrack[]>(() => {
-        if (sermonsCatalog && sermonsCatalog.length > 0) {
-            return sermonsCatalog as ISermonTrack[];
-        }
-        return tracks as ISermonTrack[];
+        return (sermonsCatalog ?? []) as ISermonTrack[];
     }, [sermonsCatalog]);
 
     const bundledAsSermonItems = useMemo(
@@ -420,6 +416,9 @@ export default function SearchQueryScreen() {
             const term =
                 fromQuery.length > 0 ? fromQuery : sermonTitle.trim();
             if (term.length > 0) addEntry(term, 'sermon');
+            captureSearchEvent('search_result_played', {
+                query_canonical: canonicalSearchQuery(term),
+            });
             dismissSearch();
         },
         [
@@ -614,6 +613,19 @@ export default function SearchQueryScreen() {
                         <View style={styles.emptyHero}>
                             <SearchRecentEmptyState />
                         </View>
+                        <SearchEmptyDiscovery
+                            trendingQueries={TRENDING_SEARCH_QUERIES}
+                            popularSermons={popularDiscovery}
+                            recentSermons={recentPlayedDiscovery}
+                            onPickTrendingQuery={(q) => {
+                                captureSearchEvent(
+                                    'search_discovery_trending_tapped',
+                                    { query: q },
+                                );
+                                setQuery(q);
+                                flushCommittedSearch(q);
+                            }}
+                        />
                     </ScrollView>
                 )
             ) : typing ? (
@@ -785,7 +797,10 @@ export default function SearchQueryScreen() {
                                     </Pressable>
                                 </View>
                             ) : showNoMatches ? (
-                                <SearchNoResults />
+                                <SearchNoResults
+                                    showClearFilters={chip !== 'Sermon'}
+                                    onClearFilters={() => setChip('Sermon')}
+                                />
                             ) : null}
                         </View>
                     ) : normalizedLive.length === 1 ? (

@@ -1,12 +1,11 @@
 import {
-    Dimensions,
     Image,
     ScrollView,
     StyleSheet,
     Text,
     View,
 } from 'react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import { router } from 'expo-router';
 import Button from '@/components/ui/button';
 import { theme } from '@/constants/theme';
@@ -15,31 +14,13 @@ import { IMAGES } from '@/assets/images/images';
 import CustomImage from '@/components/features/shared/Images/Images';
 
 const IndexScreen = () => {
-    // Navigation object is now a mock since it's not being used from a prop
-    const navigation = {
-        navigate: (param: string | object | undefined) => {},
-    };
-
-    const [isCreatingAccount, setIsCreatingAccount] = useState(false);
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
-
     const handleCreateAccount = () => {
-        setIsCreatingAccount(true);
-        setTimeout(() => {
-            router.push('/enter-email');
-            setIsCreatingAccount(false);
-        }, 2000);
+        router.push('/enter-email');
     };
 
     const handleLogin = () => {
-        setIsLoggingIn(true);
-        setTimeout(() => {
-            router.push('/home');
-            setIsLoggingIn(false);
-        }, 2000);
+        router.push('/login');
     };
-
-    const SCREEN_WIDTH = Dimensions.get('window').width;
 
     return (
         <>
@@ -71,13 +52,10 @@ const IndexScreen = () => {
                     >
                         <Button
                             onPress={handleCreateAccount}
-                            disabled={isCreatingAccount}
-                            isLoading={isCreatingAccount}
                             label="Create Account"
                         />
                         <Button
                             label="Login"
-                            isLoading={isLoggingIn}
                             onPress={handleLogin}
                             variant="outline"
                         />

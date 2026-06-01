@@ -5,10 +5,8 @@ import ScreenView from '@/components/ui/screenview';
 import SeriesPicker from '@/components/features/pickers/series-picker';
 import { theme } from '@/constants/theme';
 
-/**
- * Modal: choose followed series (Figma parity). Open via `router.push('/choose-series')`.
- */
 export default function ChooseSeriesModal() {
+    const [selected, setSelected] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
 
     return (
@@ -25,14 +23,18 @@ export default function ChooseSeriesModal() {
                 searchPlaceholder="Search series"
                 primaryLabel="Done"
                 showClose
+                selectedIds={selected}
+                onSelectionChange={setSelected}
                 onClose={() => router.back()}
                 loading={loading}
-                loadingTitle="Adding to Your Library"
+                loadingTitle="Saving selection"
                 onPrimaryPress={async () => {
                     setLoading(true);
-                    await new Promise((r) => setTimeout(r, 900));
-                    setLoading(false);
-                    router.back();
+                    try {
+                        router.back();
+                    } finally {
+                        setLoading(false);
+                    }
                 }}
             />
         </ScreenView>

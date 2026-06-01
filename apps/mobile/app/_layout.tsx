@@ -1,7 +1,8 @@
 import { TroottProviders } from '@/context/providers';
 import { PlaybackBridge } from '@/engine/state/use-playback-bridge';
+import { PlaybackProgressSync } from '@/engine/playback/use-sync-playback-progress';
 import Constants from 'expo-constants';
-import { AppState, Platform, Share, StyleSheet, View } from 'react-native';
+import { AppState, PermissionsAndroid, Platform, Share, StyleSheet, View } from 'react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SplashScreen, Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -14,7 +15,6 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PortalHost } from '@/components/ui/portal';
 import { theme } from '@/constants/theme';
 import { Toaster } from '@/components/ui/toast';
-import { requestStoragePermission } from '@/lib/permisson-helpers';
 import { queryClientPersister } from '@/api/services/mmkv-storage';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { enableScreens } from 'react-native-screens';
@@ -23,17 +23,50 @@ import Initialize from '@/engine/helpers/initialization';
 import { useUpdateOptions } from '@/engine/player/useUpdateOptions';
 import { attachEnginePlaybackListeners } from '@/engine/player/background';
 import { mergeLastPlayedPosition } from '@/engine/state/last-played-sync';
-import { usePendingDeepLinkBootstrap } from '@/lib/deep-link/use-pending-deeplink-bootstrap';
 import MiniPlayer from '@/components/features/player/mini-player/mini-player';
 import { EmbeddedBridgeGuard } from '@/components/dev/EmbeddedBridgeGuard';
 import TrackPlayer from '@rntp/player';
 import { ListenerSharingFlow } from '@/components/features/share';
-import { useShareFlow } from '@/stores/app/share';
+import { useShareFlow } from '@/lib/state/share-flow';
 import { FullWindowOverlay } from 'react-native-screens';
 import { Portal } from '@/components/ui/portal';
 import { GlobalLoadingPortal } from '@/components/ui/loading-state';
-import { initNetworkStoreSync } from '@/stores/app/network';
+import { initNetworkStoreSync } from '@/lib/state/network-store';
 import InternetConnectionWatcher from '@/components/features/shared/network-watcehr';
+
+const AUTH_PUBLIC_PATHS = new Set([
+    '/',
+    '/login',
+    '/register',
+    '/enter-email',
+    '/verify-email',
+    '/activate-user-account',
+    '/reset-password-otp-request',
+    '/request-password-otp',
+    '/reset-password',
+    '/accept-invite',
+]);
+
+function normalizeShellPath(pathname: string): string {
+    const base = (pathname.split('?')[0] ?? '').replace(/\/$/, '');
+    return base || '/';
+}
+
+function isAuthPublicPath(pathname: string): boolean {
+    const path = normalizeShellPath(pathname);
+    if (AUTH_PUBLIC_PATHS.has(path)) {
+        return true;
+    }
+    return path.startsWith('/(auth)');
+}
+
+function shouldAllowMiniPlayer(pathname: string): boolean {
+    const base = normalizeShellPath(pathname);
+    if (base === '/' || base === '') return false;
+    if (isAuthPublicPath(base)) return false;
+    if (base === '/select-ministers' || base === '/select-interests') return false;
+    return true;
+}
 
 function getSharingModule(): {
     isAvailableAsync: () => Promise<boolean>;
@@ -59,8 +92,9 @@ const QUERY_PERSIST_APP_VERSION =
     Constants.nativeAppVersion ??
     'unknown';
 
+import { resolveShareUrl } from '@/engine/utils/share-url';
+
 const RootLayout = () => {
-    usePendingDeepLinkBootstrap();
     const pathname = usePathname();
 
     useEffect(() => {
@@ -74,29 +108,18 @@ const RootLayout = () => {
     const playerListenersAttachedRef = useRef(false);
     const { visible, step, track, close, setStep } = useShareFlow();
     const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const pathOnly = (pathname.split('?')[0] ?? '').replace(/\/$/, '') || '/';
-    const shouldHideMiniPlayer =
-        pathOnly === '/user/edit-profile' ||
-        pathOnly === '/user/photo-picker' ||
-        pathOnly === '/user/edit-profile-saved' ||
-        pathOnly === '/playlist/create-playlist' ||
-        pathOnly.startsWith('/see-more') ||
-        pathOnly === '/minister' ||
-        pathOnly.startsWith('/minister/');
+    const shouldHideMiniPlayer = !shouldAllowMiniPlayer(pathname);
 
-    const buildShareUrl = useCallback(() => {
-        if (track.id != null && String(track.id).length > 0) {
-            return `https://app.troott.com/track/${track.id}`;
-        }
-        const slug = (track.title ?? 'sermon')
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, '-');
-        return `https://app.troott.com/track/${encodeURIComponent(slug)}`;
-    }, [track.id, track.title]);
+    const buildShareUrl = useCallback(async () => {
+        return resolveShareUrl({
+            sermonId: track.id,
+            shareableUrl: track.shareableUrl,
+            title: track.title,
+        });
+    }, [track.id, track.shareableUrl, track.title]);
 
     const handleCopyToClipboard = useCallback(async () => {
-        const url = buildShareUrl();
+        const url = await buildShareUrl();
         try {
             // Lazy-require so missing native `ExpoClipboard` (web, stale dev client) does not crash app startup.
             const Clipboard = require('expo-clipboard') as typeof import('expo-clipboard');
@@ -123,7 +146,7 @@ const RootLayout = () => {
     }, [buildShareUrl, close, setStep]);
 
     const handleOpenNativeShare = useCallback(async () => {
-        const url = buildShareUrl();
+        const url = await buildShareUrl();
         const message = `Listen to ${track.title ?? 'this sermon'} on Troott`;
 
         try {
@@ -146,7 +169,7 @@ const RootLayout = () => {
     }, [buildShareUrl, close, track.title]);
 
     const handlePressInstagram = useCallback(async () => {
-        const url = buildShareUrl();
+        const url = await buildShareUrl();
         const message = `Listen to ${track.title ?? 'this sermon'} on Troott`;
         try {
             await Share.share({ message: `${message}\n${url}`, url });
@@ -207,7 +230,14 @@ const RootLayout = () => {
         };
 
         void bootstrapPlayer();
-        requestStoragePermission();
+        if (Platform.OS === 'android') {
+            void PermissionsAndroid.requestMultiple([
+                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+            ]).catch((err) => {
+                console.warn(err);
+            });
+        }
 
         const sub = AppState.addEventListener('change', (state) => {
             if (
@@ -276,6 +306,7 @@ const RootLayout = () => {
                 >
                     <TroottProviders>
                         <PlaybackBridge />
+                        <PlaybackProgressSync />
                     <SafeAreaView
                         style={{
                             flex: 1,

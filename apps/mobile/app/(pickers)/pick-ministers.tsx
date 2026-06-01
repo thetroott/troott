@@ -1,14 +1,15 @@
-import React from 'react';
-import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import ScreenView from '@/components/ui/screenview';
 import MinisterPicker from '@/components/features/pickers/minister-picker';
 import { theme } from '@/constants/theme';
+import { useOnboardMinistersMutation } from '@/api/hooks/app/useListenerOnboarding';
 
-/**
- * Modal: pick ministers (Figma parity). Open via `router.push('/pick-ministers')`.
- */
 export default function PickMinistersModal() {
+    const [selected, setSelected] = useState<string[]>([]);
+    const onboard = useOnboardMinistersMutation();
+
     return (
         <ScreenView
             screenStyle={{
@@ -24,7 +25,14 @@ export default function PickMinistersModal() {
                 searchPlaceholder="Search ministers"
                 minSelection={1}
                 primaryLabel="Follow Ministers"
-                onPrimaryPress={() => router.back()}
+                selectedIds={selected}
+                onSelectionChange={setSelected}
+                onPrimaryPress={(ids) => {
+                    onboard.mutate(
+                        { ministerIds: ids },
+                        { onSuccess: () => router.back() },
+                    );
+                }}
                 showClose
                 onClose={() => router.back()}
             />
