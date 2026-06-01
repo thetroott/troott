@@ -1,5 +1,5 @@
 import cookieService from '@/api/services/cookies';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import useGoTo from '../shared/useGoTo';
 import api from '@/api/config';
 
@@ -15,109 +15,43 @@ import {
     VerifyOtpDTO,
 } from '@/dtos/auth.dto';
 
-import storage, { setVerificationEmail } from '@/api/services/local-storage';
+import storage, {
+    persistAuthFromResponse,
+    setVerificationEmail,
+} from '@/api/services/local-storage';
 import useContextType from '../shared/useContextType';
-import { UserType } from '@/models/User.model';
+import { useSession } from '@/context/session/sessionState';
 import {
-    isStudioPortalUserType,
-    navigateToStudioPortal,
-} from '@/utils/studio-portal.util';
+    PATH_ACTIVATE_ACCOUNT,
+    PATH_LOGIN,
+} from '@/routes/paths';
 import {
-    AUTH_ROUTES,
-    isAuthEntryRedirectPath,
-    isAuthPublicPath,
-} from '@/constants/auth-routes';
+    isInternalPortalUserType,
+    isListenerLikeUserType,
+} from '@/utils/auth-redirect.util';
 import { clearLocalAuth } from '@/utils/auth-session.util';
+import {
+    useRedirectAfterAuth,
+    type RedirectAfterAuthOptions,
+} from '@/hooks/app/useRedirectAfterAuth';
+
+export type { RedirectAfterAuthOptions };
 
 const useAuth = () => {
     const { userContext } = useContextType();
     const { goTo, location, navigate } = useGoTo();
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const { refreshSession } = useSession();
 
     const {
         users,
         user,
         userType,
         setUserType,
-        currentSidebar,
         setLoading,
         unsetLoading,
     } = userContext;
 
-    const redirectAfterAuth = useCallback(() => {
-        const utAfterAuth = cookieService.getUserType();
-        if (isStudioPortalUserType(utAfterAuth) && storage.checkToken()) {
-            void navigateToStudioPortal(goTo);
-        } else {
-            goTo('/dashboard');
-        }
-    }, [goTo]);
-
-    useEffect(() => {
-        let ut = cookieService.getUserType();
-        setUserType(ut ? ut : '');
-    }, []);
-
-    useEffect(() => {
-        if (!storage.checkToken() || !storage.checkUserID()) {
-            if (isAuthPublicPath(location.pathname)) {
-                goTo(location.pathname);
-            } else {
-                clearLocalAuth();
-                goTo(AUTH_ROUTES.login);
-            }
-        } else {
-            setIsLoggedIn(true);
-            currentSidebar(false);
-
-            if (isAuthEntryRedirectPath(location.pathname)) {
-                redirectAfterAuth();
-            }
-        }
-    }, [navigate, location.pathname, goTo, currentSidebar, redirectAfterAuth]);
-
-    useEffect(() => {
-        let ut = cookieService.getUserType();
-        setUserType(ut ? ut : '');
-    }, [isLoggedIn]);
-
-    const redirect = useCallback(
-        (roles: Array<string>) => {
-            if (!storage.checkToken() || !storage.checkUserID()) {
-                clearLocalAuth();
-                goTo(AUTH_ROUTES.login);
-                return;
-            }
-
-            const cookieUserType = cookieService.getUserType();
-            const token = storage.getToken();
-
-            if (!token) {
-                clearLocalAuth();
-                goTo(AUTH_ROUTES.login);
-                return;
-            }
-
-            if (cookieUserType && !roles.includes(cookieUserType)) {
-                goTo(AUTH_ROUTES.login);
-                void logoutAuthenticated();
-                return;
-            }
-
-            setIsLoggedIn(true);
-            currentSidebar(false);
-
-            if (isAuthEntryRedirectPath(location.pathname)) {
-                redirectAfterAuth();
-            }
-        },
-        [
-            goTo,
-            location.pathname,
-            currentSidebar,
-            redirectAfterAuth,
-        ],
-    );
+    const redirectAfterAuth = useRedirectAfterAuth();
 
     async function logoutAuthenticated(): Promise<void> {
         if (storage.checkToken()) {
@@ -135,27 +69,23 @@ const useAuth = () => {
 
         if (!response.error) {
             if (response.status === 200) {
-                const d = response.data;
-                const ut = d?.userType as string | undefined;
-                const troottPortalTypes: string[] = [
-                    UserType.SUPER,
-                    UserType.ADMIN,
-                    UserType.MINISTER,
-                    UserType.CREATOR,
-                    UserType.LISTENER,
-                    UserType.USER,
-                ];
-                if (!ut || !troottPortalTypes.includes(ut)) {
+                persistAuthFromResponse(response);
+
+                const payload = response.data as
+                    | Record<string, unknown>
+                    | undefined;
+                const user =
+                    payload?.user && typeof payload.user === 'object'
+                        ? (payload.user as Record<string, unknown>)
+                        : payload;
+                const ut = String(user?.userType ?? '');
+                if (
+                    !ut ||
+                    (!isInternalPortalUserType(ut) &&
+                        !isListenerLikeUserType(ut))
+                ) {
                     return response;
                 }
-
-                storage.storeAuth(
-                    response.token!,
-                    d._id ?? d.id,
-                    ut,
-                    d.email,
-                    d.businessType,
-                );
 
                 cookieService.setData({
                     key: 'userType',
@@ -164,22 +94,40 @@ const useAuth = () => {
                     path: '/',
                 });
 
-                if (d.businessType) {
+                const businessType = user?.businessType;
+                if (typeof businessType === 'string' && businessType) {
                     cookieService.setData({
                         key: 'businessType',
-                        payload: d.businessType,
+                        payload: businessType,
                         expireAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
                         path: '/',
                     });
                 }
 
                 setUserType(ut);
-                setIsLoggedIn(true);
+                await refreshSession({ force: true });
+
+                const from =
+                    typeof location.state === 'object' &&
+                    location.state !== null &&
+                    'from' in location.state
+                        ? String(
+                              (location.state as { from?: string }).from ?? '',
+                          )
+                        : undefined;
+
+                await redirectAfterAuth({
+                    userType: ut,
+                    token: true,
+                    returnTo: from,
+                });
             }
 
             if (response.status === 206) {
+                clearLocalAuth();
+                setUserType('');
                 setVerificationEmail(data.email);
-                goTo(AUTH_ROUTES.activateAccount);
+                navigate(PATH_ACTIVATE_ACCOUNT, { replace: true });
             }
         }
 
@@ -189,8 +137,7 @@ const useAuth = () => {
     const logout = async () => {
         await logoutAuthenticated();
         setUserType('');
-        goTo(AUTH_ROUTES.login);
-        setIsLoggedIn(false);
+        goTo(PATH_LOGIN);
     };
 
     const logoutUser = useCallback(
@@ -201,11 +148,10 @@ const useAuth = () => {
                 userId: data.userId || storage.getUserID(),
             });
             if (!response.error) {
-                setIsLoggedIn(false);
                 clearLocalAuth();
                 setUserType('');
                 unsetLoading({ option: 'default', message: 'successful' });
-                goTo(AUTH_ROUTES.login);
+                goTo(PATH_LOGIN);
             }
             return response;
         },
@@ -219,7 +165,6 @@ const useAuth = () => {
             const response = await api.auth.registerUser(data);
 
             if (!response.error) {
-                setIsLoggedIn(false);
                 unsetLoading({
                     option: 'default',
                     message: 'successful',
@@ -241,7 +186,6 @@ const useAuth = () => {
                 otpType: data.otpType,
             });
             if (!response.error) {
-                setIsLoggedIn(false);
                 unsetLoading({ option: 'default', message: 'successful' });
             }
             return response;
@@ -260,7 +204,6 @@ const useAuth = () => {
             });
 
             if (!response.error) {
-                setIsLoggedIn(false);
                 unsetLoading({
                     option: 'default',
                     message: 'successful',
@@ -280,7 +223,6 @@ const useAuth = () => {
                 otpType,
             });
             if (!response.error) {
-                setIsLoggedIn(false);
                 unsetLoading({ option: 'default', message: 'successful' });
             }
 
@@ -298,7 +240,6 @@ const useAuth = () => {
             });
 
             if (!response.error) {
-                setIsLoggedIn(false);
                 unsetLoading({ option: 'default', message: 'successful' });
             }
             return response;
@@ -317,7 +258,6 @@ const useAuth = () => {
                 email,
             });
             if (!response.error) {
-                setIsLoggedIn(false);
                 unsetLoading({ option: 'default', message: 'successful' });
             }
             return response;
@@ -348,7 +288,7 @@ const useAuth = () => {
         user,
         userType,
 
-        redirect,
+        redirectAfterAuth,
         login,
         register,
         logout,

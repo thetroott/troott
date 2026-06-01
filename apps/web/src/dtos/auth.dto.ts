@@ -63,3 +63,43 @@ export interface LogoutDTO {
     userId: string;
     goTo?: (url: string) => Promise<void>;
 }
+
+/** Session user shape from login / activate / GET /auth/user. */
+export interface MapRegisteredUserDTO {
+    id: string;
+    code: string;
+    slug: string;
+    avatar?: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    userType: UserType;
+    phoneNumber?: string;
+    phoneCode?: string;
+    country?: string;
+    dateOfBirth?: Date;
+    gender?: string;
+    isSuper?: boolean;
+    isAdmin?: boolean;
+    isUser?: boolean;
+    isMinister?: boolean;
+    isCreator?: boolean;
+    isListener?: boolean;
+    isActive?: boolean;
+    isLocked?: boolean;
+    lockedUntil?: Date | null;
+    isActivated?: boolean;
+    isDeactivated?: boolean;
+    isSuspended?: boolean;
+    roles?: string[];
+    onboard?: {
+        step: number;
+        stage: string;
+        status: string;
+    };
+    ministerCode?: string | null;
+    creatorCode?: string | null;
+    listenerCode?: string | null;
+    adminCode?: string | null;
+    studioCode?: string | null;
+}

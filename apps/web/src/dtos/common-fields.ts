@@ -7,6 +7,8 @@
 export interface Upload {
     fileName: string;
     s3Key: string;
+    /** Display URL from `ImageDTO.file` — not sent on PUT. */
+    url?: string;
 }
 
 /** Structured physical address — user profile (`apps/api` user.interface). */

@@ -15,6 +15,7 @@ export * from './comment.dto';
 export * from './sermon.dto';
 export * from './listener.dto';
 export * from './minister.dto';
+export * from './admin.dto';
 export * from './studio.dto';
 export * from './subscription.dto';
 export * from './transaction.dto';

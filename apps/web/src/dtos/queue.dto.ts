@@ -1,8 +1,5 @@
-import {
-    MediaSourceType,
-    QueueItemSourceType,
-    RepeatMode,
-} from './playback.dto';
+import { QueueItemSourceType } from './api-domain';
+import { MediaSourceType, RepeatMode } from './playback.dto';
 
 export interface CreateQueueItemDTO {
     mediaId: string;

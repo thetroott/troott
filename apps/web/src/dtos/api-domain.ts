@@ -50,6 +50,12 @@ export enum PlaylistStatus {
     DELETED = 'deleted',
 }
 
+/** Matches API `PlaylistItemResourceType`. */
+export enum PlaylistItemResourceType {
+    SERMON = 'sermon',
+    SERIES = 'series',
+}
+
 export enum LibraryItemType {
     SERMON = 'sermon',
     PLAYLIST = 'playlist',
