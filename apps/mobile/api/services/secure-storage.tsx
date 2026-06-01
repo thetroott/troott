@@ -1,5 +1,18 @@
-import { IGetData, IRemoveData, ISetData } from '@/utils/interface.utl';
 import * as Keychain from 'react-native-keychain';
+
+export interface ISetData {
+    key: string;
+    payload: string | object;
+}
+
+export interface IGetData {
+    key: string;
+    parse?: boolean;
+}
+
+export interface IRemoveData {
+    key: string;
+}
 
 // Define a unique service name for your application's data
 const SERVICE_NAME = 'com.troott.secure-data';

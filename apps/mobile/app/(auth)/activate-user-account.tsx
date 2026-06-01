@@ -1,20 +1,6 @@
-import React from 'react';
-import { View } from 'react-native';
-import Text from '@/components/ui/text';
-import ScreenView from '@/components/ui/screenview';
+import { Redirect } from 'expo-router';
 
+/** Legacy route — activation uses the same OTP flow as verify-email. */
 export default function ActivateUserAccountScreen() {
-    return (
-        <ScreenView>
-            <View
-                style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                }}
-            >
-                <Text>Activate account</Text>
-            </View>
-        </ScreenView>
-    );
+    return <Redirect href="/verify-email" />;
 }

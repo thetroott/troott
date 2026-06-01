@@ -8,7 +8,11 @@
 import { httpClient } from '../http-client';
 import { getMMKV } from './mmkv-storage';
 import { getBugsnag } from '../monitoring/bugsnag';
-import { NetworkQuality, NetworkState, subscribeToNetworkState } from '@/utils/network';
+import {
+    NetworkQuality,
+    type NetworkState,
+    subscribeToNetworkState,
+} from '@/lib/state/network-store';
 
 /**
  * Mutation queue item

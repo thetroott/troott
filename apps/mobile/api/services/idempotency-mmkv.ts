@@ -1,7 +1,10 @@
 /** Subset of MMKV used for idempotent request keys. */
 export interface MmkvLike {
     getString(key: string): string | undefined;
-    set(key: string, value: string | boolean | number | Uint8Array): void;
+    set(
+        key: string,
+        value: string | boolean | number | Uint8Array | ArrayBuffer,
+    ): void;
     delete(key: string): void;
 }
 

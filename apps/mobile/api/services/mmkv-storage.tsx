@@ -1,9 +1,17 @@
 import { MMKV } from 'react-native-mmkv';
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
 import { StateStorage } from '@/lib/zstore';
-
-import type { IGetData, ISetData } from '@/utils/interface.utl';
 import secureStorage from './secure-storage';
+
+export interface ISetData {
+    key: string;
+    payload: string | object;
+}
+
+export interface IGetData {
+    key: string;
+    parse?: boolean;
+}
 
 const memoryKv = new Map<string, string>();
 

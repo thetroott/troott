@@ -1,15 +1,13 @@
 import React from 'react';
 import ScreenView from '@/components/ui/screenview';
 import { SharedHeader } from '@/components/features/shared';
-
-import TermsAndConditions from '@/components/features/auth/TermsConditions';
+import ForgotPasswordOtpForm from '@/components/features/auth/forms/forgot-password-otp-form';
 
 const ResetPasswordOTP = () => {
     return (
         <ScreenView>
-            <SharedHeader title="" />
-
-            <TermsAndConditions />
+            <SharedHeader title="Enter verification code" />
+            <ForgotPasswordOtpForm />
         </ScreenView>
     );
 };

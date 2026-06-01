@@ -1,41 +1,41 @@
 /**
  * TanStack Query Client Setup
- * 
+ *
  * Production-ready QueryClient configuration with:
  * - Mobile-optimized settings
  * - Cache persistence
  * - Offline support
  * - Error handling
  * - DevTools integration
+ *
+ * Service-layer HTTP calls ({@link BaseService.call}) return Troott
+ * {@link IAPIResponse} envelopes for API failures (4xx/5xx) instead of
+ * throwing. React Query `onError` / retry here applies to transport failures
+ * ({@link ApiError}: network, timeout, non-JSON) only.
  */
 
 import { MutationCache, Query, QueryCache, QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useEffect } from 'react';
-import { apiConfig } from '../config/index';
+import { getQueryCachePolicy } from '../config/cache-policy';
 import { ApiError, logError } from '../errors';
 import { createMMKVPersister } from './cache';
 import { initializeOfflineQueue } from './offline';
-import { queryKeys } from '../utils/query-keys';
+import { queryKeys } from '../query-keys';
 
-/**
- * Re-export query keys for backward compatibility
- * 
- * @deprecated Import from './utils/query-keys' instead
- */
 export { queryKeys };
 
 /**
  * Create QueryClient with production configuration
  */
 export const createQueryClient = (): QueryClient => {
+  const { cacheTime: gcTime, staleTime } = getQueryCachePolicy();
+
   return new QueryClient({
     defaultOptions: {
       queries: {
-        // Cache time (how long unused data stays in cache)
-        gcTime: apiConfig.cacheTime,
-        // Stale time (how long data is considered fresh)
-        staleTime: apiConfig.staleTime,
+        gcTime,
+        staleTime,
         // Retry configuration
         retry: (failureCount: number, error: Error) => {
           // Don't retry on 4xx errors (except network errors)
@@ -131,13 +131,14 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const persister = createMMKVPersister();
+  const { cacheTime: persistMaxAge } = getQueryCachePolicy();
 
   return (
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={{
         persister,
-        maxAge: apiConfig.cacheTime,
+        maxAge: persistMaxAge,
         buster: '', // Add version string here when you need to invalidate all cache
         dehydrateOptions: {
           // Don't persist sensitive data

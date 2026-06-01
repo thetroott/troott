@@ -68,6 +68,8 @@ export const queryKeys = {
             [...queryKeys.search.all, 'sermons', params] as const,
         ministers: (params?: unknown) =>
             [...queryKeys.search.all, 'ministers', params] as const,
+        series: (params?: unknown) =>
+            [...queryKeys.search.all, 'series', params] as const,
         topics: (params?: unknown) =>
             [...queryKeys.search.all, 'topics', params] as const,
         trending: (params?: unknown) =>
@@ -79,6 +81,7 @@ export const queryKeys = {
     },
     playback: {
         all: ['playback'] as const,
+        recent: () => [...queryKeys.playback.all, 'recent'] as const,
         sermon: (sermonId: string) =>
             [...queryKeys.playback.all, 'sermon', sermonId] as const,
     },
