@@ -1,5 +1,5 @@
 import { HapticFeedbackTypes, trigger } from 'react-native-haptic-feedback';
-import { useReducedHapticsSetting } from '@/stores/settings/app';
+import { useReducedHapticsSetting } from '@/lib/preferences/app';
 
 const useHapticFeedback: () => (
     type?: keyof typeof HapticFeedbackTypes | HapticFeedbackTypes,

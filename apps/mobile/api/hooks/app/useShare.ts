@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import api from '../../api';
-import { queryKeys } from '../../utils/query-keys';
+import { queryKeys } from '../../query-keys';
+import { resolveShareUrl } from '@/engine/utils/share-url';
 
 export function useResolveShareLinkQuery(
     token: string,
@@ -28,11 +29,13 @@ export function useShareSermon() {
         mutationFn: async (input: {
             sermonId: string;
             title: string;
-            shareableUrl?: string;
+            shareableUrl?: string | null;
         }) => {
-            const url =
-                input.shareableUrl ??
-                `troott://sermon/${encodeURIComponent(input.sermonId)}`;
+            const url = await resolveShareUrl({
+                sermonId: input.sermonId,
+                shareableUrl: input.shareableUrl,
+                title: input.title,
+            });
             return {
                 message: `${input.title}\n${url}`,
                 url,

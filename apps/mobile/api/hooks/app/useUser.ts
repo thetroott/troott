@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useContextType } from '@/context/apps/useContextType';
-import { GET_LOGGEDIN_USER } from '@/context/types';
+import { useContextType } from '@/context';
+import { GET_LISTENER, GET_LOGGEDIN_USER } from '@/context/types';
+import type { SessionUser } from '@/context/user/types';
 import api from '../../api';
-import { queryKeys } from '../../utils/query-keys';
-import { mapApiUserToContext } from '../../utils/map-api-user';
+import { queryKeys } from '../../query-keys';
 import type { UpdateListenerDTO } from '../../dtos/listener.dto';
 
 export function useCurrentUserQuery(enabled = true) {
     const { userContext } = useContextType();
+    const queryClient = useQueryClient();
 
     return useQuery({
         queryKey: queryKeys.users.me(),
@@ -18,9 +19,25 @@ export function useCurrentUserQuery(enabled = true) {
                 throw new Error(res.message || 'Failed to load user');
             }
             const data = res.data as Record<string, unknown>;
-            const mapped = mapApiUserToContext(data);
+            const mapped: NonNullable<SessionUser> = {
+                id: String(data.id ?? ''),
+                email: String(data.email ?? ''),
+                firstName: String(data.firstName ?? ''),
+                lastName: String(data.lastName ?? ''),
+                userType: data.userType,
+                isActive: data.isActive,
+                isAdmin: data.isAdmin,
+                isSuper: data.isSuper,
+                isLocked: data.isLocked,
+                roles: data.roles,
+                status: data.status,
+                onboard: data.onboard,
+                avatar: data.avatar,
+                phoneNumber: data.phoneNumber,
+            };
             userContext.setResource(GET_LOGGEDIN_USER, mapped);
             userContext.setUserType(String(data.userType ?? ''));
+            queryClient.setQueryData(queryKeys.auth.user(), mapped);
             return mapped;
         },
     });
@@ -37,9 +54,23 @@ export function useUpdateProfileMutation() {
             if (res.error || !res.data) {
                 return;
             }
-            const mapped = mapApiUserToContext(
-                res.data as Record<string, unknown>,
-            );
+            const payload = res.data as Record<string, unknown>;
+            const mapped: NonNullable<SessionUser> = {
+                id: String(payload.id ?? ''),
+                email: String(payload.email ?? ''),
+                firstName: String(payload.firstName ?? ''),
+                lastName: String(payload.lastName ?? ''),
+                userType: payload.userType,
+                isActive: payload.isActive,
+                isAdmin: payload.isAdmin,
+                isSuper: payload.isSuper,
+                isLocked: payload.isLocked,
+                roles: payload.roles,
+                status: payload.status,
+                onboard: payload.onboard,
+                avatar: payload.avatar,
+                phoneNumber: payload.phoneNumber,
+            };
             userContext.setResource(GET_LOGGEDIN_USER, mapped);
             queryClient.invalidateQueries({ queryKey: queryKeys.users.me() });
         },
@@ -48,11 +79,18 @@ export function useUpdateProfileMutation() {
 
 export function useUpdateListenerMutation() {
     const queryClient = useQueryClient();
+    const { userContext } = useContextType();
 
     return useMutation({
         mutationFn: (payload: UpdateListenerDTO) =>
             api.listener.updateListener(payload),
-        onSuccess: () => {
+        onSuccess: (res) => {
+            if (!res.error && res.data) {
+                userContext.setResource(
+                    GET_LISTENER,
+                    res.data as Record<string, unknown>,
+                );
+            }
             queryClient.invalidateQueries({
                 queryKey: queryKeys.listener.me(),
             });

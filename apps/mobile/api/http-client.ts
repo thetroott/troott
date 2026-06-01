@@ -16,8 +16,23 @@ import {
     isRetryableError,
     logError,
 } from './errors';
-import { clearTokens, getToken, isTokenExpired } from './services/mmkv-storage';
-import { getAdaptiveTimeout, getNetworkState } from '../utils/network';
+import { DeviceEventEmitter } from 'react-native';
+import { clearTokens, getToken, storeToken } from './services/mmkv-storage';
+import { getAdaptiveTimeout, getNetworkState } from '@/lib/state/network-store';
+
+const SESSION_INVALID_EVENT = 'troott:session-invalid';
+
+type SessionInvalidPayload = {
+    message?: string;
+    status?: number;
+};
+
+function emitSessionInvalid(message?: string, status?: number): void {
+    DeviceEventEmitter.emit(SESSION_INVALID_EVENT, {
+        ...(message ? { message } : {}),
+        ...(status != null ? { status } : {}),
+    });
+}
 
 export interface RequestConfig extends Omit<RequestInit, 'priority'> {
     timeout?: number;
@@ -155,21 +170,36 @@ export class TroottHttpClient {
         return headers;
     }
 
-    private async handleAuthError(
+    private async persistReissuedToken(response: Response): Promise<void> {
+        const newToken = response.headers.get('X-New-Token');
+        if (newToken?.trim()) {
+            await storeToken({ token: newToken.trim() });
+        }
+    }
+
+    private async handleAuthFailure(
         response: Response,
         skipAuth: boolean,
     ): Promise<void> {
-        if (response.status === 401 && !skipAuth) {
-            const token = await getToken();
-            if (token && (await isTokenExpired())) {
-                await clearTokens();
-                throw new ApiError(
-                    'Authentication token expired',
-                    ApiErrorType.UNAUTHORIZED,
-                    401,
-                );
-            }
+        if (skipAuth) {
+            return;
         }
+        if (response.status !== 401 && response.status !== 403) {
+            return;
+        }
+        await clearTokens();
+        const message =
+            response.status === 403
+                ? 'Your sign-in expired. Please sign in again.'
+                : 'Sign in again.';
+        emitSessionInvalid(message, response.status);
+        throw new ApiError(
+            message,
+            response.status === 403
+                ? ApiErrorType.FORBIDDEN
+                : ApiErrorType.UNAUTHORIZED,
+            response.status,
+        );
     }
 
     private async processResponse<T>(
@@ -177,6 +207,8 @@ export class TroottHttpClient {
         url: string,
         config: RequestConfig,
     ): Promise<T> {
+        await this.persistReissuedToken(response);
+
         if (apiConfig.enableLogging) {
             console.log(`[API] ${config.method || 'GET'} ${url}`, {
                 status: response.status,
@@ -210,42 +242,59 @@ export class TroottHttpClient {
         }
 
         if (!response.ok) {
-            const errorResponse = data as {
-                status?: 'fail' | 'error' | string;
-                message?: string;
-                errors?: { message: string; field?: string }[];
-            };
-
-            const errorType = getErrorTypeFromStatus(response.status);
-            const errorMessage = errorResponse.message || response.statusText;
-
-            const apiError = new ApiError(
-                errorMessage,
-                errorType,
-                response.status,
-                {
-                    status:
-                        errorResponse.status === 'fail' ||
-                        errorResponse.status === 'error'
-                            ? errorResponse.status
-                            : 'error',
-                    message: errorMessage,
-                    errors: errorResponse.errors,
-                },
-            );
-
-            if (!config.skipErrorLogging) {
-                logError(apiError, {
-                    endpoint: url,
-                    method: config.method || 'GET',
-                });
+            if (
+                (response.status === 401 || response.status === 403) &&
+                !config.skipAuth
+            ) {
+                await this.handleAuthFailure(response, false);
             }
-
-            throw apiError;
+            if (!config.skipErrorLogging && data && typeof data === 'object') {
+                logError(
+                    new ApiError(
+                        (data as { message?: string }).message ||
+                            response.statusText,
+                        getErrorTypeFromStatus(response.status),
+                        response.status,
+                    ),
+                    {
+                        endpoint: url,
+                        method: config.method || 'GET',
+                    },
+                );
+            }
+            if (apiConfig.enableLogging && data && typeof data === 'object') {
+                const msg = (data as { message?: string }).message;
+                if (msg) {
+                    console.log(`[API] error: ${msg}`, {
+                        status: response.status,
+                    });
+                }
+            }
         }
 
-        const responseData = data as { data?: T; status?: string };
-        return responseData as T;
+        if (data && typeof data === 'object') {
+            const envelope = {
+                ...(data as Record<string, unknown>),
+                status:
+                    typeof (data as { status?: unknown }).status === 'number'
+                        ? (data as { status: number }).status
+                        : response.status,
+                error:
+                    (data as { error?: boolean }).error === true ||
+                    !response.ok,
+            };
+            return envelope as T;
+        }
+
+        if (!response.ok) {
+            throw new ApiError(
+                `Request failed: ${response.statusText}`,
+                getErrorTypeFromStatus(response.status),
+                response.status,
+            );
+        }
+
+        return data as T;
     }
 
     private async fetchWithTimeout(
@@ -300,7 +349,10 @@ export class TroottHttpClient {
                 adaptiveTimeout,
             );
 
-            await this.handleAuthError(response, skipAuth || false);
+            await this.persistReissuedToken(response);
+            if (!response.ok && !skipAuth) {
+                await this.handleAuthFailure(response, skipAuth || false);
+            }
 
             return response;
         } catch (error) {
@@ -363,10 +415,13 @@ export class TroottHttpClient {
             if (cachedRequest) {
                 this.logDeduplication(requestKey);
                 const response = await cachedRequest;
-                await this.handleAuthError(
-                    response,
-                    requestConfig.skipAuth || false,
-                );
+                await this.persistReissuedToken(response);
+                if (!response.ok && !requestConfig.skipAuth) {
+                    await this.handleAuthFailure(
+                        response,
+                        requestConfig.skipAuth || false,
+                    );
+                }
                 return this.processResponse<T>(response, url, requestConfig);
             }
 
