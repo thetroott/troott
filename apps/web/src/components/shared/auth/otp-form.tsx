@@ -13,7 +13,7 @@ import useAuth from '@/hooks/app/useAuth';
 import storage from '@/api/services/local-storage';
 import { OtpType } from '@/api/enums';
 import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
-import { AUTH_ROUTES } from '@/constants/auth-routes';
+import { PATH_ACTIVATE_ACCOUNT, PATH_LOGIN } from '@/routes/paths';
 import { Link } from 'react-router-dom';
 
 const OtpForm = (data: IForm) => {
@@ -56,7 +56,7 @@ const OtpForm = (data: IForm) => {
                 return;
             }
             toast.success(res.message || 'OTP verified.');
-            navigate(AUTH_ROUTES.login);
+            navigate(PATH_LOGIN, { replace: true });
             onSuccess?.();
         } catch (err) {
             toast.error(
@@ -306,7 +306,7 @@ const OtpForm = (data: IForm) => {
                 <p className="text-center text-sm text-muted-foreground">
                     Activating a new account?{' '}
                     <Link
-                        to={AUTH_ROUTES.activateAccount}
+                        to={PATH_ACTIVATE_ACCOUNT}
                         className="text-primary underline underline-offset-4 hover:no-underline"
                     >
                         Continue on activate account

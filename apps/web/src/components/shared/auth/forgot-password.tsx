@@ -1,7 +1,7 @@
 'use client';
 
 import type React from 'react';
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,15 +20,21 @@ import type {
 } from '@/dtos/auth.dto';
 import api from '@/api/config';
 import { toast } from 'sonner';
+import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { useNavigate } from 'react-router-dom';
 import { OtpType } from '@/api/enums';
 import { handleMutationError } from '@/utils/helpers.util';
 import { setVerificationEmail } from '@/api/services/local-storage';
-import { AUTH_ROUTES } from '@/constants/auth-routes';
+import { PATH_LOGIN, PATH_RESET_PASSWORD } from '@/routes/paths';
+import { clearLocalAuth } from '@/utils/auth-session.util';
 
 function ForgotPasswordForm(data: IForm) {
     const { className, onStepChange, ...props } = data;
     const navigate = useNavigate();
+
+    useEffect(() => {
+        clearLocalAuth();
+    }, []);
 
     const [step, setStep] = useState<'email' | 'otp' | 'success'>('email');
     const [formData, setFormData] = useState({
@@ -109,6 +115,9 @@ function ForgotPasswordForm(data: IForm) {
         },
         onSuccess: (data: IAPIResponse) => {
             if (data.error) {
+                if (!isApiHttp2xxErrorEnvelope(data)) {
+                    toast.error(data.message || 'Could not send reset code.');
+                }
                 return;
             }
             setVerificationEmail(formData.email);
@@ -127,6 +136,9 @@ function ForgotPasswordForm(data: IForm) {
         },
         onSuccess: (data: IAPIResponse) => {
             if (data.error) {
+                if (!isApiHttp2xxErrorEnvelope(data)) {
+                    toast.error(data.message || 'Invalid verification code.');
+                }
                 return;
             }
             toast.success(data.message);
@@ -141,6 +153,9 @@ function ForgotPasswordForm(data: IForm) {
         },
         onSuccess: (data: IAPIResponse) => {
             if (data.error) {
+                if (!isApiHttp2xxErrorEnvelope(data)) {
+                    toast.error(data.message || 'Could not resend code.');
+                }
                 return;
             }
             setFormData((prev) => ({ ...prev, otp: Array(6).fill('') }));
@@ -327,7 +342,7 @@ function ForgotPasswordForm(data: IForm) {
                 <div className="text-center text-sm">
                     Remember your password?{' '}
                     <a
-                        href={AUTH_ROUTES.login}
+                        href={PATH_LOGIN}
                         className="underline underline-offset-4"
                     >
                         Back to login
@@ -490,14 +505,14 @@ function ForgotPasswordForm(data: IForm) {
             </div>
 
             <Button
-                onClick={() => navigate(AUTH_ROUTES.resetPassword)}
+                onClick={() => navigate(PATH_RESET_PASSWORD)}
                 className="w-full"
             >
                 Create new password
             </Button>
 
             <Button
-                onClick={() => navigate(AUTH_ROUTES.login)}
+                onClick={() => navigate(PATH_LOGIN)}
                 variant="outline"
                 className="w-full"
             >

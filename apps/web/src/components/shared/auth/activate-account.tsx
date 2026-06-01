@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { IForm, IOtpFormErrors } from '@/utils/interfaces.util';
 import { Button } from '@/components/ui/button';
@@ -15,18 +15,14 @@ import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
 import { UserType } from '@/models/User.model';
 import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
-import { AUTH_ROUTES } from '@/constants/auth-routes';
-import {
-    isStudioPortalUserType,
-    navigateToStudioPortal,
-} from '@/utils/studio-portal.util';
+import { PATH_LOGIN, PATH_REGISTER } from '@/routes/paths';
 
 const ActivateUserForm = (data: IForm) => {
     const { className, email, onSuccess, onResend, ...props } = data;
 
     const navigate = useNavigate();
     const { userContext } = useContextType();
-    const { activateAccount, resendOtp } = useAuth();
+    const { activateAccount, resendOtp, redirectAfterAuth } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [otp, setOtp] = useState(Array(6).fill(''));
@@ -39,6 +35,13 @@ const ActivateUserForm = (data: IForm) => {
         cleanStoredEmail(email) ||
         cleanStoredEmail(storage.getUserEmail() ?? '');
 
+    useEffect(() => {
+        if (!resolvedEmail) {
+            toast.error('Missing email. Register again.');
+            navigate(PATH_REGISTER, { replace: true });
+        }
+    }, [resolvedEmail, navigate]);
+
     const buildActivatePayload = (
         digits: string[] = otp,
     ): ActivateDTO => ({
@@ -50,7 +53,7 @@ const ActivateUserForm = (data: IForm) => {
     const runActivate = async (payload: ActivateDTO) => {
         if (!payload.email?.trim()) {
             toast.error('Missing email. Register again.');
-            navigate(AUTH_ROUTES.register);
+            navigate(PATH_REGISTER);
             return;
         }
 
@@ -72,10 +75,11 @@ const ActivateUserForm = (data: IForm) => {
 
             toast.success(res.message || 'Account activated.');
 
-            if (isStudioPortalUserType(ut) && storage.checkToken()) {
-                await navigateToStudioPortal((path) => navigate(path));
+            if (storage.checkToken() && storage.checkUserID()) {
+                await redirectAfterAuth({ userType: ut || '', token: true });
             } else {
-                navigate('/dashboard');
+                toast.info('Sign in to continue.');
+                navigate(PATH_LOGIN, { replace: true });
             }
             onSuccess?.();
         } catch (err) {
@@ -370,7 +374,7 @@ const ActivateUserForm = (data: IForm) => {
     const handleResendOTP = async () => {
         if (!resolvedEmail) {
             toast.error('Missing email. Register again.');
-            navigate(AUTH_ROUTES.register);
+            navigate(PATH_REGISTER);
             return;
         }
 

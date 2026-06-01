@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { Camera, UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { resolveAssetUrl } from '@/utils/asset-url.util';
 import api from '@/api/config';
 import type { Asset } from '@/app/profile/profile.types';
 
@@ -27,13 +26,58 @@ interface ImageUploadTileProps {
     ariaLabel: string;
 }
 
+type StorageUploadDto = {
+    file?: string;
+    s3Key?: string;
+    fileName?: string;
+    uploadRef?: string;
+};
+
+function parseStorageUploadEnvelope(data: unknown): StorageUploadDto | null {
+    if (!data || typeof data !== 'object') {
+        return null;
+    }
+    const envelope = data as { data?: unknown };
+    const inner =
+        envelope.data && typeof envelope.data === 'object'
+            ? envelope.data
+            : data;
+    if (!inner || typeof inner !== 'object') {
+        return null;
+    }
+    const dto = inner as StorageUploadDto;
+    if (!dto.s3Key) {
+        return null;
+    }
+    return dto;
+}
+
+function assetFromStorageUpload(dto: StorageUploadDto): Asset {
+    return {
+        fileName: dto.fileName ?? '',
+        s3Key: dto.s3Key ?? '',
+        url: dto.file,
+    };
+}
+
+function previewSrc(
+    value: Asset | null,
+    opts?: { v?: string | number },
+): string | undefined {
+    if (!value?.url) {
+        return undefined;
+    }
+    const raw = value.url;
+    if (opts?.v != null) {
+        const sep = raw.includes('?') ? '&' : '?';
+        return `${raw}${sep}v=${encodeURIComponent(String(opts.v))}`;
+    }
+    return raw;
+}
+
 /**
  * ImageUploadTile - one component, two visual variants (`cover`, `avatar`).
- * Empty state matches Figma `11719:104736`; populated state matches `11732:105889`.
- *
- * The tile owns the upload lifecycle (`idle | uploading | error`) and reports
- * the resulting `Asset` to its parent via `onChange`. Removing clears the slot
- * to `null` so the parent can send an explicit "remove" to the backend.
+ * Upload uses `api.storage.uploadImage`; preview uses `ImageDTO.file` from the API.
  */
 export function ImageUploadTile({
     variant,
@@ -49,16 +93,12 @@ export function ImageUploadTile({
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
     const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-    const previewUrl = React.useMemo(
-        () => resolveAssetUrl(value),
-        [value],
-    );
+    const previewUrl = previewSrc(value);
 
     const handleFile = React.useCallback(
         async (file: File) => {
             setErrorMessage(null);
 
-            // Match server-side allowlist + sane size cap (5MB per Figma copy).
             const allowed = ['image/jpeg', 'image/png', 'image/webp'];
             if (!allowed.includes(file.type)) {
                 setState('error');
@@ -79,14 +119,11 @@ export function ImageUploadTile({
                     file,
                     (p: number) => setProgress(p),
                 );
-                const data = res?.data?.data ?? res?.data;
-                if (!data?.s3Key) {
+                const dto = parseStorageUploadEnvelope(res?.data);
+                if (!dto) {
                     throw new Error('Upload failed');
                 }
-                onChange({
-                    fileName: data.fileName ?? file.name,
-                    s3Key: data.s3Key,
-                });
+                onChange(assetFromStorageUpload(dto));
                 setState('idle');
                 setProgress(0);
             } catch (e) {
@@ -197,7 +234,6 @@ export function ImageUploadTile({
         );
     }
 
-    // Cover variant
     return (
         <div className={cn('flex flex-col gap-2', className)}>
             <button

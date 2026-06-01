@@ -1,16 +1,26 @@
 import { useState } from 'react';
+import { Eye, EyeOff, Loader2, LockIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Loader2, LockIcon } from 'lucide-react';
 import type { ChangePasswordDTO } from '@/dtos/auth.dto';
-import { usePasswordUtils } from '@/hooks/shared/useValidaton';
 import useAuth from '@/hooks/app/useAuth';
+import { usePasswordUtils } from '@/hooks/shared/useValidaton';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
-import { toast } from 'sonner';
+import { PATH_LOGIN } from '@/routes/paths';
+import { clearLocalAuth } from '@/utils/auth-session.util';
 import { cn } from '@/lib/utils';
 
-const ChangePasswordForm = () => {
+import { SettingsSectionCard } from './SettingsSectionCard';
+
+export function UpdatePasswordSection() {
+    const navigate = useNavigate();
+    const { changePassword } = useAuth();
+    const { validatePassword } = usePasswordUtils();
+
     const [formData, setFormData] = useState({
         currentPassword: '',
         newPassword: '',
@@ -22,9 +32,6 @@ const ChangePasswordForm = () => {
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-
-    const { validatePassword } = usePasswordUtils();
-    const { changePassword } = useAuth();
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -46,7 +53,9 @@ const ChangePasswordForm = () => {
             newErrors.currentPassword = 'Current password is required';
         }
         const passwordError = validatePassword(formData.newPassword);
-        if (passwordError) newErrors.newPassword = passwordError;
+        if (passwordError) {
+            newErrors.newPassword = passwordError;
+        }
         if (formData.newPassword !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Passwords do not match';
         }
@@ -60,7 +69,9 @@ const ChangePasswordForm = () => {
         }
 
         setErrors(newErrors);
-        if (Object.keys(newErrors).length > 0) return;
+        if (Object.keys(newErrors).length > 0) {
+            return;
+        }
 
         const payload: ChangePasswordDTO = {
             currentPassword: formData.currentPassword,
@@ -76,17 +87,17 @@ const ChangePasswordForm = () => {
                 }
                 return;
             }
-            toast.success(res.message || 'Password updated.');
-            setFormData({
-                currentPassword: '',
-                newPassword: '',
-                confirmPassword: '',
-            });
-            setTouched({});
-            setErrors({});
+            toast.success(
+                res.message ||
+                    'Password updated. Sign in again with your new password.',
+            );
+            clearLocalAuth();
+            navigate(PATH_LOGIN, { replace: true });
         } catch (err) {
             toast.error(
-                err instanceof Error ? err.message : 'Could not change password.',
+                err instanceof Error
+                    ? err.message
+                    : 'Could not change password.',
             );
         } finally {
             setSubmitting(false);
@@ -113,7 +124,7 @@ const ChangePasswordForm = () => {
                         setTouched((prev) => ({ ...prev, [field]: true }))
                     }
                     className={cn(
-                        'pl-9 pr-10 h-12',
+                        'h-11 border-[#545454] bg-transparent pl-9 pr-10 text-[#eaeaea]',
                         errors[field] &&
                             touched[field] &&
                             'border-destructive focus-visible:ring-destructive',
@@ -134,49 +145,59 @@ const ChangePasswordForm = () => {
                     )}
                 </Button>
             </div>
-            {errors[field] && touched[field] && (
+            {errors[field] && touched[field] ? (
                 <p className="text-sm text-destructive" role="alert">
                     {errors[field]}
                 </p>
-            )}
+            ) : null}
         </div>
     );
 
     return (
-        <form className="flex flex-col gap-6 max-w-md" onSubmit={handleSubmit}>
-            {renderPasswordField(
-                'current-password',
-                'Current password',
-                'currentPassword',
-                showCurrent,
-                setShowCurrent,
-            )}
-            {renderPasswordField(
-                'new-password',
-                'New password',
-                'newPassword',
-                showNew,
-                setShowNew,
-            )}
-            {renderPasswordField(
-                'confirm-password',
-                'Confirm new password',
-                'confirmPassword',
-                showConfirm,
-                setShowConfirm,
-            )}
-            <Button type="submit" className="w-full h-12" disabled={submitting}>
-                {submitting ? (
-                    <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Updating...
-                    </>
-                ) : (
-                    'Update password'
+        <SettingsSectionCard
+            title="Update password"
+            description="Ensure your account is using a long, random password to stay secure."
+        >
+            <form
+                className="flex max-w-md flex-col gap-4"
+                onSubmit={(e) => void handleSubmit(e)}
+            >
+                {renderPasswordField(
+                    'settings-current-password',
+                    'Current password',
+                    'currentPassword',
+                    showCurrent,
+                    setShowCurrent,
                 )}
-            </Button>
-        </form>
+                {renderPasswordField(
+                    'settings-new-password',
+                    'New password',
+                    'newPassword',
+                    showNew,
+                    setShowNew,
+                )}
+                {renderPasswordField(
+                    'settings-confirm-password',
+                    'Password confirmation',
+                    'confirmPassword',
+                    showConfirm,
+                    setShowConfirm,
+                )}
+                <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="h-11 w-fit min-w-[120px] bg-[#eaeaea] text-[#1c1c1e] hover:bg-white"
+                >
+                    {submitting ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Saving...
+                        </>
+                    ) : (
+                        'Save'
+                    )}
+                </Button>
+            </form>
+        </SettingsSectionCard>
     );
-};
-
-export default ChangePasswordForm;
+}

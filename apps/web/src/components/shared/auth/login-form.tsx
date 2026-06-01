@@ -11,7 +11,8 @@ import type { LoginDTO } from '@/dtos/auth.dto';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
-import { AUTH_ROUTES } from '@/constants/auth-routes';
+import { PATH_FORGOT_PASSWORD, PATH_REGISTER } from '@/routes/paths';
+import storage from '@/api/services/local-storage';
 
 const LoginForm = (data: IForm) => {
     const { className, ...props } = data;
@@ -76,6 +77,12 @@ const LoginForm = (data: IForm) => {
                 return;
             }
             if (res.status === 200) {
+                if (!storage.checkToken() || !storage.checkUserID()) {
+                    toast.error(
+                        'Sign-in succeeded but your session could not be saved. Please try again.',
+                    );
+                    return;
+                }
                 toast.success(res.message || 'Signed in successfully.');
             }
         } catch (err) {
@@ -154,7 +161,7 @@ const LoginForm = (data: IForm) => {
                         <div className="flex items-center">
                             <Label htmlFor="password">Password</Label>
                             <Link
-                                to={AUTH_ROUTES.forgotPassword}
+                                to={PATH_FORGOT_PASSWORD}
                                 className="ml-auto text-sm underline-offset-4 hover:underline"
                             >
                                 Forgot your password?
@@ -354,7 +361,7 @@ const LoginForm = (data: IForm) => {
                 <div className="text-center text-sm">
                     Don&apos;t have an account?{' '}
                     <Link
-                        to={AUTH_ROUTES.register}
+                        to={PATH_REGISTER}
                         className="underline underline-offset-4"
                     >
                         Sign up

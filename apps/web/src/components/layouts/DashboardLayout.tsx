@@ -1,5 +1,7 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { DraftProvider } from '@/context/draft/draftState';
+import { UploadProvider } from '@/context/upload/uploadState';
 import { SidebarProvider } from '../ui/sidebar';
 import AppSidebar from '../shared/navigation/Sidebar';
 import storage from '@/api/services/local-storage';
@@ -7,21 +9,25 @@ import NavBar from '../shared/navigation/NavBar';
 import { cn } from '@/lib/utils';
 import { UserType } from '@/models/User.model';
 import { ObservabilityUserSync } from '@/services/observability/ObservabilityUserSync';
+import cookieService from '@/api/services/cookies';
+import { normalizePortalUserType } from '@/utils/roles.util';
+import { PATH_STUDIO_PREFIX } from '@/routes/paths';
+import TourProvider from '@/components/shared/tour/TourProvider';
 
-/** My Sermons matches Figma [`10154:35083`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10154-35083) — no global top nav; shell fill `#2b2a2c` (not theme `neutral-900`). */
-/** My Sermons list — full canvas, no top nav (see Figma note above). */
-const MY_SERMONS_PATHS = new Set(['/sermons', '/get-sermons', '/my-sermon']);
-
-/** Figma frame fill for node `10154:35083` / `Frame 1618868833`. */
 const MY_SERMONS_CANVAS_BG = 'bg-[#2b2a2c]';
+
+function sidebarUserTypeFromCookie(): UserType {
+    return normalizePortalUserType(cookieService.getUserType());
+}
 
 const DashboardLayout = () => {
     const { pathname } = useLocation();
     const normalizedPath = pathname.replace(/\/+$/, '') || '/';
-    const hideTopNav = MY_SERMONS_PATHS.has(normalizedPath);
+    const hideTopNav = /\/studio\/[^/]+\/sermons/.test(pathname);
     const shellBg = hideTopNav ? MY_SERMONS_CANVAS_BG : 'bg-neutral-900';
-    /** Studio upload page — stretch content to the sidebar column (no double horizontal inset). */
-    const dashboardFullWidthMain = normalizedPath === '/dashboard';
+    const studioHome =
+        normalizedPath.startsWith(`${PATH_STUDIO_PREFIX}/`) &&
+        !normalizedPath.slice(`${PATH_STUDIO_PREFIX}/`.length).includes('/', 1);
 
     const [defaultOpen] = React.useState(() => {
         const stored = storage.fetch('sidebar-collapsed');
@@ -29,6 +35,7 @@ const DashboardLayout = () => {
     });
 
     return (
+        <TourProvider>
         <SidebarProvider
             defaultOpen={defaultOpen}
             className={cn('h-full min-h-0 min-w-0 flex-1', shellBg)}
@@ -40,7 +47,7 @@ const DashboardLayout = () => {
                     shellBg,
                 )}
             >
-                <AppSidebar userRole={UserType.MINISTER} />
+                <AppSidebar userRole={sidebarUserTypeFromCookie()} />
 
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                     {!hideTopNav ? <NavBar /> : null}
@@ -51,16 +58,21 @@ const DashboardLayout = () => {
                             shellBg,
                             hideTopNav
                                 ? 'p-0'
-                                : dashboardFullWidthMain
+                                : studioHome
                                   ? 'px-0 pb-4 pt-2'
                                   : 'px-4 pb-4 pt-2 md:px-6',
                         )}
                     >
-                        <Outlet />
+                        <DraftProvider>
+                            <UploadProvider>
+                                <Outlet />
+                            </UploadProvider>
+                        </DraftProvider>
                     </main>
                 </div>
             </div>
         </SidebarProvider>
+        </TourProvider>
     );
 };
 
