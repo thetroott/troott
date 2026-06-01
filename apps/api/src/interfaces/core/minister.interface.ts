@@ -195,5 +195,18 @@ export enum VerificationStatus {
     REJECTED = 'rejected',
 }
 
+export enum ministryType {
+    BAPTIST = 'baptist',
+    ANGLICAN = 'anglican',
+    METHODIST = 'methodist',
+    CATHOLIC = 'catholic',
+    ORTHODOX = 'orthodox',
+    REFORMED = 'reformed',
+    EVANGELICAL = 'evangelical',
+    CHARISMATIC = 'charismatic',
+    NON_DENOMINATIONAL = 'non_denominational',
+    PENTECOSTAL = 'pentecostal',
+}
+
 export type { IMinisterDoc };
 export default IMinisterDoc;

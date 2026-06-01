@@ -92,6 +92,8 @@ interface IStudioDoc extends Document {
 
     createdAt: Date;
     updatedAt: Date;
+    /** Optimistic concurrency version. */
+    _version: number;
     _id: ObjectId;
     id: ObjectId;
 }

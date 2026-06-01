@@ -45,6 +45,9 @@ export interface ISubscriptionIntentDoc extends Document {
 
     /** Provider-specific metadata. */
     metaData?: Record<string, unknown>;
+
+    /** Optimistic concurrency version. */
+    _version: number;
 }
 
 /**

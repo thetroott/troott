@@ -61,10 +61,10 @@ export interface IPagination {
     total: number;
     /** Number of records in the current page. */
     count: number;
-    /** Links to the next and previous pages. */
+    /** Links to the next and previous pages (present when applicable). */
     pagination: {
-        next: { page: number; limit: number };
-        prev: { page: number; limit: number };
+        next?: { page: number; limit: number };
+        prev?: { page: number; limit: number };
     };
     /** Array of records for the current page. */
     data: Array<any>;
@@ -333,8 +333,14 @@ export interface AWSConfig {
     accessKeyId: string;
     /** IAM secret access key. */
     secretAccessKey: string;
-    /** Target S3 bucket name. */
+    /** Legacy single-bucket name (fallback when split buckets unset). */
     bucketName: string;
+    /** Sermon source audio — `troott-originals`. */
+    originalsBucket?: string;
+    /** HLS output — `troott-playback`. */
+    playbackBucket?: string;
+    /** Images, documents, avatars — `troott-storage`. */
+    storageBucket?: string;
 }
 
 /** Transactional email provider configuration. */
@@ -515,14 +521,6 @@ export interface ISearchQuery {
     operator: Nullable<string>;
     /** Fields to select. */
     fields?: Array<string>;
-    
-    /** Created at. */
-    createdAt: string;
-    /** Updated at. */
-    updatedAt: string;
-    /** ID. */
-    _id: ObjectId;
-    id: ObjectId;
 }
 
 // ---------------------------------------------------------------------------
@@ -569,5 +567,8 @@ export interface IQueryOptions {
     populate?: string | Record<string, any> | Array<string | Record<string, any>>;
     select?: string;
     recentOnly?: boolean;
+    /** When true, zero matches return `{ data: [] }` with 200 instead of 404. */
+    allowEmpty?: boolean;
+    lean?: boolean;
 }
 

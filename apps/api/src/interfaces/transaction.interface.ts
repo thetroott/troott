@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose';
 import ISubscriptionDoc, { IDebitCard } from "./subscription.interface";
-import IListenerDoc from "./listener.interface";
+import IListenerDoc from '@/interfaces/core/listener.interface';
 
 type ObjectId = Types.ObjectId;
 

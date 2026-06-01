@@ -392,6 +392,7 @@ export interface IAudioHLSJobDTO {
     mimeType?: string;
     renditions?: AudioRenditionDTO[];
     segmentDuration?: number;
+    sermonId?: Types.ObjectId | string;
 }
 
 export interface IAudioDASHJobDTO {

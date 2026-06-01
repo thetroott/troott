@@ -58,6 +58,8 @@ interface IUserDoc extends Document {
 
     /** Alternative phone number. */
     altPhone: string;
+    /** Encrypted login password (AES-GCM; excluded from default queries). */
+    password?: string;
     /** How the user's password was originally set. */
     passwordType: PasswordType;
     /** Primary role category of the user. */
@@ -273,6 +275,13 @@ export enum OnboardStage {
     MINISTER_TOUR = 'minister_tour',
     /** Minister get-started — first sermon published */
     MINISTER_FIRST_SERMON = 'minister_first_sermon',
+    /** Creator get-started — personal information (same ladder as minister) */
+    CREATOR_PERSONAL = 'creator_personal',
+    CREATOR_DOCUMENT = 'creator_document',
+    CREATOR_ADDRESS = 'creator_address',
+    CREATOR_MINISTRY = 'creator_ministry',
+    CREATOR_TOUR = 'creator_tour',
+    CREATOR_FIRST_SERMON = 'creator_first_sermon',
 }
 
 /** Status of a user invitation. */

@@ -3,6 +3,8 @@ export interface SermonSearchCard {
     title: string;
     imageUrl?: string;
     duration?: number;
+    playbackUrl?: string;
+    manifestUrl?: string;
     ministerName?: string;
     seriesTitle?: string;
     slug?: string;

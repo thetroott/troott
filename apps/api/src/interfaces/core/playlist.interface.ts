@@ -98,10 +98,18 @@ interface IPlaylistDoc extends Document {
     id: ObjectId;
 }
 
+/** Discriminator for playlist item population (`refPath` on `item`). */
+export enum PlaylistItemResourceType {
+    SERMON = 'sermon',
+    SERIES = 'series',
+}
+
 /** A single entry in a playlist's item list. */
 export interface PlaylistItem {
-    /** The sermon or series document. */
-    item: ISermonDoc | ISeriesDoc | any;
+    /** Model name for {@link item} (`sermon` or `series`). */
+    itemType: PlaylistItemResourceType;
+    /** Sermon or series id (or populated document). */
+    item: ObjectId | ISermonDoc | ISeriesDoc | any;
     /** Zero-based position within the playlist. */
     position: number;
     /** ISO-8601 timestamp when the item was added. */

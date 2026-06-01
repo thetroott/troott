@@ -20,7 +20,7 @@ interface IInvitationDoc extends Document {
     /** Email address the invitation was sent to. */
     inviteeEmail: string;
     /** User ID of the invitee (populated after account creation). */
-    inviteeUserId: ObjectId;
+    inviteeUserId?: ObjectId;
     /** When the invitation was sent. */
     invitedAt: Date;
     /** Signed token the invitee uses to accept (null once consumed). */

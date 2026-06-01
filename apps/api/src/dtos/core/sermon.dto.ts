@@ -34,6 +34,8 @@ export interface SermonUploadDTO {
 
 export interface SermonDTO {
     id: string;
+    /** Audio pipeline ref (`item.itemId`); present on upload responses. */
+    uploadRef?: string;
     code: string;
     slug: string;
     title: string;
@@ -41,6 +43,7 @@ export interface SermonDTO {
     duration: number;
     imageUrl: string;
     image: Partial<ImageSource>;
+    item?: Partial<SermonSource>;
     minister: Array<{ id: string; name: string; avatar?: string }>;
 
     playbackUrl: string;
@@ -183,14 +186,8 @@ export interface FFmpegRenditionDTO {
     extraArgs?: string[]; // any extra CLI args
 }
 
-export interface IAudioHLSJobDTO {
-    uploadId: string;
-    /** Original object key in S3 (stream-first: worker reads via GetObject). */
-    sourceS3Key: string;
-    mimeType?: string;
-    renditions?: AudioRenditionDTO[];
-    segmentDuration?: number;
-}
+/** @see {@link IAudioHLSJobDTO} in `@/interfaces/core/sermon.interface` */
+export type { IAudioHLSJobDTO } from '@/interfaces/core/sermon.interface';
 
 export interface IAudioDASHJobDTO {
     uploadId: string;
@@ -204,7 +201,7 @@ export interface IAudioDASHJobDTO {
 export interface HLSDTO {
     /** Prefer after upload completes — mutually preferred vs inputStream. */
     inputFilePath?: string;
-    /** Legacy path: spool from stream into outputDir/_ingest when inputFilePath omitted. */
+    /** Spool from stream into outputDir/_ingest when inputFilePath omitted (internal ffmpeg). */
     inputStream?: import('stream').Readable;
     /** Temp output root; HLS segment files and playlists are written per rendition under this path. */
     outputDir: string;
@@ -297,50 +294,8 @@ export enum AudioType {
     SMOOTHSTREAMING = 'smoothstreaming',
 }
 
-export interface SermonResponseDTO {
-    id: string;
-    code: string;
-    slug: string;
-    title: string;
-    description: string;
-
-    playbackUrl: string;
-    manifestUrl: string;
-    imageUrl: string;
-
-    mimeType: string;
-    duration: number;
-    bitrate: number;
-    protocol: StreamingProtocol;
-    quality: StreamingQuality;
-
-    topic: string;
-    tags: Array<string>;
-    language: string;
-    isPublic: boolean;
-    shareableUrl: string;
-
-    minister: { id: string; name: string; imageUrl?: string };
-    series?: { id: string; title: string; imageUrl?: string };
-
-    preachedAt: string;
-    preachedYear: string;
-
-    status: MediaStatus;
-    isPublished: boolean;
-    allowDownload: boolean;
-    allowComment: boolean;
-
-    playCount: number;
-    downloadCount: number;
-    commentCount: number;
-    shareCount: number;
-    likeCount: number;
-    featured: boolean;
-
-    createdAt: string;
-    updatedAt: string;
-}
+/** @deprecated Use {@link SermonDTO} for API sermon responses. */
+export type SermonResponseDTO = SermonDTO;
 
 export interface IImageMetadata {
     metadataType: FileType.IMAGE;

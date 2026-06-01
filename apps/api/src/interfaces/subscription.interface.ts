@@ -1,6 +1,6 @@
 import { Document, Types } from 'mongoose';
 import IPlanDoc, { IPlanTrial } from "./plan.interface";
-import IListenerDoc from "./listener.interface";
+import IListenerDoc from '@/interfaces/core/listener.interface';
 import ITransactionDoc from "./transaction.interface";
 
 type ObjectId = Types.ObjectId;
@@ -72,6 +72,10 @@ export interface IDebitCard {
     expiryYear: string;
     /** Masked PAN. */
     cardPan: string;
+    /** Provider token for recurring charges. */
+    token?: string;
+    /** Payment provider name. */
+    provider?: string;
 }
 
 /** Billing cycle details for a subscription. */
