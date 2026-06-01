@@ -5,7 +5,7 @@ import {
     NOW_PLAYING_QUERY_KEY,
     PLAY_QUEUE_QUERY_KEY,
 } from '@/engine/queries/query-keys';
-import type { SermonTrackDTO } from '@/types/sermon';
+import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { recordLastPlayedFromTrack } from '@/engine/state/last-played-sync';
 import { usePlayerQueueStore } from '@/engine/state/player-queue-store';
 

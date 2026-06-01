@@ -4,7 +4,7 @@ import {
     usePlayerQueueStore,
     type LastPlayedSummary,
 } from '@/engine/state/player-queue-store';
-import type { SermonItemDTO, SermonTrackDTO } from '@/types/sermon';
+import type { SermonItemDTO, SermonTrackDTO } from '@/api/dtos/sermon.dto';
 
 function trackArtist(track: SermonTrackDTO): string {
     const item = track.item as SermonItemDTO | undefined;

@@ -1,4 +1,4 @@
-import type { SermonTrackDTO } from '@/types/sermon';
+import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import {
     ACTIVE_INDEX_QUERY_KEY,
     NOW_PLAYING_QUERY_KEY,

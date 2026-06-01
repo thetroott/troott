@@ -7,6 +7,7 @@ type FavoriteSermonIdsStore = {
     ids: string[];
     toggleFavorite: (sermonId: string) => void;
     isFavorite: (sermonId: string) => boolean;
+    mergeIds: (ids: string[]) => void;
 };
 
 export const useFavoriteSermonIdsStore = create<FavoriteSermonIdsStore>()(
@@ -26,6 +27,22 @@ export const useFavoriteSermonIdsStore = create<FavoriteSermonIdsStore>()(
             isFavorite: (sermonId: string) => {
                 if (!sermonId) return false;
                 return get().ids.includes(sermonId);
+            },
+            mergeIds: (ids: string[]) => {
+                const incoming = ids.filter(Boolean);
+                if (incoming.length === 0) {
+                    return;
+                }
+                const cur = get().ids;
+                const merged = [...cur];
+                for (const id of incoming) {
+                    if (!merged.includes(id)) {
+                        merged.push(id);
+                    }
+                }
+                if (merged.length !== cur.length) {
+                    set({ ids: merged });
+                }
             },
         }),
         {

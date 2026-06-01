@@ -1,5 +1,5 @@
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { ISermonTrack, SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 function rowSearchHaystack(r: Partial<ISermonTrack>): string[] {
     const tags = Array.isArray(r.tags) ? r.tags : [];

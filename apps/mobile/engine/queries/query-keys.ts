@@ -1,6 +1,6 @@
 import { PlayerQueryKeys } from '../types/queries-type';
-import type { SermonItemDTO } from '@/types/sermon';
-import { catalogUserDataKey } from '@/api/utils/query-keys';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
+import { catalogUserDataKey } from '@/api/query-keys';
 
 export const ACTIVE_INDEX_QUERY_KEY = [PlayerQueryKeys.ActiveIndex];
 

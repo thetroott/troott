@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { RepeatMode } from '@rntp/player';
 
-import type { Queue } from '@/types/queue-ref';
-import type { SermonTrackDTO } from '@/types/sermon';
+import type { Queue } from '@/api/dtos/queue-client.dto';
+import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { mmkvStateStorage } from '@/api/services/mmkv-storage';
 
 export type LastPlayedSummary = {

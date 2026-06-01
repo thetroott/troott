@@ -1,7 +1,7 @@
 import {
     usePlaybackDispatch,
     useQueueDispatch,
-} from '@/context/apps/useContextType';
+} from '@/context';
 import TrackPlayer, { Event } from '@rntp/player';
 import { useEffect, useRef } from 'react';
 import { usePlayerQueueStore } from './player-queue-store';
