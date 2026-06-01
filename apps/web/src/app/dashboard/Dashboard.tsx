@@ -1,38 +1,44 @@
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
-import { toast } from 'sonner';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import UploadLayout from '@/components/layouts/UploadLayout';
-import { DraftProvider } from '@/context/draft/draftState';
 import {
-    UploadProvider,
     useUpload,
     uploadActions,
 } from '@/context/upload/uploadState';
-import FileUploadZone from '@/components/shared/upload/FileUploadZone';
-import UploadModal from '@/components/shared/upload/UploadModal';
 import useContextType from '@/hooks/shared/useContextType';
-import { resolveMinisterId } from '@/utils/minister-id.util';
+import { useMinister } from '@/context/minister/useMinister';
+import { useCreator } from '@/context/creator/useCreator';
+import { readOpenCreateSermonFromState } from '@/constants/create-sermon-nav';
+import {
+    PATH_SEG_SERMONS_UPLOAD,
+    studioSermonsListPath,
+    studioUploadPath,
+} from '@/routes/paths';
+import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
+import storage from '@/api/services/local-storage';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,
 } from '@/constants/sermon-query-keys';
-import {
-    fetchSermonDetail,
-    useMinisterSermonsQuery,
-} from '@/hooks/app/useSermon';
+import { useMinisterSermonsQuery } from '@/hooks/app/useSermon';
+import { useCreateSermonEntry } from '@/hooks/upload/useCreateSermonEntry';
 import type { ISermonUpload } from '@/utils/interfaces.util.tsx';
+import { isTourLaunchPending } from '@/components/shared/tour/tour-steps';
 
-const UploadContent: React.FC = () => {
+const Dashboard: React.FC = () => {
     const { state, dispatch } = useUpload();
-    const {
-        currentStep,
-        uploadComplete,
-        uploadData,
-        activeOption = 'upload',
-    } = state;
+    const { activeOption = 'upload' } = state;
     const location = useLocation();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { userContext } = useContextType();
+    const { ministerId: contextMinisterId } = useMinister();
+    const { creatorId } = useCreator();
     const user = userContext.user as Record<string, unknown> | null;
-    const ministerId = useMemo(() => resolveMinisterId(user), [user]);
+    const ministerId = useMemo(
+        () => resolveStudioSermonOwnerId(user, contextMinisterId, creatorId),
+        [user, contextMinisterId, creatorId],
+    );
+    const { startUploadFlow } = useCreateSermonEntry();
 
     const listParams = {
         ...DEFAULT_MINISTER_LIST_PARAMS,
@@ -48,24 +54,50 @@ const UploadContent: React.FC = () => {
 
     const hasSermonsOnRecord =
         Array.isArray(ministerSermonsRaw) && ministerSermonsRaw.length > 0;
-    const shouldOpenEntryModal = Boolean(
-        (location.state as { openEntryModal?: boolean } | null)?.openEntryModal,
-    );
-    const useEntryModal =
-        (Boolean(ministerId) && hasSermonsOnRecord) || shouldOpenEntryModal;
+
+    useEffect(() => {
+        if (readOpenCreateSermonFromState(location.state)) {
+            startUploadFlow();
+            return;
+        }
+        const resumeId = (location.state as { resumeSermonId?: string } | null)
+            ?.resumeSermonId;
+        const draftData = (location.state as { draftData?: unknown } | null)
+            ?.draftData;
+        if (resumeId || draftData) {
+            return;
+        }
+        if (isTourLaunchPending(searchParams.get('tour'))) {
+            return;
+        }
+        if (ministerId && !hasSermonsOnRecord) {
+            startUploadFlow();
+        }
+    }, [
+        hasSermonsOnRecord,
+        location.state,
+        ministerId,
+        searchParams,
+        startUploadFlow,
+    ]);
 
     useEffect(() => {
         const draftData = (location.state as { draftData?: unknown } | null)
             ?.draftData;
-        if (draftData) {
-            dispatch(
-                uploadActions.loadFromDraft(
-                    draftData as Partial<ISermonUpload>,
-                ),
-            );
-            window.history.replaceState({}, document.title);
+        if (!draftData) {
+            return;
         }
-    }, [dispatch, location]);
+        dispatch(
+            uploadActions.loadFromDraft(
+                draftData as Partial<ISermonUpload>,
+            ),
+        );
+        const code = storage.getStudioCode()?.trim();
+        if (code) {
+            navigate(studioUploadPath(code, PATH_SEG_SERMONS_UPLOAD));
+        }
+        window.history.replaceState({}, document.title);
+    }, [dispatch, location.state, navigate]);
 
     useEffect(() => {
         const sid = (location.state as { resumeSermonId?: string } | null)
@@ -73,74 +105,31 @@ const UploadContent: React.FC = () => {
         if (!sid) {
             return;
         }
-        let cancelled = false;
-        void (async () => {
-            try {
-                const body = await fetchSermonDetail(sid);
-                const d = (body as { data?: Record<string, unknown> })?.data;
-                if (cancelled || !d) {
-                    return;
-                }
-                const tags = Array.isArray(d.tags)
-                    ? (d.tags as unknown[]).map(String)
-                    : [];
-                dispatch(
-                    uploadActions.loadFromDraft({
-                        sermonId: sid,
-                        title: String(d.title ?? ''),
-                        description: String(d.description ?? ''),
-                        tags,
-                        category: String(d.topic ?? ''),
-                        isPublic: d.isPublic !== false,
-                    }),
-                );
-                const hasAudio = Boolean(
-                    typeof d.sermonUrl === 'string' && d.sermonUrl,
-                );
-                dispatch(uploadActions.setUploadComplete(hasAudio));
-                dispatch(
-                    uploadActions.setStep(hasAudio ? 'review' : 'details'),
-                );
-                window.history.replaceState({}, document.title);
-            } catch {
-                if (!cancelled) {
-                    toast.error('Could not load sermon for editing.');
-                }
-            }
-        })();
-        return () => {
-            cancelled = true;
-        };
-    }, [dispatch, location.state]);
-
-    const isModalOpen = currentStep !== 'file';
-
-    const handleModalOpenChange = (open: boolean) => {
-        if (!open) {
-            if (
-                !uploadComplete &&
-                (uploadData.file || uploadData.title || uploadData.description)
-            ) {
-                dispatch(uploadActions.clearStoredData());
-            }
-
-            dispatch(uploadActions.setStep('file'));
+        const code = storage.getStudioCode()?.trim();
+        if (code) {
+            navigate(studioUploadPath(code, PATH_SEG_SERMONS_UPLOAD), {
+                state: { resumeSermonId: sid },
+            });
         }
-    };
+    }, [location.state, navigate]);
 
     return (
-        <UploadLayout feedHasSermons={useEntryModal}>
+        <UploadLayout feedHasSermons={hasSermonsOnRecord}>
             {activeOption === 'upload' ? (
-                <>
-                    <FileUploadZone
-                        useEntryModal={useEntryModal}
-                        autoOpenEntryModal={shouldOpenEntryModal}
-                    />
-                    <UploadModal
-                        open={isModalOpen}
-                        onOpenChange={handleModalOpenChange}
-                    />
-                </>
+                <div className="flex flex-col items-center justify-center py-16 px-4 text-center text-muted-foreground">
+                    <p className="max-w-md text-sm leading-relaxed">
+                        Use{' '}
+                        <span className="text-foreground font-medium">
+                            Upload from computer
+                        </span>{' '}
+                        above, or open{' '}
+                        <span className="text-foreground font-medium">
+                            Sermons
+                        </span>{' '}
+                        and choose Create sermon — both use the same upload
+                        experience.
+                    </p>
+                </div>
             ) : (
                 <div className="flex items-center justify-center py-8">
                     <div className="text-center space-y-4">
@@ -155,16 +144,6 @@ const UploadContent: React.FC = () => {
                 </div>
             )}
         </UploadLayout>
-    );
-};
-
-const Dashboard: React.FC = () => {
-    return (
-        <DraftProvider>
-            <UploadProvider>
-                <UploadContent />
-            </UploadProvider>
-        </DraftProvider>
     );
 };
 

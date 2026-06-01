@@ -9,25 +9,25 @@ import {
 import { useProfileQuery } from '@/hooks/app/useProfile';
 import {
     isMinisterProfile,
+    type Asset,
     type ProfileDTO,
 } from './profile.types';
-import { resolveAssetUrl } from '@/utils/asset-url.util';
 import { EditProfileDialog } from '@/components/features/profile/EditProfileDialog';
 
-const recentSermonsPlaceholder = [
-    {
-        title: 'Walking in Divine Favour',
-        meta: 'Apr 14, 2026 \u2022 2,340 plays',
-    },
-    {
-        title: 'The Power of a Praying Father',
-        meta: 'Apr 07, 2026 \u2022 1,905 plays',
-    },
-    {
-        title: 'Faith Over Fear',
-        meta: 'Mar 31, 2026 \u2022 3,102 plays',
-    },
-];
+function profileImageSrc(
+    asset: Asset | null | undefined,
+    opts?: { v?: string | number },
+): string | undefined {
+    if (!asset?.url) {
+        return undefined;
+    }
+    const raw = asset.url;
+    if (opts?.v != null) {
+        const sep = raw.includes('?') ? '&' : '?';
+        return `${raw}${sep}v=${encodeURIComponent(String(opts.v))}`;
+    }
+    return raw;
+}
 
 function formatMemberSince(iso: string): string {
     if (!iso) return '\u2014';
@@ -51,20 +51,12 @@ function getDisplayName(profile: ProfileDTO): string {
 }
 
 function UserProfile() {
-    const { data: profile, isLoading, isError } = useProfileQuery();
+    const { data: profile, isLoading, isError, error } = useProfileQuery();
     const [editOpen, setEditOpen] = React.useState(false);
 
     if (isLoading || !profile) {
         return (
             <div className="mx-auto w-full max-w-[1200px] space-y-4 text-[#eaeaea]">
-                <header className="rounded-xl border border-[#545454] bg-[#2b2a2c] px-4 py-3 md:px-6 md:py-4">
-                    <h1 className="text-xl font-semibold leading-[30px]">
-                        Profile
-                    </h1>
-                    <p className="text-xs font-medium leading-[18px] tracking-[0.02em] text-[#eaeaea]">
-                        This is how listeners will see you on the platform.
-                    </p>
-                </header>
                 <div className="h-[368px] animate-pulse rounded-xl bg-[#2b2a2c]" />
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                     {[0, 1, 2, 3].map((i) => (
@@ -76,7 +68,9 @@ function UserProfile() {
                 </div>
                 {isError ? (
                     <p className="text-sm text-red-400">
-                        Could not load profile. Please refresh.
+                        {error instanceof Error
+                            ? error.message
+                            : 'Could not load profile. Please refresh.'}
                     </p>
                 ) : null}
             </div>
@@ -84,10 +78,10 @@ function UserProfile() {
     }
 
     const minister = isMinisterProfile(profile);
-    const coverUrl = resolveAssetUrl(profile.coverImage, {
+    const coverUrl = profileImageSrc(profile.coverImage, {
         v: profile.updatedAt,
     });
-    const avatarUrl = resolveAssetUrl(profile.avatar, {
+    const avatarUrl = profileImageSrc(profile.avatar, {
         v: profile.updatedAt,
     });
     const displayName = getDisplayName(profile);
@@ -120,15 +114,6 @@ function UserProfile() {
 
     return (
         <div className="mx-auto w-full max-w-[1200px] space-y-4 text-[#eaeaea]">
-            <header className="rounded-xl border border-[#545454] bg-[#2b2a2c] px-4 py-3 md:px-6 md:py-4">
-                <h1 className="text-xl font-semibold leading-[30px]">
-                    Profile
-                </h1>
-                <p className="text-xs font-medium leading-[18px] tracking-[0.02em] text-[#eaeaea]">
-                    This is how listeners will see you on the platform.
-                </p>
-            </header>
-
             <section
                 className="relative overflow-hidden rounded-xl border border-[#545454]"
                 aria-label="Profile cover"
@@ -251,33 +236,10 @@ function UserProfile() {
                         <h3 className="text-[28px] font-semibold leading-[30px]">
                             Recent Sermons
                         </h3>
-                        <button
-                            type="button"
-                            className="text-base leading-6 tracking-[0.01em] text-[#eaeaea] hover:underline"
-                        >
-                            See all
-                        </button>
                     </div>
-                    <div className="space-y-8">
-                        {recentSermonsPlaceholder.map((item) => (
-                            <div
-                                key={item.title}
-                                className="flex items-start gap-4"
-                            >
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#545454]">
-                                    <MicVocal className="h-5 w-5 text-[#eaeaea]" />
-                                </div>
-                                <div>
-                                    <p className="text-base leading-6 tracking-[0.01em] text-[#eaeaea]">
-                                        {item.title}
-                                    </p>
-                                    <p className="text-sm leading-5 tracking-[0.01em] text-[#bdbdbd]">
-                                        {item.meta}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <p className="text-base leading-6 tracking-[0.01em] text-[#9d9d9d]">
+                        No published sermons yet.
+                    </p>
                 </article>
             </section>
 

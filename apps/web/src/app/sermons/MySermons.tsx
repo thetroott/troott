@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import EmptySermonsState from '@/components/shared/my-sermons/EmptySermonsState';
 import SermonsTable from '@/components/shared/my-sermons/SermonsTable';
 import api from '@/api/config';
 import useContextType from '@/hooks/shared/useContextType';
-import { resolveMinisterId } from '@/utils/minister-id.util';
+import { useMinister } from '@/context/minister/useMinister';
+import { useCreator } from '@/context/creator/useCreator';
+import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
 import {
     DEFAULT_MINISTER_LIST_PARAMS,
     MY_SERMONS_PAGE_SIZE,
@@ -20,8 +21,13 @@ import { Loader2 } from 'lucide-react';
 
 const Sermons = () => {
     const { userContext } = useContextType();
+    const { minister } = useMinister();
+    const { creatorId } = useCreator();
     const user = userContext.user as Record<string, unknown> | null;
-    const ministerId = useMemo(() => resolveMinisterId(user), [user]);
+    const ministerId = useMemo(
+        () => resolveStudioSermonOwnerId(user, minister?.id, creatorId),
+        [user, minister?.id, creatorId],
+    );
 
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -123,9 +129,9 @@ const Sermons = () => {
         return (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                 <p className="text-muted-foreground max-w-md">
-                    Your account is not linked to a minister profile yet, so
-                    sermon lists cannot be loaded. Upload and publish still work
-                    from Create sermon.
+                    Your account is not linked to a minister or creator profile
+                    yet, so sermon lists cannot be loaded. Upload and publish
+                    still work from Create sermon.
                 </p>
             </div>
         );
@@ -166,7 +172,28 @@ const Sermons = () => {
         Boolean(listParams.dateTo);
 
     if (!sermons.length && !hasListFilters) {
-        return <EmptySermonsState />;
+        return (
+            <SermonsTable
+                listMode="remote"
+                ministerId={ministerId}
+                sermons={[]}
+                totalCount={0}
+                page={listParams.page}
+                pageSize={MY_SERMONS_PAGE_SIZE}
+                onPageChange={setPage}
+                search={searchInput}
+                onSearchChange={setSearchInput}
+                sort={listParams.sort}
+                onSortChange={setSort}
+                status={listParams.status}
+                onStatusChange={setStatus}
+                dateFrom={listParams.dateFrom}
+                dateTo={listParams.dateTo}
+                onDateFromChange={setDateFrom}
+                onDateToChange={setDateTo}
+                isFetching={isFetching}
+            />
+        );
     }
 
     return (

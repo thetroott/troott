@@ -1,6 +1,5 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { Check } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Accordion,
@@ -11,54 +10,102 @@ import {
 import { Button } from '@/components/ui/button';
 import OnboardingItems from '@/_data/onboarding';
 import { cn } from '@/lib/utils';
+import useContextType from '@/hooks/shared/useContextType';
+import { useMinister } from '@/context/minister/useMinister';
+import { useCreator } from '@/context/creator/useCreator';
+import cookieService from '@/api/services/cookies';
+import {
+    hubCompletedItemIds,
+    resolveOnboardingStep,
+} from '@/utils/hub-onboarding.util';
+import { clearLegacyOnboardingProgress } from '@/utils/get-started-local-storage.util';
+import { resolveStudioTourLaunchPath } from '@/components/shared/tour/tour-steps';
+import { getStoredStudioCode } from '@/utils/studio-nav.util';
+import { toast } from 'sonner';
 
-const STORAGE_KEY = 'onboarding_progress';
+const hubCtaClass =
+    'h-8 min-h-8 rounded-md px-4 font-matter text-sm leading-5 tracking-[0.14px]';
+
+const hubActiveCtaClass =
+    'bg-[#08ffdb] text-[#292929] hover:bg-[#07e8c9] disabled:opacity-50';
+
+const hubCompletedOutlineClass =
+    'border-[#08ffdb] bg-transparent text-[#08ffdb] opacity-100 hover:bg-transparent hover:text-[#08ffdb] disabled:opacity-100';
 
 const GetStarted = () => {
     const navigate = useNavigate();
-    const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+    const { userContext } = useContextType();
+    const { minister } = useMinister();
+    const { creator } = useCreator();
 
     useEffect(() => {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            setCompletedSteps(JSON.parse(saved));
-        }
+        clearLegacyOnboardingProgress();
     }, []);
 
-    // Save to localStorage on change
-    useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(completedSteps));
-    }, [completedSteps]);
+    const user = userContext.user as {
+        onboard?: { step?: number };
+        studioCode?: string | null;
+    } | null;
 
-    const handleStepComplete = (stepId: string) => {
-        if (!completedSteps.includes(stepId)) {
-            setCompletedSteps((prev) => [...prev, stepId]);
-        }
-    };
+    const userType =
+        userContext.userType || cookieService.getUserType() || '';
+
+    const onboardingStep = resolveOnboardingStep(
+        userType,
+        minister,
+        creator,
+        user,
+    );
+
+    const completedSteps = useMemo(
+        () => hubCompletedItemIds(onboardingStep),
+        [onboardingStep],
+    );
 
     const progressPercentage =
         (completedSteps.length / OnboardingItems.length) * 100;
 
+    const navigateToHubItem = (item: (typeof OnboardingItems)[number]) => {
+        if (item.id === '3') {
+            const tourPath = resolveStudioTourLaunchPath(
+                getStoredStudioCode() || user?.studioCode || undefined,
+            );
+            if (tourPath) {
+                navigate(tourPath);
+                return;
+            }
+            toast.error(
+                'Your studio is not ready yet. Finish earlier steps and try again.',
+            );
+            return;
+        }
+        navigate(item.action as string);
+    };
+
     return (
         <div className="p-20">
             <div className="space-y-6 p-15 border border-border rounded-md">
-                {/* Header Section */}
-
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Get Started</h1>
 
-                    {/** Progress Bar */}
-
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground w-full max-w-md">
-                        <span className="whitespace-nowrap">
-                            {completedSteps.length}/{OnboardingItems.length}{' '}
-                            completed
+                    <div className="flex items-center gap-4 w-full max-w-[281px]">
+                        <span className="whitespace-nowrap font-matter text-xs leading-[18px] tracking-[0.24px] text-[#bdbdbd]">
+                            {`${completedSteps.length}/${OnboardingItems.length} completed`}
                         </span>
 
-                        <div className="flex-1 bg-neutral-400/60 rounded-full h-2 w-full">
+                        <div
+                            className="flex-1 h-1 rounded-md bg-[#9d9d9d] overflow-hidden"
+                            role="progressbar"
+                            aria-valuenow={completedSteps.length}
+                            aria-valuemin={0}
+                            aria-valuemax={OnboardingItems.length}
+                            aria-label="Get started onboarding progress"
+                        >
                             <div
-                                className="bg-primary  text-amber-200  h-2 rounded-full transition-all duration-300 ease-in-out"
-                                style={{ width: `${progressPercentage}%` }}
+                                className="h-full rounded-md bg-[#6f94b8] transition-all duration-300 ease-in-out"
+                                style={{
+                                    width: `${progressPercentage}%`,
+                                }}
                             />
                         </div>
                     </div>
@@ -66,7 +113,6 @@ const GetStarted = () => {
 
                 <hr className="border-border" />
 
-                {/* Onboarding Steps */}
                 <div className="space-y-4 ">
                     <h2 className="text-xl font-semibold">
                         Launch your first sermon
@@ -82,70 +128,113 @@ const GetStarted = () => {
                         collapsible
                         className="w-full space-y-2 mt-12"
                     >
-                        {OnboardingItems.map((item) => (
-                            <AccordionItem
-                                value={item.id}
-                                key={item.id}
-                                className={cn(
-                                    'has-focus-visible:border-ring has-focus-visible:ring-ring/50 rounded-md border px-6 outline-none last:border-b has-focus-visible:ring-[3px] transition-colors',
-                                    'data-[state=open]:bg-accent',
-                                )}
-                            >
-                                <AccordionTrigger>
-                                    <div className="flex items-center justify-between w-full gap-4 cursor-pointer group">
-                                        <div className="flex items-center gap-3">
-                                            <item.icon
-                                                size={24}
-                                                className="opacity-60 text-muted-foreground"
-                                            />
-                                            <span
-                                                className={cn(
-                                                    'text-sm font-medium',
-                                                    completedSteps.includes(
-                                                        item.id,
-                                                    ) &&
-                                                        'text-muted-foreground',
+                        {OnboardingItems.map((item) => {
+                            const isComplete = completedSteps.includes(
+                                item.id,
+                            );
+
+                            return (
+                                <AccordionItem
+                                    value={item.id}
+                                    key={item.id}
+                                    className={cn(
+                                        'has-focus-visible:border-ring has-focus-visible:ring-ring/50 rounded-md border px-6 outline-none last:border-b has-focus-visible:ring-[3px] transition-colors',
+                                        'data-[state=open]:bg-accent',
+                                    )}
+                                >
+                                    <AccordionTrigger>
+                                        <div className="flex items-center justify-between w-full gap-4 cursor-pointer group">
+                                            <div className="flex items-center gap-3">
+                                                {isComplete ? (
+                                                    <Check
+                                                        size={18}
+                                                        className="shrink-0 text-[#08ffdb]"
+                                                        aria-hidden
+                                                    />
+                                                ) : (
+                                                    <item.icon
+                                                        size={24}
+                                                        className="opacity-60 text-muted-foreground"
+                                                    />
                                                 )}
-                                            >
-                                                {item.title}
-                                            </span>
+                                                <span
+                                                    className={cn(
+                                                        'text-sm font-medium',
+                                                        isComplete
+                                                            ? 'text-[#9d9d9d] font-normal'
+                                                            : undefined,
+                                                    )}
+                                                >
+                                                    {item.title}
+                                                </span>
+                                            </div>
+
+                                            {isComplete ? (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    type="button"
+                                                    tabIndex={-1}
+                                                    aria-disabled="true"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                    }}
+                                                    className={cn(
+                                                        hubCtaClass,
+                                                        hubCompletedOutlineClass,
+                                                        'group-data-[state=open]:hidden min-w-[109px] pointer-events-none',
+                                                    )}
+                                                >
+                                                    Completed
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigateToHubItem(item);
+                                                    }}
+                                                    className={cn(
+                                                        hubCtaClass,
+                                                        hubActiveCtaClass,
+                                                        'group-data-[state=open]:hidden cursor-pointer',
+                                                    )}
+                                                >
+                                                    {item.button}
+                                                </Button>
+                                            )}
                                         </div>
+                                    </AccordionTrigger>
+
+                                    <AccordionContent className="text-muted-foreground pb-4 px-9">
+                                        <hr className="border-border mb-4" />
+
+                                        <p className="mb-4">{item.text}</p>
 
                                         <Button
-                                            size="sm"
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // prevent toggle
-                                                navigate(item.action as string);
+                                            variant={isComplete ? 'outline' : 'default'}
+                                            onClick={() => {
+                                                if (!isComplete) {
+                                                    navigateToHubItem(item);
+                                                }
                                             }}
-                                            className="group-data-[state=open]:hidden cursor-pointer"
+                                            disabled={isComplete}
+                                            className={cn(
+                                                hubCtaClass,
+                                                isComplete
+                                                    ? hubCompletedOutlineClass
+                                                    : hubActiveCtaClass,
+                                                'cursor-pointer',
+                                            )}
                                         >
-                                            {item.button}
+                                            {isComplete
+                                                ? 'Completed'
+                                                : item.button}
                                         </Button>
-                                    </div>
-                                </AccordionTrigger>
-
-                                <AccordionContent className="text-muted-foreground pb-4 px-9">
-                                    <hr className="border-border mb-4" />
-
-                                    <p className="mb-4">{item.text}</p>
-
-                                    <Button
-                                        onClick={() => {
-                                            handleStepComplete(item.id);
-                                            navigate(item.action as string);
-                                        }}
-                                        disabled={completedSteps.includes(
-                                            item.id,
-                                        )}
-                                        className="text-sm cursor-pointer"
-                                    >
-                                        {completedSteps.includes(item.id)
-                                            ? 'Completed'
-                                            : item.button}
-                                    </Button>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            );
+                        })}
                     </Accordion>
                 </div>
             </div>

@@ -13,6 +13,8 @@ export { UserType };
 export interface Asset {
     fileName: string;
     s3Key: string;
+    /** Display URL from `ImageDTO.file` — not sent on PUT. */
+    url?: string;
 }
 
 export interface ProfileSocials {
@@ -187,5 +189,9 @@ export function mapFormValuesToUpdatePayload(
 function sameAsset(a: Asset | null, b: Asset | null): boolean {
     if (a === b) return true;
     if (!a || !b) return false;
-    return a.s3Key === b.s3Key;
+    return (
+        a.s3Key === b.s3Key &&
+        (a.url ?? '') === (b.url ?? '') &&
+        (a.fileName ?? '') === (b.fileName ?? '')
+    );
 }
