@@ -22,11 +22,13 @@ export type CreatePlaylistFormProps = {
     onCreated?: (values: PlayListValidationSchemaType) => void;
     /** Slightly tighter spacing for bottom-sheet step. */
     compact?: boolean;
+    isSubmitting?: boolean;
 };
 
 const CreatePlaylistForm = ({
     onCreated,
     compact = false,
+    isSubmitting = false,
 }: CreatePlaylistFormProps) => {
     const { control, handleSubmit, setValue } =
         useForm<PlayListValidationSchemaType>({
@@ -187,6 +189,8 @@ const CreatePlaylistForm = ({
                 <Button
                     label="Create playlist"
                     onPress={onSubmit}
+                    disabled={isSubmitting}
+                    isLoading={isSubmitting}
                     containerStyle={{
                         marginTop: theme.sizes.spacing.xl,
                         width: '100%',

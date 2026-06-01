@@ -8,8 +8,8 @@ import { Pressable } from 'react-native';
 import {
     useRemoveFavorite,
     useAddFavorite,
-} from '@/api/hooks/player/use-favourites';
-import { useIsFavorite } from '@/api/hooks/player/use-is-favorite';
+} from '@/engine/playback/use-favourites';
+import { useIsFavorite } from '@/engine/playback/use-is-favorite';
 
 interface FavoriteButtonProps {
     item: SermonTrackDTO;

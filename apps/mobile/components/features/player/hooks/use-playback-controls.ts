@@ -15,15 +15,15 @@ import {
     usePlaybackState,
     useProgress,
 } from '@/engine/queries/playback-queries';
-import { useCanSkipNext } from '@/api/hooks/player/use-can-skip-next';
-import { useResumeLastPlayed } from '@/api/hooks/player/use-resume-last-played';
+import { useCanSkipNext } from '@/engine/playback/use-can-skip-next';
+import { useResumeLastPlayed } from '@/engine/playback/use-resume-last-played';
 import {
     useCurrentTrack,
     useLastPlayed,
     usePlayQueue,
     useRepeatModeStoreValue,
     useShuffle,
-} from '@/stores/player/queue';
+} from '@/engine/state/player-queue-store';
 import { capturePlayerEvent } from '@/components/features/player/analytics/player.analytics';
 
 type UsePlaybackControlsArgs = {

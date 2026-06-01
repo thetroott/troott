@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { theme } from '@/constants/theme';
-import { useTrackStore } from '@/stores/player-store';
+import { useTrackStore } from '@/engine/state/player-ui-store';
 import Animated, {
     runOnJS,
     SlideInDown,
@@ -19,14 +19,21 @@ import Animated, {
 } from 'react-native-reanimated';
 import { TrackDetailsHeader } from '@/components/features/sermon';
 import { useLocalSearchParams } from 'expo-router';
-import { useCurrentTrack, useLastPlayed } from '@/stores/player/queue';
+import { useCurrentTrack, useLastPlayed } from '@/engine/state/player-queue-store';
 import type { ISermonTrack, SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
-import { usePlayFromCatalogList } from '@/api/hooks/player/use-play-from-catalog-list';
-import { useDismissFullPlayer } from '@/api/hooks/player/use-dismiss-full-player';
+import { useSermonByIdQuery } from '@/api/hooks/app/useSermon';
+import { useLoadNewQueue } from '@/engine/hooks/useControl';
+import { usePlayFromCatalogList } from '@/engine/playback/use-play-from-catalog-list';
+import { useDismissFullPlayer } from '@/engine/playback/use-dismiss-full-player';
 import { TrackActionsController } from '@/components/features/player/full-player/components/track-actions-controller';
 import { TrackProgress } from '@/components/features/player/full-player/components/track-progress';
 import { SermonDetails } from '@/components/features/player/full-player/components/sermon-details';
+import { sermonDocToCatalogRow } from '@/engine/utils/library-map';
+import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
+import { useNetworkStatus } from '@/lib/state/network-store';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
+import { QueuingType } from '@/api/types';
 
 const FALLBACK_IMAGE = require('@/assets/images/liked.png');
 
@@ -101,6 +108,14 @@ const FullPlayerScreen: React.FC<FullPlayerTrackDetailsProps> = ({
     const currentTrack = useCurrentTrack();
     const lastPlayed = useLastPlayed();
     const { data: sermons, isLoading } = useSermonsCatalog();
+    const catalogHasRouteId = useMemo(() => {
+        if (!routeSermonId || !sermons?.length) return false;
+        return sermons.some((s) => String(s.id ?? '') === routeSermonId);
+    }, [routeSermonId, sermons]);
+    const { data: sermonDoc, isLoading: sermonFetchLoading } =
+        useSermonByIdQuery(routeSermonId, !!routeSermonId && !catalogHasRouteId);
+    const loadNewQueue = useLoadNewQueue();
+    const [networkStatus] = useNetworkStatus();
     const playFromCatalog = usePlayFromCatalogList('Library');
     const dismiss = useDismissFullPlayer();
     const screenH = theme.sizes.screen.height;
@@ -172,6 +187,35 @@ const FullPlayerScreen: React.FC<FullPlayerTrackDetailsProps> = ({
         if (typeof img === 'string' && img.length > 0) return { uri: img };
         return base;
     }, [uiTrack, sermons, routeSermonId]);
+
+    useEffect(() => {
+        if (!routeSermonId || catalogHasRouteId) return;
+        if (!sermonDoc || sermonFetchLoading) return;
+        const currentId =
+            currentTrack?.item?.id != null ? String(currentTrack.item.id) : '';
+        if (currentId === routeSermonId) return;
+        const row = sermonDocToCatalogRow(sermonDoc);
+        if (!row?.id) return;
+        const track = catalogRowToSermonItem(row);
+        void loadNewQueue({
+            api: undefined,
+            networkStatus: networkStatus ?? networkStatusTypes.ONLINE,
+            track,
+            index: 0,
+            tracklist: [track],
+            queue: 'Library',
+            queuingType: QueuingType.FromSelection,
+            startPlayback: true,
+        });
+    }, [
+        routeSermonId,
+        catalogHasRouteId,
+        sermonDoc,
+        sermonFetchLoading,
+        currentTrack?.item?.id,
+        loadNewQueue,
+        networkStatus,
+    ]);
 
     useEffect(() => {
         if (!routeSermonId || !sermons?.length || isLoading) return;

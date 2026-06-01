@@ -7,7 +7,7 @@ import {
     useCurrentTrack,
     useLastPlayed,
     usePlayQueue,
-} from '@/stores/player/queue';
+} from '@/engine/state/player-queue-store';
 import { colors } from '@/constants/colors';
 import { sizes } from '@/constants/sizes';
 import { usePathname, useRouter, useSegments } from 'expo-router';
@@ -15,29 +15,37 @@ import React, { useCallback, useMemo, memo } from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useSharedValue, withSpring } from 'react-native-reanimated';
 import type { LastPlayedSummary } from '@/engine/state/player-queue-store';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 import type { ImageSourcePropType } from 'react-native';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Text from '@/components/ui/text';
-import { useIsNowPlayingStackRouteFocused } from '@/api/hooks/player/now-playing-route';
+import { useIsNowPlayingStackRouteFocused } from '@/engine/playback/now-playing-route';
 import PlayPauseButton from '@/components/features/player/controls/play-pause';
 import { Next } from 'iconsax-react-nativejs';
-import { useTrackStore } from '@/stores/player-store';
-import { useFavoriteSermonIdsStore } from '@/engine/state/favorite-sermon-ids-store';
-import { useResumeLastPlayed } from '@/api/hooks/player/use-resume-last-played';
-import { useCanSkipNext } from '@/api/hooks/player/use-can-skip-next';
+import { useTrackStore } from '@/engine/state/player-ui-store';
+import {
+    useIsSermonFavorite,
+    useToggleFavoriteWithSync,
+} from '@/api/hooks/app/useFavorites';
+import { useResumeLastPlayed } from '@/engine/playback/use-resume-last-played';
+import { useCanSkipNext } from '@/engine/playback/use-can-skip-next';
 import { MINI_PLAYER_BOTTOM_OFFSET_BASE } from '@/components/features/player/mini-player/mini-player-layout';
 
-const FALLBACK_ART = require('@/assets/images/liked.png');
+const AUTH_PUBLIC_PATHS = new Set([
+    '/',
+    '/login',
+    '/register',
+    '/enter-email',
+    '/verify-email',
+    '/activate-user-account',
+    '/reset-password-otp-request',
+    '/request-password-otp',
+    '/reset-password',
+]);
 
-const ARTWORK = 35;
-const BAR_MIN_HEIGHT = 54;
-const PROGRESS_HEIGHT = 2;
-const ICON_SIZE = 24;
-
-const MAIN_TAB_NAMES = new Set([
+const MINI_PLAYER_MAIN_TAB_NAMES = new Set([
     'home',
     'search',
     'explore',
@@ -45,72 +53,97 @@ const MAIN_TAB_NAMES = new Set([
     'profile',
 ]);
 
-/** Spotify-style: hide mini player while full-screen / modal now-playing is presented. */
-function useShouldHideMiniPlayer(): boolean {
-    const pathname = usePathname();
-    const segments = useSegments();
-    const base = pathname.split('?')[0] ?? '';
-    const baseNorm = base.replace(/\/$/, '') || '/';
-    if (segments.includes('player')) return true;
-    if (baseNorm === '/player' || base.startsWith('/player/')) return true;
-    if (baseNorm.includes('/player') || segments.some((s) => s === 'player'))
-        return true;
-    return false;
+const ONBOARDING_OR_PRE_SHELL_PATHS = new Set([
+    '/select-ministers',
+    '/select-interests',
+]);
+
+function normalizeShellPath(pathname: string): string {
+    const base = (pathname.split('?')[0] ?? '').replace(/\/$/, '');
+    return base || '/';
 }
 
-/**
- * Welcome, auth, and onboarding are not part of the listening shell; do not show the mini player there.
- */
-function useAllowMiniPlayerForCurrentRoute(): boolean {
-    const pathname = usePathname();
-    const segments = useSegments();
-    const base = (pathname.split('?')[0] ?? '').replace(/\/$/, '') || '/';
+function isAuthPublicPath(pathname: string): boolean {
+    const path = normalizeShellPath(pathname);
+    if (AUTH_PUBLIC_PATHS.has(path)) {
+        return true;
+    }
+    return path.startsWith('/(auth)');
+}
 
-    if (segments.includes('(auth)') || segments.includes('(onboarding)'))
+function isMiniPlayerBlockedPath(pathOnly: string): boolean {
+    return (
+        pathOnly === '/user/edit-profile' ||
+        pathOnly === '/user/photo-picker' ||
+        pathOnly === '/user/edit-profile-saved' ||
+        pathOnly === '/playlist/create-playlist' ||
+        pathOnly.startsWith('/see-more') ||
+        pathOnly === '/minister' ||
+        pathOnly.startsWith('/minister/')
+    );
+}
+
+function shouldAllowMiniPlayer(
+    pathname: string,
+    segments: readonly string[],
+): boolean {
+    if (segments.includes('(auth)') || segments.includes('(onboarding)')) {
         return false;
+    }
+
+    const base = normalizeShellPath(pathname);
     if (base === '/' || base === '') return false;
-    if (
-        base === '/select-ministers' ||
-        base === '/select-interests' ||
-        base === '/enter-email' ||
-        base === '/register' ||
-        base === '/login' ||
-        base === '/verify-email' ||
-        base === '/activate-user-account' ||
-        base === '/request-password-otp' ||
-        base === '/reset-password' ||
-        base === '/reset-password-otp-request'
-    )
-        return false;
-    // Root index / welcome (Expo may report segment `index` without tabs)
+    if (isAuthPublicPath(base)) return false;
+    if (ONBOARDING_OR_PRE_SHELL_PATHS.has(base)) return false;
     if (segments.length === 1 && segments[0] === 'index') return false;
-    if (base === '/playlist/create-playlist') return false;
-    /** Full-screen lists from home “See more” — mini player would crowd the layout */
-    if (base.startsWith('/see-more')) return false;
-    if (base === '/minister' || base.startsWith('/minister/')) return false;
+    if (isMiniPlayerBlockedPath(base)) return false;
 
     return true;
 }
 
-/**
- * Mini player sits above the tab bar. Some Expo Router builds omit `(tabs)` from
- * `useSegments()`, which would overlap the tab bar; pathname is used as a fallback.
- */
-function useIsMainTabsShell(): boolean {
-    const segments = useSegments();
-    const pathname = usePathname();
+function shouldHideMiniPlayerForFullPlayerRoute(
+    pathname: string,
+    segments: readonly string[],
+): boolean {
+    const base = pathname.split('?')[0] ?? '';
+    const baseNorm = base.replace(/\/$/, '') || '/';
+    if (segments.includes('player')) return true;
+    if (baseNorm === '/player' || base.startsWith('/player/')) return true;
+    if (baseNorm.includes('/player') || segments.some((s) => s === 'player')) {
+        return true;
+    }
+    return false;
+}
 
+function isMainTabsShell(
+    pathname: string,
+    segments: readonly string[],
+): boolean {
     if (segments.includes('(tabs)')) return true;
 
     const last = segments.length > 0 ? segments[segments.length - 1] : '';
-    if (typeof last === 'string' && MAIN_TAB_NAMES.has(last)) return true;
+    if (typeof last === 'string' && MINI_PLAYER_MAIN_TAB_NAMES.has(last)) {
+        return true;
+    }
 
     const p = pathname.split('?')[0] ?? '';
-    if (MAIN_TAB_NAMES.has(p.replace(/^\//, '').split('/').pop() ?? ''))
+    if (
+        MINI_PLAYER_MAIN_TAB_NAMES.has(
+            p.replace(/^\//, '').split('/').pop() ?? '',
+        )
+    ) {
         return true;
+    }
 
     return /\(tabs\)\/(home|search|explore|library|profile)(\/|$)/.test(p);
 }
+
+const FALLBACK_ART = require('@/assets/images/liked.png');
+
+const ARTWORK = 35;
+const BAR_MIN_HEIGHT = 54;
+const PROGRESS_HEIGHT = 2;
+const ICON_SIZE = 24;
 
 function miniPlayerArtSource(
     nowPlaying: SermonTrackDTO | undefined,
@@ -176,9 +209,9 @@ const MiniPlayer = () => {
         (s) => s.setFullPlayerReturnPath,
     );
     const pathname = usePathname();
+    const segments = useSegments();
     const nowPlayingRouteFocused = useIsNowPlayingStackRouteFocused();
-    const toggleFavoriteId = useFavoriteSermonIdsStore((s) => s.toggleFavorite);
-    const favoriteIds = useFavoriteSermonIdsStore((s) => s.ids);
+    const { toggle: toggleFavoriteId } = useToggleFavoriteWithSync();
     const resumeLastPlayed = useResumeLastPlayed();
 
     const translateX = useSharedValue(0);
@@ -186,9 +219,11 @@ const MiniPlayer = () => {
 
     /** Hide while `/player` modal is up: pathname can lag; `showFullPlayer` + nav state must agree. */
     const hideForFullPlayer =
-        useShouldHideMiniPlayer() || showFullPlayer || nowPlayingRouteFocused;
-    const allowInAppShell = useAllowMiniPlayerForCurrentRoute();
-    const aboveMainTabs = useIsMainTabsShell();
+        shouldHideMiniPlayerForFullPlayerRoute(pathname, segments) ||
+        showFullPlayer ||
+        nowPlayingRouteFocused;
+    const allowInAppShell = shouldAllowMiniPlayer(pathname, segments);
+    const aboveMainTabs = isMainTabsShell(pathname, segments);
     const bottomOffset =
         (aboveMainTabs ? MINI_PLAYER_BOTTOM_OFFSET_BASE : 0) + insets.bottom;
 
@@ -205,7 +240,7 @@ const MiniPlayer = () => {
     const canSkipNext = useCanSkipNext();
 
     const sermonId = resolveSermonId(displayTrack, lastPlayed);
-    const isFavorite = sermonId ? favoriteIds.includes(sermonId) : false;
+    const isFavorite = useIsSermonFavorite(sermonId);
 
     const staticFromLastPlayedForProgress = useMemo(
         () =>
@@ -337,7 +372,7 @@ const MiniPlayer = () => {
                                         : 'Add favorite'
                                 }
                                 onPress={() => {
-                                    if (sermonId) toggleFavoriteId(sermonId);
+                                    if (sermonId) void toggleFavoriteId(sermonId);
                                 }}
                             >
                                 {isFavorite ? (

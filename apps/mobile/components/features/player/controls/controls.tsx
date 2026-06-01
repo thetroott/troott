@@ -6,7 +6,7 @@ import {
     useToggleRepeatMode,
     useToggleShuffle,
 } from '@/engine/hooks/useControl';
-import { useRepeatModeStoreValue, useShuffle } from '@/stores/player/queue';
+import { useRepeatModeStoreValue, useShuffle } from '@/engine/state/player-queue-store';
 import React from 'react';
 import { View } from 'react-native';
 import { RepeatMode } from '@rntp/player';

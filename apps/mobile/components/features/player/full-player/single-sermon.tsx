@@ -12,37 +12,19 @@ import Animated, {
     type SharedValue,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
-import type { BaseSermonDtoSlimified, SermonItemDTO } from '@/types/sermon';
-import type { Queue } from '@/types/queue-ref';
-import { useCurrentTrack, usePlayQueue } from '@/stores/player/queue';
+import type { BaseSermonDtoSlimified, SermonItemDTO } from '@/api/dtos/sermon.dto';
+import type { Queue } from '@/api/dtos/queue-client.dto';
+import { useCurrentTrack, usePlayQueue } from '@/engine/state/player-queue-store';
 import { useLoadNewQueue } from '@/engine/hooks/useControl';
-import { useNetworkStatus } from '@/stores/app/network';
-import { networkStatusTypes } from '@/types/network-status';
-import { QueuingType } from '@/utils/enums.util';
+import { useNetworkStatus } from '@/lib/state/network-store';
+import { networkStatusTypes } from '@/api/dtos/network.dto';
+import { QueuingType } from '@/api/types';
 import SwipeableRow from '../player/SwipeableRow';
 import type { SwipeableRowContextValue } from '../player/swipeable-row-context';
 import { RunTimeTicks } from '@/engine/helpers/time-codes';
 import { SolidIcons } from '@/assets/icons';
 import { XMarkIcon } from 'react-native-heroicons/solid';
 import { Notification } from 'iconsax-react-nativejs';
-// import { ArrowRight, X, DotsThreeVertical } from 'phosphor-react-native'; // SolidIcons alternative
-
-// import { RunTimeTicks } from '../helpers/time-codes';
-// import ItemImage from './image';
-// import SwipeableRow from './SwipeableRow';
-// import FavoriteIcon from './favorite-icon';
-// import DownloadedIcon from './downloaded-icon';
-// import { useSwipeableRowContext } from './swipeable-row-context';
-// import { buildSwipeConfig } from '../helpers/swipe-actions';
-// import { useAddToQueue, useLoadNewQueue } from '../../../providers/Player/hooks/mutations';
-// import { useCurrentTrack, usePlayQueue } from '../../../stores/player/queue';
-// import { useAddFavorite, useRemoveFavorite } from '../../../api/mutations/favorite';
-// import { useStreamedMediaInfo } from '../../../api/queries/media';
-// import { useDownloadedTrack } from '../../../api/queries/download';
-// import { useIsFavorite } from '../../../api/queries/user-data';
-// import { useNetworkStatus } from '../../../stores/network';
-// import { networkStatusTypes } from '../../../components/Network/internetConnectionWatcher';
-// import { QueuingType } from '../../../enums/queuing-type';
 
 export interface ISermon {
     track: SermonItemDTO; // BaseItemDto

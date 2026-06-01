@@ -10,7 +10,7 @@ import {
     useCurrentTrack,
     usePlayQueue,
     useQueueRef,
-} from '@/stores/player/queue';
+} from '@/engine/state/player-queue-store';
 import { useRouter } from 'expo-router';
 import { useCallback, useLayoutEffect, useMemo } from 'react';
 import { Separator } from '../../../ui/separator';

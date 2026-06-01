@@ -12,7 +12,7 @@ import { Add } from 'iconsax-react-nativejs';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
 import { SolidIcons } from '@/assets/icons';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 type PlaybackQueueProps = {
     nowPlaying: SermonItemDTO;

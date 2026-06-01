@@ -2,7 +2,7 @@ import { UPDATE_INTERVAL } from '@/engine/constants/engine';
 import { useSeekTo } from '@/engine/hooks/useControl';
 import useHapticFeedback from '@/api/hooks/shared/use-haptic-feedback';
 import { RunTimeSeconds } from '@/engine/helpers/time-codes';
-import { useCurrentTrack } from '@/stores/player/queue';
+import { useCurrentTrack } from '@/engine/state/player-queue-store';
 import Slider from '@react-native-community/slider';
 import React, {
     useCallback,
@@ -14,19 +14,6 @@ import React, {
 import { View } from 'react-native';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import { useProgress } from '@rntp/player';
-// import { HorizontalSlider } from '../../../components/Global/helpers/slider'
-// import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-// import { XStack, YStack } from 'tamagui'
-// import { useSafeAreaFrame } from 'react-native-safe-area-context'
-// import { useSeekTo } from '../../../providers/Player/hooks/mutations'
-// import { RunTimeSeconds } from '../../../components/Global/helpers/time-codes'
-// import { UPDATE_INTERVAL } from '../../../player/config'
-// import { ProgressMultiplier } from '../component.config'
-// import { useProgress } from '../../../providers/Player/hooks/queries'
-// import QualityBadge from './quality-badge'
-// import { useDisplayAudioQualityBadge } from '../../../stores/settings/player'
-// import useHapticFeedback from '../../../hooks/use-haptic-feedback'
-// import { useCurrentTrack } from '../../../stores/player/queue'
 
 export const ProgressMultiplier = 10 ** 5;
 

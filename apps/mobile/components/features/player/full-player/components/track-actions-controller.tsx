@@ -7,16 +7,16 @@ import Text from '@/components/ui/text';
 import { colors } from '@/constants/colors';
 import { theme } from '@/constants/theme';
 import { SolidIcons } from '@/assets/icons';
-import type { SermonItemDTO, SermonTrackDTO } from '@/types/sermon';
-import { openShareFlow } from '@/stores/app/share';
-import { useCurrentIndex, useCurrentTrack, usePlayQueue } from '@/stores/player/queue';
+import type { SermonItemDTO, SermonTrackDTO } from '@/api/dtos/sermon.dto';
+import { openShareFlow } from '@/lib/state/share-flow';
+import { useCurrentIndex, useCurrentTrack, usePlayQueue } from '@/engine/state/player-queue-store';
 import { useSkip } from '@/engine/hooks/useControl';
 import PlaybackQueue from '@/components/features/player/playback/playback-queue';
 import { BottomSheetModal, BottomSheetRef } from '@/components/ui/bottom-sheet-modal';
 import {
-    useFavoriteSermonIdsStore,
     useIsSermonFavorite,
-} from '@/engine/state/favorite-sermon-ids-store';
+    useToggleFavoriteWithSync,
+} from '@/api/hooks/app/useFavorites';
 
 function mapTrackToSermonItem(track: SermonTrackDTO): SermonItemDTO {
     return {
@@ -59,7 +59,7 @@ export function TrackActionsController({
               ? String(track.id)
               : undefined;
     const isFavorite = useIsSermonFavorite(sermonId);
-    const toggleFavorite = useFavoriteSermonIdsStore((s) => s.toggleFavorite);
+    const { toggle: toggleFavorite } = useToggleFavoriteWithSync();
 
     const flashIcon = React.useCallback(
         (setter: React.Dispatch<React.SetStateAction<boolean>>, duration = 220) => {
@@ -92,6 +92,9 @@ export function TrackActionsController({
             minister: trackMinister,
             image: track.item?.image ?? null,
             artwork: track.artwork ?? null,
+            shareableUrl:
+                (track.item as { shareableUrl?: string | null } | undefined)
+                    ?.shareableUrl ?? null,
         });
     }, [flashIcon, track, trackTitle, trackMinister]);
 
@@ -152,7 +155,7 @@ export function TrackActionsController({
             <View style={styles.iconsContainer}>
                 <Pressable
                     onPress={() => {
-                        if (sermonId) toggleFavorite(sermonId);
+                        if (sermonId) void toggleFavorite(sermonId);
                     }}
                     accessibilityLabel="Like Track"
                 >

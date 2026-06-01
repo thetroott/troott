@@ -1,6 +1,6 @@
 import { usePrevious, useSkip } from '@/engine/hooks/useControl';
 import useHapticFeedback from '@/api/hooks/shared/use-haptic-feedback';
-import { useCurrentTrack } from '@/stores/player/queue';
+import { useCurrentTrack } from '@/engine/state/player-queue-store';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
