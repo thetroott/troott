@@ -1,5 +1,7 @@
 # Mobile auth screens specification
 
+**Feature contract (PRODUCT + TECH):** [`feature/feat-0001/PRODUCT.md`](feature/feat-0001/PRODUCT.md) · [`feature/feat-0001/TECH.md`](feature/feat-0001/TECH.md) · Index: [`README.md`](README.md)
+
 **Master journey (UX, all states and edge cases):** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Registration (§4A), Activation (§4B), entry points (§3), interruptions (§7), feedback patterns (§9). **Account model:** no guest account; marketing/sign-in only until the user has a real session.
 
 This document specifies the authentication-related **implementation** in `apps/mobile` using the following taxonomy: **Structure**, **Components**, **Design system and tokens**, **Variants**, **States**, **Constraints**, **Functionality (actions)**, **Behaviour or interactivity**, **Flow**, **Output**, **Code quality**, and **Testing**. It reflects the current Expo Router layout and components as implemented; gaps (stubs, TODOs) are called out under **Constraints**.

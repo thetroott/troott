@@ -1,5 +1,7 @@
 # Library (saved sermons, history, organization)
 
+**Feature contract:** [`feature/feat-0007/PRODUCT.md`](feature/feat-0007/PRODUCT.md) · [`feature/feat-0007/TECH.md`](feature/feat-0007/TECH.md) · API playlist list: [`specs/api/feature/feat-0003/PRODUCT.md`](../api/feature/feat-0003/PRODUCT.md)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Save / library (§5B), empty library (§8), browse (§5D), cross-flow save (§6), feedback (§9).
 
 **Scope:** The **Library** tab: saved sermons, listening history, favourite ministers, sorting and filtering — **user-visible behavior only**. Requires **signed-in** user; no guest library.

@@ -178,6 +178,8 @@ Assume **Home**, **Search** (or Discover), **Library**, **Profile** (names may v
 
 ### C. Onboarding (taste: ministers + topics)
 
+**API + mobile contract:** [`feature/feat-0002/PRODUCT.md`](./feature/feat-0002/PRODUCT.md) (API) · [`specs/mobile/feature/feat-0002/PRODUCT.md`](../mobile/feature/feat-0002/PRODUCT.md) (mobile). **Order: ministers first, topics second.**
+
 **Use case:** As a new listener, I want to choose ministers and topics I care about so my Home feed feels relevant.
 
 **States**

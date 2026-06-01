@@ -1,5 +1,12 @@
 # Onboarding (listener taste and pre–Home)
 
+**Feature contracts:**
+
+- Mobile: [`feature/feat-0002/PRODUCT.md`](feature/feat-0002/PRODUCT.md) · [`feature/feat-0002/TECH.md`](feature/feat-0002/TECH.md)
+- API: [`specs/api/feature/feat-0002/PRODUCT.md`](../api/feature/feat-0002/PRODUCT.md) · [`TECH.md`](../api/feature/feat-0002/TECH.md)
+
+**Step order:** ministers first, topics second (both docs + this file).
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — User states (§0), verified-not-onboarded entry (§3), onboarding flow (§4C), pre-Home (§4D), interruptions (§7), feedback (§9).
 
 **Scope (UX only):** What the user sees and does after **account activation** (or equivalent) and **before** the main **Home** shell is shown consistently. No guest account: onboarding runs only for **signed-in** users who have not completed required steps.
@@ -104,4 +111,5 @@ Preference persistence and “can enter Home” flags are defined in API/mobile 
 
 ## Revision history
 
+- **2026-05-20:** Cross-linked API feat-0002; reaffirmed ministers → topics order; documented app/API migration from inverted implementation.
 - **2026-04-14:** Populated from `mobile-flow.md`; scoped to taste + pre-Home listener experience.

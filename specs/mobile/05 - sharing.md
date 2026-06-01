@@ -1,5 +1,7 @@
 # Sharing (sermons, playlists, profiles)
 
+**Feature contract:** [`feature/feat-0008/PRODUCT.md`](feature/feat-0008/PRODUCT.md) · [`feature/feat-0008/TECH.md`](feature/feat-0008/TECH.md)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Cross-flow share (§6), deep link when not signed in (§3), edge cases (§8).
 
 **Stable URLs and token links:** [`specs/api/deep-links.md`](../api/deep-links.md) (paths, teaser route, universal links, rollout).

@@ -1,5 +1,7 @@
 # Notifications (push and in-app)
 
+**Feature contract:** [`feature/feat-0009/PRODUCT.md`](feature/feat-0009/PRODUCT.md) (notifications section)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Push permission gap (§11 item 10), deep link entry (§3), feedback (§9).  
 **Stable links and universal links:** [`specs/api/deep-links.md`](../api/deep-links.md).  
 **Filename note:** File is `06 - nofications.md` (typo); prefer renaming to `06 - notifications.md` when convenient.

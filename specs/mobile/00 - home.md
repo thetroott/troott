@@ -1,5 +1,7 @@
 # Home tab and first-load experience
 
+**Feature contracts:** Shell [`feat-0003`](feature/feat-0003/PRODUCT.md) · Home rails [`feat-0005`](feature/feat-0005/PRODUCT.md)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — First Home load (§4E), entry when returning onboarded (§3), play/save entry points (§2, §5), offline and edge cases (§8).
 
 **Stable links:** After onboarding, if the user opened a shared universal link before sign-in, the app should resume the pending target (sermon / playlist / minister) instead of a generic Home landing when policy allows — see [`specs/api/deep-links.md`](../api/deep-links.md).

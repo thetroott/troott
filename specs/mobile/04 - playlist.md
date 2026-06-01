@@ -1,5 +1,7 @@
 # Playlists (create, edit, play, delete)
 
+**Feature contract:** [`feature/feat-0007/PRODUCT.md`](feature/feat-0007/PRODUCT.md) (playlists section) · [`specs/api/feature/feat-0003/PRODUCT.md`](../api/feature/feat-0003/PRODUCT.md) (listener-created playlists in Library)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Create playlist (§5C), play sermon entry points (§5A), cross-flow add to playlist (§6), interruptions (§7), edge cases (§8), confirmations (§9).
 
 **Scope:** User interactions for **user-created** playlists and any **default** lists (e.g. Favourites) the product treats like playlists. Signed-in only.

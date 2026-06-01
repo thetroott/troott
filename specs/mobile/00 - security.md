@@ -1,5 +1,7 @@
 # Security and session (user-facing)
 
+**Feature contracts:** [`feat-0001`](feature/feat-0001/PRODUCT.md) (session) · [`feat-0009`](feature/feat-0009/PRODUCT.md) (account security UI)
+
 **Master journey:** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — Account model (intro), returning user / token (§3), interruptions (§7), confirmations (§9).
 
 **Scope:** What the **listener** experiences for sign-in persistence, session end, biometric convenience, and sign-out. **No guest account:** there is no mode where the app shows personalized Home or library without a registered, signed-in user.

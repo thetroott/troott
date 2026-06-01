@@ -1,5 +1,7 @@
 # Engine
 
+**Feature contract:** [`feature/feat-0004/PRODUCT.md`](feature/feat-0004/PRODUCT.md) · [`feature/feat-0004/TECH.md`](feature/feat-0004/TECH.md)
+
 **Related UX spec (user-visible playback behavior):** [`specs/api/mobile-flow.md`](../api/mobile-flow.md) — §5A Play a sermon (loading, play/pause, seek, mini vs full player, background, errors, double-tap). This document is **engineering-focused**; keep UI aligned with those interaction rules.
 
 The engine is the playback and queue layer for the Troott mobile app. It wraps **react-native-track-player** (RNTP), manages the play queue, shuffle/repeat, skip/previous behavior, offline cache, and integrates with the app's stores and React Query. This document describes its structure, responsibilities, and how to work with it.
