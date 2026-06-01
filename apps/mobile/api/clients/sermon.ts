@@ -1,6 +1,9 @@
-import type { IAPIResponse } from '@/utils/interface.utl';
+import type { IAPIResponse } from '@/api/types';
 
 import {
+    URL_SERMON_MINISTER_MOST_LIKED,
+    URL_SERMON_MINISTER_MOST_PLAYED,
+    URL_SERMON_MINISTER_RECENTLY_PUBLISHED,
     URL_SERMON,
     URL_SERMON_BY_ID,
     URL_SERMON_MINISTER,
@@ -33,7 +36,7 @@ export class SermonService extends BaseService {
             method: 'GET',
             type: 'default',
             path: URL_SERMON_BY_ID(id),
-            isAuth: false,
+            isAuth: true,
         });
     }
 
@@ -152,6 +155,45 @@ export class SermonService extends BaseService {
             method: 'GET',
             type: 'default',
             path: URL_SERMON_STATS_RECENTLY_PUBLISHED,
+            isAuth: false,
+            params,
+        });
+    }
+
+    getMinisterMostPlayed(
+        ministerId: string,
+        params?: Record<string, unknown>,
+    ): Promise<IAPIResponse> {
+        return this.call({
+            method: 'GET',
+            type: 'default',
+            path: URL_SERMON_MINISTER_MOST_PLAYED(ministerId),
+            isAuth: false,
+            params,
+        });
+    }
+
+    getMinisterMostLiked(
+        ministerId: string,
+        params?: Record<string, unknown>,
+    ): Promise<IAPIResponse> {
+        return this.call({
+            method: 'GET',
+            type: 'default',
+            path: URL_SERMON_MINISTER_MOST_LIKED(ministerId),
+            isAuth: false,
+            params,
+        });
+    }
+
+    getMinisterRecentlyPublished(
+        ministerId: string,
+        params?: Record<string, unknown>,
+    ): Promise<IAPIResponse> {
+        return this.call({
+            method: 'GET',
+            type: 'default',
+            path: URL_SERMON_MINISTER_RECENTLY_PUBLISHED(ministerId),
             isAuth: false,
             params,
         });

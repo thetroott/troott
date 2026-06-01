@@ -3,7 +3,7 @@
  * Every method resolves to {@link IAPIResponse}.
  */
 
-import type { IAPIResponse } from '@/utils/interface.utl';
+import type { IAPIResponse } from '@/api/types';
 
 import {
     URL_ACTIVATE,
@@ -120,18 +120,12 @@ export class AuthService extends BaseService {
     }
 
     /**
-     * Clears local session and secure tokens, then `POST /auth/logout` without Bearer.
+     * Clears local credentials after server logout with Bearer.
      */
     async logout(): Promise<IAPIResponse> {
-       
+        const res = await this.logoutUser();
         await clearTokens();
-        return this.call({
-            method: 'POST',
-            type: 'default',
-            path: URL_LOGOUT,
-            isAuth: false,
-            payload: {},
-        });
+        return res;
     }
 
     /** `POST /auth/logout` with Bearer. */

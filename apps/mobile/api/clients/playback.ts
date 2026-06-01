@@ -1,4 +1,4 @@
-import type { IAPIResponse } from '@/utils/interface.utl';
+import type { IAPIResponse } from '@/api/types';
 
 import { URL_PLAYBACK, URL_PLAYBACK_SERMON } from '../config/path';
 import { BaseService } from '../config/api-call';
