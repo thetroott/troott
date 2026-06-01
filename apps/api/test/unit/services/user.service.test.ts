@@ -146,6 +146,7 @@ jest.mock('../../../src/models/plan.model', () => ({
     default: {
         findOne: jest.fn<() => Promise<any>>().mockResolvedValue({
             _id: new Types.ObjectId(),
+            code: 'plan-free-listener',
             name: 'Free',
             planType: 'listener',
             isEnabled: true,

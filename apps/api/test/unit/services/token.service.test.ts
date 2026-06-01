@@ -61,6 +61,31 @@ describe('Token Service - Unit Tests', () => {
         });
     });
 
+    describe('shouldReissueToken', () => {
+        it('returns false when token lifetime is outside reissue window', async () => {
+            const attachResult = await tokenService.attachToken(testUser);
+            expect(
+                tokenService.shouldReissueToken(attachResult.data.token),
+            ).toBe(false);
+        });
+    });
+
+    describe('bumpTokenVersion', () => {
+        it('increments tokenVersion and clears access token', async () => {
+            const attachResult = await tokenService.attachToken(testUser);
+            expect(attachResult.error).toBe(false);
+
+            const bumpResult = await tokenService.bumpTokenVersion(testUser);
+            expect(bumpResult.error).toBe(false);
+
+            const updated = await User.findById(testUser._id);
+            expect(updated?.tokenVersion).toBeGreaterThan(
+                testUser.tokenVersion ?? 0,
+            );
+            expect(updated?.accessToken).toBe('');
+        });
+    });
+
     describe('refreshToken', () => {
         it('should refresh a valid token', async () => {
             // First attach a token

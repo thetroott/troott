@@ -119,6 +119,36 @@ describe('Auth Module - Integration Tests', () => {
             expectErrorResponse(response, 400);
             expect(response.body.message).toContain('already exist');
         });
+
+        it('should reject admin userType on public register (feat-0003)', async () => {
+            const response = await request(app)
+                .post(`${baseUrl}/register`)
+                .send({
+                    firstName: 'Admin',
+                    lastName: 'Attempt',
+                    email: generateTestData.email(),
+                    password: generateTestData.password(),
+                    userType: 'admin',
+                });
+
+            expectErrorResponse(response, 400);
+            expect(response.body.message).toContain('Invalid user type');
+        });
+
+        it('should reject super-admin userType on public register (feat-0003)', async () => {
+            const response = await request(app)
+                .post(`${baseUrl}/register`)
+                .send({
+                    firstName: 'Super',
+                    lastName: 'Attempt',
+                    email: generateTestData.email(),
+                    password: generateTestData.password(),
+                    userType: 'super-admin',
+                });
+
+            expectErrorResponse(response, 400);
+            expect(response.body.message).toContain('Invalid user type');
+        });
     });
 
     describe('POST /auth/login', () => {
@@ -162,6 +192,19 @@ describe('Auth Module - Integration Tests', () => {
                 .send({});
 
             expectErrorResponse(response, 400);
+        });
+
+        it('should login admin user with valid credentials (feat-0003)', async () => {
+            adminUser = await createAdminUser();
+
+            const response = await request(app).post(`${baseUrl}/login`).send({
+                email: adminUser.user.email,
+                password: 'Test@1234',
+            });
+
+            expectSuccessResponse(response);
+            expect(response.body.data).toHaveProperty('token');
+            expect(response.body.data.userType).toBe('admin');
         });
     });
 

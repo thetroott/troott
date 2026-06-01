@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import type { Request } from 'express';
-import { canAccessSermonDocument } from '@/modules/core/sermon/sermon-access.util';
-import Minister from '@/models/minister.model';
+import { canAccessSermonDocument } from '@/utils/sermon-access.util';
+import Minister from '@/models/core/minister.model';
 
-jest.mock('@/models/minister.model', () => ({
+jest.mock('@/models/core/minister.model', () => ({
     __esModule: true,
     default: {
         findOne: jest.fn(),
@@ -27,10 +27,18 @@ describe('canAccessSermonDocument', () => {
         (Minister.findOne as jest.Mock).mockReset();
     });
 
-    it('allows public published sermon without auth', async () => {
-        const ok = await canAccessSermonDocument(mockReq(), publicDoc);
+    it('allows public published sermon when authenticated', async () => {
+        const ok = await canAccessSermonDocument(
+            mockReq('507f1f77bcf86cd799439011'),
+            publicDoc,
+        );
         expect(ok).toBe(true);
         expect(Minister.findOne).not.toHaveBeenCalled();
+    });
+
+    it('denies public published sermon without auth', async () => {
+        const ok = await canAccessSermonDocument(mockReq(), publicDoc);
+        expect(ok).toBe(false);
     });
 
     it('denies private sermon without auth', async () => {
