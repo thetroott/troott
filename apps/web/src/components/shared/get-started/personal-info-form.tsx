@@ -5,6 +5,7 @@ import DateOfBirthPicker from './DOBPicker';
 import useContextType from '@/hooks/shared/useContextType';
 import type { ICountry } from '@/utils/interfaces.util';
 import {
+    readHydratedPersonalCountry,
     readPersonalDraft,
     writePersonalDraft,
 } from '@/services/get-started-draft-storage';
@@ -30,8 +31,11 @@ const PersonalInfoForm = () => {
     } | null;
 
     const draft = useMemo(() => readPersonalDraft(), []);
+    const hydratedCountry = readHydratedPersonalCountry();
     const [country, setCountry] = useState<ICountry | undefined>(
-        draft?.country ?? user?.country,
+        (draft?.country ?? hydratedCountry ?? user?.country) as
+            | ICountry
+            | undefined,
     );
     const [dobIso, setDobIso] = useState<string | null>(
         draft?.dateOfBirth ??

@@ -1,44 +1,38 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { features } from '@/_data/mysermonFeatures';
-import { useNavigate } from 'react-router-dom';
-import { useUpload } from '@/context/upload/uploadState';
 import UploadEntryStepModal from '@/components/shared/upload/UploadEntryStepModal';
-import { applySelectedAudioToUpload } from '@/utils/upload-audio-selection.util';
+import { useCreateSermonEntry } from '@/hooks/upload/useCreateSermonEntry';
 
 const EmptySermonsState = () => {
-    const navigate = useNavigate();
-    const { dispatch, state: uploadState } = useUpload();
-    const [entryModalOpen, setEntryModalOpen] = useState(false);
+    const {
+        entryModalOpen,
+        setEntryModalOpen,
+        openEntry,
+        onFileSelected,
+        isLoading,
+    } = useCreateSermonEntry();
 
     return (
         <div className=" bg-neutral-900/60 p-8">
             <UploadEntryStepModal
                 open={entryModalOpen}
                 onOpenChange={setEntryModalOpen}
-                isLoading={uploadState.isLoading}
-                onFileSelected={(file) => {
-                    applySelectedAudioToUpload(dispatch, file);
-                    setEntryModalOpen(false);
-                    navigate('/upload-sermon');
-                }}
+                isLoading={isLoading}
+                onFileSelected={onFileSelected}
             />
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <div className="mb-7">
                     <h1 className="text-xl font-semibold mb-4">
                         Welcome to Sermons
                     </h1>
                 </div>
 
-                {/* Feature Cards Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
                     {features.map((feature, index) => (
                         <div
                             key={index}
                             className="bg-[#333234]/50  rounded-[12px] p-6  relative overflow-hidden"
                         >
-                            {/* Text Section */}
                             <div className="mb-6">
                                 <h3 className="text-sm font-semibold  mb-1 text-left">
                                     {feature.title}
@@ -48,13 +42,11 @@ const EmptySermonsState = () => {
                                 </p>
                             </div>
 
-                            {/* Illustration Section */}
                             <div className="relative h-40 bg-gradient-to-b from-amber-50 to-amber-100 rounded-lg overflow-hidden"></div>
                         </div>
                     ))}
                 </div>
 
-                {/* Call to Action Section */}
                 <div className="text-center space-y-8">
                     <div className="space-y-5">
                         <h2 className="text-xl  font-semibold ">
@@ -71,7 +63,7 @@ const EmptySermonsState = () => {
 
                     <Button
                         type="button"
-                        onClick={() => setEntryModalOpen(true)}
+                        onClick={openEntry}
                         className="bg-primary text-sm  hover:bg-teal-500 text-primary-foreground px-4 py-6  font-[500] "
                     >
                         Create sermon

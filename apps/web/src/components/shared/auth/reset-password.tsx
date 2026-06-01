@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,11 +7,12 @@ import type { ResetPasswordDTO } from '@/dtos/auth.dto';
 import { usePasswordUtils } from '@/hooks/shared/useValidaton';
 import useAuth from '@/hooks/app/useAuth';
 import storage from '@/api/services/local-storage';
-import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
 import { useNavigate } from 'react-router-dom';
-import { AUTH_ROUTES } from '@/constants/auth-routes';
+import { PATH_FORGOT_PASSWORD, PATH_LOGIN } from '@/routes/paths';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
+import { clearLocalAuth } from '@/utils/auth-session.util';
+import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
 
 const ResetPasswordForm = () => {
     const [formData, setFormData] = useState({
@@ -27,6 +28,14 @@ const ResetPasswordForm = () => {
     const { validatePassword, calculateStrength } = usePasswordUtils();
     const { resetPassword } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        clearLocalAuth();
+        const email = cleanStoredEmail(storage.getUserEmail());
+        if (!email) {
+            navigate(PATH_FORGOT_PASSWORD, { replace: true });
+        }
+    }, [navigate]);
 
     const handleChange = (field: string, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -83,7 +92,7 @@ const ResetPasswordForm = () => {
                 toast.error(
                     'We could not find your email for this session. Use forgot password again.',
                 );
-                navigate(AUTH_ROUTES.forgotPassword);
+                navigate(PATH_FORGOT_PASSWORD);
                 return;
             }
             const payload: ResetPasswordDTO = {
@@ -100,7 +109,7 @@ const ResetPasswordForm = () => {
                     return;
                 }
                 toast.success(res.message || 'Password updated. You can sign in.');
-                navigate(AUTH_ROUTES.login);
+                navigate(PATH_LOGIN);
             } catch (err) {
                 toast.error(
                     err instanceof Error

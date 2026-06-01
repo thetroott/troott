@@ -31,12 +31,6 @@ const VerifyDocumentForm = () => {
 
                 <IconText
                     icon={CircleDotIcon}
-                    text="Ensure all details are readable in the image you upload."
-                    className="text-sm text-muted-foreground mt-2"
-                />
-
-                <IconText
-                    icon={CircleDotIcon}
                     text="Place documents against a solid-colored background."
                     className="text-sm text-muted-foreground mt-2"
                 />

@@ -10,12 +10,15 @@ import type { RegisterUserDTO } from '@/dtos/auth.dto';
 import { UserType } from '@/models/User.model';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AUTH_ROUTES } from '@/constants/auth-routes';
+import {
+    PATH_ACTIVATE_ACCOUNT,
+    PATH_FORGOT_PASSWORD,
+    PATH_LOGIN,
+} from '@/routes/paths';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
-import {
-    setVerificationEmail,
-} from '@/api/services/local-storage';
+import { setVerificationEmail } from '@/api/services/local-storage';
+import { clearLocalAuth } from '@/utils/auth-session.util';
 
 const REGISTER_FORM_DEFAULT = {
     firstName: '',
@@ -105,11 +108,22 @@ const RegisterForm = (data: IForm) => {
 
         if (!validateForm()) return;
 
+        const userType = registrationUserType ?? UserType.MINISTER;
+        if (
+            userType === UserType.ADMIN ||
+            userType === UserType.SUPER
+        ) {
+            toast.error(
+                'Invalid user type value. choose from listener,creator,minister',
+            );
+            return;
+        }
+
         setSubmitting(true);
         try {
             const res = await register({
                 ...formData,
-                userType: registrationUserType ?? UserType.MINISTER,
+                userType,
             });
             if (res.error) {
                 if (!isApiHttp2xxErrorEnvelope(res)) {
@@ -117,11 +131,12 @@ const RegisterForm = (data: IForm) => {
                 }
                 return;
             }
+            clearLocalAuth();
             setVerificationEmail(formData.email);
             toast.success(
                 res.message || 'We sent a code to your email. Activate your account next.',
             );
-            navigate(AUTH_ROUTES.activateAccount);
+            navigate(PATH_ACTIVATE_ACCOUNT, { replace: true });
         } catch (err) {
             toast.error(
                 err instanceof Error ? err.message : 'Registration failed.',
@@ -266,7 +281,7 @@ const RegisterForm = (data: IForm) => {
                     <div className="flex items-center">
                         <Label htmlFor="password">Password</Label>
                         <Link
-                            to={AUTH_ROUTES.forgotPassword}
+                            to={PATH_FORGOT_PASSWORD}
                             className="ml-auto text-sm underline-offset-4 hover:underline"
                         >
                             Forgot your password?
@@ -448,7 +463,7 @@ const RegisterForm = (data: IForm) => {
             <div className="text-center text-sm">
                 Already have an account?{' '}
                 <Link
-                    to={AUTH_ROUTES.login}
+                    to={PATH_LOGIN}
                     className="underline underline-offset-4"
                 >
                     Sign in

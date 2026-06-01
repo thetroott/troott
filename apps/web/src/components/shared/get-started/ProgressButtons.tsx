@@ -1,15 +1,22 @@
-import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import OnboardingItems from '@/_data/onboarding';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { runGetStartedCheckpoint } from '@/services/get-started-checkpoint';
 import { toast } from 'sonner';
+import {
+    PATH_GET_STARTED,
+    PATH_SEG_GET_STARTED_VERIFY_DOC_UPLOAD,
+} from '@/routes/paths';
+import { clearDraftForCheckpointPath } from '@/services/get-started-draft-storage';
+import { useGetStartedCheckpointBusy } from './GetStartedProgressContext';
+import { dispatchOnboardingProfileRefresh } from '@/utils/hub-onboarding.util';
 
 const ProgressButtons = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const [busy, setBusy] = useState(false);
+    const { busy, setBusy, documentVerificationLeave } =
+        useGetStartedCheckpointBusy();
 
     const stepGroup = OnboardingItems.find((item) =>
         location.pathname.startsWith(item.action),
@@ -18,15 +25,23 @@ const ProgressButtons = () => {
     const steps = stepGroup?.steps?.map((step) => step.action) || [];
     const currentIndex = steps.findIndex((path) => location.pathname === path);
 
-    const handleBack = () => {
-        if (location.pathname === '/get-started/tour-guide') {
-            navigate('/get-started/ministry-input');
+    const navigateBack = () => {
+        if (location.pathname === `${PATH_GET_STARTED}/tour-guide`) {
+            navigate(`${PATH_GET_STARTED}/ministry-input`);
             return;
         }
         if (currentIndex > 0) {
             const previousStep = steps[currentIndex - 1];
             if (previousStep) navigate(previousStep);
         }
+    };
+
+    const handleBack = () => {
+        if (documentVerificationLeave?.isDirty) {
+            documentVerificationLeave.requestLeave(navigateBack);
+            return;
+        }
+        navigateBack();
     };
 
     const handleContinue = async () => {
@@ -38,13 +53,31 @@ const ProgressButtons = () => {
                 return;
             }
 
+            clearDraftForCheckpointPath(location.pathname);
+
+            const documentUploadPath = `${PATH_GET_STARTED}/${PATH_SEG_GET_STARTED_VERIFY_DOC_UPLOAD}`;
+
+            const milestonePaths = new Set([
+                `${PATH_GET_STARTED}/verify-account/personal-information`,
+                `${PATH_GET_STARTED}/home-address`,
+                `${PATH_GET_STARTED}/complete-profile`,
+                `${PATH_GET_STARTED}/ministry-input`,
+                `${PATH_GET_STARTED}/tour-guide`,
+            ]);
+            if (milestonePaths.has(location.pathname)) {
+                dispatchOnboardingProfileRefresh();
+            }
+
+            if (location.pathname === documentUploadPath) {
+                navigate(PATH_GET_STARTED);
+                return;
+            }
+
             if (currentIndex < steps.length - 1) {
                 const nextStep = steps[currentIndex + 1];
                 if (nextStep) navigate(nextStep);
-            } else if (location.pathname === '/get-started/tour-guide') {
-                navigate('/upload-sermon');
             } else {
-                navigate('/get-started');
+                navigate(PATH_GET_STARTED);
             }
         } finally {
             setBusy(false);
@@ -60,7 +93,7 @@ const ProgressButtons = () => {
                     disabled={
                         busy ||
                         (currentIndex <= 0 &&
-                            location.pathname !== '/get-started/tour-guide')
+                            location.pathname !== `${PATH_GET_STARTED}/tour-guide`)
                     }
                     className="px-6 py-2 transition-colors cursor-pointer"
                 >
