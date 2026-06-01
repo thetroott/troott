@@ -3,6 +3,7 @@ import {
     activateUserAccount,
     changePassword,
     forgotPassword,
+    getAuthUser,
     loginUser,
     logoutUser,
     refreshToken,
@@ -12,8 +13,8 @@ import {
     socialAuthCallback,
     verifyOTP,
 } from '@/controllers/auth.controller';
+import Protect from '@/middlewares/checkAuth.mdw';
 import passport from 'passport';
-import optionalAuth from '@/middlewares/optionalAuth.mdw';
 
 const authRouter = Router({ mergeParams: true });
 
@@ -24,9 +25,10 @@ authRouter.post('/resend-otp', resendOTP);
 authRouter.post('/activate', activateUserAccount);
 authRouter.post('/forgot-password', forgotPassword);
 authRouter.post('/reset-password', resetPassword);
-authRouter.post('/change-password', changePassword);
-authRouter.post('/token', refreshToken);
-authRouter.post('/logout', optionalAuth, logoutUser);
+authRouter.post('/change-password', Protect, changePassword);
+authRouter.post('/token', Protect, refreshToken);
+authRouter.post('/logout', Protect, logoutUser);
+authRouter.get('/user', Protect, getAuthUser);
 
 authRouter.get('/google', passport.authenticate('google'));
 authRouter.get('/github', passport.authenticate('github'));

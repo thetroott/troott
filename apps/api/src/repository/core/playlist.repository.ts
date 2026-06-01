@@ -52,7 +52,7 @@ class PlaylistRepository {
 
         const playlist = await this.model
             .findById(id)
-            .populate('user createdBy items.itemId')
+            .populate('user createdBy items.item')
             .lean();
         if (!playlist) {
             result.error = true;
@@ -81,15 +81,13 @@ class PlaylistRepository {
 
         const playlists = await this.model
             .find({ user: userId })
-            .populate('items.itemId');
+            .populate('items.item');
 
-        if (!playlists || playlists.length === 0) {
-            result.error = true;
-            result.message = 'No playlists found for user';
-            result.code = 404;
-        } else {
-            result.data = playlists;
-        }
+        result.data = playlists ?? [];
+        result.message =
+            playlists.length > 0
+                ? 'Playlists found'
+                : 'No playlists found for user';
 
         return result;
     }

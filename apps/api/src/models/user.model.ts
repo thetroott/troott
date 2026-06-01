@@ -8,7 +8,7 @@ import IUserDoc, {
     UserType,
 } from '@/interfaces/user.interface';
 import { DbModels } from '@/types/common.enum';
-import authService from '@/services/auth.service';
+import { apiKeySubSchema, countrySubSchema } from '@/models/shared-schemas';
 
 const UserSchema = new Schema<IUserDoc>(
     {
@@ -21,8 +21,8 @@ const UserSchema = new Schema<IUserDoc>(
         phoneNumber: { type: String },
         phoneCode: { type: String },
         countryPhone: { type: String },
-        country: { type: Schema.Types.Mixed },
-        homeCountry: { type: Schema.Types.Mixed },
+        country: countrySubSchema,
+        homeCountry: countrySubSchema,
         location: {
             address: { type: String },
             city: { type: String },
@@ -49,6 +49,7 @@ const UserSchema = new Schema<IUserDoc>(
             index: true,
         },
         altPhone: { type: String },
+        password: { type: String, select: false },
         passwordType: {
             type: String,
             enum: Object.values(PasswordType),
@@ -92,7 +93,7 @@ const UserSchema = new Schema<IUserDoc>(
             default: InviteStatus.PENDING,
         },
 
-        apiKey: { type: Schema.Types.Mixed },
+        apiKey: apiKeySubSchema,
 
         isSuper: { type: Boolean, default: false },
         isAdmin: { type: Boolean, default: false },
@@ -105,7 +106,7 @@ const UserSchema = new Schema<IUserDoc>(
         isDeactivated: { type: Boolean, default: false },
         isSuspended: { type: Boolean, default: false },
         isActive: { type: Boolean, default: false },
-        loginLimit: { type: Number, default: 5 },
+        loginLimit: { type: Number, default: 0 },
         isLocked: { type: Boolean, default: false },
         lockedUntil: { type: Date, default: null },
         twoFactorEnabled: { type: Boolean, default: false },
@@ -129,7 +130,7 @@ const UserSchema = new Schema<IUserDoc>(
             ref: DbModels.STUDIO,
             index: true,
         },
-        keys: [{ type: Schema.Types.Mixed }],
+        keys: [apiKeySubSchema],
         createdBy: { type: Schema.Types.ObjectId, ref: DbModels.USER },
     },
     {
@@ -155,6 +156,10 @@ UserSchema.pre('save', async function (next) {
 
 UserSchema.methods.matchPassword = async function (password: string) {
     return true;
+};
+
+UserSchema.methods.getAuthToken = function (): string {
+    return typeof this.accessToken === 'string' ? this.accessToken : '';
 };
 
 const User: Model<IUserDoc> = mongoose.model<IUserDoc>(

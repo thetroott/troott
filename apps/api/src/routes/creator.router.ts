@@ -12,6 +12,13 @@ import {
     revokeCreatorInvitation,
     submitCreatorVerification,
     updateCreatorVerificationStatus,
+    onboardCreatorPersonalComplete,
+    onboardCreatorDocumentComplete,
+    onboardCreatorAddressComplete,
+    onboardCreatorMinistryComplete,
+    onboardCreatorTourComplete,
+    onboardCreatorFirstSermonComplete,
+    skipCreatorOnboarding,
 } from '@/controllers/core/creator.controller';
 
 const creatorRoutes: Router = Router({ mergeParams: true });
@@ -33,6 +40,38 @@ creatorRoutes.put(
     Protect,
     updateCreatorVerificationStatus,
 );
+
+creatorRoutes.post(
+    '/onboarding/personal-complete',
+    Protect,
+    onboardCreatorPersonalComplete,
+);
+creatorRoutes.post(
+    '/onboarding/document-complete',
+    Protect,
+    onboardCreatorDocumentComplete,
+);
+creatorRoutes.post(
+    '/onboarding/address-complete',
+    Protect,
+    onboardCreatorAddressComplete,
+);
+creatorRoutes.post(
+    '/onboarding/ministry-complete',
+    Protect,
+    onboardCreatorMinistryComplete,
+);
+creatorRoutes.post(
+    '/onboarding/tour-complete',
+    Protect,
+    onboardCreatorTourComplete,
+);
+creatorRoutes.post(
+    '/onboarding/first-sermon-complete',
+    Protect,
+    onboardCreatorFirstSermonComplete,
+);
+creatorRoutes.post('/onboarding/skip', Protect, skipCreatorOnboarding);
 
 creatorRoutes.get('/:id', Protect, getCreator);
 

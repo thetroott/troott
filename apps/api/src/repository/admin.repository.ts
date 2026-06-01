@@ -1,4 +1,4 @@
-import { FilterQuery, UpdateQuery } from 'mongoose';
+import { FilterQuery, PopulateOptions, UpdateQuery } from 'mongoose';
 import Admin from '@/models/admin.model';
 import { IAdminDoc } from '@/interfaces/admin.interface';
 import RepositoryService from '@/services/repository.service';
@@ -108,9 +108,9 @@ class AdminRepository extends RepositoryService<IAdminDoc> {
             if (populate) {
                 const dataPop = Array.isArray(populate) ? populate : [];
                 if (dataPop.length > 0) {
-                    query = query.populate(dataPop);
-                } else {
-                    query = query.populate('');
+                    query = query.populate(
+                        dataPop as PopulateOptions | PopulateOptions[],
+                    );
                 }
             }
 

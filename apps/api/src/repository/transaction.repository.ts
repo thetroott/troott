@@ -1,6 +1,7 @@
 import { Model } from 'mongoose';
 import Transaction from '@/models/transaction.model';
-import { IResult, ITransactionDoc } from '@/interfaces/common.interface';
+import { IResult } from '@/interfaces/common.interface';
+import type ITransactionDoc from '@/interfaces/transaction.interface';
 
 class TransactionRepository {
     private model: Model<ITransactionDoc>;

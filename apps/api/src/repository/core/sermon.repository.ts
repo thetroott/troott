@@ -1,15 +1,16 @@
-import mongoose, { Model, ObjectId, Types } from 'mongoose';
+import mongoose, { Model, ObjectId, PopulateOptions, Types } from 'mongoose';
 import Sermon from '@/models/core/sermon.model';
 
 import { IQueryOptions, IResult } from '@/interfaces/common.interface';
 import type { ISermonDoc } from '@/interfaces/core/sermon.interface';
 import { PipelineStage } from 'mongoose';
-import { ContentState, ContentStatus } from '@/types/common.enum';
+import { ContentState } from '@/types/common.enum';
+import { MediaStatus } from '@/interfaces/core/sermon.interface';
 
 /** Optional filters for GET /sermon/minister/:id (studio list). */
 export type MinisterSermonListFilters = {
     search?: string;
-    publicationStatus?: 'draft' | 'published' | 'all';
+    publicationStatus?: 'draft' | 'published' | 'all' | 'bin';
     dateFrom?: string;
     dateTo?: string;
 };
@@ -178,6 +179,39 @@ class SermonRepository {
      * @param deleteData
      * @returns {Promise<IResult>}
      */
+    /**
+     * @name restoreSermonFromBin
+     * @description Restores a soft-deleted sermon to draft/active library.
+     */
+    public async restoreSermonFromBin(id: string): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const objectId = new Types.ObjectId(id);
+        const restored = await this.model.findByIdAndUpdate(
+            objectId,
+            {
+                status: MediaStatus.DRAFT,
+                state: ContentState.ACTIVE,
+            },
+            { new: true },
+        );
+        if (!restored) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Sermon not found';
+        } else {
+            result.message = 'Sermon restored from bin';
+            result.data = restored;
+        }
+
+        return result;
+    }
+
     public async moveSermonToBin(
         id: string,
         deleteData: Partial<ISermonDoc>,
@@ -217,7 +251,7 @@ class SermonRepository {
     }
 
     /**
-     * Sermon by id or slug with minister fields for public teaser (`GET /open/sermon/:id`).
+     * Sermon by id or slug with minister fields for catalog detail (`GET /sermon/:id`).
      */
     public async findSermonWithMinisterForTeaser(
         input: string,
@@ -378,21 +412,32 @@ class SermonRepository {
         ministerId: string,
         options: MinisterSermonListFilters,
     ): Record<string, unknown> {
-        const and: Record<string, unknown>[] = [
-            { minister: ministerId },
-            {
-                state: {
-                    $nin: [ContentState.DELETED, ContentState.BROKEN],
-                },
-            },
-            { status: { $ne: ContentStatus.DELETED } },
-        ];
-
         const ps = options.publicationStatus;
-        if (ps === 'draft') {
-            and.push({ status: ContentStatus.DRAFT });
-        } else if (ps === 'published') {
-            and.push({ status: ContentStatus.PUBLISHED });
+        const isBin = ps === 'bin';
+
+        const and: Record<string, unknown>[] = [{ minister: ministerId }];
+
+        if (isBin) {
+            and.push({
+                $or: [
+                    { status: MediaStatus.DELETED },
+                    { state: ContentState.DELETED },
+                ],
+            });
+        } else {
+            and.push(
+                {
+                    state: {
+                        $nin: [ContentState.DELETED, ContentState.BROKEN],
+                    },
+                },
+                { status: { $ne: MediaStatus.DELETED } },
+            );
+            if (ps === 'draft') {
+                and.push({ status: MediaStatus.DRAFT });
+            } else if (ps === 'published') {
+                and.push({ status: MediaStatus.PUBLISHED });
+            }
         }
 
         const q = options.search?.trim();
@@ -617,7 +662,9 @@ class SermonRepository {
             .limit(options.limit || 25);
 
         if (options.populate) {
-            query = query.populate(options.populate as any);
+            query = query.populate(
+                options.populate as PopulateOptions | PopulateOptions[],
+            );
         }
 
         const sermons = await query.exec();
@@ -862,9 +909,15 @@ class SermonRepository {
                 .limit(options.limit || 25);
 
             if (options.populate) {
-                query = query.populate(options.populate as any);
+                query = query.populate(
+                    options.populate as PopulateOptions | PopulateOptions[],
+                );
             } else {
-                query = query.populate(['minister', 'series', 'topic']);
+                query = query.populate([
+                    { path: 'minister' },
+                    { path: 'series' },
+                    { path: 'topic' },
+                ] as PopulateOptions[]);
             }
 
             const sermons = await query.exec();
@@ -934,9 +987,15 @@ class SermonRepository {
                 .limit(options.limit || 25);
 
             if (options.populate) {
-                query = query.populate(options.populate as any);
+                query = query.populate(
+                    options.populate as PopulateOptions | PopulateOptions[],
+                );
             } else {
-                query = query.populate(['minister', 'series', 'topic']);
+                query = query.populate([
+                    { path: 'minister' },
+                    { path: 'series' },
+                    { path: 'topic' },
+                ] as PopulateOptions[]);
             }
 
             const sermons = await query.exec();

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Protect from '../middlewares/checkAuth.mdw';
 import {
     getMinister,
+    getMinisterById,
     getMinisters,
     updateMinister,
     inviteMinister,
@@ -25,6 +26,7 @@ const ministerRoutes: Router = Router({ mergeParams: true });
 
 ministerRoutes.get('/', Protect, getMinister);
 ministerRoutes.get('/list', Protect, getMinisters);
+ministerRoutes.get('/:ministerId', getMinisterById);
 ministerRoutes.put('/', Protect, updateMinister);
 
 ministerRoutes.post('/verification', Protect, submitMinisterVerification);

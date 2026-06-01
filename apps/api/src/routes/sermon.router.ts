@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import Protect from '../middlewares/checkAuth.mdw';
-import optionalAuth from '../middlewares/optionalAuth.mdw';
 import {
     deleteSermon,
     moveSermonToBin,
+    restoreSermonFromBin,
     publishSermon,
     updateSermon,
     uploadSermon,
@@ -50,6 +50,7 @@ sermonRouter.post('/publish/:id', Protect, publishSermon);
 
 sermonRouter.put('/update/:id', Protect, updateSermon);
 sermonRouter.put('/move-to-bin/:id', Protect, moveSermonToBin);
+sermonRouter.put('/restore/:id', Protect, restoreSermonFromBin);
 sermonRouter.delete('/delete/:id', Protect, deleteSermon);
 
 // Multi-segment GET routes before `/:id` and `/`
@@ -94,6 +95,6 @@ sermonRouter.get(
 sermonRouter.get('/user/interests', Protect, getSermonsByUserInterests);
 
 sermonRouter.get('/', getAllSermons);
-sermonRouter.get('/:id', optionalAuth, getSermonById);
+sermonRouter.get('/:id', Protect, getSermonById);
 
 export default sermonRouter;

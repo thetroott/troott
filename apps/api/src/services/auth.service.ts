@@ -20,6 +20,8 @@ import {
 import User from '@/models/user.model';
 import Role from '@/models/role.model';
 import ErrorResponse from '../utils/error.util';
+import authMapper from '@/mappers/auth.mapper';
+import { getAuthUserId } from '@/utils/auth-request.util';
 
 class AuthService {
     public result: IResult;
@@ -590,10 +592,15 @@ class AuthService {
         };
         const { req, isAdmin } = data;
 
-        const userRes = await userRepository.findById(
-            (req as any).user._id,
-            true,
-        );
+        const userId = getAuthUserId(req);
+        if (!userId) {
+            result.error = true;
+            result.message = 'authorized  - user details not found';
+            result.code = 401;
+            return result;
+        }
+
+        const userRes = await userRepository.findById(userId, true);
         const user = userRes?.data as IUserDoc | undefined;
 
         if (!user) {
@@ -610,8 +617,9 @@ class AuthService {
             result.code = 401;
         } else {
             result.error = false;
+            const mapped = await authMapper.mapRegisteredUser(user);
             result.data = {
-                user: user,
+                user: mapped,
             };
         }
 
