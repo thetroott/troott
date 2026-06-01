@@ -10,7 +10,7 @@ import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import type { ISermonTrack } from '@/types/sermon';
+import type { ISermonTrack } from '@/api/dtos/sermon.dto';
 
 type Props = {
     trendingQueries: readonly string[];

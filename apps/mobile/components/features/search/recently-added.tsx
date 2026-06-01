@@ -3,12 +3,10 @@ import React, { useMemo } from 'react';
 import Text from '@/components/ui/text';
 import { FlashList } from '@shopify/flash-list';
 import { theme } from '@/constants/theme';
-import { TransformArray } from '@/utils/transform-array';
 import SermonCard from './sermon-card';
-import { tracks } from '@/_data/_mock/tracks';
 import type { ISermonTrack } from '@/api/dtos/sermon.dto';
-import type { SermonItemDTO } from '@/types/sermon';
-import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
+import { useDiscoveryHomeRails } from '@/engine/hooks/useDiscoveryHomeRails';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
 
 const ROWS_PER_SWIPE = 2;
@@ -17,10 +15,9 @@ const ROWS_PER_SWIPE = 2;
  * Search landing carousel — same catalog source and mapping as home {@link SermonsForYou}.
  */
 const RecentlyAdded = () => {
-    const { data: sermons, isLoading, error } = useSermonsCatalog();
+    const { recentlyPublished, isLoading, error } = useDiscoveryHomeRails();
 
-    const sermonsData =
-        sermons && sermons.length > 0 ? sermons : (tracks as ISermonTrack[]);
+    const sermonsData = recentlyPublished as ISermonTrack[];
 
     const tracklistDtos: SermonItemDTO[] = useMemo(
         () =>
@@ -33,10 +30,13 @@ const RecentlyAdded = () => {
         [sermonsData],
     );
 
-    const rows = useMemo(
-        () => TransformArray(sermonsData, ROWS_PER_SWIPE) as ISermonTrack[][],
-        [sermonsData],
-    );
+    const rows = useMemo(() => {
+        const result: ISermonTrack[][] = [];
+        for (let i = 0; i < sermonsData.length; i += ROWS_PER_SWIPE) {
+            result.push(sermonsData.slice(i, i + ROWS_PER_SWIPE));
+        }
+        return result;
+    }, [sermonsData]);
 
     if (isLoading && sermonsData.length === 0) {
         return (

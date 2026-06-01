@@ -1,3 +1,5 @@
+import type { ImageSourcePropType } from 'react-native';
+
 export type ProfileMenuItem = {
     id: string;
     label: string;
@@ -11,5 +13,5 @@ export type ProfilePlaylistItem = {
     category: string;
     author: string;
     metric: string;
-    image: number;
+    image: ImageSourcePropType;
 };

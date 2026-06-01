@@ -6,6 +6,7 @@ import BrowseTopicTile from '@/components/features/search/browse-topic-tile';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
 import type { BrowseTopic } from '@/constants/browse-topics';
+import { captureSearchEvent } from '@/components/features/search/search.analytics';
 
 /**
  * Figma `Browse-Categories` / `Categories` (4995:35775, 4995:35778): 16 screen inset
@@ -43,11 +44,15 @@ function BrowseTopicsGrid({ topics }: { topics: BrowseTopic[] }) {
                             <BrowseTopicTile
                                 topic={item}
                                 tileWidth={tileWidth}
-                                onPress={() =>
+                                onPress={() => {
+                                    captureSearchEvent('search_topic_opened', {
+                                        topic_slug: item.slug,
+                                        source: 'search_landing',
+                                    });
                                     router.push(
                                         `/search/topic/${encodeURIComponent(item.slug)}`,
-                                    )
-                                }
+                                    );
+                                }}
                             />
                         </View>
                     );

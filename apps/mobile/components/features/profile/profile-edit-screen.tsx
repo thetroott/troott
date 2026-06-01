@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
+    Alert,
     Image,
     Pressable,
     StyleSheet,
@@ -12,24 +13,40 @@ import { router } from 'expo-router';
 import ScreenView from '@/components/ui/screenview';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
+import { toast } from '@/components/ui/toast';
 import { useUploadPhoto } from '@/api/hooks/shared/useUploadPhoto';
+import { useUpdateProfileMutation } from '@/api/hooks/app/useUser';
+import { useContextType } from '@/context';
+import { useProfileIdentity } from './use-profile-identity';
+
+const MAX_NAME_LENGTH = 50;
 
 type FieldProps = {
     label: string;
     value: string;
+    onChangeText: (value: string) => void;
+    editable?: boolean;
     hint?: string;
 };
 
-function EditField({ label, value, hint }: FieldProps) {
+function EditField({
+    label,
+    value,
+    onChangeText,
+    editable = true,
+    hint,
+}: FieldProps) {
     return (
         <View style={styles.fieldWrap}>
             <Text size="sm" color={theme.colors.grey[100]}>
                 {label}
             </Text>
             <TextInput
-                defaultValue={value}
+                value={value}
+                onChangeText={onChangeText}
+                editable={editable}
                 placeholderTextColor={theme.colors.grey[100]}
-                style={styles.fieldInput}
+                style={[styles.fieldInput, !editable && styles.fieldReadOnly]}
             />
             {hint ? (
                 <Text size="sm" color={theme.colors.grey[100]} textStyle={styles.hint}>
@@ -40,6 +57,12 @@ function EditField({ label, value, hint }: FieldProps) {
     );
 }
 
+function readString(user: Record<string, unknown> | null, key: string): string {
+    if (!user) return '';
+    const value = user[key];
+    return typeof value === 'string' ? value.trim() : '';
+}
+
 type ProfileEditScreenProps = {
     showSavingOverlay?: boolean;
 };
@@ -47,9 +70,39 @@ type ProfileEditScreenProps = {
 export default function ProfileEditScreen({
     showSavingOverlay = false,
 }: ProfileEditScreenProps) {
-    const [showPhotoAction, setShowPhotoAction] = React.useState(false);
-    const [showSaving, setShowSaving] = React.useState(showSavingOverlay);
-    const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
+    const { userContext } = useContextType();
+    const user = userContext.user as Record<string, unknown> | null;
+    const { avatarSource } = useProfileIdentity();
+    const updateProfile = useUpdateProfileMutation();
+
+    const initial = useMemo(
+        () => ({
+            firstName: readString(user, 'firstName'),
+            lastName: readString(user, 'lastName'),
+            email: readString(user, 'email'),
+            avatar: readString(user, 'avatar'),
+        }),
+        [user],
+    );
+
+    const [firstName, setFirstName] = useState(initial.firstName);
+    const [lastName, setLastName] = useState(initial.lastName);
+    const [avatarUri, setAvatarUri] = useState<string | null>(
+        initial.avatar || null,
+    );
+    const [showPhotoAction, setShowPhotoAction] = useState(false);
+
+    React.useEffect(() => {
+        setFirstName(initial.firstName);
+        setLastName(initial.lastName);
+        setAvatarUri(initial.avatar || null);
+    }, [initial.firstName, initial.lastName, initial.avatar]);
+
+    const dirty =
+        firstName.trim() !== initial.firstName ||
+        lastName.trim() !== initial.lastName ||
+        (avatarUri ?? '') !== (initial.avatar || '');
+
     const baseUrl = process.env.EXPO_PUBLIC_TROOTT_API_URL;
     const uploadEndpoint = baseUrl ? `${baseUrl}/user` : undefined;
     const { captureFromCamera, selectFromGallery, isUploading } = useUploadPhoto({
@@ -61,22 +114,81 @@ export default function ProfileEditScreen({
         },
     });
 
-    React.useEffect(() => {
-        setShowSaving(showSavingOverlay);
-    }, [showSavingOverlay]);
+    const isSaving = showSavingOverlay || isUploading || updateProfile.isPending;
 
-    React.useEffect(() => {
-        if (showSavingOverlay) {
-            setShowSaving(true);
+    const confirmLeave = useCallback(
+        (onLeave: () => void) => {
+            if (!dirty) {
+                onLeave();
+                return;
+            }
+            Alert.alert(
+                'Discard changes?',
+                'You have unsaved profile edits.',
+                [
+                    { text: 'Keep editing', style: 'cancel' },
+                    {
+                        text: 'Discard',
+                        style: 'destructive',
+                        onPress: onLeave,
+                    },
+                ],
+            );
+        },
+        [dirty],
+    );
+
+    const handleBack = useCallback(() => {
+        confirmLeave(() => router.back());
+    }, [confirmLeave]);
+
+    const handleSave = useCallback(async () => {
+        const trimmedFirst = firstName.trim();
+        const trimmedLast = lastName.trim();
+
+        if (trimmedFirst.length < 2) {
+            toast.error('First name must be at least 2 characters.');
             return;
         }
-        setShowSaving(isUploading);
-    }, [isUploading, showSavingOverlay]);
+
+        try {
+            const payload: Record<string, unknown> = {
+                firstName: trimmedFirst,
+                lastName: trimmedLast,
+            };
+            if (avatarUri && avatarUri.length > 0) {
+                payload.avatar = avatarUri;
+            }
+
+            const res = await updateProfile.mutateAsync(payload);
+            if (res.error) {
+                toast.error(res.message || 'Could not save profile');
+                return;
+            }
+
+            toast.success('Profile updated');
+            router.back();
+        } catch (e) {
+            const msg =
+                e instanceof Error ? e.message : 'Could not save profile';
+            toast.error(msg);
+        }
+    }, [avatarUri, firstName, lastName, updateProfile]);
+
+    const avatarImage =
+        avatarUri != null && avatarUri.length > 0
+            ? { uri: avatarUri }
+            : avatarSource;
 
     return (
         <ScreenView screenStyle={styles.screen}>
             <View style={styles.topBar}>
-                <Pressable style={styles.backBtn} onPress={() => router.back()}>
+                <Pressable
+                    style={styles.backBtn}
+                    onPress={handleBack}
+                    accessibilityRole="button"
+                    accessibilityLabel="Go back"
+                >
                     <ArrowLeft2 size={16} color={theme.colors.white[50]} />
                 </Pressable>
                 <Text size="lg" weight="semiBold" color={theme.colors.white[50]}>
@@ -84,11 +196,20 @@ export default function ProfileEditScreen({
                 </Text>
                 <Pressable
                     style={styles.saveBtn}
-                    onPress={() => {
-                        setShowSaving(isUploading);
-                    }}
+                    onPress={() => void handleSave()}
+                    disabled={isSaving || !dirty}
+                    accessibilityRole="button"
+                    accessibilityLabel="Save profile"
                 >
-                    <Text size="base" weight="medium" color={theme.colors.teal[500]}>
+                    <Text
+                        size="base"
+                        weight="medium"
+                        color={
+                            isSaving || !dirty
+                                ? theme.colors.grey[500]
+                                : theme.colors.teal[500]
+                        }
+                    >
                         Save
                     </Text>
                 </Pressable>
@@ -96,7 +217,10 @@ export default function ProfileEditScreen({
 
             <View style={styles.hero}>
                 <Image source={require('@/assets/images/cover4.jpg')} style={styles.cover} />
-                <Pressable style={styles.coverAction} onPress={() => setShowPhotoAction(true)}>
+                <Pressable
+                    style={styles.coverAction}
+                    onPress={() => router.push('/user/photo-picker')}
+                >
                     <Camera size={20} color={theme.colors.white[50]} />
                 </Pressable>
             </View>
@@ -105,21 +229,31 @@ export default function ProfileEditScreen({
                 style={styles.avatarWrap}
                 onPress={() => setShowPhotoAction(true)}
             >
-                <Image
-                    source={
-                        avatarUri ? { uri: avatarUri } : require('@/assets/images/4.jpg')
-                    }
-                    style={styles.avatar}
-                />
+                <Image source={avatarImage} style={styles.avatar} />
                 <View style={styles.avatarCamera}>
                     <Camera size={20} color={theme.colors.white[50]} />
                 </View>
             </Pressable>
 
             <View style={styles.form}>
-                <EditField label="First Name" value="Tobe" hint="4/12" />
-                <EditField label="Last Name" value="Innocent" hint="8/15" />
-                <EditField label="Email" value="tobeinnocent@email.com" />
+                <EditField
+                    label="First Name"
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    hint={`${firstName.trim().length}/${MAX_NAME_LENGTH}`}
+                />
+                <EditField
+                    label="Last Name"
+                    value={lastName}
+                    onChangeText={setLastName}
+                    hint={`${lastName.trim().length}/${MAX_NAME_LENGTH}`}
+                />
+                <EditField
+                    label="Email"
+                    value={initial.email}
+                    onChangeText={() => {}}
+                    editable={false}
+                />
             </View>
 
             {showPhotoAction ? (
@@ -163,7 +297,7 @@ export default function ProfileEditScreen({
                 </>
             ) : null}
 
-            {showSaving ? (
+            {isSaving ? (
                 <View style={styles.savingBackdrop}>
                     <View style={styles.savingToast}>
                         <Text size="base" color={theme.colors.grey[50]}>
@@ -252,9 +386,12 @@ const styles = StyleSheet.create({
     fieldInput: {
         padding: 0,
         color: theme.colors.grey[50],
-        fontSize: 32 / 2,
+        fontSize: 16,
         fontFamily: 'Matter-Medium',
         lineHeight: 24,
+    },
+    fieldReadOnly: {
+        color: theme.colors.grey[300],
     },
     hint: {
         textAlign: 'right',

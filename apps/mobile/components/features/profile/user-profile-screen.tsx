@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { ArrowRight2 } from 'iconsax-react-nativejs';
 import { router } from 'expo-router';
@@ -6,29 +6,65 @@ import { router } from 'expo-router';
 import ScreenView from '@/components/ui/screenview';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
+import { toast } from '@/components/ui/toast';
 import ProfileSection from './profile-section';
 import type { ProfileMenuItem } from './types';
 import { useProfileIdentity } from './use-profile-identity';
 
-const menuItems: ProfileMenuItem[] = [
-    { id: 'account', label: 'Account' },
-    { id: 'subscription', label: 'Manage subscription' },
-    { id: 'recap', label: 'Your Recap' },
-    { id: 'notifications', label: 'Notifications' },
-    { id: 'help-feedback', label: 'Help and feedback' },
-    { id: 'about', label: 'About Troott' },
-];
-
 export default function UserProfileScreen() {
     const { displayName, avatarSource } = useProfileIdentity();
+
+    const menuItems: ProfileMenuItem[] = useMemo(
+        () => [
+            {
+                id: 'account',
+                label: 'Account',
+                onPress: () => router.push('/user'),
+            },
+            {
+                id: 'subscription',
+                label: 'Manage subscription',
+                onPress: () => {
+                    toast.info('Subscription management is coming soon.');
+                },
+            },
+            {
+                id: 'recap',
+                label: 'Your Recap',
+                onPress: () => {
+                    toast.info('Your Recap is coming soon.');
+                },
+            },
+            {
+                id: 'notifications',
+                label: 'Notifications',
+                onPress: () => router.push('/user/notifications'),
+            },
+            {
+                id: 'help-feedback',
+                label: 'Help and feedback',
+                onPress: () => {
+                    toast.info('Contact support at hello@troott.com');
+                },
+            },
+            {
+                id: 'about',
+                label: 'About Troott',
+                onPress: () => router.push('/user/about-troott'),
+            },
+        ],
+        [],
+    );
 
     return (
         <ScreenView screenStyle={styles.screen}>
             <View style={styles.statusBarGap} />
             <View style={styles.header}>
                 <Pressable
-                    onPress={() => router.push('/user')}
+                    onPress={() => router.push('/user/photo-picker')}
                     style={styles.profileTrigger}
+                    accessibilityRole="button"
+                    accessibilityLabel="Open profile photo picker"
                 >
                     <View style={styles.avatarWrap}>
                         <Image source={avatarSource} style={styles.avatar} />
@@ -58,7 +94,6 @@ export default function UserProfileScreen() {
                 </View>
                 <ArrowRight2 size={16} color={theme.colors.white[50]} />
             </Pressable>
-
         </ScreenView>
     );
 }
@@ -121,15 +156,4 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: theme.sizes.spacing.sm,
     },
-    highlightAvatarWrap: {
-        width: 32,
-        height: 32,
-        borderRadius: theme.sizes.radius.full,
-        overflow: 'hidden',
-    },
-    highlightAvatar: {
-        width: 32,
-        height: 32,
-        borderRadius: theme.sizes.radius.full,
-    }
 });

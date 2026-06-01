@@ -1,6 +1,6 @@
 import { ImageSourcePropType, ViewStyle } from 'react-native';
 
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 export interface ITrackCard {
     id?: string;

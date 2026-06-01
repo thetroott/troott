@@ -5,10 +5,12 @@ import { router } from 'expo-router';
 
 import Text from '@/components/ui/text';
 import ScreenView from '@/components/ui/screenview';
+import Loader from '@/components/ui/loader';
 import { theme } from '@/constants/theme';
-import type { ProfilePlaylistItem } from './types';
 import ProfilePlaylistRow from './profile-playlist-row';
 import { useProfileIdentity } from './use-profile-identity';
+import { useProfilePlaylists } from './use-profile-playlists';
+import { openShareFlow } from '@/lib/state/share-flow';
 
 const cover = require('@/assets/images/cover4.jpg');
 
@@ -16,37 +18,25 @@ type ProfilePublicScreenProps = {
     showPlaylists?: boolean;
 };
 
-const playlistItems: ProfilePlaylistItem[] = [
-    {
-        id: 'p-1',
-        title: 'Hope from Despair',
-        category: 'Playlist',
-        author: 'Tobe Innocent',
-        metric: '5 views',
-        image: require('@/assets/images/1.jpg'),
-    },
-    {
-        id: 'p-2',
-        title: 'Grace Amid Trials',
-        category: 'Playlist',
-        author: 'Tobe Innocent',
-        metric: '58:30',
-        image: require('@/assets/images/2.jpg'),
-    },
-    {
-        id: 'p-3',
-        title: 'Strength in adversity.',
-        category: 'Playlist',
-        author: 'Joshua Selman',
-        metric: '58:30',
-        image: require('@/assets/images/3.jpg'),
-    },
-];
-
 export default function ProfilePublicScreen({
     showPlaylists = true,
 }: ProfilePublicScreenProps) {
-    const { displayName, avatarSource } = useProfileIdentity();
+    const { displayName, avatarSource, firstName } = useProfileIdentity();
+    const { items: playlistItems, isLoading, isError, refetch } =
+        useProfilePlaylists();
+
+    const handleShareProfile = () => {
+        openShareFlow({
+            id: null,
+            title: `${displayName} on Troott`,
+            minister: displayName,
+            image:
+                typeof avatarSource === 'object' && avatarSource != null && 'uri' in avatarSource
+                    ? String(avatarSource.uri)
+                    : null,
+            artwork: null,
+        });
+    };
 
     return (
         <ScreenView screenStyle={styles.screen}>
@@ -63,7 +53,7 @@ export default function ProfilePublicScreen({
 
             <Pressable
                 style={styles.infoWrap}
-                onPress={() => router.push('/user/edit-profile')}
+                onPress={() => router.push('/user/photo-picker')}
             >
                 <View style={styles.avatarRing}>
                     <Image source={avatarSource} style={styles.avatar} />
@@ -72,7 +62,7 @@ export default function ProfilePublicScreen({
                     {displayName}
                 </Text>
                 <Text size="sm" color={theme.colors.grey[100]}>
-                    0 Followers - 3 Following
+                    Hi, {firstName}
                 </Text>
                 <View style={styles.actions}>
                     <Pressable
@@ -83,7 +73,7 @@ export default function ProfilePublicScreen({
                     </Pressable>
                     <Pressable
                         style={styles.actionIcon}
-                        onPress={() => router.push('/user/edit-profile')}
+                        onPress={handleShareProfile}
                     >
                         <Send2 size={20} color={theme.colors.white[50]} />
                     </Pressable>
@@ -91,7 +81,38 @@ export default function ProfilePublicScreen({
             </Pressable>
 
             {showPlaylists ? (
-                <ProfilePlaylistRow items={playlistItems} />
+                isLoading && playlistItems.length === 0 ? (
+                    <View style={styles.loadingWrap}>
+                        <Loader tone="brand" />
+                    </View>
+                ) : isError && playlistItems.length === 0 ? (
+                    <View style={styles.emptyWrap}>
+                        <Text size="sm" color={theme.colors.grey[300]}>
+                            Could not load playlists.
+                        </Text>
+                        <Pressable onPress={() => void refetch()}>
+                            <Text size="sm" color={theme.colors.teal[400]}>
+                                Retry
+                            </Text>
+                        </Pressable>
+                    </View>
+                ) : playlistItems.length > 0 ? (
+                    <ProfilePlaylistRow
+                        items={playlistItems}
+                        onSeeMore={() => router.push('/library')}
+                    />
+                ) : (
+                    <View style={styles.emptyWrap}>
+                        <Text size="xl" weight="bold" color={theme.colors.white[50]}>
+                            No playlists yet
+                        </Text>
+                        <Pressable onPress={() => router.push('/playlist/create-playlist')}>
+                            <Text size="sm" color={theme.colors.teal[400]}>
+                                Create a playlist
+                            </Text>
+                        </Pressable>
+                    </View>
+                )
             ) : (
                 <View style={styles.emptyWrap}>
                     <Text size="xl" weight="bold" color={theme.colors.white[50]}>
@@ -162,9 +183,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    loadingWrap: {
+        marginTop: 40,
+        alignItems: 'center',
+    },
     emptyWrap: {
         marginTop: 60,
         alignItems: 'center',
         justifyContent: 'center',
+        gap: theme.sizes.spacing.sm,
+        paddingHorizontal: theme.sizes.spacing.lg,
     },
 });
