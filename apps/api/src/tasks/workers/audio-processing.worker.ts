@@ -3,6 +3,7 @@ import { CreateWorkerDTO } from '@/queues/queue.dto';
 import { JobChannel, QueueChannel } from '../../queues/channel.queue';
 import audioHLSProcessor from '../jobs/audio-processing.job';
 import logger from '../../utils/logger.util';
+import { mediaConfig } from '@/configs/media.config';
 
 /**
  * Bull worker for adaptive **HLS packaging** (`audio:processing` queue).
@@ -16,7 +17,7 @@ const startAudioHLSWorker = async () => {
     const audioWorkerConfig: CreateWorkerDTO = {
         queueName,
         jobName,
-        concurrency: 2,
+        concurrency: mediaConfig.hlsWorkerConcurrency,
     };
 
     const queue = await BullQueue.addProcessor(

@@ -6,8 +6,8 @@ import logger from '../../utils/logger.util';
 import type {
     IAudioMetadata,
     IAudioMetadataJobDTO,
-} from '@/dtos/core/sermon.dto';
-import { ContentStatus } from '../../utils/enums.util';
+} from '@/interfaces/core/sermon.interface';
+import { MediaStatus, UploadStatus } from '@/interfaces/core/sermon.interface';
 
 /**
  * @name audioMetadataProcessor
@@ -49,14 +49,28 @@ const audioMetadataProcessor = async (
 
         const query = sermonId
             ? { _id: sermonId }
-            : { 'uploadSummary.uploadId': uploadId };
+            : { 'item.itemId': uploadId };
+
+        const durationSec =
+            typeof metadata.duration === 'number'
+                ? Math.round(metadata.duration)
+                : undefined;
+        const bitrateKbps =
+            typeof metadata.bitrate === 'number'
+                ? Math.round(metadata.bitrate / 1000)
+                : undefined;
 
         const updateSermon = await Sermon.findOneAndUpdate(
             query,
             {
                 $set: {
-                    'uploadSummary.metadata': metadata,
-                    status: ContentStatus.DRAFT,
+                    duration: durationSec,
+                    bitrate: bitrateKbps,
+                    mimeType,
+                    status: MediaStatus.DRAFT,
+                    'item.duration': durationSec ?? 0,
+                    'item.uploadStatus': UploadStatus.EXTRACTING,
+                    'item.updatedAt': new Date().toISOString(),
                 },
             },
             { new: true },

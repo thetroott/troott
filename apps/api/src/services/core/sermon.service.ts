@@ -4,9 +4,11 @@ import type {
     IAudioMetadataJobDTO,
     ISermonDoc,
 } from '@/interfaces/core/sermon.interface';
+import {
+    MediaStatus,
+    UploadStatus,
+} from '@/interfaces/core/sermon.interface';
 import StorageService from '@/services/storage.service';
-import { ContentStatus } from '@/types/common.enum';
-import { UploadStatus, UploadStepType } from '@/types/upload.enums';
 import { S3Folder } from '@/interfaces/common.interface';
 import { UserType } from '@/interfaces/user.interface';
 import { PublishSermonDTO } from '@/dtos/core/sermon.dto';
@@ -14,8 +16,10 @@ import { Upload } from '@aws-sdk/lib-storage';
 import sermonRepository from '@/repository/core/sermon.repository';
 import Sermon from '@/models/core/sermon.model';
 import Minister from '@/models/core/minister.model';
+import Creator from '@/models/core/creator.model';
 import mongoose from 'mongoose';
-import { AWS_BUCKET_NAME, s3 } from '@/configs/aws.config';
+import { s3 } from '@/configs/aws.config';
+import { bucketNameFor } from '@/configs/s3-buckets.config';
 import { mediaConfig } from '@/configs/media.config';
 import { addJob } from '@/tasks/jobs/job';
 import { JobChannel, QueueChannel } from '@/queues/channel.queue';
@@ -23,7 +27,7 @@ import logger from '@/utils/logger.util';
 
 class SermonService {
     private s3Client = s3;
-    private readonly bucket = AWS_BUCKET_NAME;
+    private readonly originalsBucket = bucketNameFor('originals');
     private readonly UPLOAD_EXPIRY = 1000 * 60 * 60 * 24;
     private readonly storageService = StorageService;
     private readonly MINISTER_LIST_SORT_WHITELIST = new Set([
@@ -48,9 +52,15 @@ class SermonService {
 
     public parsePublicationStatus(
         raw: unknown,
-    ): 'draft' | 'published' | 'all' | undefined {
-        if (raw === 'draft' || raw === 'published' || raw === 'all') {
-            return raw;
+    ): 'draft' | 'published' | 'all' | 'bin' | undefined {
+        if (
+            raw === 'draft' ||
+            raw === 'published' ||
+            raw === 'all' ||
+            raw === 'bin' ||
+            raw === 'deleted'
+        ) {
+            return raw === 'deleted' ? 'bin' : raw;
         }
         return undefined;
     }
@@ -134,7 +144,7 @@ class SermonService {
             const s3Upload = new Upload({
                 client: this.s3Client,
                 params: {
-                    Bucket: this.bucket,
+                    Bucket: this.originalsBucket,
                     Key: s3Key,
                     Body: stream,
                     ContentType: mimeType,
@@ -150,33 +160,46 @@ class SermonService {
                       .select('_id')
                       .lean()
                 : null;
+            const creatorDoc =
+                !ministerDoc && data.uploadedBy
+                    ? await Creator.findOne({ user: data.uploadedBy })
+                          .select('_id')
+                          .lean()
+                    : null;
 
-            // Prepare the upload summary for Sermon model
-            const uploadSummary = {
-                fileId: uploadId,
-                fileName: info.filename,
-                fileSize: size,
+            const ministerOwnerRef = ministerDoc?._id
+                ? ministerDoc._id
+                : creatorDoc && data.uploadedBy
+                  ? new mongoose.Types.ObjectId(data.uploadedBy)
+                  : undefined;
+
+            const nowIso = new Date().toISOString();
+            const sermonItem = {
+                item: s3Response.Location ?? '',
+                duration: 0,
+                size: size ?? 0,
                 fileType,
                 mimetype: mimeType,
+                itemId: uploadId as string,
                 uploadedBy: data.uploadedBy,
-                uploadStatus: UploadStatus.COMPLETED,
-                uploadId,
-                s3Key: s3Key,
-                rawFile: s3Response.Location,
+                uploadStatus: UploadStatus.UPLOADED,
+                createdAt: nowIso,
+                updatedAt: nowIso,
             };
 
-            // Save upload session in DB
             const SermonUpload: Partial<ISermonDoc> = await Sermon.create({
-                uploadSummary,
-                minister: ministerDoc?._id,
-                status: ContentStatus.PROCESSING,
-                uploadState: UploadStepType.AUDIO_METADATA_PROCESSING,
+                item: sermonItem,
+                minister: ministerOwnerRef ? [ministerOwnerRef] : [],
+                status: MediaStatus.DRAFT,
             });
+
+            const sermonId = String(SermonUpload._id);
 
             const metaPayload: IAudioMetadataJobDTO = {
                 streamForMetadata: metadataStream,
                 mimeType: mimeType,
                 uploadId: uploadId as string,
+                sermonId,
             };
 
             addJob({
@@ -194,6 +217,7 @@ class SermonService {
                 uploadId: uploadId as string,
                 sourceS3Key: s3Key,
                 mimeType,
+                sermonId,
             };
 
             addJob({
@@ -273,7 +297,7 @@ class SermonService {
             const s3Upload = new Upload({
                 client: this.s3Client,
                 params: {
-                    Bucket: this.bucket,
+                    Bucket: this.originalsBucket,
                     Key: s3Key,
                     Body: stream,
                     ContentType: mimeType,
@@ -282,24 +306,25 @@ class SermonService {
 
             const s3Response = await s3Upload.done();
 
-            // Prepare the image for Sermon model
-            const uploadImage = {
-                fileName: info.filename,
-                fileSize: size,
+            const nowIso = new Date().toISOString();
+            const coverImage = {
+                item: s3Response.Location ?? '',
+                width: 0,
+                height: 0,
+                size: size ?? 0,
                 fileType,
                 mimetype: mimeType,
+                itemId: uploadId as string,
                 uploadedBy: data.uploadedBy,
                 uploadStatus: UploadStatus.COMPLETED,
-                uploadId,
-                s3Key: s3Key,
-                rawFile: s3Response.Location,
+                createdAt: nowIso,
+                updatedAt: nowIso,
             };
 
-            // Save upload session in DB
             const uploadResult: Partial<ISermonDoc> = await Sermon.create({
-                imageSummary: uploadImage,
-                status: ContentStatus.DRAFT,
-                uploadState: UploadStepType.IMAGE_UPLOADING,
+                image: coverImage,
+                imageUrl: s3Response.Location ?? '',
+                status: MediaStatus.DRAFT,
             });
 
             result.message = 'Image uploaded successfully';
@@ -312,6 +337,98 @@ class SermonService {
 
             await this.storageService.deleteFile(s3Key);
 
+            result.error = true;
+            result.code = 500;
+            result.message = err.message;
+            return result;
+        }
+    }
+
+    /**
+     * Attach a cover image to an existing sermon (studio upload wizard).
+     */
+    public async attachCoverToSermon(
+        sermonId: string,
+        data: IFile,
+    ): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: null,
+        };
+
+        const {
+            stream,
+            metadataStream,
+            info,
+            mimeType,
+            size,
+            fileType,
+            uploadId,
+        } = data;
+
+        if (!stream || !metadataStream || !info || !mimeType || !fileType) {
+            result.error = true;
+            result.code = 400;
+            result.message = 'Missing required upload fields.';
+            return result;
+        }
+
+        const folder = await this.getS3Folder(mimeType);
+        const s3Key = `${folder}/${uploadId}`;
+
+        try {
+            const s3Upload = new Upload({
+                client: this.s3Client,
+                params: {
+                    Bucket: this.originalsBucket,
+                    Key: s3Key,
+                    Body: stream,
+                    ContentType: mimeType,
+                },
+            });
+
+            const s3Response = await s3Upload.done();
+
+            const nowIso = new Date().toISOString();
+            const coverImage = {
+                item: s3Response.Location ?? '',
+                width: 0,
+                height: 0,
+                size: size ?? 0,
+                fileType,
+                mimetype: mimeType,
+                itemId: uploadId as string,
+                uploadedBy: data.uploadedBy,
+                uploadStatus: UploadStatus.COMPLETED,
+                createdAt: nowIso,
+                updatedAt: nowIso,
+            };
+
+            const updated = await Sermon.findByIdAndUpdate(
+                sermonId,
+                {
+                    image: coverImage,
+                    imageUrl: s3Response.Location ?? '',
+                },
+                { new: true, runValidators: true },
+            );
+
+            if (!updated) {
+                result.error = true;
+                result.code = 404;
+                result.message = 'Sermon not found';
+                return result;
+            }
+
+            result.message = 'Cover image uploaded successfully';
+            result.data = updated;
+            return result;
+        } catch (err: any) {
+            stream.destroy();
+            metadataStream.destroy();
+            await this.storageService.deleteFile(s3Key);
             result.error = true;
             result.code = 500;
             result.message = err.message;
@@ -584,7 +701,25 @@ class SermonService {
         })
             .select('_id')
             .lean();
-        return !!owned;
+        if (owned) {
+            return true;
+        }
+        if (mid === userId) {
+            const [ministerByUser, creatorByUser] = await Promise.all([
+                Minister.findOne({
+                    user: new mongoose.Types.ObjectId(userId),
+                })
+                    .select('_id')
+                    .lean(),
+                Creator.findOne({
+                    user: new mongoose.Types.ObjectId(userId),
+                })
+                    .select('_id')
+                    .lean(),
+            ]);
+            return !!(ministerByUser || creatorByUser);
+        }
+        return false;
     }
 
     public validateDeletePolicy(data: {
@@ -601,7 +736,7 @@ class SermonService {
             data: {},
         };
         const isAdmin = this.isAdminRole(data.actorRole);
-        const isPublished = data.sermonStatus === ContentStatus.PUBLISHED;
+        const isPublished = data.sermonStatus === MediaStatus.PUBLISHED;
 
         if (!isAdmin && !data.isOwner) {
             result.error = true;

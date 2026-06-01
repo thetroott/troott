@@ -417,6 +417,103 @@ class ListenerService {
         return result;
     }
 
+    public async onboardMinisters(
+        userId: string,
+        ministerIds: string[],
+    ): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        if (!ministerIds || ministerIds.length === 0) {
+            result.error = true;
+            result.code = 400;
+            result.message = 'At least one minister must be selected';
+            return result;
+        }
+
+        const userResult = await userRepository.findById(userId);
+        if (userResult.error || !userResult.data) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'User not found';
+            return result;
+        }
+
+        const user = userResult.data as IUserDoc;
+        if (!user.isActivated) {
+            result.error = true;
+            result.code = 403;
+            result.message = 'Account must be activated before onboarding';
+            return result;
+        }
+
+        const findResult = await listenerRepository.findOne({ user: userId });
+        if (findResult.error || !findResult.data) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Listener profile not found';
+            return result;
+        }
+
+        const validMinisters = await Minister.find({
+            _id: { $in: ministerIds },
+        }).select('_id');
+
+        const validIds = validMinisters.map((m) => String(m._id));
+        const invalidIds = ministerIds.filter((id) => !validIds.includes(id));
+
+        if (invalidIds.length > 0) {
+            result.error = true;
+            result.code = 400;
+            result.message = `Invalid minister IDs: ${invalidIds.join(', ')}`;
+            return result;
+        }
+
+        const listener = findResult.data as IListenerDoc;
+        const listenerId = String(listener._id || listener.id);
+
+        const updateResult = await listenerRepository.updateListener(
+            listenerId,
+            {
+                $set: {
+                    ministers: ministerIds,
+                    'onboarding.step': 1,
+                    'onboarding.status': OnboardStatus.IN_PROGRESS,
+                },
+            } as any,
+        );
+
+        if (updateResult.error) {
+            result.error = true;
+            result.code = updateResult.code || 500;
+            result.message = updateResult.message;
+            return result;
+        }
+
+        await userRepository.updateUser(userId, {
+            'onboard.step': 1,
+            'onboard.stage': OnboardStage.MINISTERS,
+            'onboard.status': OnboardStatus.IN_PROGRESS,
+        } as any);
+
+        try {
+            await recommendationService.seedFromMinisters(
+                listenerId,
+                ministerIds,
+            );
+        } catch {
+            // non-critical -- recommendations will be generated later
+        }
+
+        result.message = 'Ministers selected successfully';
+        result.data = updateResult.data;
+        return result;
+    }
+
     public async onboardTopics(
         userId: string,
         topicIds: string[],
@@ -428,7 +525,7 @@ class ListenerService {
             data: {},
         };
 
-        if (!topicIds || topicIds.length === 0) {
+        if (!topicIds || topicIds.length < 5) {
             result.error = true;
             result.code = 400;
             result.message = 'At least five topics must be selected';
@@ -459,6 +556,20 @@ class ListenerService {
             return result;
         }
 
+        const listener = findResult.data as IListenerDoc;
+
+        const onboardingStep = listener.onboarding?.step ?? 0;
+        const onboardingStatus = listener.onboarding?.status ?? '';
+        const isRedoing = onboardingStatus === OnboardStatus.COMPLETED;
+
+        if (onboardingStep < 1 && !isRedoing) {
+            result.error = true;
+            result.code = 400;
+            result.message =
+                'Please complete minister selection before selecting topics';
+            return result;
+        }
+
         const validTopics = await Topic.find({
             _id: { $in: topicIds },
             isActive: true,
@@ -474,7 +585,6 @@ class ListenerService {
             return result;
         }
 
-        const listener = findResult.data as IListenerDoc;
         const listenerId = String(listener._id || listener.id);
 
         const updateResult = await listenerRepository.updateListener(
@@ -482,97 +592,6 @@ class ListenerService {
             {
                 $set: {
                     topics: topicIds,
-                    'onboarding.step': 1,
-                    'onboarding.status': OnboardStatus.IN_PROGRESS,
-                },
-            } as any,
-        );
-
-        if (updateResult.error) {
-            result.error = true;
-            result.code = updateResult.code || 500;
-            result.message = updateResult.message;
-            return result;
-        }
-
-        await userRepository.updateUser(userId, {
-            'onboard.step': 1,
-            'onboard.stage': OnboardStage.TOPICS,
-            'onboard.status': OnboardStatus.IN_PROGRESS,
-        } as any);
-
-        try {
-            await recommendationService.seedFromTopics(listenerId, topicIds);
-        } catch {
-            // non-critical -- recommendations will be generated later
-        }
-
-        result.message = 'Topics selected successfully';
-        result.data = updateResult.data;
-        return result;
-    }
-
-    public async onboardMinisters(
-        userId: string,
-        ministerIds: string[],
-    ): Promise<IResult> {
-        const result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        if (!ministerIds || ministerIds.length === 0) {
-            result.error = true;
-            result.code = 400;
-            result.message = 'At least one minister must be selected';
-            return result;
-        }
-
-        const findResult = await listenerRepository.findOne({ user: userId });
-        if (findResult.error || !findResult.data) {
-            result.error = true;
-            result.code = 404;
-            result.message = 'Listener profile not found';
-            return result;
-        }
-
-        const listener = findResult.data as IListenerDoc;
-
-        const onboardingStep = listener.onboarding?.step ?? 0;
-        const onboardingStatus = listener.onboarding?.status ?? '';
-        const isRedoing = onboardingStatus === OnboardStatus.COMPLETED;
-
-        if (onboardingStep < 1 && !isRedoing) {
-            result.error = true;
-            result.code = 400;
-            result.message =
-                'Please complete topic selection before selecting ministers';
-            return result;
-        }
-
-        const validMinisters = await Minister.find({
-            _id: { $in: ministerIds },
-        }).select('_id');
-
-        const validIds = validMinisters.map((m) => String(m._id));
-        const invalidIds = ministerIds.filter((id) => !validIds.includes(id));
-
-        if (invalidIds.length > 0) {
-            result.error = true;
-            result.code = 400;
-            result.message = `Invalid minister IDs: ${invalidIds.join(', ')}`;
-            return result;
-        }
-
-        const listenerId = String(listener._id || listener.id);
-
-        const updateResult = await listenerRepository.updateListener(
-            listenerId,
-            {
-                $set: {
-                    ministers: ministerIds,
                     'onboarding.step': 2,
                     'onboarding.status': OnboardStatus.COMPLETED,
                 },
@@ -588,20 +607,17 @@ class ListenerService {
 
         await userRepository.updateUser(userId, {
             'onboard.step': 2,
-            'onboard.stage': OnboardStage.MINISTERS,
+            'onboard.stage': OnboardStage.TOPICS,
             'onboard.status': OnboardStatus.COMPLETED,
         } as any);
 
         try {
-            await recommendationService.seedFromMinisters(
-                listenerId,
-                ministerIds,
-            );
+            await recommendationService.seedFromTopics(listenerId, topicIds);
         } catch {
             // non-critical -- recommendations will be generated later
         }
 
-        result.message = 'Ministers selected successfully. Onboarding complete';
+        result.message = 'Topics selected successfully. Onboarding complete';
         result.data = updateResult.data;
         return result;
     }

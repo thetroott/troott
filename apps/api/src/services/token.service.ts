@@ -6,6 +6,10 @@ import dotenv from 'dotenv';
 import { IUserDoc } from '@/interfaces/user.interface';
 
 dotenv.config();
+
+/** Reissue when remaining JWT lifetime is within this window (feat-0004). */
+export const REISSUE_WINDOW_MS = 5 * 60 * 60 * 1000;
+
 class TokenService {
     private secret: string;
     private expire: string;
@@ -22,6 +26,55 @@ class TokenService {
         }
     }
 
+    private signToken(user: IUserDoc): string {
+        return jwt.sign(
+            {
+                id: user._id,
+                email: user.email,
+                role:
+                    user.roles && user.roles.length > 0
+                        ? typeof user.roles[0] === 'string'
+                            ? user.roles[0]
+                            : user.roles[0].name
+                        : 'user',
+                tokenVersion: user.tokenVersion,
+            },
+            this.secret,
+            {
+                algorithm: 'HS512',
+                expiresIn: this.expire,
+            } as jwt.SignOptions,
+        );
+    }
+
+    private async persistAccessToken(
+        userId: string,
+        token: string,
+    ): Promise<void> {
+        const decoded = jwt.decode(token) as jwt.JwtPayload | null;
+        await User.findByIdAndUpdate(userId, {
+            accessToken: token,
+            accessTokenExpiry: decoded?.exp
+                ? new Date(decoded.exp * 1000)
+                : undefined,
+        });
+    }
+
+    /** True when JWT should be silently reissued (within 5h of exp). */
+    public shouldReissueToken(token: string): boolean {
+        const decoded = jwt.decode(token) as jwt.JwtPayload | null;
+        if (!decoded?.exp) {
+            return false;
+        }
+        const msUntilExp = decoded.exp * 1000 - Date.now();
+        return msUntilExp > 0 && msUntilExp <= REISSUE_WINDOW_MS;
+    }
+
+    /** @deprecated Use {@link shouldReissueToken}. */
+    public checkTokenValidity(token: string): boolean {
+        return this.shouldReissueToken(token);
+    }
+
     /**
      * @description Generates and attaches a JWT token to a user
      * @param {IUserDoc} user - The user document to generate token for
@@ -36,26 +89,8 @@ class TokenService {
         };
 
         try {
-            const token = jwt.sign(
-                {
-                    id: user._id,
-                    email: user.email,
-                    role:
-                        user.roles && user.roles.length > 0
-                            ? typeof user.roles[0] === 'string'
-                                ? user.roles[0]
-                                : user.roles[0].name
-                            : 'user',
-                    tokenVersion: user.tokenVersion,
-                },
-                this.secret,
-                {
-                    algorithm: 'HS512',
-                    expiresIn: this.expire,
-                } as jwt.SignOptions,
-            );
-
-            await User.findByIdAndUpdate(user.id, { accessToken: token });
+            const token = this.signToken(user);
+            await this.persistAccessToken(String(user.id), token);
 
             result.data = { token };
             result.message = 'Token generated successfully';
@@ -93,25 +128,9 @@ class TokenService {
                 throw new ErrorResponse('Please provide a token', 401, []);
             }
 
-            if (!this.checkTokenValidity(accessToken)) {
-                const newToken = jwt.sign(
-                    {
-                        id: user._id,
-                        email: user.email,
-                        role:
-                            user.roles && user.roles.length > 0
-                                ? typeof user.roles[0] === 'string'
-                                    ? user.roles[0]
-                                    : user.roles[0].name
-                                : 'user',
-                        tokenVersion: user.tokenVersion,
-                    },
-                    this.secret,
-                    {
-                        algorithm: 'HS512',
-                        expiresIn: this.expire,
-                    } as jwt.SignOptions,
-                );
+            if (this.shouldReissueToken(accessToken)) {
+                const newToken = this.signToken(user);
+                await this.persistAccessToken(String(user._id), newToken);
 
                 result.data = { token: newToken };
                 result.message = 'Token refreshed successfully';
@@ -129,21 +148,31 @@ class TokenService {
     }
 
     /**
-     * @description Checks if a token needs to be refreshed based on expiration time
-     * @param {string} token - The JWT token to check
-     * @returns {boolean} True if token needs refresh (within 5 hours of 30-day expiry), false otherwise
+     * @description Invalidates all sessions by bumping tokenVersion and clearing access token
+     * @param {IUserDoc} user - The user document
      */
-    public checkTokenValidity(token: string): boolean {
-        const decoded = jwt.decode(token) as jwt.JwtPayload;
-        if (!decoded || !decoded.exp) return false;
+    public async bumpTokenVersion(user: IUserDoc): Promise<IResult> {
+        let result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
 
-        const expirationTime = decoded.exp * 1000;
-        const currentTime = Date.now();
-        const timeLeft = expirationTime - currentTime;
+        try {
+            await User.findByIdAndUpdate(user.id, {
+                $inc: { tokenVersion: 1 },
+                accessToken: '',
+                accessTokenExpiry: null,
+            });
+            result.message = 'Token version bumped successfully';
+        } catch (error: any) {
+            result.error = true;
+            result.code = 500;
+            result.message = `Failed to bump token version: ${error.message}`;
+        }
 
-        const refreshThreshold = 30 * 24 * 60 * 60 * 1000 - 5 * 60 * 60 * 1000;
-
-        return timeLeft <= refreshThreshold;
+        return result;
     }
 
     /**
@@ -160,7 +189,10 @@ class TokenService {
         };
 
         try {
-            await User.findByIdAndUpdate(user.id, { accessToken: '' });
+            await User.findByIdAndUpdate(user.id, {
+                accessToken: '',
+                accessTokenExpiry: null,
+            });
             result.message = 'Token detached successfully';
         } catch (error: any) {
             result.error = true;

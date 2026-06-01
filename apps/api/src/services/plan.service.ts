@@ -20,6 +20,7 @@ import {
     paystackPlanUpdate,
 } from '@/services/paystack.service';
 import planRepository from '@/repository/plan.repository';
+import { FREE_PLAN_PAYSTACK_CODES } from '@/constants/plan.constants';
 
 class PlanService {
     constructor() {}
@@ -370,12 +371,7 @@ class PlanService {
         planPricing: IPlanPricing,
     ): Promise<IPlanPaystackCode> {
         if (this.isFreePricing(planPricing)) {
-            return {
-                nairaMonthly: '',
-                nairaYearly: '',
-                dollarMonthly: '',
-                dollarYearly: '',
-            };
+            return { ...FREE_PLAN_PAYSTACK_CODES };
         }
 
         const createPaystackPlan = async (
@@ -463,10 +459,18 @@ class PlanService {
     ) {
         if (this.isFreePricing(planPricing)) {
             return {
-                nairaMonthly: paystackPlanCodes.nairaMonthly || '',
-                nairaYearly: paystackPlanCodes.nairaYearly || '',
-                dollarMonthly: paystackPlanCodes.dollarMonthly || '',
-                dollarYearly: paystackPlanCodes.dollarYearly || '',
+                nairaMonthly:
+                    paystackPlanCodes.nairaMonthly?.trim() ||
+                    FREE_PLAN_PAYSTACK_CODES.nairaMonthly,
+                nairaYearly:
+                    paystackPlanCodes.nairaYearly?.trim() ||
+                    FREE_PLAN_PAYSTACK_CODES.nairaYearly,
+                dollarMonthly:
+                    paystackPlanCodes.dollarMonthly?.trim() ||
+                    FREE_PLAN_PAYSTACK_CODES.dollarMonthly,
+                dollarYearly:
+                    paystackPlanCodes.dollarYearly?.trim() ||
+                    FREE_PLAN_PAYSTACK_CODES.dollarYearly,
             };
         }
 

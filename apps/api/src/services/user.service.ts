@@ -37,6 +37,8 @@ import recommendationService from '@/services/core/recommendation.service';
 import subscriptionRepository from '@/repository/subscription.repository';
 import { SubscriptionStatus, Currency, BillingFrequency } from '@/interfaces/subscription.interface';
 import Plan from '@/models/plan.model';
+import { FREE_PLAN_CODE } from '@/constants/plan.constants';
+import { PlanType } from '@/interfaces/plan.interface';
 import type { IListenerDoc } from '@/interfaces/core/listener.interface';
 
 
@@ -121,7 +123,6 @@ class UserService {
         }
 
         await authService.updateUserType(user, userType);
-        await authService.encryptUserPassword(user, password);
 
         const attachRole = await roleService.attachRole(user, userType);
         if (!attachRole.error && attachRole.data) {
@@ -134,6 +135,8 @@ class UserService {
             user = updatedUser;
         }
 
+        await authService.encryptUserPassword(user, password);
+        user.markModified('password');
         await user.save();
 
         await this.createDomainProfile(user, userType);
@@ -226,8 +229,8 @@ class UserService {
     ): Promise<void> {
         try {
             const freePlan = await Plan.findOne({
-                name: 'Free',
-                planType: 'listener',
+                code: FREE_PLAN_CODE,
+                planType: PlanType.FOR_LISTENER,
                 isEnabled: true,
             });
             if (!freePlan) return;
@@ -238,10 +241,15 @@ class UserService {
                 status: SubscriptionStatus.ACTIVE,
                 currency: Currency.NGN,
                 billing: {
+                    retries: 0,
                     amount: 0,
                     frequency: BillingFrequency.MONTHLY,
                     isPaid: true,
-                } as any,
+                    startAt: new Date(),
+                    paidAt: new Date(),
+                    dueAt: new Date(),
+                    graceAt: new Date(),
+                },
             });
 
             if (!subResult.error && subResult.data) {

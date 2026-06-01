@@ -18,6 +18,7 @@ import {
 import { genSlug } from '../../utils/helpers.util';
 import roleService from '@/services/role.service';
 import PermissionService from '@/services/permission.service';
+import ministerMapper from '@/mappers/minister.mapper';
 import studioService from '@/services/core/studio.service';
 import userRepository from '@/repository/user.repository';
 
@@ -318,14 +319,7 @@ class MinisterService {
         const ministerResult = await ministerRepository.findOne(
             { user: userId },
             {
-                populate: [
-                    { path: 'sermons' },
-                    { path: 'playlists' },
-                    { path: 'followers' },
-                    { path: 'bites' },
-                    { path: 'featuredSermons' },
-                    { path: 'featuredPlaylists' },
-                ],
+                populate: [{ path: 'sermons' }, { path: 'playlists' }],
             },
         );
 
@@ -337,6 +331,49 @@ class MinisterService {
         }
 
         result.data = ministerResult.data;
+        result.message = 'Minister profile retrieved successfully';
+        return result;
+    }
+
+    public async getPublicMinisterProfile(
+        idOrSlug: string,
+    ): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const trimmed = String(idOrSlug ?? '').trim();
+        if (!trimmed) {
+            result.error = true;
+            result.code = 400;
+            result.message = 'ministerId is required';
+            return result;
+        }
+
+        const ministerResult = await ministerRepository.findMinister(trimmed);
+        if (ministerResult.error || !ministerResult.data) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Minister profile not found';
+            return result;
+        }
+
+        const minister = ministerResult.data as IMinisterDoc;
+        const isPublic =
+            Boolean(minister.published) ||
+            Boolean((minister as any).verification?.isPublic);
+
+        if (!isPublic) {
+            result.error = true;
+            result.code = 404;
+            result.message = 'Minister profile not found';
+            return result;
+        }
+
+        result.data = await ministerMapper.mapMinisterProfile(minister);
         result.message = 'Minister profile retrieved successfully';
         return result;
     }

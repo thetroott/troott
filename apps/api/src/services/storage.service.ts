@@ -8,7 +8,12 @@ import {
 } from '@aws-sdk/client-s3';
 import type { Readable } from 'stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { s3, AWS_BUCKET_NAME } from '../configs/aws.config';
+import { s3 } from '../configs/aws.config';
+import {
+    bucketNameFor,
+    inferBucketRoleFromKey,
+    type S3BucketRole,
+} from '../configs/s3-buckets.config';
 import { IFile, IResult } from '@/interfaces/common.interface';
 
 import { Upload } from '@aws-sdk/lib-storage';
@@ -17,8 +22,73 @@ import { getS3Folder } from '../utils/helpers.util';
 
 class StorageService {
     private s3Client: S3Client = s3;
-    private bucket = AWS_BUCKET_NAME;
     private readonly URL_EXPIRATION = 3600;
+
+    private bucketFor(role?: S3BucketRole, key?: string): string {
+        if (role) {
+            return bucketNameFor(role);
+        }
+        if (key) {
+            return bucketNameFor(inferBucketRoleFromKey(key));
+        }
+        return bucketNameFor('storage');
+    }
+
+    /**
+     * Upload a stream to an explicit bucket role and key (no MIME folder prefix).
+     * Used for HLS segments on troott-playback.
+     */
+    public async putStreamAtKey(data: {
+        role: S3BucketRole;
+        key: string;
+        stream: NodeJS.ReadableStream;
+        mimeType: string;
+        size: number;
+        fileType?: IFile['fileType'];
+    }): Promise<IResult> {
+        const { role, key, stream, mimeType, size, fileType } = data;
+        const bucket = bucketNameFor(role);
+        const body = stream as unknown as Readable;
+
+        try {
+            const s3Upload = new Upload({
+                client: this.s3Client,
+                params: {
+                    Bucket: bucket,
+                    Key: key,
+                    Body: body,
+                    ContentType: mimeType,
+                },
+            });
+
+            const s3Response = await s3Upload.done();
+
+            return {
+                error: false,
+                code: 200,
+                message: 'File uploaded successfully.',
+                data: {
+                    fileName: key.split('/').pop(),
+                    fileSize: size,
+                    fileType: fileType ?? 'audio',
+                    mimetype: mimeType,
+                    uploadStatus: UploadStatus.COMPLETED,
+                    uploadId: key,
+                    s3Key: key,
+                    rawFile: s3Response.Location,
+                    bucket,
+                },
+            };
+        } catch (err: any) {
+            body.destroy?.();
+            return {
+                error: true,
+                code: 500,
+                message: err.message,
+                data: {},
+            };
+        }
+    }
 
     /**
      * @method uploadFile
@@ -67,7 +137,7 @@ class StorageService {
             const s3Upload = new Upload({
                 client: this.s3Client,
                 params: {
-                    Bucket: this.bucket,
+                    Bucket: bucketNameFor('storage'),
                     Key: s3Key,
                     Body: stream,
                     ContentType: mimeType,
@@ -116,7 +186,7 @@ class StorageService {
      * - code: number, HTTP-style code
      * - data: object with `exists` property (true/false)
      */
-    public async exists(key: string): Promise<IResult> {
+    public async exists(key: string, role?: S3BucketRole): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -124,9 +194,11 @@ class StorageService {
             data: {},
         };
 
+        const bucket = this.bucketFor(role, key);
+
         try {
             await this.s3Client.send(
-                new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
+                new HeadObjectCommand({ Bucket: bucket, Key: key }),
             );
 
             result = {
@@ -167,16 +239,17 @@ class StorageService {
      * - code: number, HTTP-style code
      * - data: object containing `url` property with the signed URL
      */
-    public async getSignedUrl(key: string): Promise<IResult> {
+    public async getSignedUrl(key: string, role?: S3BucketRole): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
             code: 200,
             data: {},
         };
+        const bucket = this.bucketFor(role, key);
         try {
             const command = new GetObjectCommand({
-                Bucket: this.bucket,
+                Bucket: bucket,
                 Key: key,
             });
 
@@ -206,10 +279,11 @@ class StorageService {
      * Useful when you need the entire file in memory (e.g. PDF generation,
      * email attachments). For large files prefer {@link getObjectStream}.
      */
-    public async getDocument(key: string): Promise<IResult> {
+    public async getDocument(key: string, role?: S3BucketRole): Promise<IResult> {
+        const bucket = this.bucketFor(role, key);
         try {
             const out = await this.s3Client.send(
-                new GetObjectCommand({ Bucket: this.bucket, Key: key }),
+                new GetObjectCommand({ Bucket: bucket, Key: key }),
             );
 
             if (!out.Body) {
@@ -283,6 +357,7 @@ class StorageService {
      */
     public async getObjectStream(
         key: string,
+        role: S3BucketRole = 'originals',
     ): Promise<IResult & { stream?: Readable }> {
         let result: IResult & { stream?: Readable } = {
             error: false,
@@ -290,10 +365,11 @@ class StorageService {
             code: 200,
             data: {},
         };
+        const bucket = this.bucketFor(role, key);
         try {
             const out = await this.s3Client.send(
                 new GetObjectCommand({
-                    Bucket: this.bucket,
+                    Bucket: bucket,
                     Key: key,
                 }),
             );
@@ -322,20 +398,24 @@ class StorageService {
     /**
      * Delete all objects under a prefix (best-effort cleanup after failed transcode).
      */
-    public async deleteObjectsByPrefix(prefix: string): Promise<IResult> {
+    public async deleteObjectsByPrefix(
+        prefix: string,
+        role: S3BucketRole = 'playback',
+    ): Promise<IResult> {
         const result: IResult = {
             error: false,
             message: '',
             code: 200,
             data: {},
         };
+        const bucket = this.bucketFor(role, prefix);
         try {
             const keys: string[] = [];
             let token: string | undefined;
             do {
                 const list = await this.s3Client.send(
                     new ListObjectsV2Command({
-                        Bucket: this.bucket,
+                        Bucket: bucket,
                         Prefix: prefix,
                         ContinuationToken: token,
                     }),
@@ -352,7 +432,7 @@ class StorageService {
                 const batch = keys.splice(0, 1000);
                 await this.s3Client.send(
                     new DeleteObjectsCommand({
-                        Bucket: this.bucket,
+                        Bucket: bucket,
                         Delete: {
                             Objects: batch.map((Key) => ({ Key })),
                             Quiet: true,
@@ -382,7 +462,7 @@ class StorageService {
      * - code: number, HTTP-style code
      * - data: empty object
      */
-    public async deleteFile(key: string): Promise<IResult> {
+    public async deleteFile(key: string, role?: S3BucketRole): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
@@ -390,10 +470,12 @@ class StorageService {
             data: {},
         };
 
+        const bucket = this.bucketFor(role, key);
+
         try {
             await this.s3Client.send(
                 new DeleteObjectCommand({
-                    Bucket: this.bucket,
+                    Bucket: bucket,
                     Key: key,
                 }),
             );

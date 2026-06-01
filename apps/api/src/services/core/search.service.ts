@@ -3,6 +3,7 @@ import { IResult, IPagination } from '@/interfaces/common.interface';
 import Sermon from '@/models/core/sermon.model';
 import Series from '@/models/core/series.model';
 import Minister from '@/models/core/minister.model';
+import { MinisterStatus } from '@/interfaces/core/minister.interface';
 import Playlist from '@/models/core/playlist.model';
 import Topic from '@/models/core/topic.model';
 import Listener from '@/models/core/listener.model';
@@ -150,9 +151,6 @@ class SearchService {
                 ],
                 operator: 'or',
                 fields: [],
-                createdAt: '',
-                updatedAt: '',
-                _id: '' as any,
             });
 
             result.data = searchMapper.mapSermons(pagination.data);
@@ -201,9 +199,6 @@ class SearchService {
                 ],
                 operator: 'or',
                 fields: [],
-                createdAt: '',
-                updatedAt: '',
-                _id: '' as any,
             });
 
             result.data = searchMapper.mapSeriesList(pagination.data);
@@ -252,9 +247,6 @@ class SearchService {
                 populate: [],
                 operator: 'or',
                 fields: [],
-                createdAt: '',
-                updatedAt: '',
-                _id: '' as any,
             });
 
             result.data = searchMapper.mapMinisters(pagination.data);
@@ -302,9 +294,6 @@ class SearchService {
                 populate: [{ path: 'user', select: 'firstName lastName' }],
                 operator: 'or',
                 fields: [],
-                createdAt: '',
-                updatedAt: '',
-                _id: '' as any,
             });
 
             result.data = searchMapper.mapPlaylists(pagination.data);
@@ -312,6 +301,65 @@ class SearchService {
         } catch (error) {
             result.error = true;
             result.message = 'Playlist search failed';
+            result.code = 500;
+        }
+
+        return result;
+    }
+
+    /**
+     * Lists active ministers for listener onboarding when `GET /search/ministers`
+     * is called without a search query.
+     */
+    public async listActiveMinistersForOnboarding(
+        options: SearchQueryOptions = {},
+    ): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        try {
+            const page = Math.max(1, options.page || 1);
+            const limit = Math.min(100, Math.max(1, options.limit || 30));
+            const skip = (page - 1) * limit;
+            const sortField = options.sort || 'firstName';
+            const sortOrder = options.order === 'desc' ? -1 : 1;
+
+            const filter = {
+                status: MinisterStatus.ACTIVE,
+            };
+
+            const [docs, total] = await Promise.all([
+                Minister.find(filter)
+                    .sort({ [sortField]: sortOrder, lastName: sortOrder })
+                    .skip(skip)
+                    .limit(limit)
+                    .lean(),
+                Minister.countDocuments(filter),
+            ]);
+
+            result.data = searchMapper.mapMinisters(docs);
+            result.message = 'Ministers listed';
+            result.pagination = {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit) || 1,
+                next: {
+                    page: page * limit < total ? page + 1 : page,
+                    limit,
+                },
+                prev: {
+                    page: page > 1 ? page - 1 : page,
+                    limit,
+                },
+            };
+        } catch (error) {
+            result.error = true;
+            result.message = 'Minister list failed';
             result.code = 500;
         }
 
@@ -348,9 +396,6 @@ class SearchService {
                 populate: [],
                 operator: 'or',
                 fields: [],
-                createdAt: '',
-                updatedAt: '',
-                _id: '' as any,
             });
 
             result.data = searchMapper.mapTopics(pagination.data);
@@ -358,6 +403,66 @@ class SearchService {
         } catch (error) {
             result.error = true;
             result.message = 'Topic search failed';
+            result.code = 500;
+        }
+
+        return result;
+    }
+
+    /**
+     * Lists active selectable interests (leaf topics with a parent category).
+     * Used when `GET /search/topics` is called without a search query (onboarding).
+     */
+    public async listActiveInterestTopics(
+        options: SearchQueryOptions = {},
+    ): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        try {
+            const page = Math.max(1, options.page || 1);
+            const limit = Math.min(100, Math.max(1, options.limit || 50));
+            const skip = (page - 1) * limit;
+            const sortField = options.sort || 'name';
+            const sortOrder = options.order === 'desc' ? -1 : 1;
+
+            const filter = {
+                isActive: true,
+                parentTopic: { $exists: true, $nin: ['', null] },
+            };
+
+            const [docs, total] = await Promise.all([
+                Topic.find(filter)
+                    .sort({ [sortField]: sortOrder })
+                    .skip(skip)
+                    .limit(limit)
+                    .lean(),
+                Topic.countDocuments(filter),
+            ]);
+
+            result.data = searchMapper.mapTopics(docs);
+            result.message = 'Topics listed';
+            result.pagination = {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit) || 1,
+                next: {
+                    page: page * limit < total ? page + 1 : page,
+                    limit,
+                },
+                prev: {
+                    page: page > 1 ? page - 1 : page,
+                    limit,
+                },
+            };
+        } catch (error) {
+            result.error = true;
+            result.message = 'Topic list failed';
             result.code = 500;
         }
 
@@ -399,9 +504,6 @@ class SearchService {
                 populate: [{ path: 'series', select: 'title' }],
                 operator: 'or',
                 fields: [],
-                createdAt: '',
-                updatedAt: '',
-                _id: '' as any,
             });
 
             result.data = searchMapper.mapSermons(pagination.data);
@@ -455,9 +557,6 @@ class SearchService {
                 ],
                 operator: 'or',
                 fields: [],
-                createdAt: '',
-                updatedAt: '',
-                _id: '' as any,
             });
 
             result.data = searchMapper.mapSermons(pagination.data);

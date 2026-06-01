@@ -34,8 +34,8 @@ class PlaylistService {
             data: {},
         };
 
-        const slug = genSlug(dto.title);
         const code = `pl-${generateRandomChars(8)}`;
+        const slug = `${genSlug(dto.title)}-${code}`;
 
         const playlistData: Partial<IPlaylistDoc> = {
             code,
@@ -227,7 +227,9 @@ class PlaylistService {
         }
 
         const duplicate = playlist.items.some(
-            (item: any) => String(item.item) === dto.itemId,
+            (item: any) =>
+                String(item.item) === dto.itemId &&
+                item.itemType === dto.itemType,
         );
         if (duplicate) {
             result.error = true;
@@ -240,6 +242,7 @@ class PlaylistService {
             dto.position !== undefined ? dto.position : playlist.items.length;
 
         const newItem = {
+            itemType: dto.itemType,
             item: dto.itemId,
             position,
             addedAt: new Date().toISOString(),
@@ -562,11 +565,22 @@ class PlaylistService {
             filters.status = { $ne: PlaylistStatus.DELETED };
         }
 
-        return playlistRepository.findAll(filters, {
+        const result = await playlistRepository.findAll(filters, {
             limit: options.limit || 25,
             skip: options.skip || 0,
             sort: '-updatedAt',
         });
+
+        if (result.error && result.code === 404) {
+            return {
+                error: false,
+                message: 'No playlists',
+                code: 200,
+                data: [],
+            };
+        }
+
+        return result;
     }
 
     public async getPublicPlaylists(

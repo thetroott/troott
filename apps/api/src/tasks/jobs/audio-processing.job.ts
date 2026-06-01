@@ -15,12 +15,20 @@ import storageService from '@/services/storage.service';
 import { FileType } from '@/interfaces/common.interface';
 import Sermon from '@/models/core/sermon.model';
 import {
-    ProcessingState,
-    UploadStepType,
-} from '@/types/upload.enums';
-import { ContentStatus } from '@/utils/enums.util';
+    MediaStatus,
+    StreamingProtocol,
+    UploadStatus,
+} from '@/interfaces/core/sermon.interface';
 import { buildHlsMasterPlaylist } from '@/utils/hls-master.util';
 import { mediaConfig, urlForMediaKey } from '@/configs/media.config';
+
+function hlsTempRoot(): string {
+    return mediaConfig.hlsWorkDir || os.tmpdir();
+}
+
+function elapsedMs(start: number): number {
+    return Date.now() - start;
+}
 
 function mimeTypeForHlsFile(fileName: string): string {
     const ext = path.extname(fileName).toLowerCase();
@@ -33,6 +41,16 @@ function mimeTypeForHlsFile(fileName: string): string {
     return 'application/octet-stream';
 }
 
+function sermonUploadQuery(
+    uploadId: string,
+    sermonId?: string | import('mongoose').Types.ObjectId,
+): Record<string, unknown> {
+    if (sermonId != null && String(sermonId).trim()) {
+        return { _id: String(sermonId) };
+    }
+    return { 'item.itemId': uploadId };
+}
+
 const audioHLSProcessor = async (
     job: Job<IAudioHLSJobDTO>,
     done: DoneCallback,
@@ -42,9 +60,11 @@ const audioHLSProcessor = async (
         sourceS3Key,
         renditions,
         segmentDuration,
+        sermonId,
     } = job.data;
 
     let workDir: string | undefined;
+    const jobStarted = Date.now();
     try {
         if (!uploadId || !sourceS3Key) {
             throw new Error('uploadId and sourceS3Key are required');
@@ -68,26 +88,31 @@ const audioHLSProcessor = async (
                   },
               ];
 
-        await Sermon.findOneAndUpdate(
-            { 'uploadSummary.uploadId': uploadId },
-            {
-                $set: {
-                    processingStatus: ProcessingState.PROCESSING,
-                    uploadState: UploadStepType.AUDIO_BITRATE_PROCESSING,
-                    failedStage: '',
-                    processingError: '',
-                },
+        await Sermon.findOneAndUpdate(sermonUploadQuery(uploadId, sermonId), {
+            $set: {
+                status: MediaStatus.PENDING,
+                'item.uploadStatus': UploadStatus.PROCESSING,
+                'item.updatedAt': new Date().toISOString(),
             },
-        );
+        });
 
-        workDir = await fs.mkdtemp(path.join(os.tmpdir(), 'hls-'));
+        workDir = await fs.mkdtemp(path.join(hlsTempRoot(), 'hls-'));
         const ingestPath = path.join(workDir, 'ingest');
-        const getObj = await storageService.getObjectStream(sourceS3Key);
+        const downloadStarted = Date.now();
+        const getObj = await storageService.getObjectStream(
+            sourceS3Key,
+            'originals',
+        );
         if (getObj.error || !getObj.stream) {
             throw new Error(getObj.message || 'Failed to open S3 object');
         }
 
         await pipeline(getObj.stream as Readable, createWriteStream(ingestPath));
+        logger.log({
+            data: `HLS ingest download uploadId=${uploadId} ms=${elapsedMs(downloadStarted)}`,
+            label: 'audio-hls-processor',
+            type: 'info',
+        });
 
         let hlsInput = ingestPath;
         if (mediaConfig.audioLoudnormBeforeHls) {
@@ -108,6 +133,7 @@ const audioHLSProcessor = async (
         }
 
         const packRoot = path.join(workDir, 'package');
+        const encodeStarted = Date.now();
         const processResult = await audioProcessing.ProcessHLS({
             inputFilePath: hlsInput,
             renditions: renditionsH,
@@ -118,12 +144,18 @@ const audioHLSProcessor = async (
         if (processResult.error || !processResult.data) {
             throw new Error(processResult.message || 'HLS processing failed');
         }
+        logger.log({
+            data: `HLS ffmpeg encode uploadId=${uploadId} ms=${elapsedMs(encodeStarted)}`,
+            label: 'audio-hls-processor',
+            type: 'info',
+        });
 
         const outputs = processResult.data as Array<{
             name: string;
             path: string;
         }>;
         const uploadedFiles: unknown[] = [];
+        const uploadStarted = Date.now();
 
         for (const out of outputs) {
             const files = await fs.readdir(out.path);
@@ -135,15 +167,12 @@ const audioHLSProcessor = async (
                 }
                 const mimeType = mimeTypeForHlsFile(file);
                 const stream = createReadStream(fullPath);
-                const uploadResult = await storageService.uploadFile({
+                const objectKey = `${uploadId}/hls/${out.name}/${file}`;
+                const uploadResult = await storageService.putStreamAtKey({
+                    role: 'playback',
+                    key: objectKey,
                     stream: stream as any,
                     mimeType,
-                    uploadId: `${uploadId}/hls/${out.name}/${file}`,
-                    info: {
-                        filename: file,
-                        encoding: '7bit',
-                        mimeType,
-                    } as any,
                     size: st.size,
                     fileType: FileType.AUDIO,
                 });
@@ -163,44 +192,40 @@ const audioHLSProcessor = async (
         const masterLocal = path.join(workDir, 'master.m3u8');
         await fs.writeFile(masterLocal, masterBody, 'utf8');
         const masterStat = await fs.stat(masterLocal);
+        const masterKey = `${uploadId}/hls/master.m3u8`;
         const masterStream = createReadStream(masterLocal);
-        const masterUpload = await storageService.uploadFile({
+        const masterUpload = await storageService.putStreamAtKey({
+            role: 'playback',
+            key: masterKey,
             stream: masterStream as any,
             mimeType: 'application/vnd.apple.mpegurl',
-            uploadId: `${uploadId}/hls/master.m3u8`,
-            info: {
-                filename: 'master.m3u8',
-                encoding: '7bit',
-                mimeType: 'application/vnd.apple.mpegurl',
-            } as any,
             size: masterStat.size,
             fileType: FileType.AUDIO,
         });
         if (masterUpload.error) {
             throw new Error(masterUpload.message || 'Master manifest upload failed');
         }
+        logger.log({
+            data: `HLS S3 upload uploadId=${uploadId} ms=${elapsedMs(uploadStarted)}`,
+            label: 'audio-hls-processor',
+            type: 'info',
+        });
 
-        const masterKey = `${sourceS3Key.replace(/\/$/, '')}/hls/master.m3u8`;
-        const hlsMasterUrl = urlForMediaKey(masterKey);
+        const manifestUrl = urlForMediaKey(masterKey);
 
-        await Sermon.findOneAndUpdate(
-            { 'uploadSummary.uploadId': uploadId },
-            {
-                $set: {
-                    hlsMasterUrl,
-                    sermonUrl: hlsMasterUrl,
-                    processingStatus: ProcessingState.COMPLETED,
-                    derivativesReadyAt: new Date(),
-                    uploadState: UploadStepType.AUDIO_PROCESSED,
-                    status: ContentStatus.DRAFT,
-                    processingError: '',
-                    failedStage: '',
-                },
+        await Sermon.findOneAndUpdate(sermonUploadQuery(uploadId, sermonId), {
+            $set: {
+                manifestUrl,
+                playbackUrl: manifestUrl,
+                protocol: StreamingProtocol.HLS,
+                status: MediaStatus.DRAFT,
+                'item.uploadStatus': UploadStatus.COMPLETED,
+                'item.updatedAt': new Date().toISOString(),
             },
-        );
+        });
 
         logger.log({
-            data: `HLS packaged uploadId=${uploadId} master=${hlsMasterUrl}`,
+            data: `HLS packaged uploadId=${uploadId} master=${manifestUrl} totalMs=${elapsedMs(jobStarted)}`,
             label: 'audio-hls-processor',
             type: 'success',
         });
@@ -215,25 +240,21 @@ const audioHLSProcessor = async (
         });
 
         try {
-            if (uploadId && job.data.sourceS3Key) {
-                const prefix = `${job.data.sourceS3Key.replace(/\/$/, '')}/hls/`;
-                await storageService.deleteObjectsByPrefix(prefix);
+            if (uploadId) {
+                const prefix = `${uploadId}/hls/`;
+                await storageService.deleteObjectsByPrefix(prefix, 'playback');
             }
         } catch {
             // best-effort cleanup
         }
 
-        await Sermon.findOneAndUpdate(
-            { 'uploadSummary.uploadId': uploadId },
-            {
-                $set: {
-                    processingStatus: ProcessingState.FAILED,
-                    processingError: msg,
-                    failedStage: 'hls-package',
-                    uploadState: UploadStepType.AUDIO_BITRATE_PROCESSING,
-                },
+        await Sermon.findOneAndUpdate(sermonUploadQuery(uploadId, sermonId), {
+            $set: {
+                status: MediaStatus.DRAFT,
+                'item.uploadStatus': UploadStatus.FAILED,
+                'item.updatedAt': new Date().toISOString(),
             },
-        );
+        });
 
         done(err);
     } finally {
