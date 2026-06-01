@@ -13,7 +13,11 @@ import {
 import { fetchSermonDetail } from '@/hooks/app/useSermon';
 import type { ISermonUpload } from '@/utils/interfaces.util.tsx';
 import { applySelectedAudioToUpload } from '@/utils/upload-audio-selection.util';
-import { uploadStepFromPathname } from '@/utils/upload-wizard-route.util';
+import {
+    uploadPathSegmentFromStep,
+    uploadStepFromPathname,
+    type UploadWizardStepKey,
+} from '@/utils/upload-wizard-route.util';
 import { resolveSermonPlaybackUrl } from '@/utils/sermon-list-map.util';
 import { toast } from 'sonner';
 
@@ -44,6 +48,37 @@ const SermonUploadPage = () => {
             navigate(studioSermonsListPath(code));
         }
     }, [navigate, studioCode]);
+
+    const syncStepToUrl = useCallback(
+        (step: string) => {
+            const code =
+                studioCode?.trim() || storage.getStudioCode()?.trim() || '';
+            if (!code) {
+                return;
+            }
+            const segment = uploadPathSegmentFromStep(step);
+            const target = studioUploadPath(code, segment);
+            if (!location.pathname.includes(segment)) {
+                navigate(target, { replace: true });
+            }
+        },
+        [location.pathname, navigate, studioCode],
+    );
+
+    const navigateToWizardStep = useCallback(
+        (step: UploadWizardStepKey) => {
+            const code =
+                studioCode?.trim() || storage.getStudioCode()?.trim() || '';
+            if (!code) {
+                return;
+            }
+            navigate(
+                studioUploadPath(code, uploadPathSegmentFromStep(step)),
+                { replace: true },
+            );
+        },
+        [navigate, studioCode],
+    );
 
     useEffect(() => {
         if (!hasFile && !resumeSermonId) {
@@ -95,12 +130,14 @@ const SermonUploadPage = () => {
                     } as Partial<ISermonUpload>),
                 );
                 const hasAudio = Boolean(resolveSermonPlaybackUrl(d));
+                const resumeStep: UploadWizardStepKey = hasAudio
+                    ? 'review'
+                    : 'details';
                 dispatch(uploadActions.setUploadComplete(hasAudio));
-                dispatch(
-                    uploadActions.setStep(hasAudio ? 'review' : 'details'),
-                );
+                dispatch(uploadActions.setStep(resumeStep));
                 setEntryOpen(false);
                 setWizardOpen(true);
+                navigateToWizardStep(resumeStep);
                 window.history.replaceState({}, document.title);
             } catch {
                 if (!cancelled) {
@@ -111,7 +148,7 @@ const SermonUploadPage = () => {
         return () => {
             cancelled = true;
         };
-    }, [dispatch, resumeSermonId]);
+    }, [dispatch, navigateToWizardStep, resumeSermonId]);
 
     const onFileSelected = useCallback(
         (file: File) => {
@@ -192,6 +229,7 @@ const SermonUploadPage = () => {
             <UploadModal
                 open={wizardOpen}
                 onOpenChange={handleWizardOpenChange}
+                onStepChange={syncStepToUrl}
             />
         </div>
     );

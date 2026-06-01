@@ -28,7 +28,14 @@ Sermon lifecycle behavior is spread across upload modals, TanStack list queries,
 
 ## Figma
 
-Figma: none provided. Baseline: My Sermons table/grid, upload wizard modal, empty state, Bin page, review/publish step.
+[Figma file `9lFM6TncipSv0pNVGBWZwA`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott) — pixel-accuracy and implementation checklist: [feat-0018](../feat-0018/PRODUCT.md).
+
+| Frame | Node | Surface |
+| ----- | ---- | ------- |
+| My Sermons empty / library | [`10154:35090`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10154-35090) | List chrome, empty table, Create sermon |
+| Library with drafts | [`10209:78627`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10209-78627) | Draft rows + filter |
+| Upload listener settings | [`4506:21677`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4506-21677) | Wizard tab |
+| Upload modal shell (height ref) | [`4530:20801`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4530-20801) | Details step — standard modal height |
 
 ## Actors
 

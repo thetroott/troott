@@ -24,12 +24,15 @@ interface UploadModalProps {
     onOpenChange: (open: boolean) => void;
     /** Full-page studio route: render wizard in layout instead of a portaled dialog. */
     embedded?: boolean;
+    /** Sync wizard tab to `/studio/:code/sermons/upload/…` segment (feat-0018). */
+    onStepChange?: (step: string) => void;
 }
 
 const UploadModal: React.FC<UploadModalProps> = ({
     open,
     onOpenChange,
     embedded = false,
+    onStepChange,
 }) => {
     const { state, dispatch } = useUpload();
     const { currentStep, uploadData, uploadComplete, progress, isLoading } =
@@ -94,6 +97,18 @@ const UploadModal: React.FC<UploadModalProps> = ({
         (step) => step.key === currentStep,
     );
 
+    const goToStep = (stepKey: string) => {
+        dispatch(uploadActions.setStep(stepKey));
+        if (
+            stepKey === 'progress' ||
+            stepKey === 'details' ||
+            stepKey === 'settings' ||
+            stepKey === 'review'
+        ) {
+            onStepChange?.(stepKey);
+        }
+    };
+
     const handleStepClick = (stepKey: string) => {
         const stepIndex = updatedSteps.findIndex(
             (step) => step.key === stepKey,
@@ -101,32 +116,32 @@ const UploadModal: React.FC<UploadModalProps> = ({
 
         // Priority 1: Always allow navigation to progress step if file exists (even after upload completes)
         if (stepKey === 'progress' && uploadData.file) {
-            dispatch(uploadActions.setStep(stepKey));
+            goToStep(stepKey);
             return;
         }
 
         // Priority 2: After upload completes, always allow free navigation between ALL tabs
         if (uploadComplete && uploadData.file) {
-            dispatch(uploadActions.setStep(stepKey));
+            goToStep(stepKey);
             return;
         }
 
         // Priority 3: During upload, allow free navigation between all tabs
         if (isUploading) {
-            dispatch(uploadActions.setStep(stepKey));
+            goToStep(stepKey);
             return;
         }
 
         // Priority 4: When not uploading and upload not complete, use normal navigation rules
         // Allow navigation to previous steps or current step
         if (stepIndex <= currentStepIndex) {
-            dispatch(uploadActions.setStep(stepKey));
+            goToStep(stepKey);
             return;
         }
 
         // Priority 5: For forward navigation, check if current step is completed
         if (stepIndex === currentStepIndex + 1 && canProceed()) {
-            dispatch(uploadActions.setStep(stepKey));
+            goToStep(stepKey);
             return;
         }
 
@@ -141,7 +156,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
         const nextStepIndex = currentStepIndex + 1;
         const nextStep = updatedSteps[nextStepIndex];
         if (nextStep) {
-            dispatch(uploadActions.setStep(nextStep.key));
+            goToStep(nextStep.key);
         }
     };
 
@@ -234,14 +249,13 @@ const UploadModal: React.FC<UploadModalProps> = ({
     };
 
     const shellClassName = cn(
-        UPLOAD_SHELL.widthClass,
         UPLOAD_SHELL.maxWidthClass,
-        UPLOAD_SHELL.minHeightClass,
-        'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl sm:max-w-[827px]',
+        UPLOAD_SHELL.modalHeightClass,
+        'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl',
         UPLOAD_SHELL.outerRadius,
         UPLOAD_SHELL.outerBorder,
         UPLOAD_SHELL.outerBg,
-        embedded && 'mx-auto w-full',
+        embedded && 'mx-auto',
     );
 
     const wizardTitle = `Upload sermons — ${getStepTitle()}`;

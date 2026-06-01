@@ -3,10 +3,17 @@
  * (4530:20801, 4530:21351, 4555:6094, 4558:8281) aligned with UploadEntryStepModal shell.
  */
 export const UPLOAD_SHELL = {
-    maxWidthClass: 'max-w-[827px]',
-    /** Fill the dialog/inset width; avoid `100vw` so zoom and sidebar reflow stay correct. */
-    widthClass: 'w-full min-w-0',
-    /** Flexible bounds — `dvh` tracks dynamic viewport; no hard sidebar `px` coupling. */
+    /** Standard upload dialog width — widened for two-column details layout; caps at viewport inset. */
+    maxWidthClass:
+        'w-[min(960px,calc(100%-2rem))] max-w-[min(960px,calc(100%-2rem))] sm:max-w-[min(960px,calc(100%-2rem))]',
+    /** @deprecated Prefer `maxWidthClass` (includes width). */
+    widthClass: 'w-[min(960px,calc(100%-2rem))] min-w-0',
+    /**
+     * Standard upload dialog height — matches Details wizard shell (Figma `4530:20801`).
+     * Fixed height keeps entry, progress, and details tabs visually consistent.
+     */
+    modalHeightClass: 'h-[min(660px,92dvh)] max-h-[92dvh]',
+    /** @deprecated Use `modalHeightClass` for dialog shells. */
     minHeightClass: 'min-h-[min(280px,55dvh)] max-h-[92dvh]',
     outerRadius: 'rounded-2xl',
     outerBg: 'bg-[#2b2a2c]',

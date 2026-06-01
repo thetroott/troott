@@ -18,6 +18,9 @@ Product and technical specifications for **`apps/web`**.
 | feat-0010 | Get Started onboarding (`/get-started`) | [PRODUCT](./feature/feat-0010/PRODUCT.md) | [TECH](./feature/feat-0010/TECH.md) |
 | feat-0011 | Portal profile (`/profile`) | [PRODUCT](./feature/feat-0011/PRODUCT.md) | [TECH](./feature/feat-0011/TECH.md) |
 | feat-0012 | Account settings (`/settings`) | [PRODUCT](./feature/feat-0012/PRODUCT.md) | [TECH](./feature/feat-0012/TECH.md) |
+| feat-0016 | Tour & Tutorial (studio walkthrough) | [PRODUCT](./feature/feat-0016/PRODUCT.md) | [TECH](./feature/feat-0016/TECH.md) |
+| feat-0017 | Sermon Analytics — Overview tab | [PRODUCT](./feature/feat-0017/PRODUCT.md) | [TECH](./feature/feat-0017/TECH.md) |
+| feat-0018 | My Sermons upload, library, drafts (Figma) | [PRODUCT](./feature/feat-0018/PRODUCT.md) | [TECH](./feature/feat-0018/TECH.md) |
 
 ## Numbered UX / flow docs
 
@@ -26,7 +29,7 @@ Product and technical specifications for **`apps/web`**.
 
 - [`01 - onboarding.md`](./01%20-%20onboarding.md) — points to feat-0005
 - [`02 - get-started.md`](./02%20-%20get-started.md)
-- [`04 - sermon-upload-draft.md`](./04%20-%20sermon-upload-draft.md) — detailed UC-U*; studio routing in feat-0006
+- [`04 - sermon-upload-draft.md`](./04%20-%20sermon-upload-draft.md) — detailed UC-U*; studio routing in feat-0006; Figma implementation in feat-0018
 - [`05 -  sermon-view-trash.md`](./05%20-%20%20sermon-view-trash.md) — detailed UC-V*; studio routing in feat-0006
 
 ## Mobile listener app

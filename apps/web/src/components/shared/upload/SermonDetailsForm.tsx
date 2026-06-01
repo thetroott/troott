@@ -477,9 +477,9 @@ const SermonDetailsForm: React.FC = () => {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 h-full">
+        <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
             {/* Left Column - Form Fields (Scrollable) */}
-            <div className="space-y-4 overflow-y-auto scrollbar-none max-h-[calc(100vh-150px)] pr-2">
+            <div className="max-h-full min-h-0 space-y-4 overflow-y-auto pr-2 scrollbar-none">
                 {/* Title — Figma [`4535:21468`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4535-21468) */}
                 <div className="space-y-2">
                     <div className="flex items-center gap-2">

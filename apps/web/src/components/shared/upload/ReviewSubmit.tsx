@@ -415,9 +415,9 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-4 h-full">
+        <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
             {/* Left Column - Content Details */}
-            <div className="space-y-4 overflow-y-auto scrollbar-none max-h-[calc(100vh-150px)] pr-2">
+            <div className="max-h-full min-h-0 space-y-4 overflow-y-auto pr-2 scrollbar-none">
                 {/* File Information */}
                 {uploadData.file && (
                     <div className="border border-border/50 rounded-lg p-4">

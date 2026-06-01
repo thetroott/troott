@@ -170,7 +170,7 @@ Web must surface 403 messages in toast (see `isApiHttp2xxErrorEnvelope`).
 |-----|------|-------|
 | Series/Playlists tabs | Web | Non-functional tabs in `SermonsTable` (non-goal) |
 | Legacy docs use `/minister/:id/audio` | Docs | Point to feat-0006 routes |
-| URL ↔ wizard step | Web | Segments set initial step; tab clicks do not sync URL yet |
+| URL ↔ wizard step | Web | Tab clicks sync URL via `uploadPathSegmentFromStep` (feat-0018) |
 | `image-upload` without `sermonId` | API | Still creates orphan draft row (legacy) |
 
 ## Testing and validation
@@ -200,3 +200,4 @@ Manual: upload → save draft → appears on `/studio/{lowercaseCode}/sermons` �
 - `apps/api/src/controllers/core/sermon.controller.ts`
 - [`04 - sermon-upload-draft.md`](../../04%20-%20sermon-upload-draft.md)
 - [`05 - sermon-view-trash.md`](../../05%20-%20%20sermon-view-trash.md)
+- [feat-0018 PRODUCT](../feat-0018/PRODUCT.md) — Figma-aligned My Sermons + upload + drafts UI

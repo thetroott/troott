@@ -100,11 +100,10 @@ const UploadEntryStepModal: React.FC<UploadEntryStepModalProps> = ({
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
                 className={cn(
-                    'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl sm:max-w-[827px]',
+                    'flex flex-col p-0 !gap-0 overflow-hidden shadow-xl',
                     'top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]',
-                    UPLOAD_SHELL.widthClass,
                     UPLOAD_SHELL.maxWidthClass,
-                    UPLOAD_SHELL.minHeightClass,
+                    UPLOAD_SHELL.modalHeightClass,
                     UPLOAD_SHELL.outerRadius,
                     UPLOAD_SHELL.outerBorder,
                     UPLOAD_SHELL.outerBg,
@@ -118,7 +117,12 @@ const UploadEntryStepModal: React.FC<UploadEntryStepModalProps> = ({
                 </DialogDescription>
 
                 {/* Header — Figma Frame 1618868173 */}
-                <div className="flex items-center justify-between gap-4 px-4 min-h-[46px] border-b border-[#545454]/50 bg-[#2b2a2c]">
+                <div
+                    className={cn(
+                        'flex items-center justify-between gap-4 border-b border-[#545454]/50 px-4 bg-[#2b2a2c]',
+                        UPLOAD_SHELL.headerMinH,
+                    )}
+                >
                     <div className="flex items-center gap-2 min-w-0">
                         <img
                             src="/images/assets/upload-file.svg"
@@ -145,72 +149,93 @@ const UploadEntryStepModal: React.FC<UploadEntryStepModalProps> = ({
                     </button>
                 </div>
 
-                {/* Body — Figma Frame 1618868680 */}
+                {/* Reserve tab strip height — matches wizard shell on Details */}
+                <div
+                    className="shrink-0 border-b border-[#545454]/50 px-3 py-2 md:px-4"
+                    aria-hidden
+                >
+                    <div className="h-[42px]" />
+                </div>
+
+                {/* Body — same content shell as wizard Details tab */}
+                <div className="flex min-h-0 flex-1 flex-col px-3 pb-2 pt-3 md:px-4">
+                    <div
+                        className={cn(
+                            UPLOAD_SHELL.contentCard,
+                            'flex min-h-0 flex-1 flex-col overflow-hidden transition-shadow',
+                            !isLoading && 'cursor-pointer',
+                            isDragActive &&
+                                'ring-2 ring-[#08ffdb]/45 ring-inset ring-offset-0',
+                            isLoading && 'pointer-events-none opacity-50',
+                        )}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsDragActive(true);
+                        }}
+                        onDragLeave={(e) => {
+                            e.preventDefault();
+                            setIsDragActive(false);
+                        }}
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            setIsDragActive(false);
+                            const f = e.dataTransfer.files[0];
+                            if (f) commitFile(f);
+                        }}
+                        onClick={() => fileInputRef.current?.click()}
+                        role="presentation"
+                    >
+                        <div className="flex min-h-0 flex-1 flex-col items-center justify-center p-6 md:p-8">
+                            <div className="flex w-full max-w-[295px] flex-col items-center text-center">
+                                <img
+                                    src="/images/assets/upload-file.svg"
+                                    alt=""
+                                    className="mb-6 h-10 w-10 opacity-95"
+                                    width={40}
+                                    height={40}
+                                />
+                                <p className="font-matter-medium text-[16px] leading-6 tracking-wide text-[#eaeaea]">
+                                    Drag and drop sermon to upload or select
+                                    sermon from your device.
+                                </p>
+                                <Button
+                                    type="button"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        fileInputRef.current?.click();
+                                    }}
+                                    disabled={isLoading}
+                                    className={cn(
+                                        UPLOAD_SHELL.primaryCta,
+                                        'mt-6 h-[38px] min-w-[104px] px-4 focus-visible:ring-2 focus-visible:ring-[#08ffdb]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#333234]',
+                                    )}
+                                >
+                                    {isLoading ? 'Processing…' : 'Select files'}
+                                </Button>
+                            </div>
+
+                            {validationError ? (
+                                <div
+                                    className="mt-6 flex w-full max-w-[295px] items-start gap-2 rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-left text-sm text-destructive"
+                                    onClick={(e) => e.stopPropagation()}
+                                    role="alert"
+                                >
+                                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                                    <span>{validationError}</span>
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+
                 <div
                     className={cn(
-                        'flex flex-1 flex-col items-center justify-center bg-[#2b2a2c] px-6 py-16 md:py-20 transition-shadow',
-                        !isLoading && 'cursor-pointer',
-                        isDragActive &&
-                            'ring-2 ring-[#08ffdb]/45 ring-inset ring-offset-0',
-                        isLoading && 'pointer-events-none opacity-50',
+                        'shrink-0 border-t border-[#545454]/50',
+                        UPLOAD_SHELL.footerMinH,
+                        UPLOAD_SHELL.footerBg,
                     )}
-                    onDragOver={(e) => {
-                        e.preventDefault();
-                        setIsDragActive(true);
-                    }}
-                    onDragLeave={(e) => {
-                        e.preventDefault();
-                        setIsDragActive(false);
-                    }}
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        setIsDragActive(false);
-                        const files = e.dataTransfer.files;
-                        const f = files[0];
-                        if (f) commitFile(f);
-                    }}
-                    onClick={() => fileInputRef.current?.click()}
-                    role="presentation"
-                >
-                    <div className="flex w-full max-w-[295px] flex-col items-center text-center">
-                        <img
-                            src="/images/assets/upload-file.svg"
-                            alt=""
-                            className="h-10 w-10 mb-6 opacity-95"
-                            width={40}
-                            height={40}
-                        />
-                        <p className="font-matter-medium text-[16px] leading-6 text-[#eaeaea] tracking-wide">
-                            Drag and drop sermon to upload or select sermon from
-                            your device.
-                        </p>
-                        <Button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                fileInputRef.current?.click();
-                            }}
-                            disabled={isLoading}
-                            className={cn(
-                                UPLOAD_SHELL.primaryCta,
-                                'mt-6 h-[38px] min-w-[104px] px-4 focus-visible:ring-2 focus-visible:ring-[#08ffdb]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2b2a2c]',
-                            )}
-                        >
-                            {isLoading ? 'Processing…' : 'Select files'}
-                        </Button>
-                    </div>
-
-                    {validationError ? (
-                        <div
-                            className="mt-6 flex w-full max-w-[295px] items-start gap-2 rounded-lg border border-destructive/25 bg-destructive/10 p-3 text-left text-sm text-destructive"
-                            onClick={(e) => e.stopPropagation()}
-                            role="alert"
-                        >
-                            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-                            <span>{validationError}</span>
-                        </div>
-                    ) : null}
-                </div>
+                    aria-hidden
+                />
 
                 <input
                     ref={fileInputRef}
