@@ -2,14 +2,14 @@
  * Sermon audio ingest + streaming delivery configuration.
  * CDN base should match the hostname clients use for HLS (manifest + segments).
  */
-import { AWS_BUCKET_NAME } from './aws.config';
+import { bucketNameFor } from './s3-buckets.config';
 
 const mb = (n: number) => n * 1024 * 1024;
 
 /** HTTPS URL for an object when bucket allows public read OR behind CDN origin mapping to bucket. */
 export function publicHttpsUrlForS3Key(key: string): string {
     const region = process.env.AWS_REGION || 'us-east-1';
-    const bucket = AWS_BUCKET_NAME;
+    const bucket = bucketNameFor('playback');
     const encoded = key.split('/').map(encodeURIComponent).join('/');
     return `https://${bucket}.s3.${region}.amazonaws.com/${encoded}`;
 }
@@ -29,9 +29,21 @@ export function urlForMediaKey(s3Key: string): string {
     return publicHttpsUrlForS3Key(s3Key);
 }
 
+function defaultHlsWorkerConcurrency(): number {
+    const raw = process.env.AUDIO_HLS_WORKER_CONCURRENCY?.trim();
+    if (raw) {
+        const n = Number(raw);
+        if (Number.isFinite(n) && n >= 1) {
+            return Math.floor(n);
+        }
+    }
+    return process.env.NODE_ENV === 'production' ? 1 : 2;
+}
+
 export const mediaConfig = {
-    /** Max multipart audio size for sermon upload (bytes). Default 100 MiB. */
-    sermonAudioMaxBytes: Number(process.env.SERMON_AUDIO_MAX_BYTES) || mb(100),
+    /** Max multipart audio size for sermon upload (bytes). Default 512 MiB (2 hr MP3). */
+    sermonAudioMaxBytes:
+        Number(process.env.SERMON_AUDIO_MAX_BYTES) || mb(512),
 
     /** Allowed MIME types for sermon audio upload (strict allowlist). */
     sermonAudioMimeAllowlist: new Set(
@@ -60,4 +72,13 @@ export const mediaConfig = {
 
     /** When true, run single-pass loudnorm to WAV before HLS packaging (extra CPU). */
     audioLoudnormBeforeHls: process.env.AUDIO_LOUDNORM_BEFORE_HLS === 'true',
+
+    /** Parallel HLS packaging jobs per API process (keep low on 4–8 vCPU for 1–2 hr sermons). */
+    hlsWorkerConcurrency: defaultHlsWorkerConcurrency(),
+
+    /** Temp directory root for ffmpeg HLS scratch (set to large gp3 mount in prod). */
+    hlsWorkDir: (process.env.HLS_WORK_DIR || '').trim() || undefined,
+
+    /** HTTP server close timeout on SIGTERM before force exit (ms). */
+    gracefulShutdownMs: Number(process.env.GRACEFUL_SHUTDOWN_MS) || 120_000,
 } as const;

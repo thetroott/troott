@@ -1,0 +1,157 @@
+[
+    {
+        "name": "Spiritual Growth",
+        "slug": "spiritual-growth",
+        "parentTopic": "",
+        "description": "Foundations of faith and daily spiritual disciplines",
+        "color": "#5d5385"
+    },
+    {
+        "name": "Life & Purpose",
+        "slug": "life-purpose",
+        "parentTopic": "",
+        "description": "Calling, growth, relationships, and work",
+        "color": "#543cf0"
+    },
+    {
+        "name": "Christian Living",
+        "slug": "christian-living",
+        "parentTopic": "",
+        "description": "Worship, holiness, grace, and compassion in daily life",
+        "color": "#894085"
+    },
+    {
+        "name": "Encouragement and Healing",
+        "slug": "encouragement-healing",
+        "parentTopic": "",
+        "description": "Hope, healing, and peace through difficult seasons",
+        "color": "#9f3865"
+    },
+    {
+        "name": "Church & Ministry",
+        "slug": "church-ministry",
+        "parentTopic": "",
+        "description": "Leadership, evangelism, church life, and service",
+        "color": "#4a3799"
+    },
+    {
+        "name": "Faith & Trust",
+        "slug": "faith-trust",
+        "parentTopic": "spiritual-growth",
+        "description": "Building trust in God through life's seasons"
+    },
+    {
+        "name": "Prayer life",
+        "slug": "prayer-life",
+        "parentTopic": "spiritual-growth",
+        "description": "Developing a consistent and meaningful prayer life"
+    },
+    {
+        "name": "Bible Study",
+        "slug": "bible-study",
+        "parentTopic": "spiritual-growth",
+        "description": "Studying Scripture for understanding and application"
+    },
+    {
+        "name": "Daily Devotion",
+        "slug": "daily-devotion",
+        "parentTopic": "spiritual-growth",
+        "description": "Daily time with God through devotion and reflection"
+    },
+    {
+        "name": "Purpose & Calling",
+        "slug": "purpose-calling",
+        "parentTopic": "life-purpose",
+        "description": "Discovering God's purpose and calling for your life"
+    },
+    {
+        "name": "Personal Growth",
+        "slug": "personal-growth",
+        "parentTopic": "life-purpose",
+        "description": "Growing in character, wisdom, and maturity"
+    },
+    {
+        "name": "Relationships & Marriage",
+        "slug": "relationships-marriage",
+        "parentTopic": "life-purpose",
+        "description": "Building healthy relationships and godly marriages"
+    },
+    {
+        "name": "Career & Work Ethics",
+        "slug": "career-work-ethics",
+        "parentTopic": "life-purpose",
+        "description": "Integrity, excellence, and purpose in work and career"
+    },
+    {
+        "name": "Worship & Praise",
+        "slug": "worship-praise",
+        "parentTopic": "christian-living",
+        "description": "Expressing love for God through worship and praise"
+    },
+    {
+        "name": "Holiness & Purity",
+        "slug": "holiness-purity",
+        "parentTopic": "christian-living",
+        "description": "Pursuing holiness and purity in thought and action"
+    },
+    {
+        "name": "Forgiveness & Grace",
+        "slug": "forgiveness-grace",
+        "parentTopic": "christian-living",
+        "description": "Receiving and extending forgiveness and grace"
+    },
+    {
+        "name": "Love & Compassion",
+        "slug": "love-compassion",
+        "parentTopic": "christian-living",
+        "description": "Living out Christ-like love and compassion toward others"
+    },
+    {
+        "name": "Healing & Miracles",
+        "slug": "healing-miracles",
+        "parentTopic": "encouragement-healing",
+        "description": "Faith for healing and God's power at work"
+    },
+    {
+        "name": "Overcoming Hardships",
+        "slug": "overcoming-hardships",
+        "parentTopic": "encouragement-healing",
+        "description": "Strength and perseverance through trials"
+    },
+    {
+        "name": "Hope & Encouragement",
+        "slug": "hope-encouragement",
+        "parentTopic": "encouragement-healing",
+        "description": "Finding hope and encouragement in God's promises"
+    },
+    {
+        "name": "Anxiety & Mental Peace",
+        "slug": "anxiety-mental-peace",
+        "parentTopic": "encouragement-healing",
+        "description": "Peace and rest for anxious minds through faith"
+    },
+    {
+        "name": "Leadership & Discipleship",
+        "slug": "leadership-discipleship",
+        "parentTopic": "church-ministry",
+        "description": "Leading and discipling others in the faith"
+    },
+    {
+        "name": "Evangelism & Missions",
+        "slug": "evangelism-missions",
+        "parentTopic": "church-ministry",
+        "description": "Sharing the gospel locally and globally"
+    },
+    {
+        "name": "Church Growth",
+        "slug": "church-growth",
+        "parentTopic": "church-ministry",
+        "description": "Healthy church growth and community life"
+    },
+    {
+        "name": "Serving & Giving",
+        "slug": "serving-giving",
+        "parentTopic": "church-ministry",
+        "description": "Generous service and giving in the body of Christ"
+    }
+]

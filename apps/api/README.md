@@ -31,6 +31,7 @@ To build this enhanced product experience, we asking the following questions:
 ## Documentation
 
 - **[Audio pipeline (upload, workers, S3, CDN)](docs/audio-pipeline-flow.md)** – sermon multipart upload through metadata + HLS jobs to playback URLs.
+- **[ADR 0004: Token-only auth (no refresh token)](docs/adr/0004-token-only-auth-no-refresh-token.md)** – JWT lifetime, `X-New-Token` silent reissue, mobile session layer removal ([spec](../../specs/api/feature/feat-0004/PRODUCT.md)).
 
 ## Getting Started
 

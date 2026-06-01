@@ -59,6 +59,7 @@ app.use(
             callback(new Error('Not allowed by CORS'));
         },
         credentials: true,
+        exposedHeaders: ['X-New-Token'],
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: [
             'Origin',
