@@ -1,8 +1,8 @@
 /**
  * Player / queue mutation payloads (client state, not raw API bodies).
  */
-import type { IAPIResponse } from '@/utils/interface.utl';
-import type { QueuingType } from '@/utils/enums.util';
+import type { IAPIResponse } from '@/api/types';
+import type { QueuingType } from '@/api/types';
 
 import type { networkStatusTypes } from './network.dto';
 import type { Queue } from './queue-client.dto';

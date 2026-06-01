@@ -16,6 +16,9 @@ export type {
     PlaylistVisibility,
 } from '@/models/Playlist.model';
 
+/** Matches API `PlaylistItemResourceType`. */
+export type PlaylistItemResourceType = 'sermon' | 'series';
+
 export interface CreatePlaylistDTO {
     title: string;
     description?: string;
@@ -44,6 +47,7 @@ export interface UpdatePlaylistDTO {
 
 export interface AddPlaylistItemDTO {
     itemId: string;
+    itemType: PlaylistItemResourceType;
     position?: number;
 }
 
@@ -58,6 +62,7 @@ export interface ReorderPlaylistItemDTO {
 
 export interface PlaylistItemDTO {
     id: string;
+    itemType: PlaylistItemResourceType;
     item: {
         id: string;
         title: string;

@@ -2,7 +2,7 @@
  * Client-side queue UX types (origin labels, local queuing requests).
  * Not part of the REST contract; used by the player engine and UI.
  */
-import type { QueuingType } from '@/utils/enums.util';
+import type { QueuingType } from '@/api/types';
 
 import type { SermonItemDTO } from './sermon.dto';
 

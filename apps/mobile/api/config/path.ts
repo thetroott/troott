@@ -178,8 +178,6 @@ export const URL_DISCOVERY_HOME = api('/discovery/home');
 
 export const URL_SHARE_RESOLVE = api('/share/resolve');
 
-export const URL_OPEN_SERMON = (id: string) => `${api('/open/sermon')}/${id}`;
-
 export const URL_PLAYBACK_SERMON = (sermonId: string) =>
     `${URL_PLAYBACK}/sermon/${sermonId}`;
 

@@ -5,7 +5,7 @@
 
 import type { CallApiDTO } from '../dtos/axios.dto';
 import { httpClient, RequestConfig, type TroottHttpClient } from '../http-client';
-import type { ApiResponse, IAPIResponse } from '@/utils/interface.utl';
+import type { ApiResponse, IAPIResponse } from '@/api/types';
 
 
 function appendQueryParams(
@@ -90,17 +90,21 @@ export abstract class BaseService {
             };
         }
         const r = raw as Partial<IAPIResponse> & Record<string, unknown>;
+        const status =
+            typeof r.status === 'number' ? r.status : 200;
+        const errorFlag =
+            r.error === true || status >= 400;
         return {
-            error: Boolean(r.error),
-            errors: Array.isArray(r.errors) ? (r.errors as any[]) : [],
+            error: errorFlag,
+            errors: Array.isArray(r.errors) ? (r.errors as unknown[]) : [],
             report: r.report as IAPIResponse['report'],
             count: r.count,
             total: r.total,
-            pagination: r.pagination,
+            pagination: r.pagination as IAPIResponse['pagination'],
             data: r.data ?? null,
             message: typeof r.message === 'string' ? r.message : '',
             token: r.token,
-            status: typeof r.status === 'number' ? r.status : 200,
+            status,
         };
     }
 

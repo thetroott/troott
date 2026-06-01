@@ -10,7 +10,6 @@ import { SermonService } from './sermon';
 import { PlaybackService } from './playback';
 import { MinisterService } from './minister';
 import { StorageService } from './storage';
-import { OpenService } from './open';
 import { InvitationService } from './invitation';
 import { PlanService } from './plan';
 import { SubscriptionService } from './subscription';
@@ -29,7 +28,6 @@ export class TroottAPIClient {
     public readonly playback: PlaybackService;
     public readonly minister: MinisterService;
     public readonly storage: StorageService;
-    public readonly open: OpenService;
     public readonly invitation: InvitationService;
     public readonly plan: PlanService;
     public readonly subscription: SubscriptionService;
@@ -48,7 +46,6 @@ export class TroottAPIClient {
         this.playback = new PlaybackService();
         this.minister = new MinisterService();
         this.storage = new StorageService();
-        this.open = new OpenService();
         this.invitation = new InvitationService();
         this.plan = new PlanService();
         this.subscription = new SubscriptionService();

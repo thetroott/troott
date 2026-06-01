@@ -1,4 +1,4 @@
-import type { IAPIResponse } from '@/utils/interface.utl';
+import type { IAPIResponse } from '@/api/types';
 
 import { BaseService } from '../config/api-call';
 

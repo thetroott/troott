@@ -1,80 +1,72 @@
 /**
  * API Configuration
- * 
+ *
  * Environment-based configuration for API endpoints, timeouts, and feature flags.
  * Supports dev, staging, and production environments.
  */
 
-import Constants from 'expo-constants';
+import {
+    getEnvironment,
+    getQueryCachePolicy,
+    type Environment,
+} from './cache-policy';
 
-/**
- * Environment types
- */
-export type Environment = 'development' | 'staging' | 'production';
+export type { Environment };
+export { getEnvironment, getQueryCachePolicy };
 
-/**
- * Get current environment from Expo constants
- */
-export const getEnvironment = (): Environment => {
-  const env = Constants.expoConfig?.extra?.env || process.env.NODE_ENV;
-  
-  if (env === 'production' || env === 'prod') return 'production';
-  if (env === 'staging' || env === 'stage') return 'staging';
-  return 'development';
-};
+const baseURL =
+    process.env.EXPO_PUBLIC_API_URL?.trim() ||
+    process.env.EXPO_PUBLIC_TROOTT_API_URL?.trim() ||
+    '';
 
 /**
  * API Configuration interface
  */
 export interface ApiConfig {
-  baseURL: string;
-  timeout: number;
-  retryAttempts: number;
-  enableLogging: boolean;
-  enableDevTools: boolean;
-  cacheTime: number;
-  staleTime: number;
+    baseURL: string;
+    timeout: number;
+    retryAttempts: number;
+    enableLogging: boolean;
+    enableDevTools: boolean;
+    cacheTime: number;
+    staleTime: number;
 }
 
-/**
- * Environment-specific configurations
- */
-const configs: Record<Environment, ApiConfig> = {
-  development: {
-    baseURL: process.env.EXPO_PUBLIC_API_URL as string,
-    timeout: 30000, // 30 seconds for dev (more lenient)
-    retryAttempts: 2,
-    enableLogging: true,
-    enableDevTools: true,
-    cacheTime: 5 * 60 * 1000, // 5 minutes
-    staleTime: 0, // Always consider data stale in dev
-  },
-  staging: {
-    baseURL: process.env.EXPO_PUBLIC_API_URL as string,
-    timeout: 20000, // 20 seconds
-    retryAttempts: 3,
-    enableLogging: true,
-    enableDevTools: false,
-    cacheTime: 10 * 60 * 1000, // 10 minutes
-    staleTime: 2 * 60 * 1000, // 2 minutes
-  },
-  production: {
-    baseURL: process.env.EXPO_PUBLIC_API_URL as string,
-    timeout: 15000, // 15 seconds (stricter for production)
-    retryAttempts: 3,
-    enableLogging: false, // Disable verbose logging in production
-    enableDevTools: false,
-    cacheTime: 30 * 60 * 1000, // 30 minutes
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  },
+type ApiConfigBase = Omit<ApiConfig, 'cacheTime' | 'staleTime'>;
+
+const configBases: Record<Environment, ApiConfigBase> = {
+    development: {
+        baseURL,
+        timeout: 30000,
+        retryAttempts: 2,
+        enableLogging: true,
+        enableDevTools: true,
+    },
+    staging: {
+        baseURL,
+        timeout: 20000,
+        retryAttempts: 3,
+        enableLogging: true,
+        enableDevTools: false,
+    },
+    production: {
+        baseURL,
+        timeout: 15000,
+        retryAttempts: 3,
+        enableLogging: false,
+        enableDevTools: false,
+    },
 };
 
 /**
  * Get current API configuration based on environment
  */
 export const getApiConfig = (): ApiConfig => {
-  const env = getEnvironment();
-  return configs[env];
+    const env = getEnvironment();
+    return {
+        ...configBases[env],
+        ...getQueryCachePolicy(env),
+    };
 };
 
 /**
@@ -82,17 +74,21 @@ export const getApiConfig = (): ApiConfig => {
  */
 export const apiConfig = getApiConfig();
 
+if (__DEV__ && apiConfig.enableLogging) {
+    console.log(`[API] baseURL ${apiConfig.baseURL}`);
+}
+
 /**
  * Feature flags
  */
 export const features = {
-  offlineMode: true,
-  requestDeduplication: true,
-  automaticRetry: true,
-  tokenRefresh: true,
-  cachePersistence: true,
-  backgroundSync: true,
-  circuitBreaker: true,
+    offlineMode: true,
+    requestDeduplication: true,
+    automaticRetry: true,
+    tokenRefresh: true,
+    cachePersistence: true,
+    backgroundSync: true,
+    circuitBreaker: true,
 } as const;
 
 /**
