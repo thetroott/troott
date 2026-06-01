@@ -22,13 +22,12 @@
         "_data",
         "api",
         "engine",
+        "context",
         "lib",
         "screens",
-        "stores",
-        "types",
-        "utils",
         "validation",
         "app.config.tsx",
+        "declaration.d.ts",
         "**/*.ts",
         "**/*.tsx",
         "metro.config.js",
@@ -42,7 +41,6 @@
         "components/features/player/player/instant-mix-button.tsx",
         "screens/Auth",
         "screens/Preview.tsx",
-        "api/hooks/shared/use-theme-color.ts",
-        "stores/app/device-profile.ts"
+        "api/hooks/shared/use-theme-color.ts"
     ]
 }
