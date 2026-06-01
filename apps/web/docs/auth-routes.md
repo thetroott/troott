@@ -26,4 +26,4 @@ Post-register: `register` → `/activate-account` → studio or dashboard.
 
 | Route | Purpose |
 |-------|---------|
-| `/profile/change-password` | Change password while signed in |
+| `/settings` | Account settings (name, email, password, deactivate) |
