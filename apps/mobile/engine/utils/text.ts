@@ -1,5 +1,5 @@
 import { Models } from '@/api/dtos/catalog-models.dto';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 export function getItemName(item: SermonItemDTO): string {
     return (

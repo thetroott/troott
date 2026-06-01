@@ -1,6 +1,7 @@
 import { Image } from 'react-native';
-import type { SourceType, SermonItemDTO, SermonTrackDTO } from '@/types/sermon';
-import { QueuingType } from '../../utils/enums.util';
+import type { SourceType, SermonItemDTO, SermonTrackDTO } from '@/api/dtos/sermon.dto';
+import { QueuingType } from '@/api/types';
+import { resolveCanonicalPlaybackUrl } from './library-map';
 import { getAudioCache } from './offline';
 import { queryClient } from '@/api/services/query-client';
 import { MediaInfoQueryKey } from '@/engine/queries/queries';
@@ -30,16 +31,20 @@ function guessMimeType(
     return undefined;
 }
 
-function pickPlaybackUrl(
-    url: string | number | null | undefined,
-    shareable: string | null | undefined,
-): string | number | '' {
-    const primary = url === '' || url == null ? undefined : url;
-    if (primary !== undefined) return primary;
-    const secondary =
-        shareable === '' || shareable == null ? undefined : shareable;
-    if (secondary !== undefined) return secondary;
-    return '';
+function resolveDtoPlaybackUrl(item: SermonItemDTO): string | number | '' {
+    const ext = item as SermonItemDTO & {
+        url?: string | number | null;
+        playbackUrl?: string | null;
+        manifestUrl?: string | null;
+        item?: { item?: string | null };
+    };
+    if (ext.url != null && ext.url !== '') {
+        return ext.url;
+    }
+    const canonical = resolveCanonicalPlaybackUrl(
+        ext as unknown as Record<string, unknown>,
+    );
+    return canonical ?? '';
 }
 
 function isProbablyImageFileUrl(url: string): boolean {
@@ -115,7 +120,7 @@ export function mapDtoToTrack(
         artwork?: string | number | null;
     };
 
-    const playbackUrl = pickPlaybackUrl(ext.url, item.shareableUrl);
+    const playbackUrl = resolveDtoPlaybackUrl(item);
     const cover = ext.artwork ?? item.image;
     const mediaId = String(item.id ?? playbackUrl);
 

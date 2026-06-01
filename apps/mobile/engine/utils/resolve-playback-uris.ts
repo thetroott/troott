@@ -1,6 +1,6 @@
 import { Asset } from 'expo-asset';
 
-import type { SermonTrackDTO } from '@/types/sermon';
+import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 
 function mimeFromAssetExtension(ext: string): string | undefined {
     const t = ext.toLowerCase().replace(/^\./, '');

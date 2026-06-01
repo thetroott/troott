@@ -1,6 +1,39 @@
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { ISermonTrack, SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 import { catalogRowToSermonItem } from './catalog-map';
+
+/** Canonical sermon/series image from `imageUrl` or nested `image` / `banner` subdoc. */
+export function resolveSermonImageUrl(d: Record<string, unknown>): string | null {
+    if (typeof d.imageUrl === 'string' && d.imageUrl.trim()) {
+        return d.imageUrl.trim();
+    }
+    const image = d.image as Record<string, unknown> | undefined;
+    if (image && typeof image.item === 'string' && image.item.trim()) {
+        return image.item.trim();
+    }
+    const banner = d.banner as Record<string, unknown> | undefined;
+    if (banner && typeof banner.item === 'string' && banner.item.trim()) {
+        return banner.item.trim();
+    }
+    return null;
+}
+
+/** Canonical playback URL: `playbackUrl` / `manifestUrl` / `item.item` only. */
+export function resolveCanonicalPlaybackUrl(
+    d: Record<string, unknown>,
+): string | null {
+    if (typeof d.playbackUrl === 'string' && d.playbackUrl.trim()) {
+        return d.playbackUrl.trim();
+    }
+    if (typeof d.manifestUrl === 'string' && d.manifestUrl.trim()) {
+        return d.manifestUrl.trim();
+    }
+    const item = d.item as Record<string, unknown> | undefined;
+    if (item && typeof item.item === 'string' && item.item.trim()) {
+        return item.item.trim();
+    }
+    return null;
+}
 
 /** Accepts API sermon docs (populated or lean). */
 export function sermonDocToCatalogRow(
@@ -22,21 +55,9 @@ export function sermonDocToCatalogRow(
     }
 
     const title = d.title != null ? String(d.title) : null;
-    const image =
-        typeof d.imageUrl === 'string'
-            ? d.imageUrl
-            : typeof d.coverArt === 'string'
-              ? d.coverArt
-              : typeof d.image === 'string'
-                ? d.image
-                : null;
+    const image = resolveSermonImageUrl(d);
 
-    const sermonUrl =
-        typeof d.sermonUrl === 'string'
-            ? d.sermonUrl
-            : typeof d.url === 'string'
-              ? d.url
-              : null;
+    const playbackUrl = resolveCanonicalPlaybackUrl(d);
 
     let seriesId: string | null = null;
     let seriesTitle: string | null = null;
@@ -52,11 +73,13 @@ export function sermonDocToCatalogRow(
         title,
         minister: ministerName,
         image,
-        url: sermonUrl,
+        url: playbackUrl,
         duration: typeof d.duration === 'number' ? d.duration : null,
         sourceType: 'stream',
         seriesId,
         seriesTitle,
+        shareableUrl:
+            typeof d.shareableUrl === 'string' ? d.shareableUrl : null,
     };
 }
 
@@ -166,16 +189,7 @@ export function seriesDocToLibraryRow(doc: unknown): {
             : d.name != null
               ? String(d.name)
               : 'Series';
-    const image =
-        typeof d.imageUrl === 'string'
-            ? d.imageUrl
-            : typeof d.coverArt === 'string'
-              ? d.coverArt
-              : typeof d.image === 'string'
-                ? d.image
-                : typeof d.cover === 'string'
-                  ? d.cover
-                  : undefined;
+    const image = resolveSermonImageUrl(d) ?? undefined;
     const durationSeconds =
         parseFlexibleDurationSeconds(d.duration) ??
         parseFlexibleDurationSeconds(d.totalDuration);

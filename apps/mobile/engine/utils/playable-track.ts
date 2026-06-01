@@ -1,4 +1,4 @@
-import type { SermonTrackDTO } from '@/types/sermon';
+import type { SermonTrackDTO } from '@/api/dtos/sermon.dto';
 
 /**
  * `@rntp/player` can error if a require() id or empty `url` reaches the native

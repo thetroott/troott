@@ -1,13 +1,16 @@
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { ISermonTrack, SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 /**
  * Normalizes catalog / mock rows (loader, FlashList items) into {@link SermonItemDTO}
  * so {@link loadQueue} can run through {@link mapDtoToTrack}.
+ *
+ * API-backed rows should set `url` via {@link sermonDocToCatalogRow} (canonical playback).
+ * `row.url` here is for bundled fixtures only — not legacy API `sermonUrl` aliases.
  */
 export function catalogRowToSermonItem(
     row: Partial<ISermonTrack> & { id: string | null },
 ): SermonItemDTO {
-    const url = row.url ?? row.sermon ?? null;
+    const url = row.url ?? null;
 
     return {
         id: row.id,
@@ -28,5 +31,7 @@ export function catalogRowToSermonItem(
                   : null,
         seriesId: row.seriesId ?? null,
         seriesTitle: row.seriesTitle ?? null,
+        shareableUrl:
+            typeof row.shareableUrl === 'string' ? row.shareableUrl : null,
     };
 }

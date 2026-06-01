@@ -3,7 +3,7 @@ import type {
     SermonDownloadProgress,
     SermonDownloadProgressState,
     SermonTrackDTO,
-} from '@/types/sermon';
+} from '@/api/dtos/sermon.dto';
 import axios from 'axios';
 import { MMKV } from 'react-native-mmkv';
 import RNFS from 'react-native-fs';
@@ -190,6 +190,10 @@ export const getDefaultAudioCacheLimit = () => {
     ensureDefaultAudioCacheLimit(getOfflineKV());
 };
 
+/**
+ * Persists a sermon file offline. `track.url` must be a canonical stream URL from
+ * {@link mapDtoToTrack} (playbackUrl / manifestUrl / item.item), not shareable links.
+ */
 export const saveAudio = async (
     track: SermonTrackDTO,
     setDownloadProgress: SermonDownloadProgressState,
