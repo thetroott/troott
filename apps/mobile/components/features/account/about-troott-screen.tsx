@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { ArrowLeft2, ArrowUp } from 'iconsax-react-nativejs';
 import { router } from 'expo-router';
 
@@ -7,6 +7,9 @@ import ScreenView from '@/components/ui/screenview';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
 import DeleteAccountAlert from './delete-account-alert';
+import { useAuth } from '@/api/hooks/app/useAuth';
+import api from '@/api/api';
+import { toast } from '@/components/ui/toast';
 
 type AboutRowProps = {
     label: string;
@@ -38,6 +41,35 @@ function AboutRow({ label, value, onPress, external }: AboutRowProps) {
 
 export default function AboutTroottScreen() {
     const [showDeleteAlert, setShowDeleteAlert] = React.useState(false);
+    const { LogoutMutation } = useAuth();
+
+    const confirmLogout = () => {
+        Alert.alert('Log out', 'Are you sure you want to log out?', [
+            { text: 'Cancel', style: 'cancel' },
+            {
+                text: 'Log out',
+                style: 'destructive',
+                onPress: () => LogoutMutation.mutate(),
+            },
+        ]);
+    };
+
+    const handleDeleteAccount = async () => {
+        try {
+            const res = await api.user.deleteMe();
+            if (res.error) {
+                toast.error(res.message || 'Could not delete account');
+                return;
+            }
+            setShowDeleteAlert(false);
+            toast.success('Account scheduled for deletion');
+            LogoutMutation.mutate();
+        } catch (e) {
+            const msg =
+                e instanceof Error ? e.message : 'Could not delete account';
+            toast.error(msg);
+        }
+    };
 
     return (
         <ScreenView screenStyle={styles.screen}>
@@ -71,21 +103,37 @@ export default function AboutTroottScreen() {
                     }
                 />
                 <AboutRow
+                    label="Change password"
+                    onPress={() => router.push('/user/change-password')}
+                />
+                <AboutRow
+                    label="Taste preferences"
+                    onPress={() => router.push('/(onboarding)/select-ministers')}
+                />
+                <AboutRow
                     label="Delete account"
                     onPress={() => setShowDeleteAlert(true)}
                 />
             </View>
 
-            <Pressable style={styles.logoutBtn}>
+            <Pressable
+                style={styles.logoutBtn}
+                onPress={confirmLogout}
+                disabled={LogoutMutation.isPending}
+                accessibilityRole="button"
+                accessibilityLabel="Log out"
+            >
                 <Text size="sm" color={theme.colors.red[500]}>
-                    Log out
+                    {LogoutMutation.isPending ? 'Logging out…' : 'Log out'}
                 </Text>
             </Pressable>
 
             <DeleteAccountAlert
                 visible={showDeleteAlert}
                 onClose={() => setShowDeleteAlert(false)}
-                onConfirmDelete={() => setShowDeleteAlert(false)}
+                onConfirmDelete={() => {
+                    void handleDeleteAccount();
+                }}
             />
         </ScreenView>
     );
@@ -137,11 +185,5 @@ const styles = StyleSheet.create({
         borderColor: theme.colors.red[500],
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    footerText: {
-        marginTop: 24,
-        textAlign: 'center',
-        lineHeight: 19,
-        paddingHorizontal: theme.sizes.spacing.base,
     },
 });

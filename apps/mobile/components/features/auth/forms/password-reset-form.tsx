@@ -2,44 +2,72 @@ import { StyleSheet, View } from 'react-native';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import OTPFormInput from '@/components/ui/otp-forminput';
 import Button from '@/components/ui/button';
 import TermsAndConditions from '@/components/features/auth/TermsConditions';
-import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import { router } from 'expo-router';
-import { OTPSchema, OTPType } from '@/validation/otp';
+import FormInput from '@/components/ui/forminput';
+import { Lock } from 'iconsax-react-nativejs';
+import { useForgotPasswordAuth } from '@/context';
+import { useAuth } from '@/api/hooks/app/useAuth';
+import {
+    ResetPasswordSchema,
+    ResetPasswordType,
+} from '@/validation/reset-password';
 
-const VerifyEmailForm = () => {
-    const form = useForm<OTPType>({
+const PasswordResetForm = () => {
+    const { formData } = useForgotPasswordAuth();
+    const { ResetPasswordMutation } = useAuth();
+
+    const form = useForm<ResetPasswordType>({
         defaultValues: {
-            otp: '',
+            newPassword: '',
+            confirmPassword: '',
         },
-        resolver: zodResolver(OTPSchema),
+        resolver: zodResolver(ResetPasswordSchema),
     });
-    const handleFormSubmit = () => {
-        router.push('/select-ministers');
+
+    const handleFormSubmit = (data: ResetPasswordType) => {
+        if (!formData.email) {
+            return;
+        }
+        ResetPasswordMutation.mutate({
+            email: formData.email,
+            newPassword: data.newPassword,
+        });
     };
+
     return (
         <View style={styles.container}>
-            <OTPFormInput name="otp" control={form.control} />
+            <FormInput
+                name="newPassword"
+                control={form.control}
+                label="New password"
+                placeholder="*********"
+                leftIcon={<Lock color={theme.colors.grey[400]} size={20} />}
+            />
+            <FormInput
+                name="confirmPassword"
+                control={form.control}
+                label="Confirm password"
+                placeholder="*********"
+                leftIcon={<Lock color={theme.colors.grey[400]} size={20} />}
+            />
             <TermsAndConditions />
             <Button
-                label="Continue"
-                disabled={!form.formState.isValid}
-                onPress={handleFormSubmit}
+                label="Reset password"
+                disabled={
+                    !form.formState.isValid ||
+                    !formData.email ||
+                    ResetPasswordMutation.isPending
+                }
+                isLoading={ResetPasswordMutation.isPending}
+                onPress={form.handleSubmit(handleFormSubmit)}
             />
-            <Text color={theme.colors.grey[500]}>
-                This code will expire in 5 minutes.{' '}
-            </Text>
-            <Text weight="semiBold" color={theme.colors.teal[500]} size="base">
-                Resend Code
-            </Text>
         </View>
     );
 };
 
-export default VerifyEmailForm;
+export default PasswordResetForm;
 
 const styles = StyleSheet.create({
     container: {

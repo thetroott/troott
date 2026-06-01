@@ -4,11 +4,11 @@ import { router } from 'expo-router';
 
 import PlaylistAddTrackContent from '@/components/features/playlist/playlist-add-track-content';
 import { DEFAULT_CHOOSE_PLAYLISTS } from '@/components/features/playlist/use-add-to-playlist';
+import type { ChoosePlaylistListItem } from '@/components/features/playlist/playlist-choose-types';
 import ScreenModalAndroidView from '@/components/ui/screen-modal-android';
 import { usePlaylistsQuery } from '@/api/hooks/app/useLibrary';
-import { mapPlaylistDocsToChooseItems } from '@/lib/playlists-map';
-import { useCurrentTrack } from '@/stores/player/queue';
-import { useContextType } from '@/context/apps/useContextType';
+import { useCurrentTrack } from '@/engine/state/player-queue-store';
+import { useContextType } from '@/context';
 
 const UserPlayList = () => {
     const current = useCurrentTrack();
@@ -23,11 +23,39 @@ const UserPlayList = () => {
     const userId = (userContext.user as { id?: string } | null)?.id;
     const { data: playlistsRaw } = usePlaylistsQuery(!!userId);
 
-    const sermonPlaylists = useMemo(() => {
-        const mapped = mapPlaylistDocsToChooseItems(playlistsRaw);
-        return mapped.filter(
-            (p) => (p.playlistType ?? '').toLowerCase() === 'sermon',
-        );
+    const sermonPlaylists = useMemo((): ChoosePlaylistListItem[] => {
+        if (!Array.isArray(playlistsRaw)) {
+            return [];
+        }
+        const out: ChoosePlaylistListItem[] = [];
+        for (const row of playlistsRaw) {
+            if (row == null || typeof row !== 'object') {
+                continue;
+            }
+            const o = row as Record<string, unknown>;
+            const id =
+                o._id != null
+                    ? String(o._id)
+                    : o.id != null
+                      ? String(o.id)
+                      : '';
+            const title =
+                typeof o.title === 'string'
+                    ? o.title
+                    : typeof o.name === 'string'
+                      ? o.name
+                      : '';
+            const playlistType =
+                typeof o.playlistType === 'string' ? o.playlistType : undefined;
+            if (!id || !title) {
+                continue;
+            }
+            if ((playlistType ?? '').toLowerCase() !== 'sermon') {
+                continue;
+            }
+            out.push({ id, title, playlistType });
+        }
+        return out;
     }, [playlistsRaw]);
 
     const initialPlaylists = useMemo(() => {

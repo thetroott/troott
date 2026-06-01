@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Pressable } from 'react-native';
 import React from 'react';
 import FormInput from '@/components/ui/forminput';
 import { useForm } from 'react-hook-form';
@@ -6,13 +6,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Lock, Sms } from 'iconsax-react-nativejs';
 import { theme } from '@/constants/theme';
 import Button from '@/components/ui/button';
-
-import { router } from 'expo-router';
+import Text from '@/components/ui/text';
 import { LoginSchema, LoginSchemaType } from '@/validation/login';
-import { useTrackStore } from '@/stores/player-store';
-import { replaceWithPendingTargetOrHome } from '@/lib/deep-link/replace-with-pending-or-home';
+import { useTrackStore } from '@/engine/state/player-ui-store';
+import { useAuth } from '@/api/hooks/app/useAuth';
+import { router } from 'expo-router';
 
 const LoginForm = () => {
+    const { LoginMutation } = useAuth();
     const setShowFullPlayer = useTrackStore((s) => s.setShowFullPlayer);
     const setFullPlayerReturnPath = useTrackStore(
         (s) => s.setFullPlayerReturnPath,
@@ -25,14 +26,16 @@ const LoginForm = () => {
         },
         resolver: zodResolver(LoginSchema),
     });
-    async function handleSubmit(_data: LoginSchemaType) {
+
+    function handleSubmit(data: LoginSchemaType) {
         setShowFullPlayer(false);
         setFullPlayerReturnPath(null);
-        await replaceWithPendingTargetOrHome();
+        LoginMutation.mutate({
+            email: data.email.trim().toLowerCase(),
+            password: data.password,
+        });
     }
-    const handleFormSubmit = () => {
-        router.push('/select-ministers');
-    };
+
     return (
         <View style={styles.container}>
             <FormInput
@@ -49,11 +52,19 @@ const LoginForm = () => {
                 placeholder="*********"
                 leftIcon={<Lock color={theme.colors.grey[400]} size={20} />}
             />
+            <Pressable onPress={() => router.push('/reset-password-otp-request')}>
+                <Text size="sm" color={theme.colors.teal[500]}>
+                    Forgot password?
+                </Text>
+            </Pressable>
             <Button
                 onPress={form.handleSubmit(handleSubmit)}
-                disabled={!form.formState.isValid}
+                disabled={
+                    !form.formState.isValid || LoginMutation.isPending
+                }
+                isLoading={LoginMutation.isPending}
                 label="Continue"
-            ></Button>
+            />
         </View>
     );
 };
@@ -63,11 +74,5 @@ export default LoginForm;
 const styles = StyleSheet.create({
     container: {
         gap: 20,
-    },
-    nameContainer: {
-        flexDirection: 'row',
-        gap: 10,
-        alignItems: 'center',
-        justifyContent: 'space-between',
     },
 });

@@ -5,14 +5,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Button from '@/components/ui/button';
 import TermsAndConditions from '@/components/features/auth/TermsConditions';
 import { theme } from '@/constants/theme';
-import { router } from 'expo-router';
-import { useRegisterStore } from '@/stores/register-store';
+import { useForgotPasswordAuth } from '@/context';
 import { EmailSchema, EmailSchemaType } from '@/validation/email';
 import FormInput from '@/components/ui/forminput';
 import { Sms } from 'iconsax-react-nativejs';
+import { useAuth } from '@/api/hooks/app/useAuth';
 
 const ForgotPasswordForm = () => {
-    const { setEmail, setUserEmail } = useRegisterStore();
+    const { setFormData } = useForgotPasswordAuth();
+    const { SendOtpMutation } = useAuth();
 
     const form = useForm<EmailSchemaType>({
         defaultValues: {
@@ -22,10 +23,11 @@ const ForgotPasswordForm = () => {
     });
 
     const handleFormSubmit = (data: EmailSchemaType) => {
-        setEmail(data.email);
-        setUserEmail(true);
-        router.push('/request-password-otp');
+        const email = data.email.trim().toLowerCase();
+        setFormData({ email });
+        SendOtpMutation.mutate({ email });
     };
+
     return (
         <View style={styles.container}>
             <FormInput
@@ -38,7 +40,10 @@ const ForgotPasswordForm = () => {
             <TermsAndConditions />
             <Button
                 label="Continue"
-                disabled={!form.formState.isValid}
+                disabled={
+                    !form.formState.isValid || SendOtpMutation.isPending
+                }
+                isLoading={SendOtpMutation.isPending}
                 onPress={form.handleSubmit(handleFormSubmit)}
             />
         </View>
