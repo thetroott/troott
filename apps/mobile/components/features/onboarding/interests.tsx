@@ -9,8 +9,6 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import { SolidIcons } from '@/assets/icons';
-import { router } from 'expo-router';
-import { replaceWithPendingTargetOrHome } from '@/lib/deep-link/replace-with-pending-or-home';
 import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import Text from '@/components/ui/text';
@@ -67,7 +65,6 @@ const Interests = () => {
         }
         try {
             await onboardTopics.mutateAsync({ topicIds: selectedIds });
-            router.push('/(onboarding)/select-ministers');
         } catch (e) {
             toast.error(
                 e instanceof Error ? e.message : 'Could not save topics',
@@ -78,7 +75,6 @@ const Interests = () => {
     const handleSkip = async () => {
         try {
             await skipOnboarding.mutateAsync();
-            await replaceWithPendingTargetOrHome();
         } catch (e) {
             toast.error(
                 e instanceof Error ? e.message : 'Could not skip onboarding',

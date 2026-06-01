@@ -14,13 +14,15 @@ import Input from '@/components/ui/input';
 import Button from '@/components/ui/button';
 import Text from '@/components/ui/text';
 import { toast } from '@/components/ui/toast';
-import { replaceWithPendingTargetOrHome } from '@/lib/deep-link/replace-with-pending-or-home';
+import { router } from 'expo-router';
 import {
     useOnboardMinistersMutation,
     useOnboardingMinistersQuery,
     useSkipOnboardingMutation,
 } from '@/api/hooks/app/useListenerOnboarding';
 import { ministerDocToRow } from '@/engine/utils/library-map';
+
+const MIN_MINISTERS = 1;
 
 type MinisterRow = {
     id: string;
@@ -34,14 +36,19 @@ function mapMinisters(data: unknown): MinisterRow[] {
     }
     const out: MinisterRow[] = [];
     for (const doc of data) {
+        if (!doc || typeof doc !== 'object') continue;
         const row = ministerDocToRow(doc);
-        if (row?.id) {
-            out.push({
-                id: row.id,
-                name: row.name,
-                image: row.image,
-            });
-        }
+        if (!row?.id) continue;
+        const r = doc as Record<string, unknown>;
+        const ministerialName =
+            typeof r.ministerialName === 'string' ? r.ministerialName : '';
+        out.push({
+            id: row.id,
+            name: ministerialName.trim() || row.name,
+            image:
+                row.image ??
+                (typeof r.avatar === 'string' ? r.avatar : undefined),
+        });
     }
     return out;
 }
@@ -66,12 +73,16 @@ const FavoriteMinisters = () => {
         );
     };
 
-    const handleFinish = async () => {
+    const handleContinue = async () => {
+        if (selectedIds.length < MIN_MINISTERS) {
+            toast.error(`Select at least ${MIN_MINISTERS} minister`);
+            return;
+        }
         try {
             await onboardMinisters.mutateAsync({
                 ministerIds: selectedIds,
             });
-            await replaceWithPendingTargetOrHome();
+            router.push('/(onboarding)/select-interests');
         } catch (e) {
             toast.error(
                 e instanceof Error ? e.message : 'Could not save ministers',
@@ -82,7 +93,6 @@ const FavoriteMinisters = () => {
     const handleSkip = async () => {
         try {
             await skipOnboarding.mutateAsync();
-            await replaceWithPendingTargetOrHome();
         } catch (e) {
             toast.error(
                 e instanceof Error ? e.message : 'Could not skip onboarding',
@@ -138,9 +148,13 @@ const FavoriteMinisters = () => {
             </View>
             <View style={styles.bottomContainer}>
                 <Button
-                    label="Finish"
+                    label="Continue"
+                    disabled={
+                        selectedIds.length < MIN_MINISTERS ||
+                        onboardMinisters.isPending
+                    }
                     isLoading={onboardMinisters.isPending}
-                    onPress={() => void handleFinish()}
+                    onPress={() => void handleContinue()}
                 />
                 <Button
                     label="Skip"

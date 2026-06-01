@@ -3,7 +3,7 @@ import { Image, StyleSheet, View, type ImageSourcePropType } from 'react-native'
 
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 
 type LatestReleaseProps = {
     sermon?: SermonItemDTO;

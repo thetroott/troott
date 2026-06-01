@@ -13,10 +13,9 @@ import { OutlineIcons } from '@/assets/icons';
 import PlayListCard from '@/components/features/playlist/playlist-card';
 import SermonCard from '@/components/features/search/sermon-card';
 import Text from '@/components/ui/text';
-import { tracks } from '@/_data/_mock/tracks';
 import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
 import { theme } from '@/constants/theme';
-import type { ISermonTrack, SermonItemDTO } from '@/types/sermon';
+import type { ISermonTrack, SermonItemDTO } from '@/api/dtos/sermon.dto';
 import {
     getLibraryArrayField,
     mapSeriesDocsToRows,
@@ -28,9 +27,14 @@ import {
 import {
     usePlaylistsQuery,
     useUserLibraryQuery,
+    useLibrarySessionEnabled,
 } from '@/api/hooks/app/useLibrary';
 
-import { LibraryEmptyState } from './library-states';
+import {
+    LibraryEmptyState,
+    LibraryErrorState,
+    LibraryListSkeleton,
+} from './library-states';
 
 type DisplayStyle = 'grid' | 'list';
 
@@ -128,29 +132,27 @@ export function LibraryListeningHistory({
 }: {
     displayStyle: DisplayStyle;
 }) {
-    const { data: lib } = useUserLibraryQuery(true);
+    const sessionReady = useLibrarySessionEnabled();
+    const { data: lib } = useUserLibraryQuery(sessionReady);
     let raw = getLibraryArrayField(lib, 'listeningHistory');
     if (!raw.length) raw = getLibraryArrayField(lib, 'recentlyPlayed');
     const apiItems = mapSermonDocsToItems(raw);
 
-    const previewItems: SermonItemDTO[] = useMemo(
-        () =>
-            [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
-                const row = tracks[i % 3];
-                return catalogRowToSermonItem({
-                    ...row,
-                    id:
-                        row.id != null
-                            ? String(row.id)
-                            : `listening-preview-${i}`,
-                } as Partial<ISermonTrack> & { id: string | null });
-            }),
-        [],
-    );
-
-    const listeningItems = apiItems.length ? apiItems : previewItems;
+    const listeningItems = apiItems;
 
     const isGrid = displayStyle === 'grid';
+
+    if (!listeningItems.length) {
+        return (
+            <LibraryEmptyState
+                title="No listening history yet"
+                subtitle="Sermons you play will appear here."
+                actionLabel="Explore sermons"
+                actionFilled
+                onAction={() => router.push('/search')}
+            />
+        );
+    }
 
     return (
         <View
@@ -237,7 +239,8 @@ export function LibrarySermonCategory({
     subCategories: string[];
     sortMode: 'recent' | 'alpha' | 'oldest' | 'plays';
 }) {
-    const { data: lib } = useUserLibraryQuery(true);
+    const sessionReady = useLibrarySessionEnabled();
+    const { data: lib, isLoading, isError, refetch } = useUserLibraryQuery(sessionReady);
     const downloadedOnly = subCategories.includes('Downloaded');
     const liked = mapSermonDocsToItems(
         getLibraryArrayField(lib, 'likedSermons', 'likedsermons'),
@@ -247,6 +250,19 @@ export function LibrarySermonCategory({
     );
     const base = downloadedOnly ? downloaded : liked;
     const items = sortSermons(base, sortMode);
+
+    if (isLoading && lib == null) {
+        return <LibraryListSkeleton />;
+    }
+
+    if (isError && lib == null) {
+        return (
+            <LibraryErrorState
+                message="Could not load your library."
+                onRetry={() => void refetch()}
+            />
+        );
+    }
 
     if (!items.length) {
         return (
@@ -375,7 +391,8 @@ export function LibrarySeriesCategory({
     subCategories: string[];
     sortMode: 'recent' | 'alpha' | 'oldest' | 'plays';
 }) {
-    const { data: lib } = useUserLibraryQuery(true);
+    const sessionReady = useLibrarySessionEnabled();
+    const { data: lib } = useUserLibraryQuery(sessionReady);
     const downloadedOnly = subCategories.includes('Downloaded');
     const seriesRaw = getLibraryArrayField(
         lib,
@@ -455,7 +472,8 @@ export function LibraryMinisterCategory({
     displayStyle: DisplayStyle;
     sortMode: 'alpha' | 'plays';
 }) {
-    const { data: lib } = useUserLibraryQuery(true);
+    const sessionReady = useLibrarySessionEnabled();
+    const { data: lib } = useUserLibraryQuery(sessionReady);
     const raw = getLibraryArrayField(
         lib,
         'favouriteMinisters',
@@ -500,7 +518,13 @@ export function LibraryPlaylistCategory({
     sortValue: string;
     onOpenLikedSermons: () => void;
 }) {
-    const { data: playlistApiData } = usePlaylistsQuery(true);
+    const sessionReady = useLibrarySessionEnabled();
+    const {
+        data: playlistApiData,
+        isLoading,
+        isError,
+        refetch,
+    } = usePlaylistsQuery(sessionReady);
 
     const playlistRows = useMemo(() => {
         const data = playlistApiData;
@@ -539,6 +563,19 @@ export function LibraryPlaylistCategory({
         }
         return copy;
     }, [filtered, sortValue]);
+
+    if (isLoading && playlistApiData == null) {
+        return <LibraryListSkeleton />;
+    }
+
+    if (isError && playlistApiData == null) {
+        return (
+            <LibraryErrorState
+                message="Could not load playlists."
+                onRetry={() => void refetch()}
+            />
+        );
+    }
 
     if (!sorted.length) {
         return (

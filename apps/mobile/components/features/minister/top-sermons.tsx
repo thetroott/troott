@@ -1,11 +1,10 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { theme } from '@/constants/theme';
 import Text from '@/components/ui/text';
-import React from 'react';
-import type { SermonItemDTO } from '@/types/sermon';
+import React, { useMemo } from 'react';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 import SermonCard from '@/components/features/search/sermon-card';
 import { FlashList } from '@shopify/flash-list';
-import { TransformArray } from '@/utils/transform-array';
 
 const styles = StyleSheet.create({
     section: {
@@ -46,6 +45,14 @@ const TopSermons = ({
     title = 'Top Sermons',
 }: TopSermonsProps) => {
     const ROWS_PER_SWIPE = 4;
+    const grouped = useMemo(() => {
+        const result: SermonItemDTO[][] = [];
+        for (let i = 0; i < sermons.length; i += ROWS_PER_SWIPE) {
+            result.push(sermons.slice(i, i + ROWS_PER_SWIPE));
+        }
+        return result;
+    }, [sermons]);
+
     if (!sermons || sermons.length === 0) {
         return (
             <View style={styles.section}>
@@ -87,7 +94,7 @@ const TopSermons = ({
                 </Pressable>
             </View>
             <FlashList
-                data={TransformArray(sermons, ROWS_PER_SWIPE) as SermonItemDTO[][]}
+                data={grouped}
                 keyExtractor={(_, index) => `${index}-sermon-group`}
                 horizontal
                 snapToInterval={theme.sizes.screen.width * 0.8}

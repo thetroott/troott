@@ -1,7 +1,7 @@
 import { theme } from '@/constants/theme';
 import { SaveToPlaylistIcon } from '@/components/features/shared/Icons';
 import { router } from 'expo-router';
-import type { SermonItemDTO } from '@/types/sermon';
+import type { SermonItemDTO } from '@/api/dtos/sermon.dto';
 import type { ReactNode } from 'react';
 import {
     DocumentDownload,
@@ -12,7 +12,7 @@ import {
     Send2,
 } from 'iconsax-react-nativejs';
 import Toast from 'react-native-toast-message';
-import { openShareFlow } from '@/stores/app/share';
+import { openShareFlow } from '@/lib/state/share-flow';
 
 export type GetTrackListActionsOptions = {
     /**
@@ -95,6 +95,7 @@ export const getTrackListActions = (
                 minister: track?.minister ?? 'Unknown minister',
                 image: track?.image ?? null,
                 artwork: track?.artwork ?? null,
+                shareableUrl: track?.shareableUrl ?? null,
             });
         },
     },

@@ -12,14 +12,6 @@ import { ArrowLeft, More, Send2 } from 'iconsax-react-nativejs';
 import ScreenView from '@/components/ui/screenview';
 import Text from '@/components/ui/text';
 import { theme } from '@/constants/theme';
-import { tracks } from '@/_data/_mock/tracks';
-import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
-import { catalogRowToSermonItem } from '@/engine/utils/catalog-map';
-import type { SermonItemDTO } from '@/types/sermon';
-
-type CatalogRow = Parameters<typeof catalogRowToSermonItem>[0] & {
-    artist?: string | null;
-};
 import Button from '@/components/ui/button';
 import { SolidIcons } from '@/assets/icons';
 import TopSermons from './top-sermons';
@@ -28,51 +20,38 @@ import PlaylistsFeaturedOn from './playlists-featured-on';
 import LatestRelease from './latest-release';
 import AboutSection from './about-section';
 import { SimilarMinisters } from '../home';
+import { useMinisterByIdQuery } from '@/api/hooks/app/useMinister';
+import {
+    useMinisterMostLikedQuery,
+    useMinisterMostPlayedQuery,
+    useMinisterRecentlyPublishedQuery,
+} from '@/api/hooks/app/useSermon';
+import {
+    formatMonthlyListeners,
+    ministerDisplayName,
+} from '@/lib/format-audience';
 
 type MinisterProfileProps = {
     ministerId?: string | null;
 };
 
-type MinisterMeta = {
-    id: string;
-    name: string;
-    church: string;
-    audienceLabel: string;
-    image: ImageSourcePropType;
-    aliases: string[];
-};
-
-const MINISTERS: Record<string, MinisterMeta> = {
-    'sam-adeyemi': {
-        id: 'sam-adeyemi',
-        name: 'Pastor Sam Adeyemi',
-        church: 'Daystar Christian Centre',
-        audienceLabel: '600K monthly audience • 10.5k Followers',
-        image: require('@/assets/images/4.jpg'),
-        aliases: ['sam adeyemi', 'pastor sam adeyemi'],
-    },
-    'bolaji-idowu': {
-        id: 'bolaji-idowu',
-        name: 'Pastor Bolaji Idowu',
-        church: 'Harvesters International',
-        audienceLabel: '220K monthly audience • 6.2k Followers',
-        image: require('@/assets/images/2.jpg'),
-        aliases: ['bolaji idowu', 'pastor bolaji idowu'],
-    },
-    'chris-oyakhilome': {
-        id: 'chris-oyakhilome',
-        name: 'Pastor Chris Oyakhilome',
-        church: 'LoveWorld Incorporated',
-        audienceLabel: '1.2M monthly audience • 35k Followers',
-        image: require('@/assets/images/5.jpg'),
-        aliases: ['chris oyakhilome', 'pastor chris oyakhilome'],
-    },
-};
-
-const DEFAULT_MINISTER = MINISTERS['sam-adeyemi'];
-
 const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
-    const { data: sermons, isLoading } = useSermonsCatalog();
+    const id = ministerId?.trim() ?? '';
+    const {
+        data: ministerRaw,
+        isLoading: ministerLoading,
+        isError: ministerError,
+    } = useMinisterByIdQuery(id, !!id);
+    const { data: topSermons = [], isLoading: topLoading } =
+        useMinisterMostPlayedQuery(id, !!id);
+    const { data: likedSermons = [] } = useMinisterMostLikedQuery(id, !!id);
+    const { data: recentSermons = [] } = useMinisterRecentlyPublishedQuery(
+        id,
+        !!id,
+    );
+
+    const minister = ministerRaw as Record<string, unknown> | undefined;
+
     const handleBack = () => {
         if (router.canGoBack()) {
             router.back();
@@ -81,84 +60,134 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
         router.replace('/(tabs)/home');
     };
 
-    const minister = ministerId ? MINISTERS[ministerId] ?? DEFAULT_MINISTER : DEFAULT_MINISTER;
-
-    const catalogRows =
-        sermons && sermons.length > 0
-            ? sermons
-            : (tracks as CatalogRow[]);
-
-    const sermonsData = useMemo(() => {
-        const filtered = catalogRows.filter((row) => {
-            const label = String(row.minister ?? row.artist ?? '').toLowerCase();
-            return minister.aliases.some((a) => label.includes(a));
+    const displayName = useMemo(() => {
+        if (!minister) {
+            return 'Minister';
+        }
+        return ministerDisplayName({
+            ministerialName:
+                typeof minister.ministerialName === 'string'
+                    ? minister.ministerialName
+                    : null,
+            firstName:
+                typeof minister.firstName === 'string'
+                    ? minister.firstName
+                    : null,
+            lastName:
+                typeof minister.lastName === 'string'
+                    ? minister.lastName
+                    : null,
         });
-        return filtered.length > 0 ? filtered : catalogRows;
-    }, [catalogRows, minister.aliases]);
+    }, [minister]);
 
-    const tracklistDtos: SermonItemDTO[] = useMemo(
-        () =>
-            sermonsData.map((r, i) =>
-                catalogRowToSermonItem({
-                    ...r,
-                    id: r.id != null ? String(r.id) : `s4u-${i}`,
-                }),
-            ),
-        [sermonsData],
+    const churchName =
+        typeof minister?.ministryName === 'string'
+            ? minister.ministryName
+            : '';
+
+    const audienceLabel = formatMonthlyListeners(
+        typeof minister?.monthlyListeners === 'number'
+            ? minister.monthlyListeners
+            : null,
     );
 
-    const heroTrack = tracklistDtos[0];
-    const latestRelease = tracklistDtos[1] ?? tracklistDtos[0];
-    const topSermons = tracklistDtos.slice(0, 6);
+    const latestRelease = recentSermons[0] ?? topSermons[0];
 
     const heroSource: ImageSourcePropType = useMemo(() => {
-        const raw = heroTrack?.image ?? heroTrack?.artwork;
-        if (typeof raw === 'number') return raw;
-        if (typeof raw === 'string' && raw.length > 0) return { uri: raw };
-        return minister.image;
-    }, [heroTrack, minister.image]);
+        const cover =
+            typeof minister?.coverImage === 'string'
+                ? minister.coverImage
+                : typeof minister?.avatar === 'string'
+                  ? minister.avatar
+                  : null;
+        if (cover) {
+            return { uri: cover };
+        }
+        const raw = latestRelease?.image ?? latestRelease?.artwork;
+        if (typeof raw === 'number') {
+            return raw;
+        }
+        if (typeof raw === 'string' && raw.length > 0) {
+            return { uri: raw };
+        }
+        return require('@/assets/images/4.jpg');
+    }, [latestRelease, minister]);
 
-    if (isLoading && (!sermonsData || sermonsData.length === 0)) {
+    const bioText =
+        typeof minister?.bio === 'string' && minister.bio.trim()
+            ? minister.bio.trim()
+            : undefined;
+
+    const resolvedMinisterId =
+        typeof minister?.id === 'string'
+            ? minister.id
+            : id;
+
+    const isLoading =
+        ministerLoading ||
+        (topLoading && topSermons.length === 0 && !ministerError);
+
+    if (!id) {
         return (
-            <ScreenView
-                screenStyle={{
-                    backgroundColor: theme.colors.black[50],
-                    paddingHorizontal: 0,
-                }}
-            >
+            <ScreenView screenStyle={styles.screen}>
                 <View style={styles.header}>
-                    <Pressable
-                        onPress={handleBack}
-                        style={styles.backButton}
-                    >
+                    <Pressable onPress={handleBack} style={styles.backButton}>
                         <ArrowLeft size={24} color={theme.colors.white[100]} />
                     </Pressable>
-                    <Text
-                        size="lg"
-                        color={theme.colors.white[100]}
-                        weight="semiBold"
-                    >
-                        Sermons from {minister.name}
+                    <Text size="lg" color={theme.colors.white[100]} weight="semiBold">
+                        Minister
                     </Text>
                     <View style={{ width: 24 }} />
                 </View>
-
                 <View style={styles.loadingContainer}>
-                    <Text color={theme.colors.white[100]}>
-                        Loading sermons...
+                    <Text color={theme.colors.grey[300]}>Minister not found.</Text>
+                </View>
+            </ScreenView>
+        );
+    }
+
+    if (ministerError && !minister) {
+        return (
+            <ScreenView screenStyle={styles.screen}>
+                <View style={styles.header}>
+                    <Pressable onPress={handleBack} style={styles.backButton}>
+                        <ArrowLeft size={24} color={theme.colors.white[100]} />
+                    </Pressable>
+                    <Text size="lg" color={theme.colors.white[100]} weight="semiBold">
+                        Minister
+                    </Text>
+                    <View style={{ width: 24 }} />
+                </View>
+                <View style={styles.loadingContainer}>
+                    <Text color={theme.colors.grey[300]}>
+                        Could not load this minister profile.
                     </Text>
                 </View>
             </ScreenView>
         );
     }
 
+    if (isLoading) {
+        return (
+            <ScreenView screenStyle={styles.screen}>
+                <View style={styles.header}>
+                    <Pressable onPress={handleBack} style={styles.backButton}>
+                        <ArrowLeft size={24} color={theme.colors.white[100]} />
+                    </Pressable>
+                    <Text size="lg" color={theme.colors.white[100]} weight="semiBold">
+                        Sermons from {displayName}
+                    </Text>
+                    <View style={{ width: 24 }} />
+                </View>
+                <View style={styles.loadingContainer}>
+                    <Text color={theme.colors.white[100]}>Loading sermons...</Text>
+                </View>
+            </ScreenView>
+        );
+    }
+
     return (
-        <ScreenView
-            screenStyle={{
-                backgroundColor: theme.colors.black[50],
-                paddingHorizontal: 0,
-            }}
-        >
+        <ScreenView screenStyle={styles.screen}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
@@ -166,10 +195,7 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
                 <View style={styles.heroWrap}>
                     <Image source={heroSource} style={styles.heroImage} />
                     <View style={styles.heroTopBar}>
-                        <Pressable
-                            onPress={handleBack}
-                            style={styles.iconButton}
-                        >
+                        <Pressable onPress={handleBack} style={styles.iconButton}>
                             <ArrowLeft size={24} color={theme.colors.white[50]} />
                         </Pressable>
                         <Pressable style={styles.iconButton}>
@@ -183,14 +209,18 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
                             weight="semiBold"
                             color={theme.colors.white[50]}
                         >
-                            {minister.name}
+                            {displayName}
                         </Text>
-                        <Text size="lg" color={theme.colors.white[100]}>
-                            {minister.church}
-                        </Text>
-                        <Text size="sm" color={theme.colors.grey[200]}>
-                            {minister.audienceLabel}
-                        </Text>
+                        {churchName ? (
+                            <Text size="lg" color={theme.colors.white[100]}>
+                                {churchName}
+                            </Text>
+                        ) : null}
+                        {audienceLabel ? (
+                            <Text size="sm" color={theme.colors.grey[200]}>
+                                {audienceLabel}
+                            </Text>
+                        ) : null}
                         <View style={styles.actionsRow}>
                             <Button
                                 variant="primary"
@@ -216,26 +246,30 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
                         imageSource={heroSource}
                     />
 
-                    <TopSermons
-                        sermons={topSermons}
-                    />
+                    <TopSermons sermons={topSermons} title="Top Sermons" />
 
+                    {likedSermons.length > 0 ? (
+                        <TopSermons
+                            sermons={likedSermons}
+                            title="Most Liked"
+                        />
+                    ) : null}
 
+                    <MinisterMadePlaylist />
 
-                    <MinisterMadePlaylist/>
+                    <PlaylistsFeaturedOn />
 
-                   <PlaylistsFeaturedOn/>
+                    {bioText ? (
+                        <AboutSection
+                            ministerName={displayName}
+                            text={bioText}
+                            onPressCta={() =>
+                                router.push(`/minister/${resolvedMinisterId}/about`)
+                            }
+                        />
+                    ) : null}
 
-                    <AboutSection
-                        ministerName={minister.name}
-                        text="Apostle Joshua Selman is a Nigerian minister, teacher, and founder of Eternity Network International (ENI), known for the Koinonia ministry. Born on June 25, 1980, he gained prominence for his deep teachings on intimacy with God.."
-                        onPressCta={() =>
-                            router.push(`/minister/${minister.id}/about`)
-                        }
-                    />
-
-                   <SimilarMinisters/>
-
+                    <SimilarMinisters />
                 </View>
             </ScrollView>
         </ScreenView>
@@ -245,6 +279,10 @@ const MinisterProfile = ({ ministerId }: MinisterProfileProps) => {
 export default MinisterProfile;
 
 const styles = StyleSheet.create({
+    screen: {
+        backgroundColor: theme.colors.black[50],
+        paddingHorizontal: 0,
+    },
     scrollContent: {
         paddingBottom: theme.sizes.spacing['2xl'],
     },
@@ -264,7 +302,6 @@ const styles = StyleSheet.create({
         right: theme.sizes.spacing.base,
         flexDirection: 'row',
         alignItems: 'center',
-        color: theme.colors.white[50],
         justifyContent: 'space-between',
     },
     heroOverlay: {

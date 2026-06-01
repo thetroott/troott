@@ -3,16 +3,12 @@ import React from 'react';
 import { theme } from '@/constants/theme';
 import Text from '@/components/ui/text';
 import PlayList from '@/components/features/playlist/playlist';
-import { useSermonsCatalog } from '@/engine/hooks/useSermonsCatalog';
-import { tracks } from '@/_data/_mock/tracks';
+import { useDiscoveryHomeRails } from '@/engine/hooks/useDiscoveryHomeRails';
 
 const TrendingPlayList = () => {
-    const { data: sermons, isLoading } = useSermonsCatalog();
+    const { mostPlayed, isLoading } = useDiscoveryHomeRails();
 
-    // Use fallback data if sermons are not loaded
-    const dataSource = sermons && sermons.length > 0 ? sermons : tracks;
-
-    if (isLoading && (!dataSource || dataSource.length === 0)) {
+    if (isLoading && mostPlayed.length === 0) {
         return (
             <View style={styles.container}>
                 <Text
@@ -35,9 +31,36 @@ const TrendingPlayList = () => {
         );
     }
 
-    const list = dataSource || [];
-    const trendingTracks = list.slice(0, 6);
-    const spiritualGrowthTracks = list.slice(3, 9);
+    if (mostPlayed.length === 0) {
+        return (
+            <View style={styles.container}>
+                <Text
+                    size="md"
+                    color={theme.colors.white[50]}
+                    weight="semiBold"
+                >
+                    Trending Playlist
+                </Text>
+                <Text
+                    style={{
+                        color: theme.colors.grey[300],
+                        textAlign: 'center',
+                        paddingVertical: 20,
+                    }}
+                >
+                    No trending sermons yet.
+                </Text>
+            </View>
+        );
+    }
+
+    const trendingTracks = mostPlayed.slice(0, 6);
+    const spiritualGrowthTracks = mostPlayed.slice(3, 9);
+    const primaryTitle =
+        trendingTracks[0]?.seriesTitle ??
+        trendingTracks[0]?.title ??
+        'Trending now';
+    const primaryChurch = trendingTracks[0]?.minister ?? 'Troott';
 
     return (
         <View style={styles.container}>
@@ -45,15 +68,15 @@ const TrendingPlayList = () => {
                 Trending Playlist
             </Text>
             <PlayList
-                title="Joy in the journey"
-                church="Koinonia Minstry"
+                title={String(primaryTitle)}
+                church={String(primaryChurch)}
                 tracks={trendingTracks}
                 description="Ain't no journey like a faith journey. Soundtracking your spiritual growth with sermons that uplift!"
             />
             <PlayList
-                title="Our heavenly home"
-                church="Koinonia Minstry"
-                tracks={spiritualGrowthTracks}
+                title="Most played this week"
+                church={String(primaryChurch)}
+                tracks={spiritualGrowthTracks.length > 0 ? spiritualGrowthTracks : trendingTracks}
                 description="The most streamed sermons and must hear messages"
                 cardStyle={{
                     backgroundColor: '#2F1516',
