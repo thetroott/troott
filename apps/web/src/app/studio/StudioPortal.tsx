@@ -10,6 +10,8 @@ import { useCreator } from '@/context/creator/useCreator';
 import useContextType from '@/hooks/shared/useContextType';
 import type { StudioResponseDTO } from '@/dtos/studio.dto';
 import { normalizeStudioCode } from '@/utils/studio-nav.util';
+import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
+import { StudioPageCenter } from '@/components/shared/studio/StudioPageCenter';
 import { PATH_GET_STARTED } from '@/routes/paths';
 import { isStudioContentRole } from '@/utils/roles.util';
 import { isStudioOnboardingComplete } from '@/utils/portal-onboarding.util';
@@ -68,7 +70,7 @@ const StudioPortal = () => {
         }
 
         const sessionUser = userContext.user as {
-            onboard?: { status?: string };
+            onboard?: { step?: number; status?: string };
         } | null;
 
         const tourSearch = new URLSearchParams(location.search).get('tour');
@@ -86,6 +88,7 @@ const StudioPortal = () => {
             !partialStudioAccess
         ) {
             navigate(PATH_GET_STARTED, { replace: true });
+            return;
         }
     }, [
         isHydratingSession,
@@ -100,7 +103,7 @@ const StudioPortal = () => {
 
     const sessionUser = userContext.user as {
         userType?: string;
-        onboard?: { status?: string };
+        onboard?: { step?: number; status?: string };
     } | null;
     const portalUserType = normalizeUserType(
         String(sessionUser?.userType ?? cookieService.getUserType() ?? ''),
@@ -186,9 +189,13 @@ const StudioPortal = () => {
 
     if (error) {
         return (
-            <div className="flex min-h-[40vh] items-center justify-center p-8 text-muted-foreground">
-                {error}
-            </div>
+            <StudioPageCenter>
+                <StudioEmptyState
+                    placement="page"
+                    className="min-h-[40vh] text-muted-foreground"
+                    description={error}
+                />
+            </StudioPageCenter>
         );
     }
 

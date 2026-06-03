@@ -2,6 +2,7 @@ import Dashboard from '@/app/dashboard/Dashboard';
 import MySermons from '@/app/sermons/MySermons';
 import SermonUploadPage from '@/app/studio/SermonUploadPage';
 import SermonDetailPlaceholder from '@/app/studio/SermonDetailPlaceholder';
+import SermonEditPage from '@/app/studio/SermonEditPage';
 import Analytics from '@/app/analytics/Analytics';
 import Bin from '@/app/bin/Bin';
 import StudioPortal from '@/app/studio/StudioPortal';
@@ -13,6 +14,7 @@ import {
     PATH_SEG_SERMONS,
     PATH_SEG_SERMONS_ID,
     PATH_SEG_SERMONS_ID_EDIT,
+    PATH_SEG_SERMONS_ID_ANALYTICS,
     PATH_SEG_SERMONS_ID_RESUME,
     PATH_SEG_SERMONS_UPLOAD,
     PATH_SEG_SERMONS_UPLOAD_DETAILS,
@@ -98,7 +100,14 @@ const studioRoutes: Array<IRoute> = [
                 url: `${PATH_STUDIO}/${PATH_SEG_SERMONS_ID_EDIT}`,
                 isAuth: true,
                 path: PATH_SEG_SERMONS_ID_EDIT,
-                element: <SermonDetailPlaceholder />,
+                element: <SermonEditPage />,
+            },
+            {
+                name: 'sermon-analytics',
+                url: `${PATH_STUDIO}/${PATH_SEG_SERMONS_ID_ANALYTICS}`,
+                isAuth: true,
+                path: PATH_SEG_SERMONS_ID_ANALYTICS,
+                element: <SermonEditPage />,
             },
             {
                 name: 'analytics',

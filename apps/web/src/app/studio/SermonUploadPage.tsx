@@ -19,6 +19,7 @@ import {
     type UploadWizardStepKey,
 } from '@/utils/upload-wizard-route.util';
 import { resolveSermonPlaybackUrl } from '@/utils/sermon-list-map.util';
+import { resolveSermonCoverUrl } from '@/services/upload/sermon-cover-upload.service';
 import { toast } from 'sonner';
 
 /** Full-page upload wizard at /studio/:studioCode/sermons/upload/... */
@@ -111,14 +112,16 @@ const SermonUploadPage = () => {
         let cancelled = false;
         void (async () => {
             try {
-                const body = await fetchSermonDetail(sid);
-                const d = (body as { data?: Record<string, unknown> })?.data;
-                if (cancelled || !d) {
+                const d = (await fetchSermonDetail(sid)) as
+                    | Record<string, unknown>
+                    | undefined;
+                if (cancelled || !d || typeof d !== 'object') {
                     return;
                 }
                 const tags = Array.isArray(d.tags)
                     ? (d.tags as unknown[]).map(String)
                     : [];
+                const coverUrl = resolveSermonCoverUrl(d);
                 dispatch(
                     uploadActions.loadFromDraft({
                         sermonId: sid,
@@ -127,6 +130,11 @@ const SermonUploadPage = () => {
                         tags,
                         category: String(d.topic ?? ''),
                         isPublic: d.isPublic !== false,
+                        thumbnailPreview: coverUrl,
+                        coverImageUrl: coverUrl,
+                        coverUploadStatus: coverUrl ? 'uploaded' : 'idle',
+                        coverUploadError: null,
+                        coverFileFingerprint: null,
                     } as Partial<ISermonUpload>),
                 );
                 const hasAudio = Boolean(resolveSermonPlaybackUrl(d));

@@ -12,6 +12,15 @@ export const PATH_RESET_PASSWORD = '/reset-password';
 // Portal global (not studio-scoped)
 export const PATH_GET_STARTED = '/get-started';
 export const PATH_GET_STARTED_PREFIX = '/get-started';
+
+/** True when pathname is the Get Started hub or any nested onboarding screen. */
+export function isGetStartedPath(pathname: string): boolean {
+    const normalized = pathname.split('?')[0]?.replace(/\/+$/, '') || '/';
+    return (
+        normalized === PATH_GET_STARTED ||
+        normalized.startsWith(`${PATH_GET_STARTED}/`)
+    );
+}
 export const PATH_PROFILE = '/profile';
 export const PATH_SETTINGS = '/settings';
 
@@ -30,6 +39,7 @@ export const PATH_SEG_SERMONS_UPLOAD_PUBLISH = 'sermons/upload/publish';
 export const PATH_SEG_SERMONS_ID = 'sermons/:sermonId';
 export const PATH_SEG_SERMONS_ID_RESUME = 'sermons/:sermonId/resume';
 export const PATH_SEG_SERMONS_ID_EDIT = 'sermons/:sermonId/edit';
+export const PATH_SEG_SERMONS_ID_ANALYTICS = 'sermons/:sermonId/analytics';
 export const PATH_SEG_ANALYTICS = 'analytics';
 export const PATH_SEG_BIN = 'bin';
 
@@ -63,9 +73,41 @@ export function studioSermonsListPath(studioCode: string): string {
     return `${PATH_STUDIO_PREFIX}/${normalizeStudioCodeForPath(studioCode)}/${PATH_SEG_SERMONS}`;
 }
 
+/** Studio sermon edit (details) page URL. */
+export function studioSermonEditPath(
+    studioCode: string,
+    sermonId: string,
+): string {
+    const id = sermonId.trim();
+    return `${PATH_STUDIO_PREFIX}/${normalizeStudioCodeForPath(studioCode)}/sermons/${encodeURIComponent(id)}/edit`;
+}
+
+const STUDIO_SERMON_WORKSPACE_PATH_RE =
+    /^\/studio\/[^/]+\/sermons\/[^/]+\/(edit|analytics)\/?$/i;
+
+/** Sermon edit workspace — details or in-sidebar analytics (feat-0022 / feat-0023). */
+export function isStudioSermonWorkspacePath(pathname: string): boolean {
+    const normalized = pathname.replace(/\/+$/, '') || '/';
+    return STUDIO_SERMON_WORKSPACE_PATH_RE.test(normalized);
+}
+
+/** @deprecated Use `isStudioSermonWorkspacePath` */
+export function isStudioSermonEditPath(pathname: string): boolean {
+    return isStudioSermonWorkspacePath(pathname);
+}
+
 /** Studio analytics URL. */
 export function studioAnalyticsPath(studioCode: string): string {
     return `${PATH_STUDIO_PREFIX}/${normalizeStudioCodeForPath(studioCode)}/${PATH_SEG_ANALYTICS}`;
+}
+
+/** Single-sermon analytics inside the edit workspace (feat-0023). */
+export function studioSermonAnalyticsPath(
+    studioCode: string,
+    sermonId: string,
+): string {
+    const id = sermonId.trim();
+    return `${PATH_STUDIO_PREFIX}/${normalizeStudioCodeForPath(studioCode)}/sermons/${encodeURIComponent(id)}/analytics`;
 }
 
 // Get-started (global user KYC)
