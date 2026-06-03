@@ -4,7 +4,9 @@ import {
     UpdateSermonDTO,
     UploadDTO,
 } from '@/dtos/core/sermon.dto';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 import type { ISermonDoc } from '@/interfaces/core/sermon.interface';
+import { SermonVisibilityStatus } from '@/interfaces/core/sermon.interface';
 
 function sermonDocId(sermon: ISermonDoc): string {
     if (sermon.id != null) {
@@ -86,8 +88,8 @@ class SermonMapper {
             uploadedBy = String(img.uploadedBy);
         }
         let file = '';
-        if (img?.item != null) {
-            file = String(img.item);
+        if (sermon.imageUrl != null && String(sermon.imageUrl).trim()) {
+            file = toStoragePublicUrl(String(sermon.imageUrl));
         }
         const result: UploadDTO = {
             id: itemId,
@@ -169,7 +171,7 @@ class SermonMapper {
         let imageDto: { item: string; width: number; height: number } | undefined;
         if (img) {
             imageDto = {
-                item: img.item,
+                item: img.item ?? '',
                 width: img.width,
                 height: img.height,
             };
@@ -199,6 +201,24 @@ class SermonMapper {
             topic: sermon.topic,
             tags: sermon.tags,
             isPublic: sermon.isPublic,
+            visibility: (() => {
+                const validVisibility = new Set<string>(
+                    Object.values(SermonVisibilityStatus),
+                );
+                if (
+                    typeof sermon.visibility === 'string' &&
+                    validVisibility.has(sermon.visibility)
+                ) {
+                    return sermon.visibility as SermonVisibilityStatus;
+                }
+                if (sermon.isPublic === true) {
+                    return SermonVisibilityStatus.PUBLIC;
+                }
+                if (sermon.isPublic === false) {
+                    return SermonVisibilityStatus.PRIVATE;
+                }
+                return SermonVisibilityStatus.PUBLIC;
+            })(),
             allowDownload: sermon.allowDownload,
             allowComment: sermon.allowComment,
 
@@ -238,7 +258,7 @@ class SermonMapper {
         let imageDto: { item: string; width: number; height: number } | undefined;
         if (img) {
             imageDto = {
-                item: img.item,
+                item: img.item ?? '',
                 width: img.width,
                 height: img.height,
             };
@@ -278,7 +298,7 @@ class SermonMapper {
 
             playbackUrl: sermon.playbackUrl ?? '',
             manifestUrl: sermon.manifestUrl ?? '',
-            imageUrl: sermon.imageUrl ?? '',
+            imageUrl: toStoragePublicUrl(sermon.imageUrl ?? ''),
 
             image: imageDto,
             item: audio
@@ -297,6 +317,24 @@ class SermonMapper {
             topic: sermon.topic,
             tags: sermon.tags,
             isPublic: sermon.isPublic,
+            visibility: (() => {
+                const validVisibility = new Set<string>(
+                    Object.values(SermonVisibilityStatus),
+                );
+                if (
+                    typeof sermon.visibility === 'string' &&
+                    validVisibility.has(sermon.visibility)
+                ) {
+                    return sermon.visibility as SermonVisibilityStatus;
+                }
+                if (sermon.isPublic === true) {
+                    return SermonVisibilityStatus.PUBLIC;
+                }
+                if (sermon.isPublic === false) {
+                    return SermonVisibilityStatus.PRIVATE;
+                }
+                return SermonVisibilityStatus.PUBLIC;
+            })(),
             preachedAt: sermon.preachedAt ?? '',
             preachedYear: sermon.preachedYear,
             shareableUrl,

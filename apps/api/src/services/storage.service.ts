@@ -6,55 +6,210 @@ import {
     ListObjectsV2Command,
     S3Client,
 } from '@aws-sdk/client-s3';
+import { createReadStream } from 'fs';
+import fs from 'fs/promises';
+import path from 'path';
 import type { Readable } from 'stream';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { s3 } from '../configs/aws.config';
 import {
-    bucketNameFor,
-    inferBucketRoleFromKey,
-    type S3BucketRole,
-} from '../configs/s3-buckets.config';
-import { IFile, IResult } from '@/interfaces/common.interface';
+    AWS_BUCKETS_ORIGINALS,
+    AWS_BUCKETS_PLAYBACK,
+    AWS_BUCKETS_STORAGE,
+    s3,
+} from '../configs/aws.config';
+
+import { FileType, IFile, IResult } from '@/interfaces/common.interface';
 
 import { Upload } from '@aws-sdk/lib-storage';
 import { UploadStatus } from '@/types/upload.enums';
-import { getS3Folder } from '../utils/helpers.util';
+import { getS3Folder, buildStoragePublicUrl, buildS3ObjectKey } from '../utils/helpers.util';
+
+function mimeTypeForHlsFile(fileName: string): string {
+    const ext = path.extname(fileName).toLowerCase();
+    if (ext === '.m3u8') {
+        return 'application/vnd.apple.mpegurl';
+    }
+    if (ext === '.ts') {
+        return 'video/mp2t';
+    }
+    return 'application/octet-stream';
+}
+
+async function uploadHlsPackFile(
+    storage: StorageService,
+    uploadId: string,
+    renditionName: string,
+    fullPath: string,
+    fileName: string,
+): Promise<unknown> {
+    const st = await fs.stat(fullPath);
+    if (!st.isFile() || st.size === 0) {
+        return null;
+    }
+    const stream = createReadStream(fullPath);
+    const objectKey = `${uploadId}/hls/${renditionName}/${fileName}`;
+    const uploadResult = await storage.putStreamAtKey({
+        key: objectKey,
+        stream,
+        mimeType: mimeTypeForHlsFile(fileName),
+        size: st.size,
+        fileType: FileType.AUDIO,
+    });
+    if (uploadResult.error) {
+        throw new Error(uploadResult.message || 'S3 upload failed');
+    }
+    await fs.unlink(fullPath);
+    return uploadResult.data;
+}
+
+/** Polls pack dirs during encode; uploads closed segments and unlinks local files. */
+export class HlsIncrementalUploader {
+    private readonly uploaded = new Set<string>();
+    private readonly uploadedArtifacts: unknown[] = [];
+    private timer: ReturnType<typeof setInterval> | undefined;
+    private running = false;
+
+    constructor(
+        private readonly storage: StorageService,
+        private readonly uploadId: string,
+        private readonly renditionNames: string[],
+        private readonly packRoot: string,
+    ) {}
+
+    start(pollMs = 400): void {
+        if (this.timer) {
+            return;
+        }
+        this.timer = setInterval(() => {
+            void this.tick().catch(() => {
+                /* logged by caller on encode failure */
+            });
+        }, pollMs);
+    }
+
+    stop(): void {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = undefined;
+        }
+    }
+
+    async tick(): Promise<void> {
+        if (this.running) {
+            return;
+        }
+        this.running = true;
+        try {
+            for (const name of this.renditionNames) {
+                const dir = path.join(this.packRoot, name);
+                let files: string[];
+                try {
+                    files = await fs.readdir(dir);
+                } catch {
+                    continue;
+                }
+                for (const file of files) {
+                    if (!file.endsWith('.ts')) {
+                        continue;
+                    }
+                    const fullPath = path.join(dir, file);
+                    if (this.uploaded.has(fullPath)) {
+                        continue;
+                    }
+                    try {
+                        const st1 = await fs.stat(fullPath);
+                        if (!st1.isFile() || st1.size === 0) {
+                            continue;
+                        }
+                        await new Promise((r) => setTimeout(r, 80));
+                        const st2 = await fs.stat(fullPath);
+                        if (st2.size !== st1.size) {
+                            continue;
+                        }
+                        const data = await uploadHlsPackFile(
+                            this.storage,
+                            this.uploadId,
+                            name,
+                            fullPath,
+                            file,
+                        );
+                        if (data != null) {
+                            this.uploaded.add(fullPath);
+                            this.uploadedArtifacts.push(data);
+                        }
+                    } catch {
+                        /* segment still being written */
+                    }
+                }
+            }
+        } finally {
+            this.running = false;
+        }
+    }
+
+    async flushRemaining(): Promise<unknown[]> {
+        this.stop();
+        await this.tick();
+        for (const name of this.renditionNames) {
+            const dir = path.join(this.packRoot, name);
+            let files: string[];
+            try {
+                files = await fs.readdir(dir);
+            } catch {
+                continue;
+            }
+            for (const file of files) {
+                const fullPath = path.join(dir, file);
+                if (this.uploaded.has(fullPath)) {
+                    continue;
+                }
+                try {
+                    const data = await uploadHlsPackFile(
+                        this.storage,
+                        this.uploadId,
+                        name,
+                        fullPath,
+                        file,
+                    );
+                    if (data != null) {
+                        this.uploaded.add(fullPath);
+                        this.uploadedArtifacts.push(data);
+                    }
+                } catch {
+                    // ignore
+                }
+            }
+            try {
+                await fs.rmdir(dir);
+            } catch {
+                // ignore
+            }
+        }
+        return this.uploadedArtifacts;
+    }
+}
 
 class StorageService {
     private s3Client: S3Client = s3;
     private readonly URL_EXPIRATION = 3600;
 
-    private bucketFor(role?: S3BucketRole, key?: string): string {
-        if (role) {
-            return bucketNameFor(role);
-        }
-        if (key) {
-            return bucketNameFor(inferBucketRoleFromKey(key));
-        }
-        return bucketNameFor('storage');
-    }
-
-    /**
-     * Upload a stream to an explicit bucket role and key (no MIME folder prefix).
-     * Used for HLS segments on troott-playback.
-     */
+    /** HLS segments and manifests — `AWS_BUCKETS_PLAYBACK` from `aws.config.ts`. */
     public async putStreamAtKey(data: {
-        role: S3BucketRole;
         key: string;
         stream: NodeJS.ReadableStream;
         mimeType: string;
         size: number;
         fileType?: IFile['fileType'];
     }): Promise<IResult> {
-        const { role, key, stream, mimeType, size, fileType } = data;
-        const bucket = bucketNameFor(role);
+        
+        const { key, stream, mimeType, size, fileType } = data;
         const body = stream as unknown as Readable;
 
         try {
             const s3Upload = new Upload({
                 client: this.s3Client,
                 params: {
-                    Bucket: bucket,
+                    Bucket: AWS_BUCKETS_PLAYBACK,
                     Key: key,
                     Body: body,
                     ContentType: mimeType,
@@ -76,7 +231,7 @@ class StorageService {
                     uploadId: key,
                     s3Key: key,
                     rawFile: s3Response.Location,
-                    bucket,
+                    bucket: AWS_BUCKETS_PLAYBACK,
                 },
             };
         } catch (err: any) {
@@ -85,6 +240,85 @@ class StorageService {
                 error: true,
                 code: 500,
                 message: err.message,
+                data: {},
+            };
+        }
+    }
+
+    /**
+     * Upload multipart file to any S3 bucket using `{folder}/{uploadId}.{ext}` keys.
+     * Used by storage stills, sermon originals (audio), sermon covers, profile uploads, etc.
+     */
+    public async uploadFileToBucket(
+        data: IFile,
+        bucket: string,
+        options?: {
+            /** Return raw S3 Location (sermon originals). Default: CDN URL for storage bucket. */
+            useS3Location?: boolean;
+            publicUrl?: (s3Key: string) => string;
+        },
+    ): Promise<IResult> {
+        const { stream, mimeType, uploadId, info, size, fileType } = data;
+
+        if (!stream || !info || !mimeType || !fileType || !uploadId) {
+            return {
+                error: true,
+                code: 400,
+                message: 'Missing required upload fields.',
+                data: {},
+            };
+        }
+
+        const folder = getS3Folder(mimeType);
+        const s3Key = buildS3ObjectKey(
+            folder,
+            String(uploadId),
+            mimeType,
+            info.filename ?? data.fileName,
+        );
+
+        try {
+            const s3Upload = new Upload({
+                client: this.s3Client,
+                params: {
+                    Bucket: bucket,
+                    Key: s3Key,
+                    Body: stream,
+                    ContentType: mimeType,
+                },
+            });
+
+            const s3Response = await s3Upload.done();
+            const resolvePublicUrl = options?.publicUrl ?? buildStoragePublicUrl;
+            const rawFile = options?.useS3Location
+                ? String(s3Response.Location ?? '')
+                : resolvePublicUrl(s3Key);
+
+            return {
+                error: false,
+                code: 200,
+                message: 'File uploaded successfully.',
+                data: {
+                    fileName: info.filename,
+                    fileSize: size,
+                    fileType,
+                    mimetype: mimeType,
+                    uploadStatus: UploadStatus.COMPLETED,
+                    uploadId,
+                    s3Key,
+                    rawFile,
+                    bucket,
+                },
+            };
+        } catch (err: unknown) {
+            stream.destroy?.();
+            await this.deleteFile(s3Key, bucket);
+            const message =
+                err instanceof Error ? err.message : 'Upload failed';
+            return {
+                error: true,
+                code: 500,
+                message,
                 data: {},
             };
         }
@@ -114,63 +348,9 @@ class StorageService {
      * @throws {Error} If S3 upload fails or a required field is missing.
      */
     public async uploadFile(data: IFile): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        const { stream, mimeType, uploadId, info, size, fileType } = data;
-
-        if (!stream || !info || !mimeType || !fileType) {
-            result.error = true;
-            result.code = 400;
-            result.message = 'Missing required upload fields.';
-            return result;
-        }
-
-        const folder = await getS3Folder(mimeType);
-        const s3Key = `${folder}/${uploadId}`;
-
-        try {
-            const s3Upload = new Upload({
-                client: this.s3Client,
-                params: {
-                    Bucket: bucketNameFor('storage'),
-                    Key: s3Key,
-                    Body: stream,
-                    ContentType: mimeType,
-                },
-            });
-
-            const s3Response = await s3Upload.done();
-
-            return {
-                error: false,
-                code: 200,
-                message: 'File uploaded successfully.',
-                data: {
-                    fileName: info.filename,
-                    fileSize: size,
-                    fileType,
-                    mimetype: mimeType,
-                    uploadStatus: UploadStatus.COMPLETED,
-                    uploadId,
-                    s3Key: s3Key,
-                    rawFile: s3Response.Location,
-                },
-            };
-        } catch (err: any) {
-            console.error('upload failed with a specific error:', err);
-            stream.destroy();
-
-            await this.deleteFile(uploadId as string);
-            result.error = true;
-            result.code = 500;
-            result.message = err.message;
-            return result;
-        }
+        return this.uploadFileToBucket(data, AWS_BUCKETS_STORAGE, {
+            publicUrl: buildStoragePublicUrl,
+        });
     }
 
     /**
@@ -186,45 +366,38 @@ class StorageService {
      * - code: number, HTTP-style code
      * - data: object with `exists` property (true/false)
      */
-    public async exists(key: string, role?: S3BucketRole): Promise<IResult> {
-        let result: IResult = {
-            error: false,
-            message: '',
-            code: 200,
-            data: {},
-        };
-
-        const bucket = this.bucketFor(role, key);
-
+    public async exists(key: string, bucket: string): Promise<IResult> {
         try {
             await this.s3Client.send(
                 new HeadObjectCommand({ Bucket: bucket, Key: key }),
             );
 
-            result = {
+            return {
                 error: false,
                 message: 'File exists',
                 code: 200,
                 data: { exists: true },
             };
+            
         } catch (err: any) {
-            if (err.name === 'NotFound') {
-                result = {
+            if (
+                err.name === 'NotFound' ||
+                err.$metadata?.httpStatusCode === 404
+            ) {
+                return {
                     error: false,
                     message: 'File does not exist',
                     code: 404,
                     data: { exists: false },
                 };
             }
-            result = {
+            return {
                 error: true,
                 message: err.message,
                 code: 500,
                 data: {},
             };
         }
-
-        return result;
     }
 
     /**
@@ -239,14 +412,13 @@ class StorageService {
      * - code: number, HTTP-style code
      * - data: object containing `url` property with the signed URL
      */
-    public async getSignedUrl(key: string, role?: S3BucketRole): Promise<IResult> {
+    public async getSignedUrl(key: string, bucket: string): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
             code: 200,
             data: {},
         };
-        const bucket = this.bucketFor(role, key);
         try {
             const command = new GetObjectCommand({
                 Bucket: bucket,
@@ -279,8 +451,7 @@ class StorageService {
      * Useful when you need the entire file in memory (e.g. PDF generation,
      * email attachments). For large files prefer {@link getObjectStream}.
      */
-    public async getDocument(key: string, role?: S3BucketRole): Promise<IResult> {
-        const bucket = this.bucketFor(role, key);
+    public async getDocument(key: string, bucket: string): Promise<IResult> {
         try {
             const out = await this.s3Client.send(
                 new GetObjectCommand({ Bucket: bucket, Key: key }),
@@ -353,11 +524,10 @@ class StorageService {
     }
 
     /**
-     * Stream an object from S3 (for workers reading originals before transcoding).
+     * Stream source audio from `AWS_BUCKETS_ORIGINALS` (pre-transcode workers).
      */
     public async getObjectStream(
         key: string,
-        role: S3BucketRole = 'originals',
     ): Promise<IResult & { stream?: Readable }> {
         let result: IResult & { stream?: Readable } = {
             error: false,
@@ -365,11 +535,10 @@ class StorageService {
             code: 200,
             data: {},
         };
-        const bucket = this.bucketFor(role, key);
         try {
             const out = await this.s3Client.send(
                 new GetObjectCommand({
-                    Bucket: bucket,
+                    Bucket: AWS_BUCKETS_ORIGINALS,
                     Key: key,
                 }),
             );
@@ -382,7 +551,10 @@ class StorageService {
                 };
                 return result;
             }
-            result.data = { key };
+            result.data = {
+                key,
+                contentLength: out.ContentLength,
+            };
             result.stream = out.Body as Readable;
             return result;
         } catch (error: any) {
@@ -398,24 +570,20 @@ class StorageService {
     /**
      * Delete all objects under a prefix (best-effort cleanup after failed transcode).
      */
-    public async deleteObjectsByPrefix(
-        prefix: string,
-        role: S3BucketRole = 'playback',
-    ): Promise<IResult> {
+    public async deleteObjectsByPrefix(prefix: string): Promise<IResult> {
         const result: IResult = {
             error: false,
             message: '',
             code: 200,
             data: {},
         };
-        const bucket = this.bucketFor(role, prefix);
         try {
             const keys: string[] = [];
             let token: string | undefined;
             do {
                 const list = await this.s3Client.send(
                     new ListObjectsV2Command({
-                        Bucket: bucket,
+                        Bucket: AWS_BUCKETS_PLAYBACK,
                         Prefix: prefix,
                         ContinuationToken: token,
                     }),
@@ -432,7 +600,7 @@ class StorageService {
                 const batch = keys.splice(0, 1000);
                 await this.s3Client.send(
                     new DeleteObjectsCommand({
-                        Bucket: bucket,
+                        Bucket: AWS_BUCKETS_PLAYBACK,
                         Delete: {
                             Objects: batch.map((Key) => ({ Key })),
                             Quiet: true,
@@ -462,15 +630,13 @@ class StorageService {
      * - code: number, HTTP-style code
      * - data: empty object
      */
-    public async deleteFile(key: string, role?: S3BucketRole): Promise<IResult> {
+    public async deleteFile(key: string, bucket: string): Promise<IResult> {
         let result: IResult = {
             error: false,
             message: '',
             code: 200,
             data: {},
         };
-
-        const bucket = this.bucketFor(role, key);
 
         try {
             await this.s3Client.send(
@@ -495,6 +661,46 @@ class StorageService {
             };
         }
         return result;
+    }
+
+    /** Incremental HLS segment uploader for the audio processing job. */
+    public createHlsIncrementalUploader(
+        uploadId: string,
+        renditionNames: string[],
+        packRoot: string,
+    ): HlsIncrementalUploader {
+        return new HlsIncrementalUploader(
+            this,
+            uploadId,
+            renditionNames,
+            packRoot,
+        );
+    }
+
+    /** Public HTTPS URL for a playback object via CloudFront (`CLOUDFRONT_PLAYBACK_URL`). */
+    public urlForPlaybackKey(s3Key: string): string {
+        const playbackUrl = (process.env.CLOUDFRONT_PLAYBACK_URL || '').trim();
+        if (!playbackUrl) {
+            throw new Error('CLOUDFRONT_PLAYBACK_URL is required');
+        }
+
+        const parts = s3Key.split('/').filter(Boolean);
+        if (parts.length === 0) {
+            throw new Error('Playback S3 key is required');
+        }
+
+        const [uploadId, ...rest] = parts;
+        if (!uploadId) {
+            throw new Error('Playback S3 key must include an upload id');
+        }
+
+        const playbackCdn = playbackUrl.replace(/\/$/, '');
+        const base = `${playbackCdn}/sermon/${encodeURIComponent(uploadId)}`;
+        if (rest.length === 0) {
+            return base;
+        }
+
+        return `${base}/${rest.map(encodeURIComponent).join('/')}`;
     }
 }
 
