@@ -63,17 +63,17 @@ const LoginForm = (data: IForm) => {
         setSubmitting(true);
         try {
             const res = await login(formData);
-            if (res.error) {
-                if (!isApiHttp2xxErrorEnvelope(res)) {
-                    toast.error(res.message || 'Sign in failed.');
-                }
-                return;
-            }
             if (res.status === 206) {
                 toast.info(
                     res.message ||
                         'Activate your account with the code we sent to your email.',
                 );
+                return;
+            }
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Sign in failed.');
+                }
                 return;
             }
             if (res.status === 200) {

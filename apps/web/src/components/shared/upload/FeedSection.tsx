@@ -1,5 +1,6 @@
 import React from 'react';
 import { BarChart3, TrendingUp, Users, Eye } from 'lucide-react';
+import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 
 export interface FeedSectionProps {
     hasSermons?: boolean;
@@ -29,21 +30,25 @@ const FeedSection: React.FC<FeedSectionProps> = ({ hasSermons = false }) => {
                         </p>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <img
-                            src="/images/assets/no-activity.svg"
-                            alt="Empty State"
-                            className="w-20 h-20"
-                        />
-
-                        <h4 className="text-base font-medium text-foreground mb-2">
-                            No activity yet
-                        </h4>
-                        <p className="text-sm text-muted-foreground max-w-sm">
-                            Start by uploading your first message or teaching to
-                            get things moving.
-                        </p>
-                    </div>
+                    <StudioEmptyState
+                        placement="panel"
+                        description={
+                            <>
+                                <img
+                                    src="/images/assets/no-activity.svg"
+                                    alt=""
+                                    className="mx-auto h-20 w-20"
+                                />
+                                <p className="mt-4 text-base font-medium text-foreground">
+                                    No activity yet
+                                </p>
+                                <p className="mt-2 text-sm text-muted-foreground">
+                                    Start by uploading your first message or
+                                    teaching to get things moving.
+                                </p>
+                            </>
+                        }
+                    />
                 )}
             </div>
 

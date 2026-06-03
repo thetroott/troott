@@ -7,9 +7,19 @@ import {
     type ReactNode,
 } from 'react';
 import api from '@/api/config';
+import cookieService from '@/api/services/cookies';
 import type { CreatorResponseDTO } from '@/dtos/creator.dto';
 import CreatorContext from './creatorContext';
 import { ONBOARDING_PROFILE_REFRESH_EVENT } from '@/utils/hub-onboarding.util';
+import { UserType } from '@/models/User.model';
+import { normalizeUserType } from '@/utils/auth-redirect.util';
+
+function isCreatorPortalUser(): boolean {
+    return (
+        normalizeUserType(cookieService.getUserType() || '') ===
+        UserType.CREATOR.toLowerCase()
+    );
+}
 
 function parseCreatorPayload(data: unknown): CreatorResponseDTO | null {
     if (!data || typeof data !== 'object') {
@@ -36,6 +46,13 @@ export function CreatorState({ children }: { children: ReactNode }) {
     const loadedRef = useRef(false);
 
     const refresh = useCallback(async (options?: { force?: boolean }) => {
+        if (!isCreatorPortalUser()) {
+            setCreator(null);
+            setError(null);
+            loadedRef.current = false;
+            return null;
+        }
+
         if (loadedRef.current && !options?.force && creator) {
             return creator;
         }

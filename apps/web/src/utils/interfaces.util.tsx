@@ -393,6 +393,13 @@ export interface IUploadStep {
     component: React.ComponentType<any>;
 }
 
+export type CoverUploadStatus =
+    | 'idle'
+    | 'local-only'
+    | 'uploading'
+    | 'uploaded'
+    | 'error';
+
 export interface ISermonUpload {
     file?: File | null;
     title: string;
@@ -400,8 +407,13 @@ export interface ISermonUpload {
     tags: string[];
     thumbnail?: File | null;
     thumbnailPreview?: string | null;
+    coverUploadStatus?: CoverUploadStatus;
+    coverImageUrl?: string | null;
+    coverUploadError?: string | null;
+    coverFileFingerprint?: string | null;
     category: string;
     isPublic: boolean | undefined;
+    visibility?: 'public' | 'private' | 'unlisted';
     scheduledDate?: Date | null;
     // Add these fields for dynamic link generation
     sermonId?: string;

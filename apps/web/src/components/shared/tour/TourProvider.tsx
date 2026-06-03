@@ -14,6 +14,8 @@ import useContextType from '@/hooks/shared/useContextType';
 import { useMinister } from '@/context/minister/useMinister';
 import { useCreator } from '@/context/creator/useCreator';
 import cookieService from '@/api/services/cookies';
+import { UserType } from '@/models/User.model';
+import { normalizeUserType } from '@/utils/auth-redirect.util';
 import { PATH_GET_STARTED } from '@/routes/paths';
 import {
     dispatchOnboardingProfileRefresh,
@@ -102,8 +104,8 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const { userContext } = useContextType();
-    const { minister } = useMinister();
-    const { creator } = useCreator();
+    const { minister, refresh: refreshMinister } = useMinister();
+    const { creator, refresh: refreshCreator } = useCreator();
 
     const user = userContext.user as { onboard?: { step?: number } } | null;
     const userType =
@@ -155,6 +157,12 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
             }
             sessionStorage.setItem(TOUR_SESSION_KEYS.dismissed, '1');
             clearTourSessionFlags();
+            const ut = normalizeUserType(cookieService.getUserType() || '');
+            if (ut === UserType.CREATOR) {
+                await refreshCreator({ force: true });
+            } else {
+                await refreshMinister({ force: true });
+            }
             dispatchOnboardingProfileRefresh();
             setActive(false);
             setStepIndex(0);
@@ -163,7 +171,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
         } finally {
             setBusy(false);
         }
-    }, [clearTourSessionFlags, navigate]);
+    }, [clearTourSessionFlags, navigate, refreshCreator, refreshMinister]);
 
     const goToStep = useCallback(
         (index: number) => {
@@ -236,6 +244,12 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
             autoStartedRef.current = false;
         }
     }, [isStudioHome]);
+
+    useEffect(() => {
+        if (onboardingStep >= ONBOARDING_STEP_TOUR) {
+            sessionStorage.removeItem(TOUR_SESSION_KEYS.pending);
+        }
+    }, [onboardingStep]);
 
     useEffect(() => {
         if (!isStudioHome || onboardingStep >= ONBOARDING_STEP_TOUR) {

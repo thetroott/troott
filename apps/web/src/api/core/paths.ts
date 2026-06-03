@@ -121,6 +121,10 @@ export const URL_SERMON_MOVE_TO_BIN = (id: string) =>
     `${URL_SERMON}/move-to-bin/${id}`;
 export const URL_SERMON_RESTORE = (id: string) => `${URL_SERMON}/restore/${id}`;
 export const URL_SERMON_DELETE = (id: string) => `${URL_SERMON}/delete/${id}`;
+export const URL_SERMON_RESTORE_BULK = `${URL_SERMON}/restore`;
+export const URL_SERMON_DELETE_BULK = `${URL_SERMON}/delete`;
+export const URL_SERMON_RESTORE_ALL = `${URL_SERMON}/restore-all`;
+export const URL_SERMON_DELETE_ALL = `${URL_SERMON}/delete-all`;
 export const URL_SERMON_TOPIC = (topic: string) =>
     `${URL_SERMON}/topic/${encodeURIComponent(topic)}`;
 export const URL_SERMON_BY_ID = (id: string) => `${URL_SERMON}/${id}`;

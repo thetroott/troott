@@ -13,7 +13,7 @@ const App = () => {
 
     return (
         <AppState>
-            <Toaster richColors  position="top-right" />
+            <Toaster  position="top-right" />
             <ReactQueryProvider>
                 <AppProvider>
                     <Router>

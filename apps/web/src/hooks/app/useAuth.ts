@@ -67,6 +67,14 @@ const useAuth = () => {
     const login = async (data: LoginDTO) => {
         const response = await api.auth.loginUser(data);
 
+        if (response.status === 206) {
+            clearLocalAuth();
+            setUserType('');
+            setVerificationEmail(data.email);
+            navigate(PATH_ACTIVATE_ACCOUNT, { replace: true });
+            return response;
+        }
+
         if (!response.error) {
             if (response.status === 200) {
                 persistAuthFromResponse(response);
@@ -121,13 +129,6 @@ const useAuth = () => {
                     token: true,
                     returnTo: from,
                 });
-            }
-
-            if (response.status === 206) {
-                clearLocalAuth();
-                setUserType('');
-                setVerificationEmail(data.email);
-                navigate(PATH_ACTIVATE_ACCOUNT, { replace: true });
             }
         }
 

@@ -7,9 +7,19 @@ import {
     type ReactNode,
 } from 'react';
 import api from '@/api/config';
+import cookieService from '@/api/services/cookies';
 import type { MinisterResponseDTO } from '@/dtos/minister.dto';
 import MinisterContext from './ministerContext';
 import { ONBOARDING_PROFILE_REFRESH_EVENT } from '@/utils/hub-onboarding.util';
+import { UserType } from '@/models/User.model';
+import { normalizeUserType } from '@/utils/auth-redirect.util';
+
+function isMinisterPortalUser(): boolean {
+    return (
+        normalizeUserType(cookieService.getUserType() || '') ===
+        UserType.MINISTER.toLowerCase()
+    );
+}
 
 function parseMinisterPayload(data: unknown): MinisterResponseDTO | null {
     if (!data || typeof data !== 'object') {
@@ -36,6 +46,13 @@ export function MinisterState({ children }: { children: ReactNode }) {
     const loadedRef = useRef(false);
 
     const refresh = useCallback(async (options?: { force?: boolean }) => {
+        if (!isMinisterPortalUser()) {
+            setMinister(null);
+            setError(null);
+            loadedRef.current = false;
+            return null;
+        }
+
         if (loadedRef.current && !options?.force && minister) {
             return minister;
         }

@@ -10,6 +10,9 @@ export interface Sermon {
     type: 'audio' | 'video' | 'short';
     /** My Sermons list — Figma status pill (`10154:35090`). */
     publicationStatus?: 'published' | 'draft';
+    visibility?: 'public' | 'private' | 'unlisted';
+    shareableUrl?: string;
+    uploadStatus?: string;
     /** From API for client-side sort (My Sermons table local mode). */
     createdAtMs?: number;
     updatedAtMs?: number;

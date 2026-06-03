@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -9,34 +9,68 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useUpload, uploadActions } from '@/context/upload/uploadState';
+import { useDraft } from '@/context/draft/draftState';
+import {
+    type SermonVisibilityValue,
+    visibilityToIsPublic,
+} from '@/utils/sermon-visibility.util';
 
 const ListenerSettings: React.FC = () => {
     const { state, dispatch } = useUpload();
-    const { uploadData } = state;
+    const { uploadData, currentStep } = state;
+    const { updateDraft } = useDraft();
+    const prevStepRef = useRef(currentStep);
 
     // Local state for interaction settings
     const [allowComments, setAllowComments] = useState(false);
     const [showViewerLikes, setShowViewerLikes] = useState(false);
 
     // Visibility options: public, unlisted, private
-    const [visibility, setVisibility] = useState<string>(
-        uploadData.isPublic === true
-            ? 'public'
-            : uploadData.isPublic === false
-              ? 'private'
-              : 'public',
+    const [visibility, setVisibility] = useState<SermonVisibilityValue>(
+        uploadData.visibility ??
+            (uploadData.isPublic === false ? 'private' : 'public'),
     );
 
-    const handleVisibilityChange = (value: string) => {
-        setVisibility(value);
-        if (value === 'public') {
-            dispatch(uploadActions.setUploadData({ isPublic: true }));
-        } else if (value === 'private') {
-            dispatch(uploadActions.setUploadData({ isPublic: false }));
-        } else if (value === 'unlisted') {
-            // Unlisted means not searchable but accessible via link
-            dispatch(uploadActions.setUploadData({ isPublic: false }));
+    useEffect(() => {
+        const prev = prevStepRef.current;
+        prevStepRef.current = currentStep;
+        if (
+            prev !== 'settings' ||
+            currentStep === 'settings' ||
+            !uploadData.sermonId?.trim()
+        ) {
+            return;
         }
+        void updateDraft(uploadData.sermonId, {
+            visibility:
+                uploadData.visibility ??
+                (uploadData.isPublic === false ? 'private' : 'public'),
+            isPublic: visibilityToIsPublic(
+                uploadData.visibility ??
+                    (uploadData.isPublic === false ? 'private' : 'public'),
+            ),
+            scheduledDate: uploadData.scheduledDate,
+        }).catch((err: unknown) => {
+            console.error('Failed to save listener settings on step exit:', err);
+        });
+    }, [
+        currentStep,
+        updateDraft,
+        uploadData.isPublic,
+        uploadData.scheduledDate,
+        uploadData.sermonId,
+        uploadData.visibility,
+    ]);
+
+    const handleVisibilityChange = (value: string) => {
+        const next = value as SermonVisibilityValue;
+        setVisibility(next);
+        dispatch(
+            uploadActions.setUploadData({
+                visibility: next,
+                isPublic: visibilityToIsPublic(next),
+            }),
+        );
     };
 
     const handleCommentsChange = (checked: boolean) => {
