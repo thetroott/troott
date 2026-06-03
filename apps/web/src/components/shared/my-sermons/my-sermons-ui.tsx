@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 export const MY_SERMONS_PAGE = {
     /** Page background — Figma [`10154:35083`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=10154-35083) canvas `#2b2a2c` (`Frame 1618868833`). */
     pageBg: 'bg-[#2b2a2c]',
+    /** Fill studio `main` and pass height to `contentStack` / region empty states (feat-0026). */
+    pageRoot: 'flex min-h-0 flex-1 flex-col',
     /** Full width of `main` with **16px** horizontal inset (Figma gutter), no centered max-width rail. */
     mainColumn:
         'box-border flex min-h-0 w-full min-w-0 max-w-none flex-1 flex-col px-4 pb-2 pt-2',
@@ -88,13 +90,15 @@ export const MY_SERMONS_PAGE = {
 export const MY_SERMONS_LIST = {
     /** Table block — flush with pagination; canvas `#2b2a2c` when horizontal scroll shows gutter (`Frame 1618869364`). */
     scrollWrap: 'w-full overflow-x-auto bg-[#2b2a2c]',
-    table: 'w-full min-w-[1200px] border-separate border-spacing-0 text-left',
+    table: 'w-full min-w-[1080px] table-fixed border-separate border-spacing-0 text-left',
     thead: 'border-b border-[#545454]/50 bg-[#333234]',
     /** Header row — height **46** (Figma `Frame 1618868828`). */
     theadRow:
-        'h-[46px] [&>th]:h-[46px] [&>th]:align-middle [&>th]:font-matter [&>th]:text-[12px] [&>th]:font-normal [&>th]:leading-[18px] [&>th]:text-[#bdbdbd]',
+        'h-[46px] [&>th]:h-[46px] [&>th]:align-middle [&>th]:whitespace-nowrap [&>th]:font-matter [&>th]:text-[12px] [&>th]:font-normal [&>th]:leading-[18px] [&>th]:text-[#bdbdbd]',
     thCell: 'box-border px-4 py-0 first:pl-4 last:pr-4',
-    thSortableInner: 'inline-flex items-center gap-2',
+    /** Date / status / visibility / stats — extra horizontal breathing room. */
+    thCellMetric: 'px-5',
+    thSortableInner: 'inline-flex items-center gap-2 whitespace-nowrap',
     /** Date column sort badge — 20×20 circle `#8f3628` + arrow (Figma `Frame 1618868830`). */
     thSortBadge:
         'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#8f3628] text-white',
@@ -108,7 +112,11 @@ export const MY_SERMONS_LIST = {
         'flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover/sermon-row:pointer-events-auto group-hover/sermon-row:opacity-100',
     rowQuickActionBtn:
         'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-[3px] border border-[#545454] bg-[#2b2a2c] text-[#eaeaea] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
-    tdCell: 'box-border h-[64px] border-b border-[#545454]/50 px-4 py-0 align-middle first:pl-4 last:pr-4',
+    tdCell:
+        'box-border h-[64px] border-b border-[#545454]/50 px-4 py-0 align-middle whitespace-nowrap first:pl-4 last:pr-4',
+    tdCellMetric: 'px-5',
+    /** Sermon title column — only flexible column; allows truncate inside cell. */
+    tdCellSermon: 'min-w-0 max-w-0',
     /** Native checkbox — **18×18**, radius **4**, stroke `#9d9d9d` (Component 89). */
     checkbox:
         'h-[18px] w-[18px] shrink-0 cursor-pointer rounded border border-[#9d9d9d] bg-[#242325] text-[#08ffdb] accent-[#08ffdb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#333234]',

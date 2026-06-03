@@ -11,12 +11,11 @@ import {
     MoreVertical,
     Scissors,
     Pencil,
-    Copy,
-    Move,
     Share,
     Download,
     BarChart3,
     Trash2,
+    Info,
 } from 'lucide-react';
 import { MY_SERMONS_LIST } from '@/components/shared/my-sermons/my-sermons-ui';
 
@@ -26,30 +25,30 @@ interface SermonContextMenuProps {
     triggerClassName?: string;
     /** Grid cards use vertical dots per Figma `ph:dots-three-vertical-bold`. */
     menuIcon?: 'horizontal' | 'vertical';
+    onGetInfo?: (sermonId: string) => void;
     onEdit?: (sermonId: string) => void;
     onRename?: (sermonId: string) => void;
-    onDuplicate?: (sermonId: string) => void;
-    onMove?: (sermonId: string) => void;
     onShare?: (sermonId: string) => void;
     onDownload?: (sermonId: string) => void;
     onAnalytics?: (sermonId: string) => void;
     onMoveToTrash?: (sermonId: string) => void;
+    /** When false, **Move to trash** is hidden (e.g. published sermons). */
+    canMoveToTrash?: boolean;
 }
 
 const SermonContextMenu = ({
     sermonId,
     triggerClassName,
     menuIcon = 'horizontal',
+    onGetInfo,
     onEdit,
     onRename,
-    onDuplicate,
-    onMove,
     onShare,
     onDownload,
     onAnalytics,
     onMoveToTrash,
+    canMoveToTrash = true,
 }: SermonContextMenuProps) => {
-    // Default handlers if none provided
     const handleEdit = () => {
         if (onEdit) {
             onEdit(sermonId);
@@ -63,22 +62,6 @@ const SermonContextMenu = ({
             onRename(sermonId);
         } else {
             console.log('Rename sermon:', sermonId);
-        }
-    };
-
-    const handleDuplicate = () => {
-        if (onDuplicate) {
-            onDuplicate(sermonId);
-        } else {
-            console.log('Duplicate sermon:', sermonId);
-        }
-    };
-
-    const handleMove = () => {
-        if (onMove) {
-            onMove(sermonId);
-        } else {
-            console.log('Move sermon:', sermonId);
         }
     };
 
@@ -130,77 +113,73 @@ const SermonContextMenu = ({
                 </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-                className="w-48 bg-[#333234] text-white rounded-lg  "
+                className="w-48 rounded-lg bg-[#333234] text-white"
                 align="end"
             >
-                {/* First Group: Edit, Rename, Duplicate, Move */}
+                {onGetInfo ? (
+                    <>
+                        <DropdownMenuItem
+                            onClick={() => onGetInfo(sermonId)}
+                            className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-primary/10"
+                        >
+                            <Info className="h-4 w-4 text-white" />
+                            Get info
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="my-1 bg-gray-500/30" />
+                    </>
+                ) : null}
+
                 <DropdownMenuItem
                     onClick={handleEdit}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
+                    className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-primary/10"
                 >
-                    <Scissors className="w-4 h-4 text-white" />
+                    <Scissors className="h-4 w-4 text-white" />
                     Edit
                 </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-gray-500/30 my-1" />
                 <DropdownMenuItem
                     onClick={handleRename}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
+                    className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-primary/10"
                 >
-                    <Pencil className="w-4 h-4 text-white" />
+                    <Pencil className="h-4 w-4 text-white" />
                     Rename
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                    onClick={handleDuplicate}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
-                >
-                    <Copy className="w-4 h-4 text-white" />
-                    Duplicate
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                    onClick={handleMove}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
-                >
-                    <Move className="w-4 h-4 text-white" />
-                    Move
-                </DropdownMenuItem>
 
-                {/* First Separator */}
-                <DropdownMenuSeparator className="bg-gray-500/30 my-1" />
+                <DropdownMenuSeparator className="my-1 bg-gray-500/30" />
 
-                {/* Second Group: Share, Download, Analytics */}
                 <DropdownMenuItem
                     onClick={handleShare}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
+                    className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-primary/10"
                 >
-                    <Share className="w-4 h-4 text-white" />
+                    <Share className="h-4 w-4 text-white" />
                     Share
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={handleDownload}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
+                    className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-primary/10"
                 >
-                    <Download className="w-4 h-4 text-white" />
+                    <Download className="h-4 w-4 text-white" />
                     Download
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     onClick={handleAnalytics}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
+                    className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-primary/10"
                 >
-                    <BarChart3 className="w-4 h-4 text-white" />
+                    <BarChart3 className="h-4 w-4 text-white" />
                     Analytics
                 </DropdownMenuItem>
 
-                {/* Second Separator */}
-                <DropdownMenuSeparator className="bg-gray-500/30 my-1" />
-
-                {/* Third Group: Move to Trash */}
-                <DropdownMenuItem
-                    onClick={handleMoveToTrash}
-                    className="flex items-center gap-3 cursor-pointer hover:bg-primary/10 px-3 py-2"
-                >
-                    <Trash2 className="w-4 h-4 text-red-400" />
-                    Move to Trash
-                </DropdownMenuItem>
+                {onMoveToTrash && canMoveToTrash ? (
+                    <>
+                        <DropdownMenuSeparator className="my-1 bg-gray-500/30" />
+                        <DropdownMenuItem
+                            onClick={handleMoveToTrash}
+                            className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-primary/10"
+                        >
+                            <Trash2 className="h-4 w-4 text-red-400" />
+                            Move to Trash
+                        </DropdownMenuItem>
+                    </>
+                ) : null}
             </DropdownMenuContent>
         </DropdownMenu>
     );

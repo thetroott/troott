@@ -17,6 +17,8 @@ import {
     parseMinisterSermonsResponse,
 } from '@/utils/sermon-list-map.util';
 import { Button } from '@/components/ui/button';
+import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
+import { StudioPageCenter } from '@/components/shared/studio/StudioPageCenter';
 import { Loader2 } from 'lucide-react';
 
 const Sermons = () => {
@@ -127,22 +129,29 @@ const Sermons = () => {
 
     if (!ministerId) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                <p className="text-muted-foreground max-w-md">
-                    Your account is not linked to a minister or creator profile
-                    yet, so sermon lists cannot be loaded. Upload and publish
-                    still work from Create sermon.
-                </p>
-            </div>
+            <StudioPageCenter>
+                <StudioEmptyState
+                    placement="page"
+                    wideDescription
+                    description="Your account is not linked to a minister or creator profile yet, so sermon lists cannot be loaded. Upload and publish still work from Create sermon."
+                />
+            </StudioPageCenter>
         );
     }
 
     if (isLoading) {
         return (
-            <div className="flex flex-col items-center justify-center py-24 gap-3 text-muted-foreground">
-                <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
-                <p>Loading sermons…</p>
-            </div>
+            <StudioPageCenter>
+                <StudioEmptyState placement="page">
+                    <Loader2
+                        className="h-8 w-8 animate-spin text-[#9d9d9d]"
+                        aria-hidden
+                    />
+                    <p className="font-matter text-sm text-[#9d9d9d]">
+                        Loading sermons…
+                    </p>
+                </StudioEmptyState>
+            </StudioPageCenter>
         );
     }
 
@@ -152,16 +161,22 @@ const Sermons = () => {
                 ? String((error as { message: unknown }).message)
                 : 'Could not load sermons.';
         return (
-            <div className="flex flex-col items-center justify-center py-16 px-4 text-center gap-4">
-                <p className="text-destructive">{message}</p>
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => refetch()}
+            <StudioPageCenter>
+                <StudioEmptyState
+                    placement="page"
+                    description={
+                        <span className="text-destructive">{message}</span>
+                    }
                 >
-                    Retry
-                </Button>
-            </div>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => refetch()}
+                    >
+                        Retry
+                    </Button>
+                </StudioEmptyState>
+            </StudioPageCenter>
         );
     }
 

@@ -30,8 +30,6 @@ export function MySermonsEmptyTableSection() {
                     onSermonSelect={noop}
                     onEdit={noop}
                     onRename={noop}
-                    onDuplicate={noop}
-                    onMove={noop}
                     onShare={noop}
                     onDownload={noop}
                     onAnalytics={noop}
@@ -69,7 +67,7 @@ export function MySermonsEmptyShell({
         <div
             className={cn(
                 MY_SERMONS_PAGE.pageBg,
-                'flex min-h-0 flex-1 flex-col',
+                MY_SERMONS_PAGE.pageRoot,
                 decorative && 'pointer-events-none select-none',
                 className,
             )}
@@ -104,7 +102,7 @@ export function MySermonsEmptyShell({
                         className={MY_SERMONS_PAGE.tabStrip}
                         aria-label="Sermon categories"
                     >
-                        {(['Sermon', 'Series', 'Playlists'] as const).map(
+                        {(['Sermon'] as const).map(
                             (tab) => (
                                 <button
                                     key={tab}

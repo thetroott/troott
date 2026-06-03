@@ -1,5 +1,6 @@
 import type { Sermon } from '@/_data/dummySermons';
 import SermonContextMenu from './SermonContextMenu';
+import { canStudioUserMoveSermonToBin } from '@/utils/sermon-studio-policy.util';
 import {
     MY_SERMONS_GRID,
     SermonListAudioGlyph,
@@ -8,10 +9,9 @@ import {
 
 interface SermonsGridViewProps {
     sermons: Sermon[];
+    onGetInfo?: (sermonId: string) => void;
     onEdit: (sermonId: string) => void;
     onRename: (sermonId: string) => void;
-    onDuplicate: (sermonId: string) => void;
-    onMove: (sermonId: string) => void;
     onShare: (sermonId: string) => void;
     onDownload: (sermonId: string) => void;
     onAnalytics: (sermonId: string) => void;
@@ -20,10 +20,9 @@ interface SermonsGridViewProps {
 
 const SermonsGridView = ({
     sermons,
+    onGetInfo,
     onEdit,
     onRename,
-    onDuplicate,
-    onMove,
     onShare,
     onDownload,
     onAnalytics,
@@ -74,14 +73,16 @@ const SermonsGridView = ({
                                     MY_SERMONS_GRID.gridMenuTrigger
                                 }
                                 menuIcon="vertical"
+                                onGetInfo={onGetInfo}
                                 onEdit={onEdit}
                                 onRename={onRename}
-                                onDuplicate={onDuplicate}
-                                onMove={onMove}
                                 onShare={onShare}
                                 onDownload={onDownload}
                                 onAnalytics={onAnalytics}
                                 onMoveToTrash={onMoveToTrash}
+                                canMoveToTrash={canStudioUserMoveSermonToBin(
+                                    sermon,
+                                )}
                             />
                         </div>
                     </article>

@@ -26,11 +26,13 @@ import {
 } from '@/components/shared/my-sermons/my-sermons-ui';
 import { cn } from '@/lib/utils';
 import storage from '@/api/services/local-storage';
+import { studioSermonAnalyticsPath } from '@/routes/paths';
+import { navigateOnSermonEdit } from '@/utils/sermon-edit-routing.util';
 import {
-    PATH_SEG_SERMONS_UPLOAD,
-    studioAnalyticsPath,
-    studioUploadPath,
-} from '@/routes/paths';
+    canStudioUserMoveSermonToBin,
+    SERMON_PUBLISHED_TRASH_POLICY_MESSAGE,
+} from '@/utils/sermon-studio-policy.util';
+import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -48,6 +50,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { StudioConfirmDialog } from '@/components/shared/studio/StudioConfirmDialog';
+import { SermonChangeVisibilityDialog } from '@/components/shared/my-sermons/SermonChangeVisibilityDialog';
+import { SermonGetInfoDialog } from '@/components/shared/sermon/SermonGetInfoDialog';
+import type { SermonVisibilityValue } from '@/utils/sermon-visibility.util';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { sermonQueryKeys } from '@/constants/sermon-query-keys';
@@ -93,9 +99,9 @@ interface SermonsTableProps {
     isFetching?: boolean;
 }
 
-type MainTab = 'Sermon' | 'Series' | 'Playlists';
+type MainTab = 'Sermon';
 
-const MAIN_TABS: MainTab[] = ['Sermon', 'Series', 'Playlists'];
+const MAIN_TABS: MainTab[] = ['Sermon'];
 
 const DEFAULT_PAGE_SIZE = 16;
 
@@ -235,23 +241,49 @@ const SermonsTable = ({
 
     const setPage = controlled ? onPageChange! : setLocalPage;
 
+    const [infoTarget, setInfoTarget] = useState<{
+        id: string;
+        title: string;
+    } | null>(null);
+    const [trashTarget, setTrashTarget] = useState<{
+        id: string;
+        name: string;
+    } | null>(null);
+    const [trashSubmitting, setTrashSubmitting] = useState(false);
     const [renameOpen, setRenameOpen] = useState(false);
     const [renameTarget, setRenameTarget] = useState<{
         id: string;
         name: string;
     } | null>(null);
     const [renameInput, setRenameInput] = useState('');
+    const [visibilityTarget, setVisibilityTarget] = useState<{
+        id: string;
+        title: string;
+        visibility: SermonVisibilityValue;
+        shareableUrl?: string;
+    } | null>(null);
+
+    const openChangeVisibility = useCallback((sermon: Sermon) => {
+        setVisibilityTarget({
+            id: sermon.id,
+            title: sermon.name,
+            visibility: sermon.visibility ?? 'public',
+            shareableUrl: sermon.shareableUrl,
+        });
+    }, []);
 
     const handleEdit = useCallback(
         (sermonId: string) => {
             const code = storage.getStudioCode()?.trim();
-            if (code) {
-                navigate(studioUploadPath(code, PATH_SEG_SERMONS_UPLOAD), {
-                    state: { resumeSermonId: sermonId },
-                });
+            if (!code) {
+                return;
             }
+            const row = sermons.find((s) => s.id === sermonId);
+            navigateOnSermonEdit(navigate, code, sermonId, {
+                isDraft: row?.publicationStatus === 'draft',
+            });
         },
-        [navigate],
+        [navigate, sermons],
     );
 
     const invalidateMinisterLists = useCallback(async () => {
@@ -318,14 +350,6 @@ const SermonsTable = ({
         [openRename],
     );
 
-    const handleDuplicate = useCallback(() => {
-        toast.message('Duplicate sermon is not available yet.');
-    }, []);
-
-    const handleMove = useCallback(() => {
-        toast.message('Move to series is not available yet.');
-    }, []);
-
     const handleShare = useCallback((sermonId: string) => {
         const url = `${window.location.origin}/sermon/${sermonId}`;
         void navigator.clipboard.writeText(url).then(
@@ -362,40 +386,54 @@ const SermonsTable = ({
                 toast.error('Studio code not found.');
                 return;
             }
-            navigate(
-                `${studioAnalyticsPath(code)}?tab=overview&sermonId=${encodeURIComponent(sermonId)}`,
-            );
+            navigate(studioSermonAnalyticsPath(code, sermonId));
         },
         [navigate],
     );
 
-    const handleMoveToTrash = useCallback(
-        async (sermonId: string) => {
-            if (!window.confirm('Move this sermon to trash?')) {
+    const requestMoveToTrash = useCallback(
+        (sermonId: string) => {
+            const row = sermons.find((s) => s.id === sermonId);
+            if (row && !canStudioUserMoveSermonToBin(row)) {
+                toast.error(SERMON_PUBLISHED_TRASH_POLICY_MESSAGE);
                 return;
             }
-            try {
-                const res = await moveSermonToBinMutation.mutateAsync({
-                    id: sermonId,
-                });
-                if (res.error) {
-                    if (!isApiHttp2xxErrorEnvelope(res)) {
-                        toast.error(res.message || 'Could not move sermon.');
-                    }
-                    return;
-                }
-                toast.success('Sermon moved to trash.');
-                await invalidateMinisterLists();
-            } catch (e: unknown) {
-                toast.error(
-                    e && typeof e === 'object' && 'message' in e
-                        ? String((e as { message: unknown }).message)
-                        : 'Could not move sermon to trash.',
-                );
-            }
+            setTrashTarget({
+                id: sermonId,
+                name: row?.name?.trim() || 'this sermon',
+            });
         },
-        [invalidateMinisterLists, moveSermonToBinMutation],
+        [sermons],
     );
+
+    const confirmMoveToTrash = useCallback(async () => {
+        if (!trashTarget) {
+            return;
+        }
+        setTrashSubmitting(true);
+        try {
+            const res = await moveSermonToBinMutation.mutateAsync({
+                id: trashTarget.id,
+            });
+            if (res.error) {
+                if (!isApiHttp2xxErrorEnvelope(res)) {
+                    toast.error(res.message || 'Could not move sermon.');
+                }
+                return;
+            }
+            toast.success('Sermon moved to trash.');
+            setTrashTarget(null);
+            await invalidateMinisterLists();
+        } catch (e: unknown) {
+            toast.error(
+                e && typeof e === 'object' && 'message' in e
+                    ? String((e as { message: unknown }).message)
+                    : 'Could not move sermon to trash.',
+            );
+        } finally {
+            setTrashSubmitting(false);
+        }
+    }, [invalidateMinisterLists, moveSermonToBinMutation, trashTarget]);
 
     const uncontrolledFiltered = useMemo(() => {
         if (controlled) return sermons;
@@ -437,15 +475,21 @@ const SermonsTable = ({
         return uncontrolledFiltered.slice(start, start + pageSize);
     }, [controlled, sermons, uncontrolledFiltered, localPage, pageSize]);
 
-    const getFilteredSermons = (): Sermon[] => {
-        if (activeTab === 'Playlists' || activeTab === 'Series') {
-            return [];
-        }
-        return pageSlice;
-    };
+    const getFilteredSermons = (): Sermon[] => pageSlice;
 
     const filteredSermons = getFilteredSermons();
     const hasFilteredSermons = filteredSermons.length > 0;
+
+    const requestGetInfo = useCallback(
+        (sermonId: string) => {
+            const row = filteredSermons.find((s) => s.id === sermonId);
+            setInfoTarget({
+                id: sermonId,
+                title: row?.name?.trim() || 'Untitled sermon',
+            });
+        },
+        [filteredSermons],
+    );
 
     const hasListFilters = controlled
         ? Boolean(search.trim()) ||
@@ -515,9 +559,64 @@ const SermonsTable = ({
         <div
             className={cn(
                 MY_SERMONS_PAGE.pageBg,
-                'flex min-h-0 flex-1 flex-col',
+                MY_SERMONS_PAGE.pageRoot,
             )}
         >
+            <SermonGetInfoDialog
+                sermonId={infoTarget?.id ?? null}
+                open={infoTarget !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setInfoTarget(null);
+                    }
+                }}
+                context="library"
+                initialTitle={infoTarget?.title}
+            />
+
+            <SermonChangeVisibilityDialog
+                sermonId={visibilityTarget?.id ?? null}
+                sermonTitle={visibilityTarget?.title ?? ''}
+                open={visibilityTarget !== null}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setVisibilityTarget(null);
+                    }
+                }}
+                initialVisibility={visibilityTarget?.visibility ?? 'public'}
+                shareableUrl={visibilityTarget?.shareableUrl}
+                onSuccess={() => void invalidateMinisterLists()}
+            />
+
+            <StudioConfirmDialog
+                open={Boolean(trashTarget)}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setTrashTarget(null);
+                    }
+                }}
+                title="Move to trash"
+                description={
+                    <>
+                        <p>
+                            You&apos;re about to move{' '}
+                            <span className="font-matter-medium break-words text-[#eaeaea]">
+                                {trashTarget?.name ?? 'this sermon'}
+                            </span>{' '}
+                            to trash.
+                        </p>
+                        <p>
+                            You can restore it later from the Bin page in your
+                            studio.
+                        </p>
+                    </>
+                }
+                confirmLabel="Move to trash"
+                confirmTone="destructive"
+                confirming={trashSubmitting}
+                onConfirm={confirmMoveToTrash}
+            />
+
             <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
@@ -806,14 +905,13 @@ const SermonsTable = ({
                                 {viewMode === 'grid' ? (
                                     <SermonsGridView
                                         sermons={filteredSermons}
+                                        onGetInfo={requestGetInfo}
                                         onEdit={handleEdit}
                                         onRename={handleRename}
-                                        onDuplicate={handleDuplicate}
-                                        onMove={handleMove}
                                         onShare={handleShare}
                                         onDownload={handleDownload}
                                         onAnalytics={handleAnalytics}
-                                        onMoveToTrash={handleMoveToTrash}
+                                        onMoveToTrash={requestMoveToTrash}
                                     />
                                 ) : (
                                     <SermonsListView
@@ -822,14 +920,16 @@ const SermonsTable = ({
                                         selectAll={allOnPageSelected}
                                         onSelectAll={handleSelectAll}
                                         onSermonSelect={handleSermonSelect}
+                                        onGetInfo={requestGetInfo}
                                         onEdit={handleEdit}
                                         onRename={handleRename}
-                                        onDuplicate={handleDuplicate}
-                                        onMove={handleMove}
                                         onShare={handleShare}
                                         onDownload={handleDownload}
                                         onAnalytics={handleAnalytics}
-                                        onMoveToTrash={handleMoveToTrash}
+                                        onMoveToTrash={requestMoveToTrash}
+                                        onChangeVisibility={
+                                            openChangeVisibility
+                                        }
                                         sortKey={sort}
                                         onDateCreatedSortClick={
                                             handleDateCreatedHeaderClick
@@ -847,20 +947,11 @@ const SermonsTable = ({
                     ) : showEmptyTableShell ? (
                         <MySermonsEmptyTableSection />
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-16">
-                            <div className="text-center">
-                                <h3 className="mb-2 font-matter-medium text-lg text-[#eaeaea]">
-                                    Nothing here
-                                </h3>
-                                <p className="font-matter text-sm leading-5 text-[#9d9d9d] ">
-                                    {activeTab === 'Playlists'
-                                        ? 'Playlists are not available yet.'
-                                        : activeTab === 'Series'
-                                          ? 'Series are not available yet.'
-                                          : 'No audio sermons match your filters. Try adjusting search or filters.'}
-                                </p>
-                            </div>
-                        </div>
+                        <StudioEmptyState
+                            placement="region"
+                            title="Nothing here"
+                            description="No audio sermons match your filters. Try adjusting search or filters."
+                        />
                     )}
                 </div>
             </div>

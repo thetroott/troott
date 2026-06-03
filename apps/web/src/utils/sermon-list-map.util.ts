@@ -1,4 +1,5 @@
 import type { Sermon } from '@/_data/dummySermons';
+import { normalizeSermonVisibility } from '@/utils/sermon-visibility.util';
 import type { IAPIResponse } from '@/api/types';
 import type { AxiosResponse } from 'axios';
 
@@ -111,6 +112,14 @@ export function mapApiSermonToTableRow(raw: Record<string, unknown>): Sermon {
     const updatedAtMs = dateFieldToMs(raw.updatedAt) ?? createdAtMs;
     const releaseDateMs = dateFieldToMs(raw.releaseDate) ?? createdAtMs;
 
+    const item = raw.item as Record<string, unknown> | undefined;
+    const uploadStatus =
+        item && typeof item.uploadStatus === 'string'
+            ? item.uploadStatus
+            : undefined;
+    const shareableUrl =
+        typeof raw.shareableUrl === 'string' ? raw.shareableUrl.trim() : '';
+
     return {
         id,
         name: title,
@@ -125,6 +134,9 @@ export function mapApiSermonToTableRow(raw: Record<string, unknown>): Sermon {
         dislikes: 0,
         type: 'audio',
         publicationStatus: isDraft ? 'draft' : 'published',
+        visibility: normalizeSermonVisibility(raw.visibility, raw.isPublic as boolean | undefined),
+        shareableUrl: shareableUrl || undefined,
+        uploadStatus,
     };
 }
 

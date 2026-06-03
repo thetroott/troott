@@ -29,6 +29,10 @@ export function ministerSermonDocToDraft(doc: Record<string, unknown>): IDraft {
         file: null,
         thumbnail: null,
         thumbnailPreview,
+        coverUploadStatus: thumbnailPreview ? 'uploaded' : 'idle',
+        coverImageUrl: thumbnailPreview,
+        coverUploadError: null,
+        coverFileFingerprint: null,
         scheduledDate: null,
         seriesId:
             typeof doc.seriesId === 'string'
@@ -54,6 +58,7 @@ export function partialDraftToUpdateSermonDto(
     if (draft.tags !== undefined) dto.tags = draft.tags;
     if (draft.category !== undefined) dto.topic = draft.category;
     if (draft.isPublic !== undefined) dto.isPublic = draft.isPublic;
+    if (draft.visibility !== undefined) dto.visibility = draft.visibility;
     if (draft.seriesId !== undefined) {
         dto.isSeries = Boolean(draft.seriesId);
         dto.series = draft.seriesId;

@@ -5,10 +5,14 @@ import {
     URL_SERMON,
     URL_SERMON_BY_ID,
     URL_SERMON_DELETE,
+    URL_SERMON_DELETE_ALL,
+    URL_SERMON_DELETE_BULK,
     URL_SERMON_IMAGE_UPLOAD,
     URL_SERMON_MINISTER,
     URL_SERMON_MOVE_TO_BIN,
     URL_SERMON_RESTORE,
+    URL_SERMON_RESTORE_ALL,
+    URL_SERMON_RESTORE_BULK,
     URL_SERMON_PUBLISH,
     URL_SERMON_START_UPLOAD,
     URL_SERMON_TOPIC,
@@ -38,7 +42,7 @@ class SermonAPI {
             type: 'default',
             method: 'GET',
             path: URL_SERMON_BY_ID(id),
-            isAuth: false,
+            isAuth: true,
             payload: {},
         });
     }
@@ -116,6 +120,52 @@ class SermonAPI {
             path: URL_SERMON_DELETE(id),
             isAuth: true,
             payload: {},
+        });
+    }
+
+    restoreSermons(ids: string[]): Promise<IAPIResponse> {
+        return this.axiosService.call({
+            type: 'default',
+            method: 'PUT',
+            path: URL_SERMON_RESTORE_BULK,
+            isAuth: true,
+            payload: { ids },
+        });
+    }
+
+    deleteSermons(ids: string[]): Promise<IAPIResponse> {
+        return this.axiosService.call({
+            type: 'default',
+            method: 'DELETE',
+            path: URL_SERMON_DELETE_BULK,
+            isAuth: true,
+            payload: { ids },
+        });
+    }
+
+    restoreAllSermons(payload: {
+        ownerId: string;
+        filters?: Record<string, unknown>;
+    }): Promise<IAPIResponse> {
+        return this.axiosService.call({
+            type: 'default',
+            method: 'PUT',
+            path: URL_SERMON_RESTORE_ALL,
+            isAuth: true,
+            payload,
+        });
+    }
+
+    deleteAllSermons(payload: {
+        ownerId: string;
+        filters?: Record<string, unknown>;
+    }): Promise<IAPIResponse> {
+        return this.axiosService.call({
+            type: 'default',
+            method: 'DELETE',
+            path: URL_SERMON_DELETE_ALL,
+            isAuth: true,
+            payload,
         });
     }
 

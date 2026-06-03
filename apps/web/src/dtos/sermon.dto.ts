@@ -48,6 +48,7 @@ export interface SermonDTO {
     tags: Array<string>;
     language: string;
     isPublic: boolean;
+    visibility?: 'public' | 'private' | 'unlisted';
     shareableUrl: string;
     preachedAt: string;
     preachedYear: string;
@@ -82,6 +83,7 @@ export interface UpdateSermonDTO {
     topic?: string;
     tags?: Array<string>;
     isPublic?: boolean;
+    visibility?: 'public' | 'private' | 'unlisted';
     allowDownload?: boolean;
     allowComment?: boolean;
     isSeries?: boolean;
@@ -109,6 +111,7 @@ export interface PublishSermonDTO {
     tags: Array<string> | string;
     language?: string;
     isPublic: boolean;
+    visibility?: 'public' | 'private' | 'unlisted';
     isSeries: boolean;
     publishedBy: string;
     id?: string;

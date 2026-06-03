@@ -194,6 +194,36 @@ export function useDeleteSermonMutation(
     });
 }
 
+export function useRestoreSermonsMutation(
+    options?: UseMutationOptions<IAPIResponse, Error, { ids: string[] }>,
+) {
+    const qc = useQueryClient();
+    const { onSuccess, ...rest } = options ?? {};
+    return useMutation({
+        ...rest,
+        mutationFn: async ({ ids }) => api.sermon.restoreSermons(ids),
+        onSuccess: (data, variables, onMutateResult, context) => {
+            void qc.invalidateQueries({ queryKey: sermonQueryKeys.all });
+            onSuccess?.(data, variables, onMutateResult, context);
+        },
+    });
+}
+
+export function useDeleteSermonsMutation(
+    options?: UseMutationOptions<IAPIResponse, Error, { ids: string[] }>,
+) {
+    const qc = useQueryClient();
+    const { onSuccess, ...rest } = options ?? {};
+    return useMutation({
+        ...rest,
+        mutationFn: async ({ ids }) => api.sermon.deleteSermons(ids),
+        onSuccess: (data, variables, onMutateResult, context) => {
+            void qc.invalidateQueries({ queryKey: sermonQueryKeys.all });
+            onSuccess?.(data, variables, onMutateResult, context);
+        },
+    });
+}
+
 export function useMoveSermonToBinMutation(
     options?: UseMutationOptions<
         IAPIResponse,
