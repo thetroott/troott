@@ -11,7 +11,7 @@ export function studioPortalPath(studioCode: string): string {
 }
 
 /**
- * Navigates to /studio/{code}. Uses `preferredCode` when provided (e.g. from StudioContext).
+ * Navigates to /studio/{code} (studio home / Dashboard). Uses `preferredCode` when provided.
  */
 export async function navigateToStudioPortal(
     goTo: (path: string) => void,

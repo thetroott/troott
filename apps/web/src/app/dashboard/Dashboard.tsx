@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import UploadLayout from '@/components/layouts/UploadLayout';
+import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 import {
     useUpload,
     uploadActions,
@@ -11,7 +12,6 @@ import { useCreator } from '@/context/creator/useCreator';
 import { readOpenCreateSermonFromState } from '@/constants/create-sermon-nav';
 import {
     PATH_SEG_SERMONS_UPLOAD,
-    studioSermonsListPath,
     studioUploadPath,
 } from '@/routes/paths';
 import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
@@ -46,11 +46,10 @@ const Dashboard: React.FC = () => {
         limit: 50,
     };
 
-    const { data: ministerSermonsRaw } = useMinisterSermonsQuery(
-        ministerId,
-        listParams,
-        { enabled: Boolean(ministerId) },
-    );
+    const { data: ministerSermonsRaw, isSuccess: sermonsLoaded } =
+        useMinisterSermonsQuery(ministerId, listParams, {
+            enabled: Boolean(ministerId),
+        });
 
     const hasSermonsOnRecord =
         Array.isArray(ministerSermonsRaw) && ministerSermonsRaw.length > 0;
@@ -70,16 +69,7 @@ const Dashboard: React.FC = () => {
         if (isTourLaunchPending(searchParams.get('tour'))) {
             return;
         }
-        if (ministerId && !hasSermonsOnRecord) {
-            startUploadFlow();
-        }
-    }, [
-        hasSermonsOnRecord,
-        location.state,
-        ministerId,
-        searchParams,
-        startUploadFlow,
-    ]);
+    }, [location.state, searchParams, startUploadFlow]);
 
     useEffect(() => {
         const draftData = (location.state as { draftData?: unknown } | null)
@@ -114,34 +104,36 @@ const Dashboard: React.FC = () => {
     }, [location.state, navigate]);
 
     return (
-        <UploadLayout feedHasSermons={hasSermonsOnRecord}>
+        <UploadLayout
+            feedHasSermons={sermonsLoaded && hasSermonsOnRecord}
+        >
             {activeOption === 'upload' ? (
-                <div className="flex flex-col items-center justify-center py-16 px-4 text-center text-muted-foreground">
-                    <p className="max-w-md text-sm leading-relaxed">
-                        Use{' '}
-                        <span className="text-foreground font-medium">
-                            Upload from computer
-                        </span>{' '}
-                        above, or open{' '}
-                        <span className="text-foreground font-medium">
-                            Sermons
-                        </span>{' '}
-                        and choose Create sermon — both use the same upload
-                        experience.
-                    </p>
-                </div>
+                <StudioEmptyState
+                    placement="region"
+                    wideDescription
+                    description={
+                        <>
+                            Use{' '}
+                            <span className="font-medium text-foreground">
+                                Upload from computer
+                            </span>{' '}
+                            above, or open{' '}
+                            <span className="font-medium text-foreground">
+                                Sermons
+                            </span>{' '}
+                            and choose Create sermon — both use the same upload
+                            experience.
+                        </>
+                    }
+                    className="min-h-[min(50vh,400px)] text-muted-foreground"
+                />
             ) : (
-                <div className="flex items-center justify-center py-8">
-                    <div className="text-center space-y-4">
-                        <h2 className="text-2xl font-semibold text-foreground">
-                            Coming Soon
-                        </h2>
-                        <p className="text-muted-foreground">
-                            This feature is currently under development and will
-                            be available soon.
-                        </p>
-                    </div>
-                </div>
+                <StudioEmptyState
+                    placement="region"
+                    title="Coming Soon"
+                    className="min-h-[min(40vh,320px)]"
+                    description="This feature is currently under development and will be available soon."
+                />
             )}
         </UploadLayout>
     );
