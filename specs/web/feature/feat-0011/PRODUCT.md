@@ -123,9 +123,12 @@ Code: `apps/web/src/app/profile/`, `components/features/profile/`, `hooks/app/us
 
 | Surface | Node id | Code reference |
 | ------- | ------- | -------------- |
-| Profile page (read) | `11745:106250` | `UserProfile.tsx` |
+| Profile page (read, minimal hero) | `11578:98647` | `UserProfile.tsx` |
+| Profile page (read, with cover) | `11745:106250` | `UserProfile.tsx` |
 | Edit profile — empty | `11719:104736` | `EditProfileDialog.tsx` + `ImageUploadTile` cover |
 | Edit profile — populated | `11732:105889` | Same dialog with values |
+
+**Data + actions parity (normative):** [feat-0024 PROFILE_DATA_ACTIONS_SPEC](../feat-0024/PROFILE_DATA_ACTIONS_SPEC.md) — Figma screenshots, API matrix, gap register.
 
 Visual baseline: dark portal shell (`#2b2a2c` cards, `#545454` borders, `#08ffdb` accent on avatar ring and primary save).
 

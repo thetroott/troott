@@ -66,6 +66,18 @@ Path helpers: `apps/web/src/routes/paths.ts` — `studioSermonsListPath`, `studi
 | `apps/web/src/components/shared/upload/ReviewSubmit.tsx` | Publish + Save as draft |
 | `apps/web/src/context/upload/uploadState.tsx` | Wizard state, `sermonId`, steps |
 
+Footer status strip contract: [`UPLOAD_MODAL_FOOTER_STATUS.md`](./UPLOAD_MODAL_FOOTER_STATUS.md).
+Polling lifecycle contract: [`UPLOAD_STATUS_POLLING_SPEC.md`](./UPLOAD_STATUS_POLLING_SPEC.md).
+
+Cross-spec invariants (must remain aligned across PRODUCT/TECH/helpers):
+
+- Single polling owner per `sermonId` session (`UploadModal`).
+- Canonical status mapping for footer copy:
+  - `uploaded|extracting|processing -> Processing...`
+  - `completed -> Processing complete`
+  - `failed -> Processing failed`
+  - `cancelled -> Processing cancelled` (reserved until cancel flow ships).
+
 ### Drafts (Figma `10209:78627`)
 
 | Concern | Implementation |
@@ -115,6 +127,8 @@ Owner id: `resolveStudioSermonOwnerId` (minister id or creator scope).
 - [x] Save as draft + list refresh
 - [x] Standard modal height across entry + wizard
 - [x] URL ↔ wizard tab bidirectional sync (`uploadPathSegmentFromStep`, `UploadModal.onStepChange`)
+- [x] Single polling owner pattern + shared status fanout across tabs
+- [x] Footer status and polling contracts documented as canonical references
 
 ### Deferred / out of scope
 
@@ -157,6 +171,8 @@ Manual:
 1. Empty library → Create sermon → upload → Save draft → Draft filter shows row.
 2. Publish draft → Published filter → Get Started step 6 if first publish.
 3. Open `/sermons/upload` → backdrop visible; entry and Details modals same height.
+4. While upload status is non-terminal, verify only one active poll owner for `sermonId`.
+5. Verify footer mapping is canonical (`uploaded|extracting|processing => Processing...`) across all tabs.
 
 ---
 

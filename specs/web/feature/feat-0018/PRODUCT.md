@@ -63,7 +63,7 @@ Primary Figma anchors: **`10154:35090`**, **`10209:78627`**, **`4506:21677`**. O
 | Upload progress | `4530:20801`, `4530:21351`, `4555:6094` | Height ref; per-state pixel QA deferred |
 | Details / metadata | `4558:8281`, `4660:6496` | Implemented; not primary frame |
 | Listener settings | `4506:21677` (+ sub-variants `6314:*`, `6317:*`) | Primary frame; sub-variant pixel QA deferred |
-| Thumbnail / cover | `4296:7648`, `4698:20904`, `4755:6887` | Implemented in `SermonDetailsForm`; omitted from PRODUCT UCs |
+| Thumbnail / cover | `4296:7648`, `4698:20904`, `4755:6887` | Implemented in `SermonDetailsForm`; **immediate API upload** → [feat-0032](../feat-0032/PRODUCT.md) |
 | Processing / blocking | `6147:33439` | Deferred |
 | Review & submit | `4348:6495`, `6147:67501` | Covered by UC-MS04 only |
 | Success / error chrome | `10162:39143`, accessories `10252:34896` | Deferred |
@@ -167,11 +167,17 @@ All upload dialogs (**entry** + **wizard** tabs) share one fixed shell height ma
 4. Save draft and publish invalidate TanStack list queries without manual refresh.
 5. Upload route shows My Sermons backdrop behind modals (`SermonUploadPage`).
 6. **Create sermon** from toolbar uses same entry modal → wizard sequence as Get Started upload.
+7. Upload footer status remains globally consistent across tabs, with canonical mapping:
+   - `uploaded|extracting|processing -> Processing...`
+   - `completed -> Processing complete` (polling stops on that GET response — [UPLOAD_STATUS_POLLING P4b](./UPLOAD_STATUS_POLLING_SPEC.md#p4b--stop-on-terminal-response-requestresponse-cycle))
+   - `failed -> Processing failed`
 
 ---
 
 ## Related
 
+- [UPLOAD_STATUS_POLLING_SPEC](./UPLOAD_STATUS_POLLING_SPEC.md) — poll lifecycle; **stop on `uploadStatus: "completed"` response**
+- [feat-0029 PROCESSING_ETA_SPEC](../feat-0029/PROCESSING_ETA_SPEC.md) — honest processing countdown (no fixed 10 min default)
 - [feat-0006 PRODUCT](../feat-0006/PRODUCT.md) — CRUD + API map
 - [feat-0008](../feat-0008/PRODUCT.md) — single `start-upload` per file
 - [feat-0016](../feat-0016/PRODUCT.md) — tour step 3 (Sermons nav)

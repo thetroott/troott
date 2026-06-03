@@ -53,6 +53,7 @@ Figma: none provided. Baseline is the implemented web UI: dashboard shell (dark 
 ### Dashboard chrome (all Get Started routes)
 
 - Renders inside **DashboardLayout**: collapsible left sidebar, Troott logo, search, role-filtered nav, top **NavBar** (except studio sermons canvas override).
+- **Dashboard UI sidebar invariant:** [`feat-0034`](../feat-0034/PRODUCT.md) — same `AppSidebar` chrome on every dashboard route (including sermon edit); onboarding shell is the reference.
 - Background: neutral dark shell consistent with the rest of the portal.
 - Requires authenticated session (`isAuth: true` on route rows).
 

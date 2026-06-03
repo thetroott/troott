@@ -139,6 +139,8 @@ Figma: none provided. Baseline: collapsible sidebar, Troott logo, sidebar search
 
 42. Sidebar search follows the existing expand/focus pattern without unsolicited navigation.
 
+**Extended contract:** searchable destinations and sermon lookup — [feat-0028 SIDEBAR_SEARCH_SPEC.md](../feat-0028/SIDEBAR_SEARCH_SPEC.md).
+
 ### J. Must not regress
 
 43. Minister **and creator** studio links resolve via `studio.code` after login.

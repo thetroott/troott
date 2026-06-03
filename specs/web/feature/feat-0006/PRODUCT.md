@@ -23,7 +23,7 @@ Sermon lifecycle behavior is spread across upload modals, TanStack list queries,
 - Listener consumption, mobile upload, or public teaser pages ([`../api/deep-links.md`](../../../api/deep-links.md) if present).
 - Series and playlists tabs on My Sermons (UI placeholders only until separate specs).
 - Admin sermon moderation console ([feat-0003](../feat-0003/PRODUCT.md) admin routes).
-- Audio processing pipeline internals (workers, transcoding).
+- Audio processing pipeline internals (workers, transcoding) — see [`specs/api/feature/feat-0006`](../../../api/feature/feat-0006/PRODUCT.md)
 - Replacing legacy `/minister/:id/audio` URLs (product uses `/studio/{code}/sermons`).
 
 ## Figma
