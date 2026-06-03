@@ -7,6 +7,7 @@ import {
     LibraryItemAddedFrom,
     LibraryItemType,
 } from '@/interfaces/core/library.interface';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 const idOf = (doc: unknown): string => {
     if (doc == null) {
@@ -52,15 +53,18 @@ const mapLibraryItem = (row: any): LibraryItemResponseDTO => {
 
     let imageUrl: string | undefined;
     if (ref?.imageUrl) {
-        imageUrl = ref.imageUrl;
+        imageUrl = toStoragePublicUrl(ref.imageUrl);
     } else if (typeof ref?.banner === 'string') {
-        imageUrl = ref.banner;
+        imageUrl = toStoragePublicUrl(ref.banner);
     } else if (ref?.banner?.item) {
-        imageUrl = ref.banner.item;
+        imageUrl = toStoragePublicUrl(ref.banner.item);
     } else if (ref?.avatar) {
-        imageUrl = ref.avatar;
+        imageUrl =
+            typeof ref.avatar === 'string'
+                ? toStoragePublicUrl(ref.avatar)
+                : toStoragePublicUrl(ref.avatar?.s3Key);
     } else if (ref?.profile?.ministryLogo) {
-        imageUrl = ref.profile.ministryLogo;
+        imageUrl = toStoragePublicUrl(ref.profile.ministryLogo);
     }
 
     let duration: number | undefined;

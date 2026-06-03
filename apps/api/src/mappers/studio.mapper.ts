@@ -1,5 +1,6 @@
 import type IStudioDoc from '@/interfaces/core/studio.interface';
 import type { StudioMember, StudioInvite } from '@/interfaces/core/studio.interface';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 function idOf(v: unknown): string {
     if (v == null) return '';
@@ -16,8 +17,10 @@ function mapProfile(profile: unknown): Record<string, unknown> {
     return {
         description: p.description,
         ministryName: p.ministryName,
-        ministryLogo: p.ministryLogo,
-        banner: p.banner,
+        ministryLogo: p.ministryLogo
+            ? toStoragePublicUrl(String(p.ministryLogo))
+            : p.ministryLogo,
+        banner: p.banner ? toStoragePublicUrl(String(p.banner)) : p.banner,
         ministryType: p.ministryType,
         ministryHQLocation: {
             address: hq.address,
@@ -49,7 +52,9 @@ class StudioMapper {
             slug: doc.slug,
             name: doc.name,
             country: doc.country,
-            avatar: doc.avatar,
+            avatar: doc.avatar
+                ? toStoragePublicUrl(String(doc.avatar))
+                : doc.avatar,
             email: doc.email,
             profile: mapProfile(doc.profile),
             parentStudio: doc.parentStudio ? idOf(doc.parentStudio) : undefined,

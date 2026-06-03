@@ -3,6 +3,7 @@ import { SeriesDTO, UpdateSeriesDTO } from '@/dtos/core/series.dto';
 import { ISeriesDoc } from '@/interfaces/core/series.interface';
 import type IMinisterDoc from '@/interfaces/core/minister.interface';
 import type ISermonDoc from '@/interfaces/core/sermon.interface';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 class SeriesMapper {
     constructor() {}
@@ -18,7 +19,7 @@ class SeriesMapper {
         let bannerDto: { item: string; width: number; height: number } | undefined;
         if (banner) {
             bannerDto = {
-                item: banner.item,
+                item: toStoragePublicUrl(banner.item),
                 width: banner.width,
                 height: banner.height,
             };
@@ -60,7 +61,7 @@ class SeriesMapper {
         let bannerDto: { item: string; width: number; height: number } | undefined;
         if (series.banner) {
             bannerDto = {
-                item: series.banner.item,
+                item: toStoragePublicUrl(series.banner.item),
                 width: series.banner.width,
                 height: series.banner.height,
             };
@@ -104,7 +105,7 @@ class SeriesMapper {
         }
         let file = '';
         if (banner?.item != null) {
-            file = String(banner.item);
+            file = toStoragePublicUrl(String(banner.item));
         }
         const result: UploadDTO = {
             id: itemId,

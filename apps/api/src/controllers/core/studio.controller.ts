@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import asyncHandler from '@/middlewares/async.mdw';
 import ErrorResponse from '@/utils/error.util';
-import { getAuthUserId } from '@/utils/auth-request.util';
 import studioService, {
     type CreateStudioResult,
 } from '@/services/core/studio.service';
@@ -23,7 +22,7 @@ function isPlatformAdmin(req: Request): boolean {
 
 export const createStudio: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
         const body = req.body as CreateStudioDTO;
@@ -84,7 +83,7 @@ export const getStudio: RequestHandler = asyncHandler(
 
 export const getMyStudio: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         const result = await studioService.getMyPrimaryStudio(userId);
         if (result.error) {
@@ -108,7 +107,7 @@ export const getMyStudio: RequestHandler = asyncHandler(
 
 export const listMyStudios: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         const page = req.query.page
             ? parseInt(String(req.query.page), 10)
@@ -145,7 +144,7 @@ export const listMyStudios: RequestHandler = asyncHandler(
 
 export const patchStudio: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         const studioId = req.params.id;
         if (!studioId) return next(new ErrorResponse('id is required', 400, []));
@@ -172,7 +171,7 @@ export const patchStudio: RequestHandler = asyncHandler(
 
 export const postStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         const studioId = req.params.id;
         if (!studioId) {
@@ -202,7 +201,7 @@ export const postStudioInvite: RequestHandler = asyncHandler(
 
 export const deleteStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         const { id: studioId, inviteId } = req.params;
         if (!studioId || !inviteId) {
@@ -232,7 +231,7 @@ export const deleteStudioInvite: RequestHandler = asyncHandler(
 
 export const acceptStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         const { id: studioId, inviteId } = req.params;
         if (!studioId || !inviteId) {
@@ -258,7 +257,7 @@ export const acceptStudioInvite: RequestHandler = asyncHandler(
 
 export const rejectStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
         const { id: studioId, inviteId } = req.params;
         if (!studioId || !inviteId) {

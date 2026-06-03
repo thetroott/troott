@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../../middlewares/async.mdw';
 import ErrorResponse from '../../utils/error.util';
-import { getAuthUserId } from '../../utils/auth-request.util';
-import { pathParam } from '../../utils/route-params.util';
 import playbackRepository from '@/repository/core/playback.repository';
 
 /**
@@ -11,7 +9,7 @@ import playbackRepository from '@/repository/core/playback.repository';
  */
 export const savePlaybackProgress = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
@@ -56,7 +54,7 @@ export const savePlaybackProgress = asyncHandler(
 /** @route GET /api/v1/playback */
 export const listPlaybackProgress = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
@@ -81,12 +79,12 @@ export const listPlaybackProgress = asyncHandler(
 /** @route GET /api/v1/playback/sermon/:sermonId */
 export const getPlaybackForSermon = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = getAuthUserId(req);
+        const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const sermonId = pathParam(req.params.sermonId);
+        const sermonId = (Array.isArray(req.params.sermonId) ? req.params.sermonId[0] : req.params.sermonId);
         if (!sermonId) {
             return next(new ErrorResponse('sermonId is required', 400, []));
         }

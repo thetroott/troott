@@ -11,22 +11,59 @@ import studioRepository from '@/repository/core/studio.repository';
 import ministerRepository from '@/repository/core/minister.repository';
 import creatorRepository from '@/repository/core/creator.repository';
 import userRepository from '@/repository/user.repository';
-import {
-    generateStudioCode,
-    isReservedStudioSlug,
-    normalizeStudioSlug,
-} from '@/utils/studio-slug.util';
-import { genSlug } from '@/utils/helpers.util';
+import { genSlug, generateRandomChars } from '@/utils/helpers.util';
 import type {
     CreateStudioDTO,
     CreateStudioInviteDTO,
     UpdateStudioDTO,
 } from '@/dtos/core/studio.dto';
 import type { ICountry } from '@/interfaces/common.interface';
-import {
-    isMongoObjectId,
-    mongoIdFromDoc,
-} from '@/utils/resolve-public-id.util';
+
+const STUDIO_RESERVED_SLUGS = new Set(
+    [
+        'admin',
+        'api',
+        'v1',
+        'studios',
+        'studio',
+        'settings',
+        'help',
+        'login',
+        'register',
+        'oauth',
+        'webhook',
+        'open',
+        'share',
+        'static',
+        'assets',
+        'health',
+        'me',
+        'new',
+        'edit',
+        'search',
+        'discover',
+        'user',
+        'users',
+        'minister',
+        'ministers',
+        'creator',
+        'creators',
+        'listener',
+        'listeners',
+        'playlist',
+        'playlists',
+        'sermon',
+        'sermons',
+        'series',
+        'playback',
+        'plans',
+        'subscriptions',
+        'invitation',
+        'invitations',
+        'null',
+        'undefined',
+    ].map((s) => s.toLowerCase()),
+);
 
 const MAX_CODE_ATTEMPTS = 10;
 const MAX_SLUG_ATTEMPTS = 10;
@@ -115,17 +152,34 @@ export async function resolveStudioMongoId(param: string): Promise<string | null
     const trimmed = param?.trim();
     if (!trimmed) return null;
 
-    if (isMongoObjectId(trimmed)) {
+    const isMongoObjectId =
+        mongoose.Types.ObjectId.isValid(trimmed) &&
+        new mongoose.Types.ObjectId(trimmed).toString() === trimmed;
+
+    if (isMongoObjectId) {
         const r = await studioRepository.findStudioById(trimmed, false);
         if (r.error || !r.data) return null;
-        return mongoIdFromDoc(r.data);
+        const doc = r.data as { _id?: unknown; id?: unknown };
+        if (doc._id != null) return String(doc._id);
+        if (doc.id != null) return String(doc.id);
+        return '';
     }
 
     let r = await studioRepository.findByCode(trimmed);
-    if (!r.error && r.data) return mongoIdFromDoc(r.data);
+    if (!r.error && r.data) {
+        const doc = r.data as { _id?: unknown; id?: unknown };
+        if (doc._id != null) return String(doc._id);
+        if (doc.id != null) return String(doc.id);
+        return '';
+    }
 
     r = await studioRepository.findBySlug(trimmed);
-    if (!r.error && r.data) return mongoIdFromDoc(r.data);
+    if (!r.error && r.data) {
+        const doc = r.data as { _id?: unknown; id?: unknown };
+        if (doc._id != null) return String(doc._id);
+        if (doc.id != null) return String(doc.id);
+        return '';
+    }
 
     return null;
 }
@@ -254,7 +308,8 @@ class StudioService {
 
     private async generateUniqueCode(): Promise<string | null> {
         for (let i = 0; i < MAX_CODE_ATTEMPTS; i++) {
-            const code = generateStudioCode();
+            const raw = generateRandomChars(12).replace(/[^a-zA-Z0-9]/g, '');
+            const code = (raw || generateRandomChars(12)).toUpperCase().slice(0, 12);
             const ex = await studioRepository.findByCode(code);
             if (ex.error || !ex.data) return code;
         }
@@ -262,14 +317,15 @@ class StudioService {
     }
 
     private async generateUniqueSlug(baseName: string): Promise<string | null> {
-        let base = normalizeStudioSlug(baseName) || genSlug(baseName);
-        if (!base || isReservedStudioSlug(base)) {
-            base = `channel-${generateStudioCode().toLowerCase()}`;
+        let base = genSlug(baseName.trim()).toLowerCase() || genSlug(baseName);
+        if (!base || STUDIO_RESERVED_SLUGS.has(base.toLowerCase())) {
+            const fallbackRaw = generateRandomChars(12).replace(/[^a-zA-Z0-9]/g, '');
+            base = `channel-${(fallbackRaw || generateRandomChars(12)).toUpperCase().slice(0, 12).toLowerCase()}`;
         }
         for (let i = 0; i < MAX_SLUG_ATTEMPTS; i++) {
             const candidate =
                 i === 0 ? base : `${base}-${Math.random().toString(36).slice(2, 6)}`;
-            if (isReservedStudioSlug(candidate)) continue;
+            if (STUDIO_RESERVED_SLUGS.has(candidate.toLowerCase())) continue;
             const ex = await studioRepository.findBySlug(candidate);
             if (ex.error || !ex.data) return candidate;
         }
@@ -419,7 +475,7 @@ class StudioService {
         }
 
         let slug = dto.slug
-            ? normalizeStudioSlug(dto.slug)
+            ? genSlug(dto.slug.trim()).toLowerCase()
             : await this.generateUniqueSlug(dto.name);
         if (!slug) {
             result.error = true;
@@ -427,7 +483,7 @@ class StudioService {
             result.message = 'Could not allocate a unique studio slug';
             return result;
         }
-        if (isReservedStudioSlug(slug)) {
+        if (STUDIO_RESERVED_SLUGS.has(slug.toLowerCase())) {
             result.error = true;
             result.code = 400;
             result.message = 'This slug is reserved';
@@ -923,8 +979,8 @@ class StudioService {
         }
 
         if (dto.slug != null) {
-            const s = normalizeStudioSlug(dto.slug);
-            if (isReservedStudioSlug(s)) {
+            const s = genSlug(dto.slug.trim()).toLowerCase();
+            if (STUDIO_RESERVED_SLUGS.has(s.toLowerCase())) {
                 return {
                     error: true,
                     code: 400,

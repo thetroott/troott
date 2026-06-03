@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../../middlewares/async.mdw';
 import ErrorResponse from '../../utils/error.util';
-import { pathParam } from '../../utils/route-params.util';
-import { getAuthUserId } from '../../utils/auth-request.util';
 import type { ILibraryDoc } from '@/interfaces/core/library.interface';
 import libraryRepository from '@/repository/core/library.repository';
 import libraryService from '@/services/core/library.service';
@@ -58,7 +56,7 @@ async function assertListenerOwnedByActor(
  */
 export const createLibrary = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
@@ -139,12 +137,12 @@ export const createLibrary = asyncHandler(
  */
 export const getLibraryByUser = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const paramId = pathParam(req.params.userId);
+        const paramId = (Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId);
         if (!paramId) {
             return next(new ErrorResponse('userId is required', 400, []));
         }
@@ -199,13 +197,13 @@ export const getLibraryByUser = asyncHandler(
  */
 export const getLibraryById = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const paramId = pathParam(req.params.userId);
-        const libraryId = pathParam(req.params.libraryId);
+        const paramId = (Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId);
+        const libraryId = (Array.isArray(req.params.libraryId) ? req.params.libraryId[0] : req.params.libraryId);
         if (!paramId || !libraryId) {
             return next(
                 new ErrorResponse(
@@ -304,12 +302,12 @@ export const getAllLibraries = asyncHandler(
  */
 export const updateLibrary = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const paramId = pathParam(req.params.userId);
+        const paramId = (Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId);
         if (!paramId) {
             return next(new ErrorResponse('userId is required', 400, []));
         }
@@ -349,12 +347,12 @@ export const updateLibrary = asyncHandler(
  */
 export const deleteLibrary = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const paramId = pathParam(req.params.userId);
+        const paramId = (Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId);
         if (!paramId) {
             return next(new ErrorResponse('userId is required', 400, []));
         }

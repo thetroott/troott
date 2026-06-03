@@ -7,6 +7,7 @@ import { PlaylistItemResourceType } from '@/interfaces/core/playlist.interface';
 import type ISermonDoc from '@/interfaces/core/sermon.interface';
 import type ISeriesDoc from '@/interfaces/core/series.interface';
 import type IUserDoc from '@/interfaces/user.interface';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 const idOf = (doc: unknown): string => {
     if (doc == null) {
@@ -61,7 +62,7 @@ const mapPlaylistItem = (row: any): PlaylistItemDTO => {
 
     if (sermon?.title != null) {
         title = sermon.title;
-        imageUrl = sermon.imageUrl;
+        imageUrl = toStoragePublicUrl(sermon.imageUrl);
         duration = sermon.duration;
         let m: unknown;
         if (Array.isArray(sermon.minister)) {
@@ -74,9 +75,9 @@ const mapPlaylistItem = (row: any): PlaylistItemDTO => {
         title = series.title;
         const b = series.banner as { item?: string } | undefined;
         if (typeof series.banner === 'string') {
-            imageUrl = series.banner;
+            imageUrl = toStoragePublicUrl(series.banner);
         } else {
-            imageUrl = b?.item;
+            imageUrl = toStoragePublicUrl(b?.item);
         }
         duration = series.totalDuration;
         let m: unknown;
@@ -88,7 +89,7 @@ const mapPlaylistItem = (row: any): PlaylistItemDTO => {
         minister = ministerDisplayName(m);
     } else if (raw && typeof raw === 'object') {
         title = (raw as { title?: string }).title ?? '';
-        imageUrl = (raw as { imageUrl?: string }).imageUrl;
+        imageUrl = toStoragePublicUrl((raw as { imageUrl?: string }).imageUrl);
         duration = (raw as { duration?: number }).duration;
     }
 
@@ -155,7 +156,7 @@ class PlaylistMapper {
             slug: p.slug ?? '',
             title: p.title ?? '',
             description: p.description ?? '',
-            banner: p.banner ?? '',
+            banner: toStoragePublicUrl(p.banner ?? ''),
 
             items: (p.items ?? []).map((it: any) => mapPlaylistItem(it)),
             itemsCount: p.itemsCount ?? (p.items?.length ?? 0),

@@ -4,7 +4,6 @@ import ErrorResponse from '../../utils/error.util';
 import searchService from '@/services/core/search.service';
 import ministerRepository from '@/repository/core/minister.repository';
 import { SearchScope, SearchQueryOptions } from '@/dtos/core/search.dto';
-import { pathParam } from '../../utils/route-params.util';
 
 function parseScope(raw: unknown): SearchScope {
     const s = typeof raw === 'string' ? raw.toLowerCase() : 'all';
@@ -182,7 +181,7 @@ export const searchWithinMinister = asyncHandler(
 
 export const searchWithinSeries = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const seriesId = pathParam(req.params.seriesId);
+        const seriesId = (Array.isArray(req.params.seriesId) ? req.params.seriesId[0] : req.params.seriesId);
         const q = (req.query.q as string) || '';
         if (!seriesId) {
             return next(
@@ -324,7 +323,7 @@ export const deleteRecentSearch = asyncHandler(
                 data: {},
             });
         }
-        const id = pathParam(req.params.id);
+        const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
         if (!id) {
             return next(new ErrorResponse('id is required', 400, []));
         }

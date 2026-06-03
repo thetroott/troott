@@ -4,6 +4,7 @@ import type {
 } from '@/dtos/core/listener.dto';
 import type IListenerDoc from '@/interfaces/core/listener.interface';
 import { UserType } from '@/interfaces/user.interface';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 const idOf = (doc: unknown): string => {
     if (doc == null) {
@@ -68,8 +69,12 @@ class ListenerMapper {
             countryPhone: l.countryPhone,
             country: l.country,
             homeCountry: l.homeCountry,
-            avatar: l.avatar,
-            banner: l.banner,
+            avatar: (typeof l.avatar === 'string'
+                ? toStoragePublicUrl(l.avatar)
+                : toStoragePublicUrl(l.avatar?.s3Key)) as typeof l.avatar,
+            banner: (typeof l.banner === 'string'
+                ? toStoragePublicUrl(l.banner)
+                : toStoragePublicUrl(l.banner?.s3Key)) as typeof l.banner,
             onboarding: l.onboarding,
             topics: topicIds(l.topics),
             ministers: ministerIds(l.ministers),
@@ -93,8 +98,12 @@ class ListenerMapper {
             email: l.email ?? '',
             slug: l.slug,
             bio: undefined,
-            avatar: l.avatar ?? null,
-            coverImage: l.banner ?? null,
+            avatar: (typeof l.avatar === 'string'
+                ? toStoragePublicUrl(l.avatar)
+                : toStoragePublicUrl(l.avatar?.s3Key) || null) as typeof l.avatar,
+            coverImage: (typeof l.banner === 'string'
+                ? toStoragePublicUrl(l.banner)
+                : toStoragePublicUrl(l.banner?.s3Key) || null) as typeof l.banner,
             topics: topicIds(l.topics),
             ministry: l.ministry,
             createdAt: l.createdAt ?? '',

@@ -5,6 +5,7 @@ import {
     PlaylistSearchCard,
     TopicSearchCard,
 } from '@/dtos/core/search.dto';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 function docId(doc: { _id?: unknown; id?: unknown }): string {
     if (doc._id != null) {
@@ -65,7 +66,7 @@ class SearchMapper {
         return {
             id: docId(doc),
             title: doc.title ?? '',
-            imageUrl: doc.imageUrl,
+            imageUrl: toStoragePublicUrl(doc.imageUrl),
             duration: doc.duration,
             playbackUrl,
             manifestUrl,
@@ -84,9 +85,9 @@ class SearchMapper {
         const minister = firstMinisterFromSearchDoc(doc);
         let imageUrl: string | undefined;
         if (doc.imageUrl) {
-            imageUrl = doc.imageUrl;
+            imageUrl = toStoragePublicUrl(doc.imageUrl);
         } else {
-            imageUrl = doc.coverImage;
+            imageUrl = toStoragePublicUrl(doc.coverImage);
         }
 
         let sermonCount = 0;
@@ -113,9 +114,9 @@ class SearchMapper {
     public mapMinister(doc: any): MinisterSearchCard {
         let avatar: string | undefined;
         if (typeof doc.avatar === 'string') {
-            avatar = doc.avatar;
+            avatar = toStoragePublicUrl(doc.avatar);
         } else {
-            avatar = doc.avatar?.s3Key;
+            avatar = toStoragePublicUrl(doc.avatar?.s3Key);
         }
 
         let ministerialName: string | undefined;
@@ -160,7 +161,7 @@ class SearchMapper {
         return {
             id: docId(doc),
             title: doc.title ?? '',
-            banner: doc.banner,
+            banner: toStoragePublicUrl(doc.banner),
             itemsCount,
             ownerName,
             slug: doc.slug,

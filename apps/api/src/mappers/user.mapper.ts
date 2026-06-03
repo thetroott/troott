@@ -1,6 +1,7 @@
 import { UserDTO, UserProfileDTO, UserResponseDTO } from '@/dtos/user.dto';
 import IRoleDoc from '@/interfaces/role.interface';
 import { IUserDoc } from '@/interfaces/user.interface';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 function roleToResponseString(r: string | IRoleDoc | unknown): string {
     if (typeof r === 'string') {
@@ -48,8 +49,16 @@ class UserMapper {
             homeCountry: user.homeCountry,
             location: user.location,
 
-            avatar: user.avatar,
-            banner: user.banner,
+            avatar: (typeof user.avatar === 'string'
+                ? toStoragePublicUrl(user.avatar)
+                : toStoragePublicUrl(
+                      (user.avatar as { s3Key?: string })?.s3Key,
+                  )) as unknown as typeof user.avatar,
+            banner: (typeof user.banner === 'string'
+                ? toStoragePublicUrl(user.banner)
+                : toStoragePublicUrl(
+                      (user.banner as { s3Key?: string })?.s3Key,
+                  )) as unknown as typeof user.banner,
             gender: user.gender,
             dateOfBirth: user.dateOfBirth,
 

@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import asyncHandler from '../../middlewares/async.mdw';
 import ErrorResponse from '../../utils/error.util';
-import { pathParam } from '../../utils/route-params.util';
-import { getAuthUserId } from '../../utils/auth-request.util';
 import playlistService from '@/services/core/playlist.service';
 import type IUserDoc from '@/interfaces/user.interface';
 import type {
@@ -103,7 +101,7 @@ function parseLimitSkip(req: Request): { limit: number; skip: number } {
  */
 export const createPlaylist = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
@@ -171,12 +169,12 @@ export const getAllPlaylists = asyncHandler(
  */
 export const getPlaylistsByUser = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const userId = pathParam(req.params.userId);
+        const userId = (Array.isArray(req.params.userId) ? req.params.userId[0] : req.params.userId);
         if (!userId) {
             return next(new ErrorResponse('userId is required', 400, []));
         }
@@ -213,7 +211,7 @@ export const getPlaylistsByUser = asyncHandler(
  */
 export const getPlaylistById = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const id = pathParam(req.params.id);
+        const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
         if (!id) {
             return next(new ErrorResponse('id is required', 400, []));
         }
@@ -241,12 +239,12 @@ export const getPlaylistById = asyncHandler(
  */
 export const updatePlaylist = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const id = pathParam(req.params.id);
+        const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
         if (!id) {
             return next(new ErrorResponse('id is required', 400, []));
         }
@@ -277,12 +275,12 @@ export const updatePlaylist = asyncHandler(
  */
 export const deletePlaylist = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const id = pathParam(req.params.id);
+        const id = (Array.isArray(req.params.id) ? req.params.id[0] : req.params.id);
         if (!id) {
             return next(new ErrorResponse('id is required', 400, []));
         }
@@ -310,12 +308,12 @@ export const deletePlaylist = asyncHandler(
  */
 export const addItemToPlaylist = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const playlistId = pathParam(req.params.playlistId);
+        const playlistId = (Array.isArray(req.params.playlistId) ? req.params.playlistId[0] : req.params.playlistId);
         if (!playlistId) {
             return next(new ErrorResponse('playlistId is required', 400, []));
         }
@@ -373,12 +371,12 @@ export const addItemToPlaylist = asyncHandler(
  */
 export const removeItemFromPlaylist = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const actorId = getAuthUserId(req);
+        const actorId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!actorId) {
             return next(new ErrorResponse('Unauthorized', 401, []));
         }
 
-        const playlistId = pathParam(req.params.playlistId);
+        const playlistId = (Array.isArray(req.params.playlistId) ? req.params.playlistId[0] : req.params.playlistId);
         if (!playlistId) {
             return next(new ErrorResponse('playlistId is required', 400, []));
         }
