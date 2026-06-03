@@ -333,14 +333,13 @@ export interface AWSConfig {
     accessKeyId: string;
     /** IAM secret access key. */
     secretAccessKey: string;
-    /** Legacy single-bucket name (fallback when split buckets unset). */
-    bucketName: string;
+
     /** Sermon source audio — `troott-originals`. */
-    originalsBucket?: string;
+    originalsBucket: string;
     /** HLS output — `troott-playback`. */
-    playbackBucket?: string;
+    playbackBucket: string;
     /** Images, documents, avatars — `troott-storage`. */
-    storageBucket?: string;
+    storageBucket: string;
 }
 
 /** Transactional email provider configuration. */
@@ -465,8 +464,6 @@ export interface IEmailJob {
 export interface IFile {
     /** Readable stream of file bytes. */
     stream?: PassThrough;
-    /** Secondary stream for metadata extraction (duration, dimensions). */
-    metadataStream?: PassThrough;
     /** Busboy file info (encoding, MIME, filename). */
     info?: FileInfo;
     /** Resolved MIME type. */

@@ -1,5 +1,13 @@
 import type { Config } from 'jest';
 
+/** AWS helpers import `aws.config` at module load; Jest uses `development` + dummy creds. */
+process.env.NODE_ENV = 'development';
+process.env.AWS_REGION ??= 'eu-central-1';
+process.env.AWS_ACCESS_KEY_ID ??= 'jest-test-key';
+process.env.AWS_SECRET_ACCESS_KEY ??= 'jest-test-secret';
+process.env.AWS_STORAGE_BUCKET ??= 'troott-storage';
+process.env.CLOUDFRONT_STORAGE_URL ??= 'https://storage.troott.com';
+
 /**
  * Jest config for @troott/api.
  * - All test files live under `test/` (nothing co-located in `src/`).

@@ -3,7 +3,7 @@
     "private": true,
     "main": "server.ts",
     "exports": {
-        "./enums": "./src/utils/enums.util.ts"
+        "./enums": "./src/types/common.enum.ts"
     },
     "version": "1.0.0",
     "scripts": {
@@ -59,6 +59,7 @@
         "express-mongo-sanitize": "^2.2.0",
         "express-rate-limit": "^7.4.1",
         "express-session": "^1.18.2",
+        "express-slow-down": "^3.1.0",
         "express-useragent": "^1.0.15",
         "express-validator": "^7.2.1",
         "firebase-admin": "^13.1.0",

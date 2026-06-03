@@ -1,4 +1,4 @@
-import express, { type Express } from 'express';
+import express, { RequestHandler, type Express } from 'express';
 import dotenv, { config } from 'dotenv';
 import errorHandler from '../middlewares/error.mdw';
 import cookieParser from 'cookie-parser';
@@ -9,6 +9,9 @@ import hpp from 'hpp';
 import cors from 'cors';
 import v1Routes from '../routes/v1/routes.router';
 import path from 'path';
+import { limitRequests } from '@/middlewares/ratelimit.mdw';
+import { speedLimiter } from '@/middlewares/speedlimit.mdw';
+import { getOrigins } from '@/utils/origin.util';
 
 config();
 dotenv.config();
@@ -16,11 +19,11 @@ dotenv.config();
 const app: Express = express();
 
 // body parser
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: false }));
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ limit: '2mb', extended: false }));
 
-app.use(bodyParser.json({ limit: '50mb', inflate: true }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
+app.use(bodyParser.json({ limit: '2mb', inflate: true }));
+app.use(bodyParser.urlencoded({ limit: '2mb', extended: false }));
 
 // cookie parser
 app.use(cookieParser());
@@ -29,33 +32,33 @@ app.use(cookieParser());
 app.use(expressSanitize());
 
 // secure response header
-app.use(helmet());
+app.use(
+    helmet({
+        contentSecurityPolicy: false,
+        crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+);
 
 // prevent parameter pollution
 app.use(hpp());
+
+// limit requests
+app.use(limitRequests);
+
+// limit request speed
+app.use(speedLimiter as RequestHandler);
 
 // enable CORS: communicate with multiple domain
 app.use(
     cors({
         origin: (origin, callback) => {
-            // Allow requests with no origin (like mobile apps or curl requests)
-            if (!origin) return callback(null, true);
-
-            // Allow localhost for development
-            if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+            if (!origin) {
                 return callback(null, true);
             }
 
-            // Allow staging domain
-            if (origin.includes('staging.troott.com')) {
+            if (getOrigins(origin as string)) {
                 return callback(null, true);
             }
-
-            // Allow production domain
-            if (origin.includes('troott.com')) {
-                return callback(null, true);
-            }
-
             callback(new Error('Not allowed by CORS'));
         },
         credentials: true,
@@ -76,6 +79,7 @@ app.use(
 // Set view engine and views
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '../views'));
+app.set('trust proxy', 1);
 
 // Routes
 app.use('/api/v1', v1Routes);

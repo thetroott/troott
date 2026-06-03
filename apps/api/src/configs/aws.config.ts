@@ -2,78 +2,61 @@ import { S3Client } from '@aws-sdk/client-s3';
 import { ENVType } from '@/types/common.enum';
 import { AWSConfig } from '@/interfaces/common.interface';
 
-function splitBucketEnv(name: string | undefined): string | undefined {
-    const v = name?.trim();
-    return v && v.length > 0 ? v : undefined;
-}
-
-function withSplitBuckets(base: Omit<AWSConfig, 'originalsBucket' | 'playbackBucket' | 'storageBucket'>): AWSConfig {
-    return {
-        ...base,
-        originalsBucket:
-            splitBucketEnv(process.env.AWS_ORIGINALS_BUCKET) ?? base.bucketName,
-        playbackBucket:
-            splitBucketEnv(process.env.AWS_PLAYBACK_BUCKET) ?? base.bucketName,
-        storageBucket:
-            splitBucketEnv(process.env.AWS_STORAGE_BUCKET) ?? base.bucketName,
-    };
-}
-
 let config: AWSConfig;
 
 switch (process.env.NODE_ENV) {
-    case ENVType.PRODUCTION:
-        config = withSplitBuckets({
-            region: process.env.AWS_REGION!,
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-            bucketName: process.env.AWS_BUCKET_NAME!,
-        });
+  case ENVType.PRODUCTION:
+    config = {
+      region: process.env.AWS_REGION!,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
 
-        break;
+      originalsBucket: process.env.AWS_ORIGINALS_BUCKET!,
+      playbackBucket: process.env.AWS_PLAYBACK_BUCKET!,
+      storageBucket: process.env.AWS_STORAGE_BUCKET!,
+    };
 
-    case ENVType.STAGING:
-        config = withSplitBuckets({
-            region: process.env.AWS_REGION!,
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-            bucketName: process.env.AWS_STAGING_BUCKET_NAME!,
-        });
+    break;
 
-        break;
+  case ENVType.STAGING:
+    config = {
+      region: process.env.AWS_REGION!,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
 
-    case ENVType.DEVELOPMENT:
-        config = withSplitBuckets({
-            region: process.env.AWS_REGION!,
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-            bucketName: process.env.AWS_DEV_BUCKET_NAME!,
-        });
+      originalsBucket: process.env.AWS_STORAGE_BUCKET!,
+      playbackBucket: process.env.AWS_STORAGE_BUCKET!,
+      storageBucket: process.env.AWS_STORAGE_BUCKET!,
+    };
 
-        break;
+    break;
 
-    case 'test':
-        config = withSplitBuckets({
-            region: process.env.AWS_REGION || 'us-east-1',
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'test',
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'test',
-            bucketName:
-                process.env.AWS_DEV_BUCKET_NAME ||
-                process.env.AWS_BUCKET_NAME ||
-                'test-bucket',
-        });
-        break;
+  case ENVType.DEVELOPMENT:
+    config = {
+      region: process.env.AWS_REGION!,
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
 
-    default:
-        throw new Error('Invalid NODE_ENV. AWS config not set.');
+      originalsBucket: process.env.AWS_STORAGE_BUCKET!,
+      playbackBucket: process.env.AWS_STORAGE_BUCKET!,
+      storageBucket: process.env.AWS_STORAGE_BUCKET!,
+    };
+
+    break;
+
+  default:
+    throw new Error("Invalid NODE_ENV. AWS config not set.");
 }
 
 export const s3 = new S3Client({
-    region: config.region,
-    credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-    },
+  region: config.region,
+  credentials: {
+    accessKeyId: config.accessKeyId,
+    secretAccessKey: config.secretAccessKey,
+  },
 });
 
-export const AWS_BUCKET_NAME = config.bucketName;
+
+export const AWS_BUCKETS_ORIGINALS = config.originalsBucket;
+export const AWS_BUCKETS_PLAYBACK = config.playbackBucket;
+export const AWS_BUCKETS_STORAGE = config.storageBucket;
