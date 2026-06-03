@@ -5,7 +5,7 @@ import { IQueryOptions, IResult } from '@/interfaces/common.interface';
 import type { ISermonDoc } from '@/interfaces/core/sermon.interface';
 import { PipelineStage } from 'mongoose';
 import { ContentState } from '@/types/common.enum';
-import { MediaStatus } from '@/interfaces/core/sermon.interface';
+import { MediaStatus, StreamingProtocol, UploadStatus } from '@/interfaces/core/sermon.interface';
 
 /** Optional filters for GET /sermon/minister/:id (studio list). */
 export type MinisterSermonListFilters = {
@@ -108,6 +108,111 @@ class SermonRepository {
         }
 
         return result;
+    }
+
+    /**
+     * Lookup for upload pipeline jobs: prefer sermon `_id`, else `item.itemId` (uploadId).
+     */
+    private uploadPipelineQuery(
+        uploadId: string,
+        sermonId?: string | ObjectId | Types.ObjectId,
+    ): Record<string, unknown> {
+        if (sermonId != null && String(sermonId).trim()) {
+            return { _id: String(sermonId) };
+        }
+        return { 'item.itemId': uploadId };
+    }
+
+    /** Sets `status: pending` + `item.uploadStatus: processing` when HLS job starts. */
+    public async markUploadPipelineProcessing(
+        uploadId: string,
+        sermonId?: string | ObjectId | Types.ObjectId,
+    ): Promise<ISermonDoc | null> {
+        return this.model.findOneAndUpdate(
+            this.uploadPipelineQuery(uploadId, sermonId),
+            {
+                $set: {
+                    status: MediaStatus.PENDING,
+                    'item.uploadStatus': UploadStatus.PROCESSING,
+                    'item.updatedAt': new Date().toISOString(),
+                },
+            },
+            { new: true },
+        );
+    }
+
+    /** True when `item.uploadStatus` is already cancelled (worker guard). */
+    public async isUploadProcessingCancelled(
+        uploadId: string,
+        sermonId?: string | ObjectId | Types.ObjectId,
+    ): Promise<boolean> {
+        const sermon = await this.model
+            .findOne(this.uploadPipelineQuery(uploadId, sermonId))
+            .select('item.uploadStatus')
+            .lean();
+        return sermon?.item?.uploadStatus === UploadStatus.CANCELLED;
+    }
+
+    /** Sets draft + `item.uploadStatus: cancelled`. Returns updated doc or null. */
+    public async markUploadProcessingCancelled(
+        uploadId: string,
+        sermonId?: string | ObjectId | Types.ObjectId,
+    ): Promise<ISermonDoc | null> {
+        const nowIso = new Date().toISOString();
+        return this.model.findOneAndUpdate(
+            this.uploadPipelineQuery(uploadId, sermonId),
+            {
+                $set: {
+                    status: MediaStatus.DRAFT,
+                    'item.uploadStatus': UploadStatus.CANCELLED,
+                    'item.updatedAt': nowIso,
+                },
+            },
+            { new: true },
+        );
+    }
+
+    /** HLS success: manifest + playback URLs and `uploadStatus: completed`. */
+    public async markUploadPipelineCompleted(
+        uploadId: string,
+        sermonId: string | ObjectId | Types.ObjectId | undefined,
+        manifestUrl: string,
+    ): Promise<ISermonDoc | null> {
+        const nowIso = new Date().toISOString();
+        return this.model.findOneAndUpdate(
+            this.uploadPipelineQuery(uploadId, sermonId),
+            {
+                $set: {
+                    manifestUrl,
+                    playbackUrl: manifestUrl,
+                    protocol: StreamingProtocol.HLS,
+                    status: MediaStatus.DRAFT,
+                    'item.uploadStatus': UploadStatus.COMPLETED,
+                    'item.updatedAt': nowIso,
+                },
+            },
+            { new: true },
+        );
+    }
+
+    /** HLS failure or cancel: terminal `item.uploadStatus`. */
+    public async markUploadPipelineTerminal(
+        uploadId: string,
+        sermonId: string | ObjectId | Types.ObjectId | undefined,
+        uploadStatus: UploadStatus.FAILED | UploadStatus.CANCELLED,
+    ): Promise<ISermonDoc | null> {
+        const nowIso = new Date().toISOString();
+        return this.model.findOneAndUpdate(
+            this.uploadPipelineQuery(uploadId, sermonId),
+            {
+                $set: {
+                    status: MediaStatus.DRAFT,
+                    'item.uploadStatus': uploadStatus,
+                    'item.updatedAt': nowIso,
+                },
+            },
+            { new: true },
+        );
     }
 
     /**

@@ -35,13 +35,14 @@ interface ISermonDoc extends Document {
     playbackUrl: string;
     /** Master playlist URL (.m3u8 or .mpd). */
     manifestUrl: string;
-    /** CDN URL of the sermon's cover image. */
+    /** CDN URL of the sermon's cover image for client rendering. */
     imageUrl: string;
+    /** Duration of the sermon in seconds. */
+    duration: number;
 
     /** MIME type of the stream (e.g. `application/x-mpegURL`). */
     mimeType: string;
-    /** Duration of the sermon in seconds. */
-    duration: number;
+
     /** Bitrate in kbps. */
     bitrate: number;
     /** Streaming protocol used for delivery. */
@@ -55,8 +56,10 @@ interface ISermonDoc extends Document {
     tags: Array<string>;
     /** ISO-639 language code (e.g. `en`, `yo`). */
     language: string;
-    /** Whether the sermon is publicly accessible. */
+    /** Whether the sermon is publicly accessible (legacy; prefer `visibility`). */
     isPublic: boolean;
+    /** Discovery / access scope: public, unlisted, or private. */
+    visibility: SermonVisibilityStatus;
 
     /** Signed access token for CDN / DRM validation. */
     token: string;
@@ -184,7 +187,7 @@ export interface SermonSource {
  * Includes dimensional metadata for responsive rendering.
  */
 export interface ImageSource {
-    /** S3 / CDN URL of the original image file. */
+    /** S3 Location URL of the original image object in troott-storage (not CDN). */
     item: string;
     /** Image width in pixels. */
     width: number;
@@ -296,10 +299,15 @@ export enum UploadStatus {
     CANCELLED = 'cancelled',
 }
 
+/** Discovery / access scope for a sermon (aligned with playlist visibility). */
+export enum SermonVisibilityStatus {
+    PUBLIC = 'public',
+    PRIVATE = 'private',
+    UNLISTED = 'unlisted',
+}
+
 /**
  * Publishing lifecycle status of a sermon.
- *
- * Controls visibility across the platform.
  */
 export enum MediaStatus {
     /** Info saved, files may not be ready. */
@@ -350,126 +358,6 @@ export interface IDocumentMetadata {
     author?: string;
     title?: string;
     language?: string;
-}
-
-// ---------------------------------------------------------------------------
-// Audio processing DTOs
-// ---------------------------------------------------------------------------
-
-export interface AudioRenditionDTO {
-    name: string;
-    bitrate: number;
-    sampleRate: number;
-    channels: number;
-}
-
-export interface FFmpegRenditionDTO {
-    name?: string;
-    codec?: string;
-    bitrate?: number;
-    sampleRate?: number;
-    channels?: number;
-    extraArgs?: string[];
-}
-
-export interface FFmpegOptionsDTO {
-    args: string[];
-    inputStream?: import('stream').PassThrough;
-    inputFilePath?: string;
-    outputStream?: import('stream').PassThrough;
-    onData?: string[];
-}
-
-export interface FFmpegJobDTO {
-    input: string;
-    output: string;
-    options: FFmpegOptionsDTO;
-}
-
-export interface IAudioHLSJobDTO {
-    uploadId: string;
-    sourceS3Key: string;
-    mimeType?: string;
-    renditions?: AudioRenditionDTO[];
-    segmentDuration?: number;
-    sermonId?: Types.ObjectId | string;
-}
-
-export interface IAudioDASHJobDTO {
-    uploadId: string;
-    mimeType?: string;
-    inputStream: import('stream').PassThrough;
-    outputStream: import('stream').PassThrough;
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-}
-
-export interface IAudioMetadataJobDTO {
-    streamForMetadata: import('stream').PassThrough;
-    mimeType: string;
-    uploadId: string;
-    sermonId?: Types.ObjectId | any;
-}
-
-export interface IAudioProcessingJobDTO {
-    stream: import('stream').PassThrough;
-    mimeType: string;
-    uploadId: string;
-}
-
-export interface IAudioNormalisationDTO {
-    uploadId: string;
-    inputStream: import('stream').PassThrough;
-    outputStream: import('stream').PassThrough;
-    mimeType: string;
-    targetIntegrated?: number;
-    targetTruePeak?: number;
-}
-
-export interface HLSDTO {
-    inputFilePath?: string;
-    inputStream?: import('stream').Readable;
-    outputDir: string;
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-}
-
-export interface DASHDTO {
-    inputStream: import('stream').PassThrough;
-    outputDir: string;
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-}
-
-export interface MeasureLoudnessDTO {
-    stream: import('stream').PassThrough;
-}
-
-export interface NormaliseAudioDTO {
-    inputStream: import('stream').PassThrough;
-    outputStream: import('stream').PassThrough;
-    targetIntegrated?: number;
-    targetTruePeak?: number;
-}
-
-export interface MultiBitrateDTO {
-    inputStream: import('stream').PassThrough;
-    renditions: AudioRenditionDTO[];
-    outputDir: string;
-}
-
-export interface LoudnessMetadataDTO {
-    trackId: string;
-    integrated: number;
-    loudnessRange: number;
-    truePeak: number;
-    path: string;
-}
-
-export interface AudioProcessingResult {
-    success?: import('../common.interface').IResult;
-    loudness?: LoudnessMetadataDTO;
-    outputs?: { name: string; path: string }[];
 }
 
 // ---------------------------------------------------------------------------

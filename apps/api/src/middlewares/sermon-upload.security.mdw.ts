@@ -1,9 +1,8 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response, NextFunction } from 'express';
 import ErrorResponse from '../utils/error.util';
-import { mediaConfig } from '../configs/media.config';
 
-/** Stricter cap for sermon audio field size vs generic multipart (aligned with media.config). */
+/** Stricter cap for sermon audio field size vs generic multipart. */
 export const sermonAudioUploadSizeLimit = (
     req: Request,
     res: Response,
@@ -13,10 +12,12 @@ export const sermonAudioUploadSizeLimit = (
     if (!cl) return next();
     const n = parseInt(cl, 10);
     if (!Number.isFinite(n) || n <= 0) return next();
-    if (n > mediaConfig.sermonAudioMaxBytes) {
+    const sermonAudioMaxBytes =
+        Number(process.env.SERMON_AUDIO_MAX_BYTES) || 512 * 1024 * 1024;
+    if (n > sermonAudioMaxBytes) {
         return next(
             new ErrorResponse(
-                `Audio file exceeds maximum size (${mediaConfig.sermonAudioMaxBytes} bytes)`,
+                `Audio file exceeds maximum size (${sermonAudioMaxBytes} bytes)`,
                 413,
                 [],
             ),

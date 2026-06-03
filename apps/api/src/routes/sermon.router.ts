@@ -22,9 +22,10 @@ import {
     getUserRecentlyPlayedSermons,
     getPopularSermonsRecentlyPlayed,
     getSermonsByUserInterests,
-    uploadSermonCover,
+    uploadSermonImage,
     getSermonsByMinisterMostPlayed,
     getFavoriteMinisterSermons,
+    cancelSermonProcessing,
 } from '@/controllers/core/sermon.controller';
 import uploadHandler from '../middlewares/upload.mdw';
 import {
@@ -45,8 +46,9 @@ sermonRouter.post(
     uploadHandler,
     uploadSermon,
 );
-sermonRouter.post('/image-upload', Protect, uploadHandler, uploadSermonCover);
+sermonRouter.post('/image-upload', Protect, uploadHandler, uploadSermonImage);
 sermonRouter.post('/publish/:id', Protect, publishSermon);
+sermonRouter.post('/cancel-processing/:id', Protect, cancelSermonProcessing);
 
 sermonRouter.put('/update/:id', Protect, updateSermon);
 sermonRouter.put('/move-to-bin/:id', Protect, moveSermonToBin);

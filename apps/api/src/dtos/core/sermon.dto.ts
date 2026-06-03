@@ -3,12 +3,15 @@ import type {
     ImageSource,
     SermonSource,
     MediaStatus,
+    SermonVisibilityStatus,
     StreamingProtocol,
     StreamingQuality,
 } from '@/interfaces/core/sermon.interface';
-import { PassThrough } from 'stream';
-import { ObjectId } from 'mongoose';
+import { PassThrough, Readable } from 'stream';
+import { Types } from 'mongoose';
 import { FileType, IResult } from '@/interfaces/common.interface';
+
+type ObjectId = Types.ObjectId;
 
 export interface SermonUploadDTO {
     id: string;
@@ -23,6 +26,7 @@ export interface SermonUploadDTO {
     tags: Array<string>;
     language?: string;
     isPublic: boolean;
+    visibility?: SermonVisibilityStatus;
     allowDownload?: boolean;
     allowComment?: boolean;
     isSeries?: boolean;
@@ -56,6 +60,7 @@ export interface SermonDTO {
     tags: Array<string>;
     language: string;
     isPublic: boolean;
+    visibility: SermonVisibilityStatus;
     shareableUrl: string;
 
     preachedAt: string;
@@ -85,8 +90,6 @@ export interface SermonPlaybackDTO {
 }
 
 export interface UpdateSermonDTO {
-    id?: string;
-
     title?: string;
     description?: string;
     duration?: number;
@@ -97,6 +100,7 @@ export interface UpdateSermonDTO {
     topic?: string;
     tags?: Array<string>;
     isPublic?: boolean;
+    visibility?: SermonVisibilityStatus;
     allowDownload?: boolean;
     allowComment?: boolean;
 
@@ -119,26 +123,85 @@ export interface UpdateSermonDTO {
  * `sermon` is the audio upload id used to resolve the draft sermon document.
  */
 export interface PublishSermonDTO {
+    code: string;
+    slug: string;
     title: string;
     description: string;
+
+    playbackUrl: string;
+    manifestUrl: string;
+    imageUrl: string;
     duration: number;
-    /** Audio upload id (resolves the draft sermon document). */
-    sermon: string;
-    image: Partial<ImageSource> | string;
-    size: number;
-    preachedAt: Date | string;
-    preachedYear: string;
+
+    mimeType: string;
+    bitrate: number;
+    protocol: StreamingProtocol;
+    quality: StreamingQuality;
+
     topic: string;
-    tags: Array<string> | string;
-    language?: string;
+    tags: Array<string>;
+    language: string;
     isPublic: boolean;
+    visibility: SermonVisibilityStatus;
+
+    preachedAt: string;
+    preachedYear: string;
+    minister: Array<string>;
+
+    allowDownload: boolean;
+    allowComment: boolean;
+
+    sermon: string;
+    item: SermonSource;
+    image: ImageSource;
+
     isSeries: boolean;
+    series: string;
+    playlist: string;
+
+    status: MediaStatus;
+    isPublished: boolean;
+    publishedBy: string;
+    publishedAt: string;
+}
+
+export interface PublishSermonInputDTO {
+    title: string;
+    description: string;
+    topic: string;
+    tags: Array<string>;
+    language: string;
+
+    visibility: SermonVisibilityStatus;
+    isPublic: boolean;
+    preachedAt: string;
+    preachedYear: string;
+    minister: string | Array<string>;
     publishedBy: string;
 
-    id?: string;
-    status?: MediaStatus;
-    isPublished?: boolean;
-    publishedAt?: Date;
+    allowDownload: boolean;
+    allowComment: boolean;
+
+    isSeries: boolean;
+    series: string;
+    playlist: string;
+
+    status: MediaStatus;
+    isPublished: boolean;
+    publishedAt: string | Date;
+}
+
+export interface SermonPipelineDTO {
+    item: SermonSource;
+    image: ImageSource;
+    imageUrl: string;
+    playbackUrl: string;
+    manifestUrl: string;
+    duration: number;
+    mimeType: string;
+    protocol: StreamingProtocol;
+    quality: StreamingQuality;
+    bitrate: number;
 }
 
 export interface DeleteSermonDTO {
@@ -160,94 +223,6 @@ export interface UploadDTO {
     uploadRef: string;
 }
 
-
-
-export interface IAudioNormalisationDTO {
-    uploadId: string;
-    inputStream: PassThrough;
-    outputStream: PassThrough;
-    mimeType: string;
-    targetIntegrated?: number; // LUFS, default -14
-    targetTruePeak?: number; // dBTP, default -1
-}
-
-export interface AudioRenditionDTO {
-    name: string;
-    bitrate: number;
-    sampleRate: number;
-    channels: number;
-}
-export interface FFmpegRenditionDTO {
-    name?: string; // e.g., "64k", "128k"
-    codec?: string; // e.g., 'aac'
-    bitrate?: number; // e.g., 128 (kbps)
-    sampleRate?: number; // e.g., 48000 Hz
-    channels?: number; // 1 for mono, 2 for stereo
-    extraArgs?: string[]; // any extra CLI args
-}
-
-/** @see {@link IAudioHLSJobDTO} in `@/interfaces/core/sermon.interface` */
-export type { IAudioHLSJobDTO } from '@/interfaces/core/sermon.interface';
-
-export interface IAudioDASHJobDTO {
-    uploadId: string;
-    mimeType?: string;
-    inputStream: PassThrough;
-    outputStream: PassThrough
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-}
-
-export interface HLSDTO {
-    /** Prefer after upload completes — mutually preferred vs inputStream. */
-    inputFilePath?: string;
-    /** Spool from stream into outputDir/_ingest when inputFilePath omitted (internal ffmpeg). */
-    inputStream?: import('stream').Readable;
-    /** Temp output root; HLS segment files and playlists are written per rendition under this path. */
-    outputDir: string;
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-}
-
-export interface DASHDTO {
-    inputStream: PassThrough;
-    outputDir: string;
-    renditions: AudioRenditionDTO[];
-    segmentDuration?: number;
-}
-
-export interface MeasureLoudnessDTO {
-    stream: PassThrough;
-}
-
-/** Pipe loudness-normalized PCM/WAV to `outputStream` (FFmpeg `pipe:1` -> consumer). */
-export interface NormaliseAudioDTO {
-    inputStream: PassThrough;
-    outputStream: PassThrough;
-    targetIntegrated?: number;
-    targetTruePeak?: number;
-}
-
-export interface MultiBitrateDTO {
-    inputStream: PassThrough;
-    renditions: AudioRenditionDTO[];
-    outputDir: string;
-}
-
-export interface LoudnessMetadataDTO {
-    trackId: string;
-    integrated: number;
-    loudnessRange: number; // LRA
-    truePeak: number; // TP dB
-    path: string;
-}
-
-export interface AudioProcessingResult {
-    success?: IResult;
-    loudness?: LoudnessMetadataDTO;
-    outputs?: { name: string; path: string }[];
-}
-
 export interface IAudioMetadata {
     metadataType: FileType.AUDIO;
     formatName?: string;
@@ -257,35 +232,55 @@ export interface IAudioMetadata {
     year?: number;
 }
 
-/** Bull job payload for `audio:metadata` extraction workers. */
-export interface IAudioMetadataJobDTO {
-    streamForMetadata: PassThrough;
-    mimeType: string;
-    uploadId: string;
-    sermonId?: ObjectId | any;
+export interface AudioQualityDTO {
+    name: string;
+    bitrate: number;
+    sampleRate: number;
+    channels: number;
 }
 
-export interface IAudioProcessingJobDTO {
-    stream: PassThrough;
-    mimeType: string;
-    uploadId: string;
+export interface AudioPlaybackDTO {
+    inputStream: Readable;
+    normalizationFilter: string;
+    audioQualities: Array<AudioQualityDTO>;
+    hlsOutputPath: string;
+    hlsSegmentDuration: number;
 }
 
+export interface AudioNormalizationDTO {
+    measuredIntegratedLoudness: number;
+    measuredTruePeak: number;
+    measuredLoudnessRange: number;
+    measuredThreshold: number;
+    targetOffset: number;
+    audioNormalizationParameters: string;
+}
+
+
+/** Internal FFmpeg runner options (`audio.service.ts`). */
 export interface FFmpegOptionsDTO {
-    args: string[];
-    /** Pipe this stream into ffmpeg stdin (mutually exclusive with `inputFilePath` for a typical transcode). */
+    args: Array<string>;
     inputStream?: PassThrough;
-    /** Read from a file path instead of stdin (e.g. after one-shot spool of the upload to disk for multi-rendition HLS). */
-    inputFilePath?: string;
     outputStream?: PassThrough;
-    onData?: string[];
+    onData?: Array<string>;
 }
 
-export interface FFmpegJobDTO {
-    input: string;
-    output: string;
-    options: FFmpegOptionsDTO;
+export interface IAudioHLSJobDTO {
+    uploadId: string;
+    sourceS3Key: string;
+    mimeType: string;
+    audioQualities: AudioQualityDTO[];
+    segmentDuration: number;
+    sermonId: ObjectId | string;
 }
+
+export interface IAudioMetadataJobDTO {
+    sourceS3Key: string;
+    mimeType: string;
+    uploadId: string;
+    sermonId: ObjectId | string;
+}
+
 
 export enum AudioType {
     HLS = 'hls',
@@ -293,9 +288,6 @@ export enum AudioType {
     PROGRESSIVE = 'progressive',
     SMOOTHSTREAMING = 'smoothstreaming',
 }
-
-/** @deprecated Use {@link SermonDTO} for API sermon responses. */
-export type SermonResponseDTO = SermonDTO;
 
 export interface IImageMetadata {
     metadataType: FileType.IMAGE;

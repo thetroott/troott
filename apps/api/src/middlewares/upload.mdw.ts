@@ -2,7 +2,7 @@ import { NextFunction, Request, RequestHandler, Response } from 'express';
 import asyncHandler from './async.mdw';
 import busboy, { FileInfo } from 'busboy';
 import { IncomingHttpHeaders } from 'http';
-import { PassThrough } from 'stream';
+import { Readable } from 'stream';
 import redisMdw from './redis.mdw';
 import ErrorResponse from '../utils/error.util';
 import { FileFormat, FileMimeType } from '@/interfaces/common.interface';
@@ -62,22 +62,19 @@ const uploadHandler: RequestHandler = asyncHandler(
                 }
 
                 const fileType = determineFileType(mimeType as FileMimeType);
-                let fileId = genFileName(fieldname, fileType);
-
-                const uploadStream = new PassThrough();
-                const metadataStream = new PassThrough();
+                const fileId = genFileName(fieldname, fileType);
+                const chunks: Buffer[] = [];
                 let fileSize = 0;
 
-                file.on('data', async (chunk) => {
-                    uploadStream.write(chunk);
-                    metadataStream.write(chunk);
+                file.on('data', (chunk: Buffer) => {
+                    chunks.push(chunk);
                     fileSize += chunk.length;
 
                     const percent = ((fileSize / expectedSize) * 100).toFixed(
                         2,
                     );
 
-                    await redisMdw.keepData(
+                    void redisMdw.keepData(
                         {
                             key: fileId,
                             value: { percent, fileSize },
@@ -87,13 +84,22 @@ const uploadHandler: RequestHandler = asyncHandler(
                 });
 
                 file.on('end', () => {
-                    uploadStream.end();
-                    metadataStream.end();
+                    if (fileSize === 0) {
+                        return next(
+                            new ErrorResponse(
+                                `File "${filename}" is empty.`,
+                                400,
+                                [],
+                            ),
+                        );
+                    }
+
+                    const buffer = Buffer.concat(chunks);
+                    const uploadStream = Readable.from(buffer);
 
                     files.push({
                         fieldname,
-                        stream: uploadStream,
-                        metadataStream,
+                        stream: uploadStream as IFile['stream'],
                         fileName: filename,
                         mimeType,
                         info,
@@ -103,13 +109,11 @@ const uploadHandler: RequestHandler = asyncHandler(
                     });
 
                     console.log(
-                        `🟢 Finished streaming file: ${fileId}, size: ${fileSize} bytes`,
+                        `Finished streaming file: ${fileId}, size: ${fileSize} bytes`,
                     );
                 });
 
                 file.on('error', (err) => {
-                    uploadStream.destroy(err);
-                    metadataStream.destroy(err);
                     return next(err);
                 });
             });
@@ -194,16 +198,10 @@ const uploadHandler: RequestHandler = asyncHandler(
             const fileType = determineFileType(mimeType as FileMimeType);
             const fileName = genFileName(name, fileType);
 
-            const uploadStream = new PassThrough();
-            const metadataStream = new PassThrough();
-            uploadStream.end(buffer);
-            metadataStream.end(buffer);
-
             (req as any).files = [
                 {
                     fieldname: 'base64file',
-                    stream: uploadStream,
-                    metadataStream,
+                    stream: Readable.from(buffer) as IFile['stream'],
                     fileName,
                     mimeType,
                     size,

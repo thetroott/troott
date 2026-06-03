@@ -2,6 +2,7 @@ import mongoose, { Schema, Model } from 'mongoose';
 import type ISermonDoc from '@/interfaces/core/sermon.interface';
 import {
     MediaStatus,
+    SermonVisibilityStatus,
     StreamingProtocol,
     StreamingQuality,
     TokenType,
@@ -19,7 +20,7 @@ const SermonSchema = new Schema<ISermonDoc>(
             unique: true,
             index: true,
         },
-        title: { type: String },
+        title: { type: String, index: true },
         description: { type: String, maxLength: 1000 },
 
         playbackUrl: { type: String },
@@ -42,6 +43,12 @@ const SermonSchema = new Schema<ISermonDoc>(
         tags: [{ type: String }],
         language: { type: String },
         isPublic: { type: Boolean, default: true, index: true },
+        visibility: {
+            type: String,
+            enum: Object.values(SermonVisibilityStatus),
+            default: SermonVisibilityStatus.PUBLIC,
+            index: true,
+        },
 
         token: { type: String },
         tokenType: {
@@ -138,9 +145,6 @@ const SermonSchema = new Schema<ISermonDoc>(
         },
     },
 );
-
-SermonSchema.index({ title: 'text', description: 'text' });
-SermonSchema.index({ 'item.itemId': 1 });
 
 const Sermon: Model<ISermonDoc> = mongoose.model<ISermonDoc>(
     DbModels.SERMON,
