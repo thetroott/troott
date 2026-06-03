@@ -22,19 +22,25 @@ import type {
 } from '@/types/analytics';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { studioHomePath } from '@/routes/paths';
+import { studioSermonAnalyticsPath } from '@/routes/paths';
 
 interface AnalyticsBreakdownSectionProps {
     studioCode: string;
     overviewParams: Omit<AnalyticsBreakdownParams, 'dimension' | 'q'>;
+    /** When set (single-sermon analytics), sermon rows filter to this id only. */
+    focusSermonId?: string;
+    defaultDimension?: BreakdownDimension;
 }
 
 export default function AnalyticsBreakdownSection({
     studioCode,
     overviewParams,
+    focusSermonId,
+    defaultDimension = 'sermon',
 }: AnalyticsBreakdownSectionProps) {
     const navigate = useNavigate();
-    const [dimension, setDimension] = useState<BreakdownDimension>('sermon');
+    const [dimension, setDimension] =
+        useState<BreakdownDimension>(defaultDimension);
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -70,7 +76,13 @@ export default function AnalyticsBreakdownSection({
         if (dimension !== 'sermon') {
             return [];
         }
-        const source = data?.rows ?? emptyAnalyticsBreakdown().rows;
+        let source = data?.rows ?? emptyAnalyticsBreakdown().rows;
+        if (focusSermonId) {
+            source = source.filter(
+                (row) =>
+                    row.sermonTitle !== 'No Data' && row.id === focusSermonId,
+            );
+        }
         const isEmpty =
             source.length === 1 && source[0]?.sermonTitle === 'No Data';
         if (isEmpty || !debouncedSearch) {
@@ -82,7 +94,7 @@ export default function AnalyticsBreakdownSection({
                 row.sermonTitle !== 'No Data' &&
                 row.sermonTitle.toLowerCase().includes(q),
         );
-    }, [data?.rows, debouncedSearch, dimension]);
+    }, [data?.rows, debouncedSearch, dimension, focusSermonId]);
 
     const showEmptyHelper =
         dimension === 'sermon' &&
@@ -109,7 +121,10 @@ export default function AnalyticsBreakdownSection({
         if (row.id === 'empty') {
             return;
         }
-        navigate(`${studioHomePath(studioCode)}/sermons/${row.id}`);
+        if (focusSermonId && row.id === focusSermonId) {
+            return;
+        }
+        navigate(studioSermonAnalyticsPath(studioCode, row.id));
     };
 
     if (isLoading) {

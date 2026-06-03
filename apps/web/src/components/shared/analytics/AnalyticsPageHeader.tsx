@@ -11,6 +11,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { STUDIO_HEADER_ACTION } from '@/components/shared/studio/studio-header-actions';
 import { toast } from 'sonner';
 
 interface AnalyticsPageHeaderProps {
@@ -68,7 +69,7 @@ export default function AnalyticsPageHeader({
                 <Button
                     type="button"
                     variant="outline"
-                    className="h-8 gap-2 border-[#545454]/50 text-[#bdbdbd]"
+                    className={STUDIO_HEADER_ACTION.outline}
                     onClick={() =>
                         toast.message('Share is not available yet.')
                     }
@@ -78,7 +79,7 @@ export default function AnalyticsPageHeader({
                 </Button>
                 <Button
                     type="button"
-                    className="h-8 gap-2 bg-[#08ffdb] text-[#1f2020] hover:bg-[#08ffdb]/90"
+                    className={STUDIO_HEADER_ACTION.primary}
                     onClick={() =>
                         toast.message('Create analytics is not available yet.')
                     }

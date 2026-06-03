@@ -1,4 +1,5 @@
 import type { AnalyticsBreakdownRow } from '@/types/analytics';
+import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 import { cn } from '@/lib/utils';
 
 interface AnalyticsBreakdownTableProps {
@@ -142,9 +143,11 @@ export default function AnalyticsBreakdownTable({
                 </tbody>
             </table>
             {showEmptyHelper ? (
-                <p className="py-6 text-center text-xs text-[#bdbdbd]">
-                    No data to show yet.
-                </p>
+                <StudioEmptyState
+                    placement="panelCompact"
+                    compactDescription
+                    description="No data to show yet."
+                />
             ) : null}
         </div>
     );
