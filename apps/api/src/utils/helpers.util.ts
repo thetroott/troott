@@ -1,10 +1,14 @@
 import slugify from 'slugify';
 import { DateTime } from 'luxon';
-import { FileMimeType, FileType, S3Folder } from '@/interfaces/common.interface';
+import {
+    FileMimeType,
+    FileType,
+    S3Folder,
+} from '@/interfaces/common.interface';
+import type { IPlanPaystackCode } from '@/interfaces/plan.interface';
 import { UserType } from '@/interfaces/user.interface';
 import { Random } from '@btffamily/pacitude';
-
-
+import { AWS_BUCKETS_STORAGE } from '@/configs/aws.config';
 
 /**
  * @name genUserCode
@@ -28,6 +32,16 @@ export const genUserCode = (userType: UserType): string => {
     const code = Random.randomNum(6);
 
     return `${baseName}-${year}-${code}`;
+};
+
+/**
+ * @name genSermonCode
+ * @description Generates a unique sermon catalog code (`sm-{year}-{random_6_digits}`).
+ */
+export const genSermonCode = (): string => {
+    const year = new Date().getFullYear();
+    const code = Random.randomNum(6);
+    return `sm-${year}-${code}`;
 };
 
 /**
@@ -298,8 +312,20 @@ export const getS3Folder: GetS3Folder = (mimeType: string): S3Folder => {
         case 'audio/mpeg':
         case 'audio/mp3':
         case 'audio/wav':
+        case 'audio/x-wav':
+        case 'audio/wave':
         case 'audio/aac':
         case 'audio/x-m4a':
+        case 'audio/m4a':
+        case 'audio/mp4':
+        case 'audio/ogg':
+        case 'audio/opus':
+        case 'audio/flac':
+        case 'audio/x-flac':
+        case 'audio/webm':
+        case 'audio/x-caf':
+        case 'audio/aiff':
+        case 'audio/x-aiff':
             return S3Folder.AUDIO;
 
         // Video
@@ -323,10 +349,323 @@ export const getS3Folder: GetS3Folder = (mimeType: string): S3Folder => {
     }
 };
 
+const MIME_TYPE_TO_EXTENSION: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/jpg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+    'image/svg+xml': 'svg',
+    'audio/mpeg': 'mp3',
+    'audio/mp3': 'mp3',
+    'audio/mp4': 'm4a',
+    'audio/m4a': 'm4a',
+    'audio/x-m4a': 'm4a',
+    'audio/aac': 'aac',
+    'audio/wav': 'wav',
+    'audio/x-wav': 'wav',
+    'audio/wave': 'wav',
+    'audio/ogg': 'ogg',
+    'audio/opus': 'opus',
+    'audio/flac': 'flac',
+    'audio/x-flac': 'flac',
+    'audio/webm': 'webm',
+    'audio/x-caf': 'caf',
+    'audio/aiff': 'aiff',
+    'audio/x-aiff': 'aiff',
+    'video/mp4': 'mp4',
+    'video/webm': 'webm',
+    'application/pdf': 'pdf',
+    'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        'docx',
+    'application/vnd.ms-excel': 'xls',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+    'application/vnd.ms-powerpoint': 'ppt',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        'pptx',
+    'text/plain': 'txt',
+};
+
+/** File extension for S3 object keys (no leading dot). */
+export const extensionFromMimeType = (mimeType: string): string => {
+    const mime = mimeType.toLowerCase().split(';')[0]?.trim() ?? '';
+    if (MIME_TYPE_TO_EXTENSION[mime]) {
+        return MIME_TYPE_TO_EXTENSION[mime];
+    }
+    const subtype = mime.split('/')[1];
+    if (!subtype) {
+        return 'bin';
+    }
+    if (subtype === 'svg+xml') {
+        return 'svg';
+    }
+    if (subtype.includes('+')) {
+        return subtype.split('+')[0] ?? 'bin';
+    }
+    return subtype;
+};
+
+/** Extension from original filename when present and safe. */
+export const extensionFromFilename = (
+    filename: string | undefined | null,
+): string | null => {
+    const name = filename?.trim() ?? '';
+    if (!name) {
+        return null;
+    }
+    const match = name.match(/\.([a-zA-Z0-9]{1,8})$/);
+    if (!match?.[1]) {
+        return null;
+    }
+    const ext = match[1].toLowerCase();
+    if (ext === 'jpeg') {
+        return 'jpg';
+    }
+    return ext;
+};
+
+/**
+ * S3 object key: `{folder}/{uploadId}.{ext}`.
+ * `uploadId` stays extensionless; extension comes from filename or MIME type.
+ */
+export const buildS3ObjectKey = (
+    folder: string,
+    uploadId: string,
+    mimeType: string,
+    originalFilename?: string | null,
+): string => {
+    const id = uploadId.trim();
+    const ext =
+        extensionFromFilename(originalFilename) ??
+        extensionFromMimeType(mimeType);
+    const base = id.replace(/\.[a-zA-Z0-9]{1,8}$/, '');
+    return `${folder}/${base}.${ext}`;
+};
+
+/** CDN base from CLOUDFRONT_STORAGE_URL (no trailing slash). */
+export const storageCdnBase = (): string =>
+    (process.env.CLOUDFRONT_STORAGE_URL || '').replace(/\/$/, '');
+
+/** Public URL for a troott-storage S3 key, e.g. images/file-image-…. */
+export const buildStoragePublicUrl = (s3Key: string): string => {
+    const base = storageCdnBase();
+    const key = s3Key?.trim() ?? '';
+    if (!base || !key) {
+        return key;
+    }
+    const segments = key
+        .replace(/^\/+/, '')
+        .split('/')
+        .filter(Boolean)
+        .map((segment) => encodeURIComponent(segment));
+    return `${base}/${segments.join('/')}`;
+};
+
+/** Public still-image URL for legacy bare uploadId (no extension). Prefer full s3Key on new uploads. */
+export const buildStorageImageUrl = (uploadId: string): string =>
+    buildStoragePublicUrl(`images/${uploadId}`);
+
+const extractStorageS3KeyFromUrl = (url: URL): string | null => {
+    const bucket = (
+        AWS_BUCKETS_STORAGE ||
+        process.env.AWS_STORAGE_BUCKET ||
+        ''
+    ).trim();
+    if (!bucket) {
+        return null;
+    }
+    const host = url.hostname;
+    if (host.includes('.s3.') && host.startsWith(`${bucket}.`)) {
+        const key = url.pathname.replace(/^\//, '');
+        return key ? decodeURIComponent(key) : null;
+    }
+    if (host.includes('s3.') || host === 's3.amazonaws.com') {
+        const parts = url.pathname.replace(/^\//, '').split('/');
+        if (parts[0] === bucket && parts.length > 1) {
+            return decodeURIComponent(parts.slice(1).join('/'));
+        }
+    }
+    return null;
+};
+
+/** Remove cache-bust query/hash suffixes before parsing storage URLs or keys. */
+export const stripUrlQueryAndHash = (value: string): string =>
+    value.split('#')[0]?.split('?')[0] ?? value;
+
+/**
+ * Normalize a stored CDN URL, raw S3 URL, s3Key, or uploadId to `images/{uploadId}`.
+ * Use on **write** paths (Mongo persist); map to CDN with `toStoragePublicUrl` on GET.
+ */
+export const normalizeStorageReferenceToS3Key = (
+    stored: string | undefined | null,
+): string => {
+    if (stored == null) {
+        return '';
+    }
+    const value = stripUrlQueryAndHash(stored.trim());
+    if (!value) {
+        return '';
+    }
+
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+        try {
+            const url = new URL(value);
+            const legacy = url.pathname.match(/^\/sermon\/image\/(.+)$/);
+            if (legacy?.[1]) {
+                return `images/${decodeURIComponent(legacy[1])}`;
+            }
+            const imagesPath = url.pathname.match(/^\/images\/(.+)$/);
+            if (imagesPath?.[1]) {
+                return `images/${decodeURIComponent(imagesPath[1])}`;
+            }
+            const key = extractStorageS3KeyFromUrl(url);
+            if (key?.startsWith('images/')) {
+                return key;
+            }
+            return value;
+        } catch {
+            return value;
+        }
+    }
+
+    if (value.startsWith('/images/flags/')) {
+        return value;
+    }
+    if (value.startsWith('images/')) {
+        return value;
+    }
+    if (value.startsWith('file-image-') || /^file-[\w-]+$/.test(value)) {
+        return `images/${value}`;
+    }
+
+    return value;
+};
+
+/** Map stored S3 URL, s3Key, or uploadId to CDN URL for API responses. */
+export const toStoragePublicUrl = (
+    stored: string | undefined | null,
+): string => {
+    if (stored == null) {
+        return '';
+    }
+    const value = stripUrlQueryAndHash(stored.trim());
+    if (!value) {
+        return '';
+    }
+
+    const base = storageCdnBase();
+
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+        try {
+            const url = new URL(value);
+            if (base) {
+                try {
+                    const cdnHost = new URL(base).hostname;
+                    if (url.hostname === cdnHost) {
+                        const legacy = url.pathname.match(
+                            /^\/sermon\/image\/(.+)$/,
+                        );
+                        if (legacy?.[1]) {
+                            return buildStorageImageUrl(
+                                decodeURIComponent(legacy[1]),
+                            );
+                        }
+                        return url.href;
+                    }
+                } catch {
+                    /* invalid CLOUDFRONT_STORAGE_URL */
+                }
+            }
+            if (url.hostname.includes('amazonaws.com')) {
+                const key = extractStorageS3KeyFromUrl(url);
+                if (key?.startsWith('images/')) {
+                    return base ? buildStoragePublicUrl(key) : value;
+                }
+            }
+            return value;
+        } catch {
+            return value;
+        }
+    }
+
+    if (value.startsWith('/images/flags/')) {
+        return value;
+    }
+    if (value.startsWith('images/')) {
+        return base ? buildStoragePublicUrl(value) : value;
+    }
+    if (value.startsWith('file-image-') || /^file-[\w-]+$/.test(value)) {
+        return base ? buildStorageImageUrl(value) : value;
+    }
+
+    return value;
+};
+
+/** Stable code for the seeded listener free tier plan. */
+export const FREE_PLAN_CODE = 'plan-free-listener';
+
+const DEFAULT_FREE_PLAN_PAYSTACK_CODES: IPlanPaystackCode = {
+    nairaMonthly: 'troott_free_ngn_monthly',
+    nairaYearly: 'troott_free_ngn_yearly',
+    dollarMonthly: 'troott_free_usd_monthly',
+    dollarYearly: 'troott_free_usd_yearly',
+};
+
+function envOrDefault(envKey: string, fallback: string): string {
+    const value = process.env[envKey]?.trim();
+    return value && value.length > 0 ? value : fallback;
+}
+
+/** Non-empty Paystack plan codes for $0 plans (sentinels; no Paystack API calls). */
+export function getFreePlanPaystackCodes(): IPlanPaystackCode {
+    return {
+        nairaMonthly: envOrDefault(
+            'SEED_FREE_PLAN_PAYSTACK_NGN_MONTHLY',
+            DEFAULT_FREE_PLAN_PAYSTACK_CODES.nairaMonthly,
+        ),
+        nairaYearly: envOrDefault(
+            'SEED_FREE_PLAN_PAYSTACK_NGN_YEARLY',
+            DEFAULT_FREE_PLAN_PAYSTACK_CODES.nairaYearly,
+        ),
+        dollarMonthly: envOrDefault(
+            'SEED_FREE_PLAN_PAYSTACK_USD_MONTHLY',
+            DEFAULT_FREE_PLAN_PAYSTACK_CODES.dollarMonthly,
+        ),
+        dollarYearly: envOrDefault(
+            'SEED_FREE_PLAN_PAYSTACK_USD_YEARLY',
+            DEFAULT_FREE_PLAN_PAYSTACK_CODES.dollarYearly,
+        ),
+    };
+}
+
+/** Resolved at module load for seed, schema defaults, and service. */
+export const FREE_PLAN_PAYSTACK_CODES: IPlanPaystackCode =
+    getFreePlanPaystackCodes();
+
+export function paystackCodesNeedRepair(
+    codes: Partial<IPlanPaystackCode> | null | undefined,
+): boolean {
+    if (!codes) {
+        return true;
+    }
+    const keys: Array<keyof IPlanPaystackCode> = [
+        'nairaMonthly',
+        'nairaYearly',
+        'dollarMonthly',
+        'dollarYearly',
+    ];
+    return keys.some((key) => !String(codes[key] ?? '').trim());
+}
+
+
 export default {
     formatMoney,
     FileType,
+    FREE_PLAN_PAYSTACK_CODES,
+
     genUserCode,
+    genSermonCode,
     generateRandomChars,
     generateRandomNumbers,
     generateRandomCode,
@@ -351,4 +690,7 @@ export default {
     getIdIndex,
     countTruthyValues,
     arrStrResolve,
+
+    paystackCodesNeedRepair,
+    getFreePlanPaystackCodes,
 };
