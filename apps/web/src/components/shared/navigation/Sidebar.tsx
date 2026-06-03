@@ -15,6 +15,7 @@ import {
 import { SearchForm } from '../dialog/Search.tsx';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+    isStudioHomePath,
     isStudioScopedLegacyNavUrl,
     resolveStudioNavUrl,
 } from '@/utils/studio-nav.util';
@@ -144,13 +145,17 @@ const AppSidebar = (data: ISideBar) => {
                                             user,
                                             creator,
                                         );
+                                    const isDashboardNav =
+                                        item.url === '/dashboard';
                                     const isActive =
                                         !isDisabled &&
-                                        (currentPath === targetHref ||
-                                            (targetHref !== '#' &&
-                                                currentPath.startsWith(
-                                                    `${targetHref}/`,
-                                                )));
+                                        (isDashboardNav
+                                            ? isStudioHomePath(currentPath)
+                                            : currentPath === targetHref ||
+                                              (targetHref !== '#' &&
+                                                  currentPath.startsWith(
+                                                      `${targetHref}/`,
+                                                  )));
 
                                     const iconClassName = `
                                 text-neutral-400
