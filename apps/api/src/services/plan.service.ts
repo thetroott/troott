@@ -20,7 +20,7 @@ import {
     paystackPlanUpdate,
 } from '@/services/paystack.service';
 import planRepository from '@/repository/plan.repository';
-import { FREE_PLAN_PAYSTACK_CODES } from '@/constants/plan.constants';
+import { FREE_PLAN_PAYSTACK_CODES } from '@/utils/helpers.util';
 
 class PlanService {
     constructor() {}

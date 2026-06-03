@@ -3,7 +3,6 @@ import asyncHandler from '../middlewares/async.mdw';
 import Protect from '../middlewares/checkAuth.mdw';
 import planService from '@/services/plan.service';
 import ErrorResponse from '../utils/error.util';
-import { pathParam } from '../utils/route-params.util';
 
 /**
  * @name getPlans
@@ -142,7 +141,7 @@ export const updatePlan: RequestHandler = asyncHandler(
             );
         }
 
-        const planId = pathParam(req.params.planId);
+        const planId = (Array.isArray(req.params.planId) ? req.params.planId[0] : req.params.planId);
         if (!planId) {
             return next(new ErrorResponse('Plan ID is required', 400, []));
         }

@@ -25,7 +25,7 @@ import {
     IUserDoc,
     OnboardStatus,
 } from '@/interfaces/user.interface';
-import { genUserCode } from '../utils/code.util';
+import { genUserCode } from '../utils/helpers.util';
 import { genSlug } from '../utils/helpers.util';
 import roleService from '@/services/role.service';
 import PermissionService from '@/services/permission.service';

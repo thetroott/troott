@@ -62,6 +62,12 @@ const errorHandler = (
 
     // Logs only in dev or staging
     if (ENV.isDevelopment() || ENV.isStaging()) {
+        const route = req.originalUrl || req.url || '';
+        logger.log({
+            data: `[ERR] ${req.method} ${route} -> ${customError.statusCode} ${customError.message}`,
+            label: 'ERR',
+            type: 'error',
+        });
         logger.log({ data: err, label: 'ERR' });
     }
 

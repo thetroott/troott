@@ -4,7 +4,7 @@ import {
     FREE_PLAN_CODE,
     FREE_PLAN_PAYSTACK_CODES,
     paystackCodesNeedRepair,
-} from '@/constants/plan.constants';
+} from '@/utils/helpers.util';
 import logger from '../../utils/logger.util';
 
 export function buildFreePlanSeedDocument() {

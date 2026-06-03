@@ -8,7 +8,7 @@ import { IUserDoc, UserType } from '../../src/modules/users/user/user.interface'
 import User from '@/models/user.model';
 import tokenService from '@/services/token.service';
 import authService from '@/services/auth.service';
-import { genUserCode } from '../../src/utils/code.util';
+import { genUserCode } from '../../src/utils/helpers.util';
 
 /**
  * Test helper utilities for API testing

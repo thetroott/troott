@@ -4,11 +4,17 @@ import ErrorResponse from '../utils/error.util';
 import asyncHandler from './async.mdw';
 import User from '@/models/user.model';
 import tokenService from '@/services/token.service';
+import type { UserType } from '@/interfaces/user.interface';
 
 declare global {
     namespace Express {
         interface Request {
-            user?: User;
+            user?: {
+                id: string;
+                email: string;
+                role?: string;
+                userType: UserType;
+            };
         }
     }
 }
@@ -68,7 +74,12 @@ const Protect = asyncHandler(
             res.setHeader('X-New-Token', refreshResult.data.token);
         }
 
-        req.user = { id: decoded.id, email: decoded.email, role: decoded.role };
+        req.user = {
+            id: String(decoded.id),
+            email: decoded.email ?? user.email,
+            role: decoded.role,
+            userType: user.userType,
+        };
         next();
     },
 );

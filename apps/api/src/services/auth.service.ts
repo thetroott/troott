@@ -21,8 +21,6 @@ import User from '@/models/user.model';
 import Role from '@/models/role.model';
 import ErrorResponse from '../utils/error.util';
 import authMapper from '@/mappers/auth.mapper';
-import { getAuthUserId } from '@/utils/auth-request.util';
-
 class AuthService {
     public result: IResult;
 
@@ -592,7 +590,9 @@ class AuthService {
         };
         const { req, isAdmin } = data;
 
-        const userId = getAuthUserId(req);
+        const userId = String(
+            (req.user as { id?: string } | undefined)?.id ?? '',
+        );
         if (!userId) {
             result.error = true;
             result.message = 'authorized  - user details not found';

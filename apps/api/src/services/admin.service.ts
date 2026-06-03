@@ -10,7 +10,7 @@ import { CreateAdminDTO, UpdateAdminDTO } from '@/dtos/admin.dto';
 import adminRepository from '@/repository/admin.repository';
 import { IResult } from '@/interfaces/common.interface';
 import { IUserDoc, UserType } from '@/interfaces/user.interface';
-import { genUserCode } from '../utils/code.util';
+import { genUserCode } from '../utils/helpers.util';
 import roleService from '@/services/role.service';
 import PermissionService from '@/services/permission.service';
 import { generateRandomChars, genSlug } from '@/utils/helpers.util';

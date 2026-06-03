@@ -8,7 +8,7 @@ import {
 } from '../../src/modules/users/user/user.interface';
 import User from '@/models/user.model';
 import authService from '@/services/auth.service';
-import { genUserCode } from '../../src/utils/code.util';
+import { genUserCode } from '../../src/utils/helpers.util';
 
 /**
  * Factory for creating test user data

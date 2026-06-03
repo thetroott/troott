@@ -23,9 +23,10 @@ import PermissionService from '@/services/permission.service';
 import { genSlug } from '../utils/helpers.util';
 import { generateRandomChars } from '../utils/helpers.util';
 import { OAuthProvider } from '@/types/common.enum';
-import { SocialIdKey } from '../utils/types.util';
-import { genUserCode } from '../utils/code.util';
+import { SocialIdKey } from '@/types/common.types';
+import { genUserCode } from '../utils/helpers.util';
 import storageService from '@/services/storage.service';
+import { AWS_BUCKETS_STORAGE } from '@/configs/aws.config';
 import { IFile } from '@/interfaces/common.interface';
 import roleService from '@/services/role.service';
 import emailService from '@/services/email.service';
@@ -37,7 +38,7 @@ import recommendationService from '@/services/core/recommendation.service';
 import subscriptionRepository from '@/repository/subscription.repository';
 import { SubscriptionStatus, Currency, BillingFrequency } from '@/interfaces/subscription.interface';
 import Plan from '@/models/plan.model';
-import { FREE_PLAN_CODE } from '@/constants/plan.constants';
+import { FREE_PLAN_CODE } from '@/utils/helpers.util';
 import { PlanType } from '@/interfaces/plan.interface';
 import type { IListenerDoc } from '@/interfaces/core/listener.interface';
 
@@ -429,7 +430,10 @@ class UserService {
             // If there's an old avatar, delete it from S3
             if (oldAvatar?.s3Key) {
                 try {
-                    await storageService.deleteFile(oldAvatar.s3Key);
+                    await storageService.deleteFile(
+                        oldAvatar.s3Key,
+                        AWS_BUCKETS_STORAGE,
+                    );
                 } catch (error) {
                     console.error('Failed to delete old avatar:', error);
                 }
@@ -488,7 +492,10 @@ class UserService {
             // If there's an old banner, delete it from S3
             if (oldBanner?.s3Key) {
                 try {
-                    await storageService.deleteFile(oldBanner.s3Key);
+                    await storageService.deleteFile(
+                        oldBanner.s3Key,
+                        AWS_BUCKETS_STORAGE,
+                    );
                 } catch (error) {
                     console.error('Failed to delete old banner:', error);
                 }

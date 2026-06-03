@@ -177,7 +177,8 @@ jest.mock('../../../src/services/email.service', () => ({
     },
 }));
 
-jest.mock('../../../src/utils/code.util', () => ({
+jest.mock('../../../src/utils/helpers.util', () => ({
+    ...jest.requireActual('../../../src/utils/helpers.util'),
     genUserCode: jest.fn<() => string>().mockReturnValue('USR-TEST-001'),
 }));
 

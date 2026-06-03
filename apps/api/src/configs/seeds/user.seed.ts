@@ -9,7 +9,7 @@ import {
 } from '@/interfaces/user.interface';
 import ErrorResponse from '@/utils/error.util';
 import authService from '@/services/auth.service';
-import { genUserCode } from '../../utils/code.util';
+import { genUserCode } from '@/utils/helpers.util';
 import { genSlug } from '@/utils/helpers.util';
 import PermissionService from '@/services/permission.service';
 import adminService from '@/services/admin.service';

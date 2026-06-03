@@ -4,7 +4,6 @@ import redisWrapper from '../middlewares/redis.mdw';
 import { IResult } from '@/interfaces/common.interface';
 import IRoleDoc from '../interfaces/role.interface';
 import { IUserDoc } from '@/interfaces/user.interface';
-import { matchPermission as matchPermissionUtil } from '@/utils/role.util';
 
 const RBAC_USER_CACHE_KEY = (userId: string) => `rbac:perms:user:${userId}`;
 const DEFAULT_TTL = Number(
@@ -122,7 +121,17 @@ export async function hasPermission(
 
     // 1. Check base role permissions
     const rolePerms = await resolveUserPermissions(user);
-    if (matchPermissionUtil(requested, rolePerms)) return true;
+    const requestedPerm = requested.toLowerCase();
+    if (rolePerms.has('*:*') || rolePerms.has(requestedPerm)) {
+        return true;
+    }
+    const [entity, action] = requestedPerm.split(':');
+    if (
+        (entity && rolePerms.has(`${entity}:*`)) ||
+        (action && rolePerms.has(`*:${action}`))
+    ) {
+        return true;
+    }
 
     // 2. Check resource ownership (if resource provided or resourceOwnerId provided)
     if (checkOwnership) {

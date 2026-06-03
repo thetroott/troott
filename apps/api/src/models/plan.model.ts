@@ -1,7 +1,7 @@
 import mongoose, { Model, Schema } from 'mongoose';
 import IPlanDoc, { PlanType } from '@/interfaces/plan.interface';
 import { DbModels } from '@/types/common.enum';
-import { FREE_PLAN_PAYSTACK_CODES } from '@/constants/plan.constants';
+import { FREE_PLAN_PAYSTACK_CODES } from '@/utils/helpers.util';
 
 const PlanSchema = new Schema<IPlanDoc>(
     {

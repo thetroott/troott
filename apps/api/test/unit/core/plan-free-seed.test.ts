@@ -5,7 +5,7 @@ import {
     FREE_PLAN_CODE,
     FREE_PLAN_PAYSTACK_CODES,
     paystackCodesNeedRepair,
-} from '@/constants/plan.constants';
+} from '@/utils/helpers.util';
 
 describe('free plan seed payload', () => {
     it('uses non-empty paystackPlanCodes (Mongoose 8 required strings)', () => {

@@ -19,7 +19,7 @@ import storageRoutes from '@/routes/storage.router';
 import invitationRoutes from '@/routes/invitation.router';
 import planRoutes from '@/routes/plan.router';
 import subscriptionRoutes from '@/routes/subscription.router';
-import { ENVType } from '@/utils/enums.util';
+import { ENVType } from '@/types/common.enum';
 import { ENV } from '@/utils/env.util';
 
 const router = express.Router();

@@ -1,6 +1,7 @@
 import pug from 'pug';
 import nodemailer from 'nodemailer';
 import appRootPath from 'app-root-path';
+import path from 'path';
 import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
 import { SendMailClient } from 'zeptomail';
 import { SendEmailDTO, SendOtpDTO } from '@/dtos/email.dto';
@@ -15,7 +16,7 @@ import { addJob } from '../tasks/jobs/job';
 import { JobChannel, QueueChannel } from '../queues/channel.queue';
 import { IUserDoc, OtpType } from '@/interfaces/user.interface';
 
-const BASE_FOLDER = `${appRootPath.path}/apps/api/src`;
+const BASE_FOLDER = path.join(appRootPath.path, 'src');
 
 class AppEmailService {
     private config: EmailConfig;
@@ -93,7 +94,13 @@ class AppEmailService {
                 templateFolder = 'marketing';
             }
 
-            const templatePath = `${BASE_FOLDER}/views/emails/${templateFolder}/${data.template}.pug`;
+            const templatePath = path.join(
+                BASE_FOLDER,
+                'views',
+                'emails',
+                templateFolder,
+                `${data.template}.pug`,
+            );
 
             const html = pug.renderFile(templatePath, {
                 ...data.payload,

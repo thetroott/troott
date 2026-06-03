@@ -285,7 +285,7 @@ export const loginUser = asyncHandler(
 
         const responseData = await authMapper.mapUser(
             userExist,
-            token.data as any,
+            token.data?.token as any,
         );
 
         res.status(200).json({
