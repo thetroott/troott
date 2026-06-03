@@ -1,0 +1,37 @@
+---
+description: Studio users cannot move published sermons to bin or permanently delete them
+globs:
+  - apps/web/**/*
+  - apps/api/**/*
+  - specs/web/**/*
+alwaysApply: false
+---
+
+# Published sermon delete policy (studio)
+
+## Rule
+
+For **ministers** and **creators** (non-admin studio users):
+
+1. **Cannot** move a **published** sermon to the bin (`PUT /sermon/move-to-bin/:id`).
+2. **Cannot** permanently delete a **published** sermon (`DELETE /sermon/delete/:id`).
+
+**Published** means `sermon.status === 'published'` (API `MediaStatus.PUBLISHED`). Web list rows use `publicationStatus === 'published'` from `mapApiSermonToTableRow`.
+
+## API (source of truth)
+
+`apps/api/src/services/core/sermon.service.ts` — `validateDeletePolicy()`:
+
+- Non-admin + published → **403** with message *"Published sermons cannot be moved to bin…"* or *"…deleted…"*.
+- Admins may move/delete published only with explicit `allowPublishedDelete` on hard-delete.
+
+## Web UI
+
+- **My Sermons:** hide **Move to trash** in `SermonContextMenu` when `publicationStatus === 'published'`; guard in `SermonsTable.requestMoveToTrash`.
+- **Bin:** hide **Empty immediately** for published rows; filter ids in batch empty; use `sermon-studio-policy.util.ts`.
+- Do not add client flows that bypass this policy.
+
+## Specs
+
+- `specs/web/feature/feat-0022/SERMON_EDIT_SPEC.md` (lifecycle D)
+- `specs/web/feature/feat-0019/BIN_UI_PARITY_SPEC.md` (delete policy)
