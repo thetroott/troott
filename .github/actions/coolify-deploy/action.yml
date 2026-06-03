@@ -1,0 +1,48 @@
+name: Trigger Coolify deploy
+description: GET /api/v1/deploy for a Coolify application UUID
+
+inputs:
+    coolify-api-url:
+        description: Coolify base URL
+        required: true
+    coolify-api-token:
+        description: Coolify API bearer token
+        required: true
+    app-uuid:
+        description: Coolify application UUID
+        required: true
+    app-label:
+        description: Label for logs
+        required: false
+        default: app
+
+runs:
+    using: composite
+    steps:
+        - name: Deploy ${{ inputs.app-label }}
+          shell: bash
+          env:
+              COOLIFY_API_URL: ${{ inputs.coolify-api-url }}
+              COOLIFY_API_TOKEN: ${{ inputs.coolify-api-token }}
+              COOLIFY_APP_UUID: ${{ inputs.app-uuid }}
+          run: |
+              set -euo pipefail
+              if [ -z "$COOLIFY_API_TOKEN" ] || [ -z "$COOLIFY_APP_UUID" ]; then
+                echo "Coolify API token or application UUID not configured for ${{ inputs.app-label }}"
+                exit 1
+              fi
+              echo "Triggering Coolify deploy for ${{ inputs.app-label }}..."
+              response=$(curl -s -w "\n%{http_code}" -X GET \
+                "$COOLIFY_API_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID&force=false" \
+                -H "Authorization: Bearer $COOLIFY_API_TOKEN" \
+                -H "Content-Type: application/json")
+              http_code=$(echo "$response" | tail -n1)
+              body=$(echo "$response" | sed '$d')
+              if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 201 ]; then
+                echo "Deployment triggered successfully"
+                echo "$body"
+              else
+                echo "Deployment failed with HTTP $http_code"
+                echo "$body"
+                exit 1
+              fi

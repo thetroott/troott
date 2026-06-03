@@ -223,19 +223,19 @@ function mapUrlsToDocument(
     if (uiType === 'drivers-license') {
         return {
             type: DocumentType.DRIVERS,
-            frontPage: urls.front,
-            backPage: urls.back,
+            frontPage: urls.front ?? '',
+            backPage: urls.back ?? '',
         };
     }
     if (uiType === 'passport') {
         return {
             type: DocumentType.PASSPORT,
-            frontPage: urls.passport_page,
+            frontPage: urls.passport_page ?? '',
         };
     }
     return {
         type: DocumentType.NIN,
-        frontPage: urls.nin_page,
+        frontPage: urls.nin_page ?? '',
     };
 }
 

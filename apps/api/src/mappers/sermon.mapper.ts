@@ -192,7 +192,6 @@ class SermonMapper {
         }
 
         const result: UpdateSermonDTO = {
-            id: sermonDocId(sermon),
             title: sermon.title,
             description: sermon.description,
             preachedAt: sermon.preachedAt ?? '',

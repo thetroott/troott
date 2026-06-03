@@ -1,4 +1,4 @@
-import { config } from '@troott/configs/eslint/react-internal';
+import { config } from '@troott/configs/eslint/react-internal.js';
 
 export default [
     {

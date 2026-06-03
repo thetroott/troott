@@ -11,10 +11,11 @@
         "clean:js": "find src -name '*.js' -type f -delete",
         "prebuild": "pnpm clean",
         "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
-        "build": "tsc --noEmit false && copyfiles -u 1 src/_data/**/* dist/ && copyfiles -u 1 src/views/**/* dist/",
+        "build": "tsc --noEmit false && node -e \"const fs=require('fs'); fs.cpSync('src/_data','dist/_data',{recursive:true}); fs.cpSync('src/views','dist/views',{recursive:true});\"",
         "start": "node dist/server.js",
         "staging": "NODE_ENV=staging node dist/server.js",
         "prod": "NODE_ENV=production node dist/server.js",
+        "lint": "eslint .",
         "pm2:staging": "pm2 start dist/server.js --name troott-staging --env staging",
         "pm2:prod": "pm2 start dist/server.js --name troott-prod --env production",
         "pm2:restart": "pm2 restart all",
@@ -97,6 +98,7 @@
         "zeptomail": "^7.0.2"
     },
     "devDependencies": {
+        "@troott/configs/eslint": "workspace:*",
         "@types/app-root-path": "^1.2.8",
         "@types/bcrypt": "^5.0.2",
         "@types/bcryptjs": "^2.4.6",

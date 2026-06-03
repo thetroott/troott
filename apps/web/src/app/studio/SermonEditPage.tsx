@@ -452,7 +452,7 @@ const SermonEditPage = () => {
                     detailsPathState={detailsPathState}
                     analyticsPath={analyticsPath}
                     sermonTitle={sidebarTitle}
-                    thumbnailPreview={form.thumbnailPreview}
+                    thumbnailPreview={form.thumbnailPreview ?? undefined}
                     activeSection={
                         isAnalyticsSection ? 'analytics' : 'details'
                     }

@@ -52,3 +52,4 @@ Product and technical specifications for the Troott **API** service.
 
 - Web portal: [`specs/web/README.md`](../web/README.md)
 - Mobile: [`specs/mobile/README.md`](../mobile/README.md)
+- Platform CI/CD: [`specs/platform/README.md`](../platform/README.md) — [feat-0001](../platform/feature/feat-0001/PRODUCT.md) (Pacepard reference)

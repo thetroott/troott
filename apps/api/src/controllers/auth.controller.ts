@@ -705,7 +705,7 @@ export const resendOTP = asyncHandler(
 export const socialAuthCallback = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         // Passport.js places the authenticated user object onto req.user
-        const user = req.user as IUserDoc;
+        const user = req.user as unknown as IUserDoc;
 
         if (!user) {
             return next(

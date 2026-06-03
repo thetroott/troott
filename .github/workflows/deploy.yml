@@ -1,0 +1,178 @@
+# feat-0001 — CD: Coolify deploy api.troott.com, app.troott.com, troott.com
+# Spec: specs/platform/feature/feat-0001/TECH.md
+
+name: Deploy
+
+on:
+    push:
+        branches:
+            - development
+            - staging
+            - main
+        paths-ignore:
+            - '**.md'
+            - 'docs/**'
+            - 'specs/**'
+    workflow_dispatch:
+        inputs:
+            environment:
+                description: Environment to deploy to
+                required: true
+                type: choice
+                options:
+                    - development
+                    - staging
+                    - production
+            apps:
+                description: 'Apps (comma-separated: api,web,website)'
+                required: false
+                default: api,web,website
+
+env:
+    NODE_VERSION: '22'
+    PNPM_VERSION: '10.33.0'
+    TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+    TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
+concurrency:
+    group: deploy-${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || (github.ref_name == 'staging' && 'staging' || 'development')) }}
+    cancel-in-progress: false
+
+jobs:
+    determine-environment:
+        name: Determine environment
+        runs-on: ubuntu-latest
+        outputs:
+            env: ${{ steps.set-env.outputs.env }}
+        steps:
+            - name: Set environment
+              id: set-env
+              run: |
+                  if [ -n "${{ github.event.inputs.environment }}" ]; then
+                    echo "env=${{ github.event.inputs.environment }}" >> "$GITHUB_OUTPUT"
+                  elif [ "${{ github.ref_name }}" = "main" ]; then
+                    echo "env=production" >> "$GITHUB_OUTPUT"
+                  elif [ "${{ github.ref_name }}" = "staging" ]; then
+                    echo "env=staging" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "env=development" >> "$GITHUB_OUTPUT"
+                  fi
+
+    build:
+        name: Build for deployment
+        runs-on: ubuntu-latest
+        timeout-minutes: 30
+        needs: determine-environment
+        environment:
+            name: ${{ needs.determine-environment.outputs.env }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup monorepo
+              uses: ./.github/actions/setup-monorepo
+
+            - name: Setup Turborepo cache
+              uses: turborepo/cache-action@v1
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Build deployable apps
+              env:
+                  VITE_API_BASE_URL: ${{ vars.API_URL }}
+                  VITE_APP_URL: ${{ vars.WEB_URL }}
+                  NEXT_PUBLIC_API_URL: ${{ vars.API_URL }}
+              run: pnpm build:ci
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: troott-production-build
+                  path: |
+                      apps/api/dist
+                      apps/web/dist
+                      apps/website/.next
+                  retention-days: 7
+                  if-no-files-found: error
+
+    deploy-api:
+        name: Deploy API
+        runs-on: ubuntu-latest
+        needs: [build, determine-environment]
+        if: github.event_name == 'push' || contains(github.event.inputs.apps, 'api')
+        environment:
+            name: ${{ needs.determine-environment.outputs.env }}
+            url: ${{ vars.API_URL }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: troott-production-build
+                  path: .
+
+            - name: Deploy to Coolify
+              uses: ./.github/actions/coolify-deploy
+              with:
+                  coolify-api-url: ${{ vars.COOLIFY_API_URL }}
+                  coolify-api-token: ${{ secrets.COOLIFY_API_TOKEN }}
+                  app-uuid: ${{ secrets.COOLIFY_APP_UUID_API }}
+                  app-label: api.troott.com
+
+    deploy-web:
+        name: Deploy studio web
+        runs-on: ubuntu-latest
+        needs: [build, determine-environment]
+        if: github.event_name == 'push' || contains(github.event.inputs.apps, 'web')
+        environment:
+            name: ${{ needs.determine-environment.outputs.env }}
+            url: ${{ vars.WEB_URL }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: troott-production-build
+                  path: .
+
+            - name: Deploy to Coolify
+              uses: ./.github/actions/coolify-deploy
+              with:
+                  coolify-api-url: ${{ vars.COOLIFY_API_URL }}
+                  coolify-api-token: ${{ secrets.COOLIFY_API_TOKEN }}
+                  app-uuid: ${{ secrets.COOLIFY_APP_UUID_WEB }}
+                  app-label: app.troott.com
+
+    deploy-website:
+        name: Deploy marketing website
+        runs-on: ubuntu-latest
+        needs: [build, determine-environment]
+        if: github.event_name == 'push' || contains(github.event.inputs.apps, 'website')
+        environment:
+            name: ${{ needs.determine-environment.outputs.env }}
+            url: ${{ vars.WEBSITE_URL }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: troott-production-build
+                  path: .
+
+            - name: Deploy to Coolify
+              uses: ./.github/actions/coolify-deploy
+              with:
+                  coolify-api-url: ${{ vars.COOLIFY_API_URL }}
+                  coolify-api-token: ${{ secrets.COOLIFY_API_TOKEN }}
+                  app-uuid: ${{ secrets.COOLIFY_APP_UUID_WEBSITE }}
+                  app-label: troott.com

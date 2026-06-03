@@ -343,7 +343,7 @@ class SearchService {
 
             result.data = searchMapper.mapMinisters(docs);
             result.message = 'Ministers listed';
-            result.pagination = {
+            (result as any).pagination = {
                 total,
                 page,
                 limit,
@@ -446,7 +446,7 @@ class SearchService {
 
             result.data = searchMapper.mapTopics(docs);
             result.message = 'Topics listed';
-            result.pagination = {
+            (result as any).pagination = {
                 total,
                 page,
                 limit,

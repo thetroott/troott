@@ -1,0 +1,61 @@
+# feat-0001 — Mobile CD via EAS (not Coolify)
+# Spec: specs/platform/feature/feat-0001/TECH.md
+
+name: Mobile EAS build
+
+on:
+    workflow_dispatch:
+        inputs:
+            profile:
+                description: EAS build profile
+                required: true
+                type: choice
+                options:
+                    - preview
+                    - production
+            platform:
+                description: Target platform
+                required: true
+                type: choice
+                options:
+                    - all
+                    - android
+                    - ios
+    push:
+        tags:
+            - 'mobile/v*'
+
+env:
+    PNPM_VERSION: '10.33.0'
+
+jobs:
+    eas-build:
+        name: EAS build (${{ inputs.profile }})
+        runs-on: ubuntu-latest
+        timeout-minutes: 60
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup monorepo
+              uses: ./.github/actions/setup-monorepo
+
+            - name: Setup EAS
+              uses: expo/expo-github-action@v8
+              with:
+                  eas-version: latest
+                  token: ${{ secrets.EXPO_TOKEN }}
+
+            - name: Run EAS build
+              working-directory: apps/mobile
+              env:
+                  EAS_PROFILE: ${{ github.event_name == 'push' && 'production' || inputs.profile }}
+                  EAS_PLATFORM: ${{ github.event_name == 'push' && 'all' || inputs.platform }}
+              run: |
+                  platform="$EAS_PLATFORM"
+                  if [ "$platform" = "all" ]; then
+                    eas build --platform all --profile "$EAS_PROFILE" --non-interactive
+                  else
+                    eas build --platform "$platform" --profile "$EAS_PROFILE" --non-interactive
+                  fi

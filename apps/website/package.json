@@ -51,6 +51,7 @@
         "toast": "^0.5.4"
     },
     "devDependencies": {
+        "@troott/configs/eslint": "workspace:*",
         "@eslint/eslintrc": "^3",
         "@types/node": "^22.13.14",
         "@types/react": "19.0.4",

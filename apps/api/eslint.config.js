@@ -1,4 +1,4 @@
-import { config } from '@troott/configs/eslint/base';
+import { config } from '@troott/configs/eslint/base.js';
 
 export default [
     {
