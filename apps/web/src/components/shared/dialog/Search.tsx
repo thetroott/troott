@@ -8,23 +8,8 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { SidebarGroup, SidebarGroupContent } from '@/components/ui/sidebar';
-import {
-    ArrowUpRightIcon,
-    CircleFadingPlusIcon,
-    FileInputIcon,
-    FolderPlusIcon,
-    Search,
-} from 'lucide-react';
-import {
-    CommandDialog,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-    CommandSeparator,
-    CommandShortcut,
-} from '@/components/ui/command';
+import { Search } from 'lucide-react';
+import { SidebarSearchCommand } from '@/components/shared/dialog/SidebarSearchCommand';
 
 interface ISearchForm {
     navItems?: Array<{
@@ -35,6 +20,7 @@ interface ISearchForm {
     collapsed?: boolean;
     props?: React.ComponentProps<'form'>;
 }
+
 export function SearchForm(data: ISearchForm) {
     const { ...props } = data;
     const [open, setOpen] = React.useState(false);
@@ -118,74 +104,7 @@ export function SearchForm(data: ISearchForm) {
                 </SidebarGroup>
             </div>
 
-            <CommandDialog open={open} onOpenChange={setOpen}>
-                <CommandInput placeholder="Type a command or search..." />
-                <CommandList>
-                    <CommandEmpty>No results found.</CommandEmpty>
-                    <CommandGroup heading="Quick start">
-                        <CommandItem>
-                            <FolderPlusIcon
-                                size={16}
-                                className="opacity-60"
-                                aria-hidden="true"
-                            />
-                            <span>New folder</span>
-                            <CommandShortcut className="justify-center">
-                                ⌘N
-                            </CommandShortcut>
-                        </CommandItem>
-                        <CommandItem>
-                            <FileInputIcon
-                                size={16}
-                                className="opacity-60"
-                                aria-hidden="true"
-                            />
-                            <span>Import document</span>
-                            <CommandShortcut className="justify-center">
-                                ⌘I
-                            </CommandShortcut>
-                        </CommandItem>
-                        <CommandItem>
-                            <CircleFadingPlusIcon
-                                size={16}
-                                className="opacity-60"
-                                aria-hidden="true"
-                            />
-                            <span>Add block</span>
-                            <CommandShortcut className="justify-center">
-                                ⌘B
-                            </CommandShortcut>
-                        </CommandItem>
-                    </CommandGroup>
-                    <CommandSeparator />
-                    <CommandGroup heading="Navigation">
-                        <CommandItem>
-                            <ArrowUpRightIcon
-                                size={16}
-                                className="opacity-60"
-                                aria-hidden="true"
-                            />
-                            <span>Go to dashboard</span>
-                        </CommandItem>
-                        <CommandItem>
-                            <ArrowUpRightIcon
-                                size={16}
-                                className="opacity-60"
-                                aria-hidden="true"
-                            />
-                            <span>Go to apps</span>
-                        </CommandItem>
-                        <CommandItem>
-                            <ArrowUpRightIcon
-                                size={16}
-                                className="opacity-60"
-                                aria-hidden="true"
-                            />
-                            <span>Go to connections</span>
-                        </CommandItem>
-                    </CommandGroup>
-                </CommandList>
-            </CommandDialog>
+            <SidebarSearchCommand open={open} onOpenChange={setOpen} />
         </>
     );
 }
