@@ -10,7 +10,7 @@
                 "./*"
             ],
             "@troott/api/enums": [
-                "../api/src/utils/enums.util.ts"
+                "../api/src/types/common.enum.ts"
             ]
         }
     },

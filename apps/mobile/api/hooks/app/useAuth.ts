@@ -445,12 +445,26 @@ export const useAuth = (options?: UseAuthOptions) => {
         }, 1000);
     };
 
+    const resolveTokenString = (raw: unknown): string => {
+        if (typeof raw === 'string' && raw.trim()) {
+            return raw.trim();
+        }
+        if (raw && typeof raw === 'object') {
+            const nested = (raw as { token?: unknown }).token;
+            if (typeof nested === 'string' && nested.trim()) {
+                return nested.trim();
+            }
+        }
+        return '';
+    };
+
     const persistSession = async (payload: {
-        token?: string;
+        token?: unknown;
         user?: Record<string, unknown>;
     }): Promise<NonNullable<SessionUser>> => {
-        if (payload.token) {
-            await storeToken({ token: payload.token });
+        const token = resolveTokenString(payload.token);
+        if (token) {
+            await storeToken({ token });
         }
         const u = (payload.user ?? {}) as Record<string, unknown>;
         storage.setUserEmail(String(u.email ?? ''));
@@ -552,7 +566,7 @@ export const useAuth = (options?: UseAuthOptions) => {
                 }
                 setEmail(email);
                 setField('email', email);
-                toast.error(apiErrorMessage(payload));
+                toast.info(apiErrorMessage(payload));
                 goTo('/verify-email');
                 return;
             }

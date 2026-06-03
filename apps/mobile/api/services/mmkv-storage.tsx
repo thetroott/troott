@@ -141,7 +141,10 @@ const mmkvstorage = {
 
 /** Persists the access token in Keychain-backed secure storage and MMKV (sync mirror for headers / checks). */
 export async function storeToken(params: { token: string }): Promise<void> {
-    const { token } = params;
+    const token = String(params.token ?? '').trim();
+    if (!token || token.toLowerCase() === 'undefined') {
+        return;
+    }
     await secureStorage.setData({ key: 'token', payload: token });
     await mmkvstorage.setData({ key: 'token', payload: token });
 }

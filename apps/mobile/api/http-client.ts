@@ -187,6 +187,20 @@ export class TroottHttpClient {
         if (response.status !== 401 && response.status !== 403) {
             return;
         }
+        const token = await getToken();
+        // Do not hard-logout when there is no local token yet (e.g. boot/login races).
+        if (!token) {
+            throw new ApiError(
+                response.status === 403
+                    ? 'Your sign-in expired. Please sign in again.'
+                    : 'Sign in again.',
+                response.status === 403
+                    ? ApiErrorType.FORBIDDEN
+                    : ApiErrorType.UNAUTHORIZED,
+                response.status,
+            );
+        }
+
         await clearTokens();
         const message =
             response.status === 403
