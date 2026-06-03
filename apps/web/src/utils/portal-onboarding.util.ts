@@ -19,12 +19,15 @@ export function isStudioOnboardingComplete(
     const ut = normalizePortalUserType(String(userType));
 
     if (ut === UserType.MINISTER) {
-        return isMinisterOnboardingComplete(minister);
+        if (isMinisterOnboardingComplete(minister)) {
+            return true;
+        }
+        return user?.onboard?.status === 'completed';
     }
 
     if (ut === UserType.CREATOR) {
-        if (creator) {
-            return isCreatorOnboardingComplete(creator);
+        if (isCreatorOnboardingComplete(creator)) {
+            return true;
         }
         return user?.onboard?.status === 'completed';
     }

@@ -13,6 +13,7 @@ import SelectDocumentType from '@/components/shared/get-started/SelectDocumentTy
 import VerifyDocument1 from '@/components/shared/get-started/verify-document1';
 import VerifyDocumentForm from '@/components/shared/get-started/verify-document';
 import UploadDocumentWrapper from '@/components/shared/upload/UploadDocumentWrapper';
+import GetStartedOnboardingGate from '@/components/shared/get-started/GetStartedOnboardingGate';
 import { IRoute } from '@/utils/interfaces';
 import {
     PATH_GET_STARTED,
@@ -33,6 +34,7 @@ const ministerRoutes: Array<IRoute> = [
         url: PATH_GET_STARTED,
         isAuth: true,
         path: 'get-started',
+        element: <GetStartedOnboardingGate />,
         subroutes: [
             {
                 name: 'get-started-index',

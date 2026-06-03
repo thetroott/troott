@@ -13,14 +13,26 @@ import { cn } from '@/lib/utils';
 import useContextType from '@/hooks/shared/useContextType';
 import { useMinister } from '@/context/minister/useMinister';
 import { useCreator } from '@/context/creator/useCreator';
+import { useStudio } from '@/context/studio/useStudio';
+import storage from '@/api/services/local-storage';
 import cookieService from '@/api/services/cookies';
 import {
     hubCompletedItemIds,
+    ONBOARDING_STEP_TOUR,
     resolveOnboardingStep,
 } from '@/utils/hub-onboarding.util';
 import { clearLegacyOnboardingProgress } from '@/utils/get-started-local-storage.util';
-import { resolveStudioTourLaunchPath } from '@/components/shared/tour/tour-steps';
+import {
+    resolveStudioTourLaunchPath,
+    TOUR_SESSION_KEYS,
+} from '@/components/shared/tour/tour-steps';
 import { getStoredStudioCode } from '@/utils/studio-nav.util';
+import {
+    PATH_SEG_SERMONS_UPLOAD_FILE,
+    studioUploadPath,
+} from '@/routes/paths';
+import { UserType } from '@/models/User.model';
+import { normalizeUserType } from '@/utils/auth-redirect.util';
 import { toast } from 'sonner';
 
 const hubCtaClass =
@@ -35,8 +47,9 @@ const hubCompletedOutlineClass =
 const GetStarted = () => {
     const navigate = useNavigate();
     const { userContext } = useContextType();
-    const { minister } = useMinister();
-    const { creator } = useCreator();
+    const { minister, isLoading: ministerLoading } = useMinister();
+    const { creator, isLoading: creatorLoading } = useCreator();
+    const { studioCode: contextStudioCode } = useStudio();
 
     useEffect(() => {
         clearLegacyOnboardingProgress();
@@ -66,9 +79,15 @@ const GetStarted = () => {
         (completedSteps.length / OnboardingItems.length) * 100;
 
     const navigateToHubItem = (item: (typeof OnboardingItems)[number]) => {
+        const studioCode =
+            getStoredStudioCode() ||
+            user?.studioCode?.trim() ||
+            contextStudioCode?.trim() ||
+            '';
+
         if (item.id === '3') {
             const tourPath = resolveStudioTourLaunchPath(
-                getStoredStudioCode() || user?.studioCode || undefined,
+                studioCode || undefined,
             );
             if (tourPath) {
                 navigate(tourPath);
@@ -79,6 +98,36 @@ const GetStarted = () => {
             );
             return;
         }
+
+        if (item.id === '4') {
+            const ut = normalizeUserType(userType);
+            const profileLoading =
+                (ut === UserType.MINISTER && ministerLoading) ||
+                (ut === UserType.CREATOR && creatorLoading);
+            if (profileLoading) {
+                toast.error(
+                    'Loading your profile. Try again in a moment.',
+                );
+                return;
+            }
+            if (onboardingStep < ONBOARDING_STEP_TOUR) {
+                toast.error(
+                    'Complete the studio tour before uploading your first sermon.',
+                );
+                return;
+            }
+            if (!studioCode) {
+                toast.error(
+                    'Your studio is not ready yet. Finish earlier steps and try again.',
+                );
+                return;
+            }
+            sessionStorage.removeItem(TOUR_SESSION_KEYS.pending);
+            storage.setStudioCode(studioCode);
+            navigate(studioUploadPath(studioCode, PATH_SEG_SERMONS_UPLOAD_FILE));
+            return;
+        }
+
         navigate(item.action as string);
     };
 
@@ -189,6 +238,7 @@ const GetStarted = () => {
                                                 </Button>
                                             ) : (
                                                 <Button
+                                                    type="button"
                                                     size="sm"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
@@ -212,6 +262,7 @@ const GetStarted = () => {
                                         <p className="mb-4">{item.text}</p>
 
                                         <Button
+                                            type="button"
                                             variant={isComplete ? 'outline' : 'default'}
                                             onClick={() => {
                                                 if (!isComplete) {

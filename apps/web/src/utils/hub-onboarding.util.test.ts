@@ -39,6 +39,17 @@ describe('hub-onboarding.util', () => {
         ).toBe(2);
     });
 
+    it('uses higher of minister and user onboard step for minister', () => {
+        expect(
+            resolveOnboardingStep(
+                UserType.MINISTER,
+                { onboarding: { step: 4, status: 'in-progress' } } as never,
+                null,
+                { onboard: { step: 5, status: 'in-progress' } },
+            ),
+        ).toBe(5);
+    });
+
     it('detects studio upload nav hrefs', () => {
         expect(
             isStudioUploadNavHref('/studio/abc/sermons/upload/file'),
@@ -87,6 +98,19 @@ describe('hub-onboarding.util', () => {
                 null,
             ),
         ).toBe(false);
+    });
+
+    it('allows upload route after tour even when tour launch flag lingered', () => {
+        expect(
+            canAccessStudioDuringOnboarding(
+                '/studio/abc/sermons/upload/file',
+                UserType.MINISTER,
+                { onboarding: { step: 5, status: 'in-progress' } } as never,
+                null,
+                null,
+                '1',
+            ),
+        ).toBe(true);
     });
 
     it('allows studio home when tour launch is pending', () => {

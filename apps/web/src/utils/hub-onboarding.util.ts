@@ -36,9 +36,13 @@ export function resolveOnboardingStep(
     const ut = normalizePortalUserType(String(userType));
 
     if (ut === UserType.MINISTER) {
-        const raw = minister?.onboarding?.step ?? user?.onboard?.step;
-        const step = typeof raw === 'number' ? raw : Number(raw);
-        return Number.isFinite(step) ? step : 0;
+        const mRaw = minister?.onboarding?.step ?? user?.onboard?.step;
+        const uRaw = user?.onboard?.step;
+        const m = typeof mRaw === 'number' ? mRaw : Number(mRaw);
+        const u = typeof uRaw === 'number' ? uRaw : Number(uRaw);
+        const mStep = Number.isFinite(m) ? m : 0;
+        const uStep = Number.isFinite(u) ? u : 0;
+        return Math.max(mStep, uStep);
     }
 
     if (ut === UserType.CREATOR) {
@@ -132,22 +136,22 @@ export function canAccessStudioDuringOnboarding(
     searchTour?: string | null,
 ): boolean {
     const pathOnly = pathname.split('?')[0]?.replace(/\/+$/, '') || '/';
+    const step = resolveOnboardingStep(userType, minister, creator, user);
+
+    // Tour complete — upload wizard must work even if `troott.tour.pending` was left set.
+    if (step >= ONBOARDING_STEP_TOUR && isStudioUploadNavHref(pathOnly)) {
+        return true;
+    }
 
     if (isTourLaunchPending(searchTour)) {
         return isStudioHomePath(pathOnly);
     }
-
-    const step = resolveOnboardingStep(userType, minister, creator, user);
 
     if (
         isStudioHomePath(pathOnly) &&
         step >= ONBOARDING_STEP_MINISTRY &&
         step < ONBOARDING_STEP_FIRST_SERMON
     ) {
-        return true;
-    }
-
-    if (step >= ONBOARDING_STEP_TOUR && isStudioUploadNavHref(pathOnly)) {
         return true;
     }
 
