@@ -8,6 +8,14 @@ import {
     JobDataDTO,
 } from '@/queues/queue.dto';
 import { REDIS_CONFIG } from '../configs/redis.config';
+import { JobChannel } from './channel.queue';
+
+/** HLS packaging can run 30–90+ minutes; default Bull lock is 30s. */
+const LONG_RUNNING_QUEUE_SETTINGS: QueueOptions['settings'] = {
+    lockDuration: 3 * 60 * 60 * 1000,
+    stalledInterval: 60 * 1000,
+    maxStalledCount: 2,
+};
 
 class BullQueue {
     // A map to store active queue instances by name
@@ -45,6 +53,9 @@ class BullQueue {
                 //     minVersion: "TLSv1.2",
                 // },
             },
+            ...(name === JobChannel.processAudio
+                ? { settings: LONG_RUNNING_QUEUE_SETTINGS }
+                : {}),
             defaultJobOptions: {
                 attempts: 3,
                 backoff: {

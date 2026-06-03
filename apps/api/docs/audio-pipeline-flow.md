@@ -1,6 +1,10 @@
 # Audio pipeline: upload through CDN playback
 
-End-to-end flow for sermon audio: multipart upload, S3 ingest, Bull workers (metadata + HLS), derivative uploads, and how clients stream via CDN.
+> **Canonical spec:** [`specs/api/feature/feat-0006/PRODUCT.md`](../../../specs/api/feature/feat-0006/PRODUCT.md) + [`TECH.md`](../../../specs/api/feature/feat-0006/TECH.md)
+>
+> **Stream-native processing:** [`specs/api/feature/feat-0007/`](../../../specs/api/feature/feat-0007/PRODUCT.md) — S3 → FFmpeg pipe → incremental segment upload (no ingest/WAV/spool on disk)
+
+This file is a **short implementation index** aligned with the code in `apps/api`.
 
 ## 1. Client upload request
 
@@ -10,76 +14,56 @@ End-to-end flow for sermon audio: multipart upload, S3 ingest, Bull workers (met
 
 1. **Protect** – JWT; sets `req.user`.
 2. **sermonUploadRateLimiter** – per-user hourly upload cap.
-3. **requireMinisterProfile** – user must have a Minister profile.
+3. **requireMinisterProfile** – user must have a Minister or Creator profile.
 4. **sermonAudioUploadSizeLimit** – rejects oversized `Content-Length` when present.
-5. **uploadHandler** – busboy parses multipart; tees bytes into `stream` (upload body) and `metadataStream` (same bytes for probing).
+5. **uploadHandler** – busboy parses multipart into a single upload `stream`.
 6. **uploadSermon** controller.
-
-**Controller** ([`sermon.controller.ts`](../src/controllers/core/sermon.controller.ts)): validates MIME against `mediaConfig.sermonAudioMimeAllowlist`, sets `file.uploadedBy` from the authenticated user, calls `handleUploadSermon(file)`.
 
 ## 2. Streaming ingest to S3 (original file)
 
 **Service:** `handleUploadSermon` in [`sermon.service.ts`](../src/services/core/sermon.service.ts).
 
-- Validates MIME and optional size (`SERMON_AUDIO_MAX_BYTES` / [`media.config.ts`](../src/configs/media.config.ts)).
+- Validates MIME and optional size (`SERMON_AUDIO_MAX_BYTES`, `SERMON_AUDIO_MIME_ALLOWLIST` env vars).
 - Builds `s3Key` = `{audio-folder}/{uploadId}` (e.g. `audio/<uploadId>`).
-- Uses `@aws-sdk/lib-storage` `Upload` with `Body: stream` so the API does not buffer the whole file in RAM.
-- Writes to **`troott-originals`** (env: `AWS_ORIGINALS_BUCKET`; falls back to `AWS_BUCKET_NAME` in dev).
-- On success: creates a `Sermon` with:
-  - **`item`** (`SermonSource`): `item` (S3 URL), `itemId` (= uploadId), `size`, `mimetype`, `uploadStatus` (`uploaded`), timestamps
-  - **`status`**: `MediaStatus.DRAFT`
-  - **`minister`**: array of minister/creator owner refs
+- Uses `@aws-sdk/lib-storage` `Upload` with `Body: stream`.
+- Writes to **`troott-originals`**.
+- Enqueues metadata + HLS with **`sourceS3Key`** (not live streams in Bull).
 
 ## 3. Asynchronous jobs (Bull + Redis)
 
-After S3 upload completes, two jobs are enqueued:
-
-| Job       | Queue (`JobChannel`) | Bull job name       | Stable job id           | Payload                                              |
-| --------- | -------------------- | ------------------- | ----------------------- | ---------------------------------------------------- |
-| Metadata  | `audio:metadata`     | `audio-metadata`    | `audio-meta-{uploadId}` | `metadataStream`, `mimeType`, `uploadId`, `sermonId` |
-| HLS pack  | `audio:processing`   | `audio-processing`  | `hls-package-{uploadId}` | `uploadId`, `sourceS3Key`, `sermonId`              |
-
-- Metadata uses the tee’d **metadata stream** from busboy.
-- HLS does **not** reuse the upload stream; it **reads the object from S3** by key after upload completes.
-
-**Workers** ([`worker.ts`](../src/tasks/workers/worker.ts)): metadata worker + HLS packaging worker both run against Redis-backed Bull queues.
+| Job       | Queue | Stable job id           | Payload |
+| --------- | ----- | ----------------------- | ------- |
+| Metadata  | `audio:metadata` | `audio-meta-{uploadId}` | `sourceS3Key`, `mimeType`, `uploadId`, `sermonId` |
+| HLS pack  | `audio:processing` | `hls-package-{uploadId}` | `uploadId`, `sourceS3Key`, `sermonId` |
 
 ## 4. Metadata worker
 
 **Job:** [`audio-metadata.job.ts`](../src/tasks/jobs/audio-metadata.job.ts).
 
-- Runs `music-metadata` `parseStream` on `metadataStream`.
-- Finds sermon by `_id` (`sermonId`) or `{ 'item.itemId': uploadId }`.
-- Sets root **`duration`**, **`bitrate`**, **`mimeType`**, **`item.duration`**, **`item.uploadStatus`** → `extracting`, **`status`** → `draft`.
+- `getObjectStream(sourceS3Key, 'originals')` → `music-metadata` `parseStream`.
+- Sets `duration`, `bitrate`, `item.uploadStatus → extracting`.
 
-## 5. HLS worker (transcode + derivatives to S3)
+## 5. HLS worker (stream-native FFmpeg)
 
 **Job:** [`audio-processing.job.ts`](../src/tasks/jobs/audio-processing.job.ts).
 
-1. Sets **`item.uploadStatus`** → `processing`, **`status`** → `pending` (optional while packaging).
-2. Reads the original from **`troott-originals`** via `storageService.getObjectStream(sourceS3Key, 'originals')` and writes a temp ingest file (`HLS_WORK_DIR` or OS tmp).
-3. Optional: if `AUDIO_LOUDNORM_BEFORE_HLS=true`, runs loudnorm to WAV, then feeds that into packaging.
-4. `ProcessHLS`: per-rendition AAC + HLS segments under a temp directory.
-5. Uploads segments and playlists to **`troott-playback`** via `putStreamAtKey` at `{uploadId}/hls/{rendition}/…` (no `audio/` prefix).
-6. Builds multivariant **`master.m3u8`** at `{uploadId}/hls/master.m3u8` on the playback bucket.
-7. Sets **`manifestUrl`** and **`playbackUrl`** (CDN URLs via `urlForMediaKey`), **`protocol`** → `hls`, **`item.uploadStatus`** → `completed`, **`status`** → `draft`.
-8. On failure: **`item.uploadStatus`** → `failed` (errors logged; no legacy `processingError` field on the document).
+1. Optional **2-pass loudnorm** (`AUDIO_LOUDNORM_TWO_PASS=true`): measure pass from S3 → linear filter (no WAV).
+2. **One S3 read** → **`processHLSAllRenditionsFromStream`** (loudnorm → AAC → all HLS renditions in one FFmpeg).
+3. **`HlsIncrementalUploader`** polls segment dirs, uploads to playback, unlinks each `.ts` as it closes.
+4. Master `m3u8` from memory; Bull **`lockDuration` 3h** on `audio:processing`.
+5. Logs: **`s3GetBytes`**, **`workDirBytesPeak`**, stage timings.
 
 ## 6. Client playback
 
-Web and mobile resolve audio URLs in this order:
-
-1. `playbackUrl`
-2. `manifestUrl`
-3. `item.item` (raw ingest URL before HLS is ready)
+1. `playbackUrl` → 2. `manifestUrl` → 3. `item.item`
 
 ## Related files
 
 | File | Role |
 | ---- | ---- |
-| [`s3-buckets.config.ts`](../src/configs/s3-buckets.config.ts) | `troott-originals` / `troott-playback` / `troott-storage` routing |
-| [`sermon.model.ts`](../src/models/core/sermon.model.ts) | Mongoose schema (`item`, `image`, `MediaStatus`) |
-| [`sermon.interface.ts`](../src/interfaces/core/sermon.interface.ts) | `ISermonDoc`, `SermonSource`, enums |
-| [`sermon.mapper.ts`](../src/mappers/sermon.mapper.ts) | API response mapping |
-| [`audio-metadata.job.ts`](../src/tasks/jobs/audio-metadata.job.ts) | Metadata worker |
+| [`audio.service.ts`](../src/services/core/audio.service.ts) | `processHLSAllRenditionsFromStream`, `measureLoudnormFilterFromStream` |
+| [`hls-segment-uploader.util.ts`](../src/utils/hls-segment-uploader.util.ts) | Incremental segment upload + unlink |
+| [`audio-metadata.job.ts`](../src/tasks/jobs/audio-metadata.job.ts) | S3-based metadata |
 | [`audio-processing.job.ts`](../src/tasks/jobs/audio-processing.job.ts) | HLS worker |
+| Env (`AUDIO_LOUDNORM_*`, `HLS_WORK_DIR`, `AUDIO_HLS_WORKER_CONCURRENCY`) | Loudnorm, worker concurrency, temp dir |
+| [`queue.ts`](../src/queues/queue.ts) | Long-running HLS queue settings |

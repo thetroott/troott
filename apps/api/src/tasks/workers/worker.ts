@@ -1,5 +1,5 @@
 import logger from '../../utils/logger.util';
-import startAudioMetadataWorker from './audio.worker';
+import startAudioMetadataWorker from './audio-metadata.worker';
 import startAudioHLSWorker from './audio-processing.worker';
 import startEmailWorker from './email.worker';
 
