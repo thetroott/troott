@@ -16,10 +16,7 @@ import { useMinister } from '@/context/minister/useMinister';
 import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
 import { buildSermonUploadFileSignature } from '@/utils/sermon-upload-file-signature.util';
 import { useStudioSermonAudioUpload } from '@/hooks/upload/useStudioSermonAudioUpload';
-import { useSermonByIdQuery } from '@/hooks/app/useSermon';
 import { cn } from '@/lib/utils';
-import { formatUploadPipelineLabel } from '@/utils/upload-pipeline-label.util';
-import { UploadStatus } from '@/dtos/sermon-media.types';
 import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
 
 /**
@@ -56,41 +53,6 @@ const UploadProgressStep: React.FC = () => {
     const onUploadError = useCallback(() => {
         setUploadError(true);
     }, []);
-
-    const sermonIdForPipeline =
-        uploadComplete && uploadData.sermonId?.trim()
-            ? uploadData.sermonId.trim()
-            : undefined;
-
-    const { data: uploadedSermonDetail } = useSermonByIdQuery(
-        sermonIdForPipeline,
-        {
-            enabled: Boolean(sermonIdForPipeline),
-            refetchInterval: (query) => {
-                const item = (
-                    query.state.data as
-                        | { item?: { uploadStatus?: string } }
-                        | undefined
-                )?.item;
-                const status = item?.uploadStatus;
-                if (
-                    status === UploadStatus.COMPLETED ||
-                    status === UploadStatus.FAILED
-                ) {
-                    return false;
-                }
-                return 4000;
-            },
-        },
-    );
-
-    const pipelineLabel = formatUploadPipelineLabel(
-        (
-            uploadedSermonDetail as
-                | { item?: { uploadStatus?: string } }
-                | undefined
-        )?.item?.uploadStatus,
-    );
 
     const { clearUploadFlight } = useStudioSermonAudioUpload({
         file,
@@ -258,11 +220,9 @@ const UploadProgressStep: React.FC = () => {
                             <p className="font-matter text-center text-[12px] text-[#707070]">
                                 {formatFileSize(uploadData.file.size)} · Audio
                             </p>
-                            {pipelineLabel ? (
-                                <p className="font-matter text-center text-[12px] text-[#9a9a9a]">
-                                    {pipelineLabel}
-                                </p>
-                            ) : null}
+                            <p className="font-matter text-center text-[12px] text-[#9a9a9a]">
+                                Uploaded
+                            </p>
                         </div>
                         <Button
                             type="button"

@@ -46,6 +46,10 @@ export const initialUploadData: ISermonUpload = {
     tags: [],
     thumbnail: null,
     thumbnailPreview: null,
+    coverUploadStatus: 'idle',
+    coverImageUrl: null,
+    coverUploadError: null,
+    coverFileFingerprint: null,
     isPublic: undefined,
 };
 

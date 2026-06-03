@@ -1,6 +1,23 @@
 import type { AxiosResponse } from 'axios';
 
 import api from '@/api/config';
+import { sermonQueryKeys } from '@/constants/sermon-query-keys';
+
+export function coverFileFingerprint(file: File): string {
+    return `${file.name}:${file.size}:${file.lastModified}`;
+}
+
+export function resolveSermonCoverUrl(
+    doc: Record<string, unknown>,
+): string | null {
+    const imageUrl =
+        typeof doc.imageUrl === 'string' ? doc.imageUrl.trim() : '';
+    return imageUrl || null;
+}
+
+export type SermonCoverUploadResult = {
+    imageUrl: string;
+};
 
 /**
  * Upload sermon cover image and attach to an existing sermon row.
@@ -10,7 +27,7 @@ export async function uploadSermonCoverForSermon(
     sermonId: string,
     file: File,
     onProgress?: (percent: number) => void,
-): Promise<void> {
+): Promise<SermonCoverUploadResult> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('sermonId', sermonId);
@@ -18,7 +35,7 @@ export async function uploadSermonCoverForSermon(
         formData,
         onProgress,
     )) as AxiosResponse<{
-        data?: { error?: boolean; message?: string };
+        data?: { error?: boolean; message?: string } | Record<string, unknown>;
         error?: boolean;
         message?: string;
     }>;
@@ -35,4 +52,13 @@ export async function uploadSermonCoverForSermon(
                 : 'Cover upload failed',
         );
     }
+    const sermon =
+        envelope && typeof envelope === 'object'
+            ? (envelope as Record<string, unknown>)
+            : null;
+    const imageUrl = sermon ? resolveSermonCoverUrl(sermon) : null;
+    if (!imageUrl) {
+        throw new Error('Cover upload succeeded but no image URL returned');
+    }
+    return { imageUrl };
 }

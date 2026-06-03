@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -12,18 +12,60 @@ import {
     ZoomIn,
     ZoomOut,
     RotateCcw,
+    Loader2,
+    CheckCircle2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { UPLOAD_SHELL } from '@/components/shared/upload/upload-studio-ui';
 import { useUpload, uploadActions } from '@/context/upload/uploadState';
+import { useDraft } from '@/context/draft/draftState';
+import { useSermonByIdQuery } from '@/hooks/app/useSermon';
+import { useSermonCoverUpload } from '@/hooks/upload/useSermonCoverUpload';
+import useContextType from '@/hooks/shared/useContextType';
+import { useCreator } from '@/context/creator/useCreator';
+import { useMinister } from '@/context/minister/useMinister';
+import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
+import {
+    coverFileFingerprint,
+    resolveSermonCoverUrl,
+} from '@/services/upload/sermon-cover-upload.service';
 import type { IUploadFormErrors } from '@/utils/interfaces.util';
+
+function coverUploadErrorMessage(err: unknown): string {
+    if (
+        err &&
+        typeof err === 'object' &&
+        'message' in err &&
+        typeof (err as { message: unknown }).message === 'string'
+    ) {
+        return (err as { message: string }).message;
+    }
+    return 'Cover upload failed. Please try again.';
+}
 
 const SermonDetailsForm: React.FC = () => {
     const { state, dispatch } = useUpload();
+    const { updateDraft } = useDraft();
     const { uploadData, errors, uploadComplete, progress, currentStep } = state;
+    const { userContext } = useContextType();
+    const { minister } = useMinister();
+    const { creatorId } = useCreator();
+    const user = userContext.user as Record<string, unknown> | null;
+    const ministerId = resolveStudioSermonOwnerId(
+        user,
+        minister?.id,
+        creatorId,
+    );
+    const { uploadCover, isUploading: coverUploading } =
+        useSermonCoverUpload(ministerId);
+    const { data: sermonDetail } = useSermonByIdQuery(uploadData.sermonId, {
+        enabled: Boolean(uploadData.sermonId?.trim()),
+        staleTime: 0,
+    });
     const fileInputRef = useRef<HTMLInputElement>(null);
     const imageRef = useRef<HTMLImageElement>(null);
     const cropContainerRef = useRef<HTMLDivElement>(null);
+    const prevStepRef = useRef(currentStep);
 
     const [localData, setLocalData] = useState({
         title: uploadData.title || '',
@@ -178,6 +220,152 @@ const SermonDetailsForm: React.FC = () => {
         return null;
     };
 
+    const maybeUploadCover = useCallback(
+        async (file: File) => {
+            const fingerprint = coverFileFingerprint(file);
+            const sermonId = uploadData.sermonId?.trim();
+
+            if (!sermonId) {
+                dispatch(
+                    uploadActions.setUploadData({
+                        coverUploadStatus: 'local-only',
+                        coverUploadError: null,
+                        coverFileFingerprint: fingerprint,
+                        thumbnail: file,
+                    }),
+                );
+                return;
+            }
+
+            if (
+                fingerprint === uploadData.coverFileFingerprint &&
+                uploadData.coverUploadStatus === 'uploaded'
+            ) {
+                return;
+            }
+
+            dispatch(
+                uploadActions.setUploadData({
+                    coverUploadStatus: 'uploading',
+                    coverUploadError: null,
+                    coverFileFingerprint: fingerprint,
+                    thumbnail: file,
+                }),
+            );
+
+            try {
+                const { imageUrl } = await uploadCover(sermonId, file);
+                dispatch(
+                    uploadActions.setUploadData({
+                        coverUploadStatus: 'uploaded',
+                        coverImageUrl: imageUrl,
+                        thumbnailPreview: imageUrl,
+                        coverUploadError: null,
+                    }),
+                );
+            } catch (err: unknown) {
+                dispatch(
+                    uploadActions.setUploadData({
+                        coverUploadStatus: 'error',
+                        coverUploadError: coverUploadErrorMessage(err),
+                    }),
+                );
+            }
+        },
+        [
+            dispatch,
+            uploadCover,
+            uploadData.coverFileFingerprint,
+            uploadData.coverUploadStatus,
+            uploadData.sermonId,
+        ],
+    );
+
+    useEffect(() => {
+        if (!uploadData.sermonId?.trim()) {
+            return;
+        }
+        if (uploadData.thumbnail instanceof File) {
+            return;
+        }
+        if (
+            uploadData.coverUploadStatus === 'uploaded' &&
+            uploadData.coverImageUrl
+        ) {
+            return;
+        }
+        const doc = sermonDetail as Record<string, unknown> | undefined;
+        if (!doc || typeof doc !== 'object') {
+            return;
+        }
+        const inner = doc.item as Record<string, unknown> | undefined;
+        const url = resolveSermonCoverUrl(inner ?? doc);
+        if (!url) {
+            return;
+        }
+        dispatch(
+            uploadActions.setUploadData({
+                thumbnailPreview: url,
+                coverImageUrl: url,
+                coverUploadStatus: 'uploaded',
+                coverUploadError: null,
+            }),
+        );
+    }, [
+        dispatch,
+        sermonDetail,
+        uploadData.coverImageUrl,
+        uploadData.coverUploadStatus,
+        uploadData.sermonId,
+        uploadData.thumbnail,
+    ]);
+
+    useEffect(() => {
+        if (
+            !uploadData.sermonId?.trim() ||
+            !(uploadData.thumbnail instanceof File) ||
+            uploadData.coverUploadStatus !== 'local-only'
+        ) {
+            return;
+        }
+        void maybeUploadCover(uploadData.thumbnail);
+    }, [
+        maybeUploadCover,
+        uploadData.coverUploadStatus,
+        uploadData.sermonId,
+        uploadData.thumbnail,
+    ]);
+
+    useEffect(() => {
+        const prev = prevStepRef.current;
+        prevStepRef.current = currentStep;
+        if (
+            prev !== 'details' ||
+            currentStep === 'details' ||
+            !uploadData.sermonId?.trim()
+        ) {
+            return;
+        }
+        void updateDraft(uploadData.sermonId, {
+            title: uploadData.title,
+            description: uploadData.description,
+            tags: uploadData.tags,
+            category: uploadData.category,
+            seriesId: uploadData.seriesId,
+        }).catch((err: unknown) => {
+            console.error('Failed to save details on step exit:', err);
+        });
+    }, [
+        currentStep,
+        updateDraft,
+        uploadData.category,
+        uploadData.description,
+        uploadData.sermonId,
+        uploadData.seriesId,
+        uploadData.tags,
+        uploadData.title,
+    ]);
+
     const handleThumbnailSelect = (file: File) => {
         const validationError = validateThumbnailFile(file);
         if (validationError) {
@@ -186,6 +374,11 @@ const SermonDetailsForm: React.FC = () => {
         }
 
         setThumbnailError('');
+        if (
+            uploadData.thumbnailPreview?.startsWith('blob:')
+        ) {
+            URL.revokeObjectURL(uploadData.thumbnailPreview);
+        }
         const previewUrl = URL.createObjectURL(file);
 
         dispatch(
@@ -194,6 +387,7 @@ const SermonDetailsForm: React.FC = () => {
                 thumbnailPreview: previewUrl,
             }),
         );
+        void maybeUploadCover(file);
     };
 
     const handleThumbnailDragOver = (e: React.DragEvent) => {
@@ -232,7 +426,7 @@ const SermonDetailsForm: React.FC = () => {
     };
 
     const handleThumbnailRemove = () => {
-        if (uploadData.thumbnailPreview) {
+        if (uploadData.thumbnailPreview?.startsWith('blob:')) {
             URL.revokeObjectURL(uploadData.thumbnailPreview);
         }
 
@@ -240,6 +434,10 @@ const SermonDetailsForm: React.FC = () => {
             uploadActions.setUploadData({
                 thumbnail: null,
                 thumbnailPreview: null,
+                coverUploadStatus: 'idle',
+                coverImageUrl: null,
+                coverUploadError: null,
+                coverFileFingerprint: null,
             }),
         );
 
@@ -393,13 +591,17 @@ const SermonDetailsForm: React.FC = () => {
                 (blob) => {
                     if (blob) {
                         const croppedUrl = URL.createObjectURL(blob);
+                        const croppedFile = new File([blob], 'cover.jpg', {
+                            type: 'image/jpeg',
+                        });
                         dispatch(
                             uploadActions.setUploadData({
-                                thumbnail: blob as File,
+                                thumbnail: croppedFile,
                                 thumbnailPreview: croppedUrl,
                             }),
                         );
                         setCropMode(false);
+                        void maybeUploadCover(croppedFile);
                     }
                 },
                 'image/jpeg',
@@ -812,6 +1014,66 @@ const SermonDetailsForm: React.FC = () => {
 
                     {uploadData.thumbnailPreview ? (
                         <div className="space-y-3">
+                            {(uploadData.coverUploadStatus === 'local-only' ||
+                                uploadData.coverUploadStatus === 'uploading' ||
+                                uploadData.coverUploadStatus === 'uploaded' ||
+                                uploadData.coverUploadStatus === 'error') && (
+                                <div
+                                    className={cn(
+                                        'flex items-center gap-2 rounded-md px-3 py-2 text-[13px]',
+                                        uploadData.coverUploadStatus ===
+                                            'local-only' &&
+                                            'bg-amber-500/10 text-amber-200',
+                                        uploadData.coverUploadStatus ===
+                                            'uploading' &&
+                                            'bg-blue-500/10 text-blue-200',
+                                        uploadData.coverUploadStatus ===
+                                            'uploaded' &&
+                                            'bg-emerald-500/10 text-emerald-200',
+                                        uploadData.coverUploadStatus ===
+                                            'error' &&
+                                            'bg-red-500/10 text-red-200',
+                                    )}
+                                >
+                                    {uploadData.coverUploadStatus ===
+                                        'uploading' ||
+                                    coverUploading ? (
+                                        <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                                    ) : uploadData.coverUploadStatus ===
+                                      'uploaded' ? (
+                                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                    ) : null}
+                                    <span className="flex-1">
+                                        {uploadData.coverUploadStatus ===
+                                        'local-only'
+                                            ? 'Finish audio upload first to save this cover'
+                                            : uploadData.coverUploadStatus ===
+                                                'uploading'
+                                              ? 'Saving cover…'
+                                              : uploadData.coverUploadStatus ===
+                                                  'uploaded'
+                                                ? 'Cover saved'
+                                                : uploadData.coverUploadError ||
+                                                  'Cover upload failed'}
+                                    </span>
+                                    {uploadData.coverUploadStatus === 'error' &&
+                                    uploadData.thumbnail instanceof File ? (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-7 shrink-0"
+                                            onClick={() =>
+                                                void maybeUploadCover(
+                                                    uploadData.thumbnail as File,
+                                                )
+                                            }
+                                        >
+                                            Retry
+                                        </Button>
+                                    ) : null}
+                                </div>
+                            )}
                             {/* Thumbnail Preview with Crop Overlay - Portrait Dimensions */}
                             <div
                                 ref={cropContainerRef}

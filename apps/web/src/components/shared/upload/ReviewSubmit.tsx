@@ -27,6 +27,7 @@ import {
 } from '@/routes/paths';
 import { studioSermonsListPath } from '@/routes/paths';
 import { useQueryClient } from '@tanstack/react-query';
+import { visibilityToIsPublic } from '@/utils/sermon-visibility.util';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
 import { useUpload, uploadActions } from '@/context/upload/uploadState';
@@ -35,7 +36,6 @@ import { sermonQueryKeys } from '@/constants/sermon-query-keys';
 import useContextType from '@/hooks/shared/useContextType';
 import { useCreator } from '@/context/creator/useCreator';
 import { useMinister } from '@/context/minister/useMinister';
-import { uploadSermonCoverForSermon } from '@/services/upload/sermon-cover-upload.service';
 import { resolveStudioSermonOwnerId } from '@/utils/studio-sermon-owner.util';
 import { usePublishSermonMutation } from '@/hooks/app/useSermon';
 import type { PublishSermonDTO } from '@/dtos/sermon.dto';
@@ -45,6 +45,8 @@ interface ReviewSubmitProps {
     onModalClose?: () => void;
     onSubmitRef?: React.MutableRefObject<(() => void) | null>;
     onSaveDraftRef?: React.MutableRefObject<(() => Promise<void>) | null>;
+    /** When false, only registers footer handlers (save/publish) for modal close. */
+    showPanel?: boolean;
 }
 
 function apiErrorMessage(err: unknown): string {
@@ -63,6 +65,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
     onModalClose,
     onSubmitRef,
     onSaveDraftRef,
+    showPanel = true,
 }) => {
     const { state, dispatch } = useUpload();
     const { updateDraft } = useDraft();
@@ -146,7 +149,15 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
                 description: uploadData.description,
                 topic: uploadData.category || '',
                 tags: uploadData.tags ?? [],
-                isPublic: uploadData.isPublic ?? true,
+                visibility:
+                    uploadData.visibility ??
+                    (uploadData.isPublic === false ? 'private' : 'public'),
+                isPublic: visibilityToIsPublic(
+                    uploadData.visibility ??
+                        (uploadData.isPublic === false
+                            ? 'private'
+                            : 'public'),
+                ),
                 minister: ministerId || userId,
                 publishedBy: userId,
                 sermon: audioRef,
@@ -205,7 +216,15 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
                     description: uploadData.description,
                     tags: uploadData.tags,
                     category: uploadData.category,
-                    isPublic: uploadData.isPublic,
+                    visibility:
+                        uploadData.visibility ??
+                        (uploadData.isPublic === false ? 'private' : 'public'),
+                    isPublic: visibilityToIsPublic(
+                        uploadData.visibility ??
+                            (uploadData.isPublic === false
+                                ? 'private'
+                                : 'public'),
+                    ),
                     scheduledDate: uploadData.scheduledDate,
                     seriesId: uploadData.seriesId,
                 });
@@ -261,19 +280,17 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
             return;
         }
 
+        if (uploadData.coverUploadStatus !== 'uploaded') {
+            toast.error('Add and save a cover on Details', {
+                description:
+                    'Upload a thumbnail on the Details step before publishing.',
+            });
+            dispatch(uploadActions.setStep('details'));
+            return;
+        }
+
         dispatch(uploadActions.setLoading(true));
         try {
-            if (uploadData.thumbnail instanceof File) {
-                try {
-                    await uploadSermonCoverForSermon(
-                        sermonId,
-                        uploadData.thumbnail,
-                    );
-                } catch (coverErr: unknown) {
-                    toast.error(apiErrorMessage(coverErr));
-                    return;
-                }
-            }
             const res = await publishSermonMutation.mutateAsync({
                 id: sermonId,
                 payload:
@@ -308,7 +325,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
     }, [
         dispatch,
         uploadData.sermonId,
-        uploadData,
+        uploadData.coverUploadStatus,
         uploadComplete,
         buildPublishBody,
         onModalClose,
@@ -413,6 +430,10 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
     const handleEditThumbnail = () => {
         dispatch(uploadActions.setStep('details'));
     };
+
+    if (!showPanel) {
+        return null;
+    }
 
     return (
         <div className="grid h-full min-h-0 grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">

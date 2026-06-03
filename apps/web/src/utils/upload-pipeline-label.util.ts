@@ -6,15 +6,17 @@ export function formatUploadPipelineLabel(
 ): string | null {
     switch (uploadStatus) {
         case UploadStatus.UPLOADED:
-            return 'Upload received';
+            return 'Uploaded...';
         case UploadStatus.EXTRACTING:
-            return 'Extracting audio…';
+            return 'Processing...';
         case UploadStatus.PROCESSING:
-            return 'Processing audio…';
+            return 'Processing...';
         case UploadStatus.COMPLETED:
             return 'Processing complete';
         case UploadStatus.FAILED:
             return 'Processing failed';
+        case UploadStatus.CANCELLED:
+            return 'Processing cancelled';
         default:
             return null;
     }

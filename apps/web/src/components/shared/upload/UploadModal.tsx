@@ -1,4 +1,4 @@
-import React, { Fragment, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -18,6 +18,17 @@ import UploadProgressStep from './UploadProgressStep';
 import SermonDetailsForm from './SermonDetailsForm';
 import ListenerSettings from './ListenerSettings';
 import ReviewSubmit from './ReviewSubmit';
+import { useSermonByIdQuery } from '@/hooks/app/useSermon';
+import { formatUploadPipelineLabel } from '@/utils/upload-pipeline-label.util';
+import {
+    estimateProcessingRemainingSec,
+    estimateProcessingTotalSec,
+    formatProcessingTimeLeft,
+    mergeProcessingTotalSec,
+    pickSermonDurationSec,
+    pickSermonFileSizeBytes,
+} from '@/utils/upload-processing-eta.util';
+import { UploadStatus } from '@/dtos/sermon-media.types';
 
 interface UploadModalProps {
     open: boolean;
@@ -39,16 +50,25 @@ const UploadModal: React.FC<UploadModalProps> = ({
         state;
     const reviewSubmitRef = useRef<(() => void) | null>(null);
     const saveDraftRef = useRef<(() => Promise<void>) | null>(null);
+    const uploadStartAtRef = useRef<number | null>(null);
+    const uploadDurationSecRef = useRef<number | null>(null);
+    const uploadCompleteAtRef = useRef<number | null>(null);
+    const processingStartAtRef = useRef<number | null>(null);
+    const processingTotalSecRef = useRef<number | null>(null);
+    const [etaNowMs, setEtaNowMs] = useState<number>(() => Date.now());
+    const [uploadTransferSec, setUploadTransferSec] = useState<number | null>(
+        null,
+    );
+    const [pollOwnerId] = useState<string>('UploadModal');
 
-    // Check if upload is in progress - defined at component level for use throughout
-    const isUploading =
-        uploadData.file &&
-        !uploadComplete &&
-        isLoading &&
-        progress > 0 &&
-        progress < 100;
-    const uploadBusyOnServer =
-        Boolean(uploadData.file) && !uploadComplete && isLoading;
+    const hasUploadFile = Boolean(uploadData.file);
+    /** Multipart in flight or waiting on `start-upload` response (includes 100% finalizing). */
+    const uploadInFlight =
+        hasUploadFile && !uploadComplete && isLoading;
+    /** Bytes still transferring (footer “Uploading N%”). */
+    const isTransferring =
+        uploadInFlight && progress > 0 && progress < 100;
+    const uploadBusyOnServer = uploadInFlight;
     const showFinalizingUpload =
         Boolean(uploadData.file) &&
         !uploadComplete &&
@@ -64,6 +84,259 @@ const UploadModal: React.FC<UploadModalProps> = ({
             currentStep === 'details' ||
             currentStep === 'settings' ||
             currentStep === 'review');
+
+    const sermonIdForPipeline =
+        uploadData.sermonId && uploadData.sermonId.trim().length > 0
+            ? uploadData.sermonId.trim()
+            : undefined;
+    const {
+        data: uploadedSermonDetail,
+        dataUpdatedAt: statusDataUpdatedAt,
+    } = useSermonByIdQuery(
+        sermonIdForPipeline,
+        {
+            enabled: Boolean(sermonIdForPipeline),
+            staleTime: 0,
+            refetchOnMount: 'always',
+            refetchOnReconnect: true,
+            refetchOnWindowFocus: (query) => {
+                const item = (
+                    query.state.data as
+                        | { item?: { uploadStatus?: string } }
+                        | undefined
+                )?.item;
+                const status = item?.uploadStatus;
+                if (
+                    status === UploadStatus.COMPLETED ||
+                    status === UploadStatus.FAILED ||
+                    status === UploadStatus.CANCELLED
+                ) {
+                    return false;
+                }
+                return true;
+            },
+            refetchInterval: (query) => {
+                const item = (
+                    query.state.data as
+                        | { item?: { uploadStatus?: string } }
+                        | undefined
+                )?.item;
+                const status = item?.uploadStatus;
+                if (
+                    status === UploadStatus.COMPLETED ||
+                    status === UploadStatus.FAILED ||
+                    status === UploadStatus.CANCELLED
+                ) {
+                    return false;
+                }
+                const elapsedSinceUploadCompleteMs =
+                    uploadCompleteAtRef.current != null
+                        ? Date.now() - uploadCompleteAtRef.current
+                        : 0;
+                if (elapsedSinceUploadCompleteMs >= 60 * 60 * 1000) {
+                    return 15000;
+                }
+                if (elapsedSinceUploadCompleteMs >= 30 * 60 * 1000) {
+                    return 10000;
+                }
+                return 4000;
+            },
+        },
+    );
+    const serverUploadStatus = (
+        uploadedSermonDetail as
+            | { item?: { uploadStatus?: string } }
+            | undefined
+    )?.item?.uploadStatus;
+    const pipelineLabel = formatUploadPipelineLabel(serverUploadStatus);
+    const isServerTerminal =
+        serverUploadStatus === UploadStatus.COMPLETED ||
+        serverUploadStatus === UploadStatus.FAILED ||
+        serverUploadStatus === UploadStatus.CANCELLED;
+    const elapsedSinceUploadCompleteMs =
+        uploadCompleteAtRef.current != null
+            ? Math.max(0, etaNowMs - uploadCompleteAtRef.current)
+            : 0;
+    const isStallWarn = elapsedSinceUploadCompleteMs >= 30 * 60 * 1000;
+    const isStallError = elapsedSinceUploadCompleteMs >= 60 * 60 * 1000;
+    const statusStalenessMs =
+        statusDataUpdatedAt > 0 ? Math.max(0, etaNowMs - statusDataUpdatedAt) : 0;
+    const isProcessingActive =
+        hasUploadFile &&
+        !isTransferring &&
+        (showFinalizingUpload ||
+            (uploadComplete && !isServerTerminal) ||
+            (!uploadComplete && !isLoading));
+
+    const formatMinutesLeft = (seconds: number): string => {
+        const mins = Math.max(1, Math.ceil(seconds / 60));
+        return `${mins} minute${mins === 1 ? '' : 's'} left`;
+    };
+
+    useEffect(() => {
+        if (isTransferring && uploadStartAtRef.current == null) {
+            uploadStartAtRef.current = Date.now();
+        }
+        if (!uploadInFlight) {
+            uploadStartAtRef.current = null;
+        }
+    }, [isTransferring, uploadInFlight]);
+
+    useEffect(() => {
+        if (
+            uploadComplete &&
+            uploadStartAtRef.current != null &&
+            uploadDurationSecRef.current == null
+        ) {
+            const sec = Math.max(
+                1,
+                (Date.now() - uploadStartAtRef.current) / 1000,
+            );
+            uploadDurationSecRef.current = sec;
+            setUploadTransferSec(sec);
+        }
+        if (!hasUploadFile) {
+            uploadDurationSecRef.current = null;
+            setUploadTransferSec(null);
+        }
+    }, [uploadComplete, hasUploadFile]);
+
+    useEffect(() => {
+        if (uploadComplete && uploadCompleteAtRef.current == null) {
+            uploadCompleteAtRef.current = Date.now();
+        }
+        if (!hasUploadFile) {
+            uploadCompleteAtRef.current = null;
+        }
+    }, [uploadComplete, hasUploadFile]);
+
+    useEffect(() => {
+        if (isProcessingActive && processingStartAtRef.current == null) {
+            processingStartAtRef.current = Date.now();
+        }
+        if (!isProcessingActive) {
+            processingStartAtRef.current = null;
+            processingTotalSecRef.current = null;
+        }
+    }, [isProcessingActive]);
+
+    const durationSec = pickSermonDurationSec(uploadedSermonDetail);
+    const fileSizeBytes = pickSermonFileSizeBytes(
+        uploadedSermonDetail,
+        uploadData.file?.size,
+    );
+
+    const processingTotalSec = useMemo(() => {
+        if (!isProcessingActive) {
+            return null;
+        }
+        const candidate = estimateProcessingTotalSec({
+            durationSec,
+            fileSizeBytes,
+            uploadTransferSec,
+            uploadStatus: serverUploadStatus,
+        });
+        const merged = mergeProcessingTotalSec(
+            processingTotalSecRef.current,
+            candidate,
+        );
+        processingTotalSecRef.current = merged;
+        return merged;
+    }, [
+        isProcessingActive,
+        durationSec,
+        fileSizeBytes,
+        uploadTransferSec,
+        serverUploadStatus,
+    ]);
+
+    useEffect(() => {
+        if (!(isTransferring || isProcessingActive)) {
+            return;
+        }
+        const timer = setInterval(() => {
+            setEtaNowMs(Date.now());
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [isTransferring, isProcessingActive]);
+
+    useEffect(() => {
+        if (!sermonIdForPipeline || !isProcessingActive) {
+            return;
+        }
+        const detail = {
+            event: 'upload-status-poll-heartbeat',
+            owner: pollOwnerId,
+            sermonId: sermonIdForPipeline,
+            uploadStatus: serverUploadStatus ?? null,
+            elapsedSinceUploadCompleteMs,
+            statusStalenessMs,
+            isDuplicateOwner: false,
+        };
+        window.dispatchEvent(
+            new CustomEvent('upload-status-poll-telemetry', {
+                detail,
+            }),
+        );
+    }, [
+        sermonIdForPipeline,
+        pollOwnerId,
+        isProcessingActive,
+        serverUploadStatus,
+        elapsedSinceUploadCompleteMs,
+        statusStalenessMs,
+    ]);
+
+    const uploadEtaLabel = useMemo(() => {
+        if (!isTransferring || !uploadStartAtRef.current) {
+            return null;
+        }
+        const elapsedSec = (etaNowMs - uploadStartAtRef.current) / 1000;
+        if (elapsedSec <= 1 || progress <= 1) {
+            return 'calculating…';
+        }
+        const pctPerSec = progress / elapsedSec;
+        if (!Number.isFinite(pctPerSec) || pctPerSec <= 0) {
+            return 'calculating…';
+        }
+        const remainingSec = Math.max(1, Math.round((100 - progress) / pctPerSec));
+        return formatMinutesLeft(remainingSec);
+    }, [isTransferring, progress, etaNowMs]);
+
+    const processingEtaLabel = useMemo(() => {
+        if (
+            !isProcessingActive ||
+            processingStartAtRef.current == null ||
+            isStallError
+        ) {
+            return null;
+        }
+        const processingElapsedSec =
+            (etaNowMs - processingStartAtRef.current) / 1000;
+        const remainingSec = estimateProcessingRemainingSec(
+            {
+                durationSec,
+                fileSizeBytes,
+                uploadTransferSec,
+                processingElapsedSec,
+                uploadStatus: serverUploadStatus,
+            },
+            processingTotalSec,
+        );
+        if (remainingSec == null) {
+            return null;
+        }
+        return formatProcessingTimeLeft(remainingSec);
+    }, [
+        isProcessingActive,
+        isStallError,
+        etaNowMs,
+        durationSec,
+        fileSizeBytes,
+        uploadTransferSec,
+        serverUploadStatus,
+        processingTotalSec,
+    ]);
 
     // Removed auto-switch to details after upload completes
     // Users can manually navigate to any tab they want after upload completes
@@ -110,42 +383,15 @@ const UploadModal: React.FC<UploadModalProps> = ({
     };
 
     const handleStepClick = (stepKey: string) => {
-        const stepIndex = updatedSteps.findIndex(
-            (step) => step.key === stepKey,
-        );
-
-        // Priority 1: Always allow navigation to progress step if file exists (even after upload completes)
-        if (stepKey === 'progress' && uploadData.file) {
-            goToStep(stepKey);
+        // Once a file is in the wizard, all tabs stay reachable during upload,
+        // finalizing, and backend processing (feat-0006/0007).
+        if (!hasUploadFile) {
+            if (stepKey === 'progress') {
+                goToStep(stepKey);
+            }
             return;
         }
-
-        // Priority 2: After upload completes, always allow free navigation between ALL tabs
-        if (uploadComplete && uploadData.file) {
-            goToStep(stepKey);
-            return;
-        }
-
-        // Priority 3: During upload, allow free navigation between all tabs
-        if (isUploading) {
-            goToStep(stepKey);
-            return;
-        }
-
-        // Priority 4: When not uploading and upload not complete, use normal navigation rules
-        // Allow navigation to previous steps or current step
-        if (stepIndex <= currentStepIndex) {
-            goToStep(stepKey);
-            return;
-        }
-
-        // Priority 5: For forward navigation, check if current step is completed
-        if (stepIndex === currentStepIndex + 1 && canProceed()) {
-            goToStep(stepKey);
-            return;
-        }
-
-        // If none of the above conditions are met, don't allow navigation
+        goToStep(stepKey);
     };
 
     const handleNext = () => {
@@ -161,23 +407,25 @@ const UploadModal: React.FC<UploadModalProps> = ({
     };
 
     const handleClose = async () => {
-        // Auto-save to draft when closing if there's any data and upload is complete
-        // (if upload is still in progress, we'll save the current state as draft)
-        if (uploadData.file || uploadData.title || uploadData.description) {
-            // Call save draft handler from ReviewSubmit if available, otherwise just close
-            if (saveDraftRef.current) {
-                try {
-                    await saveDraftRef.current();
-                } catch (error) {
-                    console.error(
-                        'Failed to save draft on modal close:',
-                        error,
-                    );
-                }
+        const canSaveDraft =
+            uploadData.sermonId ||
+            uploadData.draftId ||
+            uploadData.file ||
+            uploadData.title ||
+            uploadData.description;
+
+        if (canSaveDraft && saveDraftRef.current) {
+            try {
+                await saveDraftRef.current();
+            } catch (error) {
+                console.error('Failed to save draft on modal close:', error);
+                onOpenChange(false);
+                dispatch(uploadActions.setStep('file'));
             }
+            return;
         }
+
         onOpenChange(false);
-        // Reset to file step when closing
         dispatch(uploadActions.setStep('file'));
     };
 
@@ -190,13 +438,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
             case 'settings':
                 return <ListenerSettings />;
             case 'review':
-                return (
-                    <ReviewSubmit
-                        onModalClose={() => onOpenChange(false)}
-                        onSubmitRef={reviewSubmitRef}
-                        onSaveDraftRef={saveDraftRef}
-                    />
-                );
+                return null;
             default:
                 return <UploadProgressStep />;
         }
@@ -238,14 +480,10 @@ const UploadModal: React.FC<UploadModalProps> = ({
         }
     };
 
-    const tabAllowsNavigation = (stepKey: string, stepIndex: number) => {
+    const tabAllowsNavigation = (stepKey: string) => {
         if (stepKey === currentStep) return true;
-        if (stepKey === 'progress' && uploadData.file) return true;
-        if (uploadComplete && uploadData.file) return true;
-        if (isUploading) return true;
-        if (stepIndex <= currentStepIndex) return true;
-        if (stepIndex === currentStepIndex + 1 && canProceed()) return true;
-        return false;
+        if (!hasUploadFile) return stepKey === 'progress';
+        return true;
     };
 
     const shellClassName = cn(
@@ -310,13 +548,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                         )}
                     >
                         {UPLOAD_STEP_TABS.flatMap((tab, idx) => {
-                            const stepIndex = updatedSteps.findIndex(
-                                (s) => s.key === tab.key,
-                            );
-                            const allowed = tabAllowsNavigation(
-                                tab.key,
-                                stepIndex,
-                            );
+                            const allowed = tabAllowsNavigation(tab.key);
                             const isActive = currentStep === tab.key;
                             const innerInactiveClass =
                                 tab.inactiveInner === 'pill'
@@ -398,7 +630,15 @@ const UploadModal: React.FC<UploadModalProps> = ({
                         )}
                     >
                         <div className="scrollbar-none flex min-h-0 flex-1 flex-col overflow-y-auto p-6 md:p-8">
-                            {getStepContent()}
+                            {currentStep !== 'review' ? getStepContent() : null}
+                            {hasUploadFile ? (
+                                <ReviewSubmit
+                                    showPanel={currentStep === 'review'}
+                                    onModalClose={() => onOpenChange(false)}
+                                    onSubmitRef={reviewSubmitRef}
+                                    onSaveDraftRef={saveDraftRef}
+                                />
+                            ) : null}
                         </div>
                     </div>
                 </div>
@@ -415,54 +655,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                 >
                     {showFooterUploadStatus && uploadData.file ? (
                         <div className="flex min-w-0 flex-1 items-center gap-3">
-                            {uploadComplete ? (
-                                <>
-                                    <Icon
-                                        icon={
-                                            UPLOAD_SHELL.iconifyFooterUploadGlyph
-                                        }
-                                        width={20}
-                                        height={20}
-                                        className="shrink-0 text-[#bdbdbd]"
-                                        aria-hidden
-                                    />
-                                    <Icon
-                                        icon={
-                                            UPLOAD_SHELL.iconifyFooterUploadSuccessGlyph
-                                        }
-                                        width={20}
-                                        height={20}
-                                        className="shrink-0 text-[#08ffdb]"
-                                        aria-hidden
-                                    />
-                                    <p className="shrink-0 font-matter text-[13px] leading-5 text-[#bdbdbd]">
-                                        Upload complete
-                                    </p>
-                                </>
-                            ) : showFinalizingUpload ? (
-                                <>
-                                    <Icon
-                                        icon={
-                                            UPLOAD_SHELL.iconifyFooterUploadGlyph
-                                        }
-                                        width={20}
-                                        height={20}
-                                        className="shrink-0 text-[#bdbdbd]"
-                                        aria-hidden
-                                    />
-                                    <Loader2
-                                        className="h-4 w-4 shrink-0 animate-spin text-[#bdbdbd]"
-                                        aria-hidden
-                                    />
-                                    <p
-                                        className={
-                                            UPLOAD_SHELL.footerStatusText
-                                        }
-                                    >
-                                        Processing…
-                                    </p>
-                                </>
-                            ) : uploadBusyOnServer ? (
+                            {isTransferring ? (
                                 <>
                                     <div className="flex shrink-0 items-center gap-2">
                                         <Icon
@@ -495,8 +688,74 @@ const UploadModal: React.FC<UploadModalProps> = ({
                                             …{' '}
                                         </span>
                                         <span className="text-[#bdbdbd]">
-                                            Time left —
+                                            {uploadEtaLabel ?? ''}
                                         </span>
+                                    </p>
+                                </>
+                            ) : isProcessingActive ? (
+                                <>
+                                    <Icon
+                                        icon={
+                                            UPLOAD_SHELL.iconifyFooterUploadGlyph
+                                        }
+                                        width={20}
+                                        height={20}
+                                        className="shrink-0 text-[#bdbdbd]"
+                                        aria-hidden
+                                    />
+                                    <Loader2
+                                        className="h-4 w-4 shrink-0 animate-spin text-[#bdbdbd]"
+                                        aria-hidden
+                                    />
+                                    <p
+                                        className={
+                                            UPLOAD_SHELL.footerStatusText
+                                        }
+                                    >
+                                        {isStallError
+                                            ? 'Processing is taking too long'
+                                            : isStallWarn
+                                              ? 'Still processing...'
+                                              : (pipelineLabel ?? 'Processing...')}
+                                        {processingEtaLabel ? (
+                                            <>
+                                                <span
+                                                    className={
+                                                        UPLOAD_SHELL.footerStatusMuted
+                                                    }
+                                                >
+                                                    {' '}
+                                                    …{' '}
+                                                </span>
+                                                <span className="text-[#bdbdbd]">
+                                                    {processingEtaLabel}
+                                                </span>
+                                            </>
+                                        ) : null}
+                                    </p>
+                                </>
+                            ) : uploadComplete ? (
+                                <>
+                                    <Icon
+                                        icon={
+                                            UPLOAD_SHELL.iconifyFooterUploadGlyph
+                                        }
+                                        width={20}
+                                        height={20}
+                                        className="shrink-0 text-[#bdbdbd]"
+                                        aria-hidden
+                                    />
+                                    <Icon
+                                        icon={
+                                            UPLOAD_SHELL.iconifyFooterUploadSuccessGlyph
+                                        }
+                                        width={20}
+                                        height={20}
+                                        className="shrink-0 text-[#08ffdb]"
+                                        aria-hidden
+                                    />
+                                    <p className="shrink-0 font-matter text-[13px] leading-5 text-[#bdbdbd]">
+                                        {pipelineLabel ?? 'Upload complete'}
                                     </p>
                                 </>
                             ) : (
@@ -515,7 +774,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                                             UPLOAD_SHELL.footerStatusText
                                         }
                                     >
-                                        Ready when you are
+                                        {pipelineLabel ?? 'Waiting for upload…'}
                                     </p>
                                 </>
                             )}
@@ -532,54 +791,30 @@ const UploadModal: React.FC<UploadModalProps> = ({
                             Close
                         </Button>
                         {currentStep === 'review' ? (
-                            <Fragment>
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    disabled={
-                                        isLoading ||
-                                        isUploading ||
-                                        !uploadData.title
-                                    }
-                                    className="h-[34px] min-h-[34px] rounded-md border border-[#707070] bg-transparent px-3 font-matter-medium text-[12px] leading-[18px] text-[#eaeaea] tracking-wide hover:bg-white/5"
-                                    onClick={async () => {
-                                        if (saveDraftRef.current)
-                                            await saveDraftRef.current();
-                                    }}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#eaeaea] border-t-transparent" />
-                                            Saving…
-                                        </>
-                                    ) : (
-                                        'Save as Draft'
-                                    )}
-                                </Button>
-                                <Button
-                                    type="button"
-                                    disabled={
-                                        isLoading ||
-                                        isUploading ||
-                                        !uploadData.file ||
-                                        !uploadData.title
-                                    }
-                                    className={cn(
-                                        UPLOAD_SHELL.primaryCta,
-                                        'min-w-[88px]',
-                                    )}
-                                    onClick={() => reviewSubmitRef.current?.()}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#292929] border-t-transparent" />
-                                            Publishing…
-                                        </>
-                                    ) : (
-                                        'Publish'
-                                    )}
-                                </Button>
-                            </Fragment>
+                            <Button
+                                type="button"
+                                disabled={
+                                    isLoading ||
+                                    uploadInFlight ||
+                                    !uploadData.file ||
+                                    !uploadData.title ||
+                                    uploadData.coverUploadStatus !== 'uploaded'
+                                }
+                                className={cn(
+                                    UPLOAD_SHELL.primaryCta,
+                                    'min-w-[88px]',
+                                )}
+                                onClick={() => reviewSubmitRef.current?.()}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-[#292929] border-t-transparent" />
+                                        Publishing…
+                                    </>
+                                ) : (
+                                    'Publish'
+                                )}
+                            </Button>
                         ) : (
                             <Button
                                 type="button"
@@ -614,7 +849,16 @@ const UploadModal: React.FC<UploadModalProps> = ({
     }
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog
+            open={open}
+            onOpenChange={(next) => {
+                if (next) {
+                    onOpenChange(true);
+                    return;
+                }
+                void handleClose();
+            }}
+        >
             <DialogContent
                 className={cn(
                     shellClassName,
