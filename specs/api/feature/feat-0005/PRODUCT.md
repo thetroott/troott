@@ -14,6 +14,7 @@ This feature spec is the **implementation bridge** between:
 
 - [`audio-processing-job-plan.md`](../../audio-processing-job-plan.md) — Bull/ffmpeg HLS pipeline
 - [`media-compute-deployment-plan.md`](../../media-compute-deployment-plan.md) — AWS EC2, sizing, ops
+- [`feature/feat-0006/`](../feat-0006/PRODUCT.md) — **Canonical** upload → processing → playback API spec
 
 It does **not** replace those plans; it defines **what to change in code** and **acceptance criteria** for production launch on a single monolith (e.g. Coolify on `c6a.2xlarge`).
 
@@ -65,7 +66,7 @@ Today the API:
 
 ## Processing SLA (internal targets)
 
-| Stage | Target (2 hr sermon, 8 vCPU, loudnorm off) |
+| Stage | Target (2 hr sermon, 8 vCPU, with loudnorm) |
 | ----- | ------------------------------------------ |
 | Metadata | < 2 min after upload |
 | HLS ready (p50) | ≤ 45 min |
@@ -109,4 +110,5 @@ Today the API:
 
 - [`audio-processing-job-plan.md`](../../audio-processing-job-plan.md)
 - [`media-compute-deployment-plan.md`](../../media-compute-deployment-plan.md)
-- [`apps/api/docs/audio-pipeline-flow.md`](../../../../apps/api/docs/audio-pipeline-flow.md)
+- [`apps/api/docs/audio-pipeline-flow.md`](../../../../apps/api/docs/audio-pipeline-flow.md) — Short code index (links to canonical spec)
+- [`feature/feat-0006/`](../feat-0006/PRODUCT.md) — **Canonical** upload → processing API spec

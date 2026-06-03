@@ -16,7 +16,7 @@ See [`PRODUCT.md`](./PRODUCT.md). Primary implementation in **`apps/api`**.
 | `AWS_STORAGE_BUCKET` | `troott-storage` | Images, documents, avatars |
 | `SERMON_AUDIO_MAX_BYTES` | `536870912` (512 MiB) | Max sermon upload size |
 | `MEDIA_CDN_BASE_URL` | — | CloudFront base; origin **`troott-playback`** |
-| `AUDIO_LOUDNORM_BEFORE_HLS` | `false` | Extra CPU/disk; off until validated for 2 hr |
+| `AUDIO_LOUDNORM_FILTER` | `loudnorm=I=-16:TP=-1.5:LRA=11` | Required pre-HLS loudnorm (all sermon audio) |
 | `AUDIO_HLS_WORKER_CONCURRENCY` | `1` in production, `2` otherwise | Bull HLS parallel jobs per process |
 | `HLS_WORK_DIR` | `os.tmpdir()` | Temp dir for ffmpeg scratch (mount large gp3 path in prod) |
 | `GRACEFUL_SHUTDOWN_MS` | `120000` | HTTP close timeout before force exit |
@@ -193,7 +193,7 @@ Coolify: set build context to repo root, Dockerfile path `apps/api/Dockerfile`, 
 | audio-processing-job-plan | feat-0005 / current code |
 | ------------------------- | ------------------------ |
 | DASH + Opus archival | **Deferred** — HLS-only MVP |
-| 2-pass loudnorm | **Off** by default (`AUDIO_LOUDNORM_BEFORE_HLS`) |
+| 2-pass loudnorm | **Deferred** — single-pass loudnorm **required** before HLS (`sermonAudioLoudnormFilter`) |
 | Renditions 32–128k | **64 / 128 / 192** (existing defaults) |
 | `audio.processing.status` field | Uses `item.uploadStatus` today — unchanged |
 
