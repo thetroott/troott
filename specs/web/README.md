@@ -21,6 +21,21 @@ Product and technical specifications for **`apps/web`**.
 | feat-0016 | Tour & Tutorial (studio walkthrough) | [PRODUCT](./feature/feat-0016/PRODUCT.md) | [TECH](./feature/feat-0016/TECH.md) |
 | feat-0017 | Sermon Analytics — Overview tab | [PRODUCT](./feature/feat-0017/PRODUCT.md) | [TECH](./feature/feat-0017/TECH.md) |
 | feat-0018 | My Sermons upload, library, drafts (Figma) | [PRODUCT](./feature/feat-0018/PRODUCT.md) | [TECH](./feature/feat-0018/TECH.md) |
+| feat-0026 | Empty states — centered layout (`apps/web`) | [PRODUCT](./feature/feat-0026/PRODUCT.md) | [TECH](./feature/feat-0026/TECH.md) |
+| feat-0031 | Get Started — Upload sermon CTA (blink / no-op) | [PRODUCT](./feature/feat-0031/PRODUCT.md) | [TECH](./feature/feat-0031/TECH.md) |
+| feat-0032 | Upload modal — immediate sermon cover image API upload | [PRODUCT](./feature/feat-0032/PRODUCT.md) | [TECH](./feature/feat-0032/TECH.md) |
+| feat-0033 | Profile cover (`banner`) / Background image not visible on web | [PRODUCT](./feature/feat-0033/PRODUCT.md) | [TECH](./feature/feat-0033/TECH.md) |
+| feat-0034 | Dashboard sidebar — always show onboarding Dashboard UI | [PRODUCT](./feature/feat-0034/PRODUCT.md) | [TECH](./feature/feat-0034/TECH.md) |
+
+**Cross-cutting:** [feat-0026 EMPTY_STATE_LAYOUT_SPEC](./feature/feat-0026/EMPTY_STATE_LAYOUT_SPEC.md) — all empty states centered in page / region / panel.
+
+**Upload modal cover:** [feat-0032 PRODUCT](./feature/feat-0032/PRODUCT.md) — `POST /sermon/image-upload` on Details step, not only on Publish; API [feat-0014](../../api/feature/feat-0014/PRODUCT.md).
+
+**Profile hero cover:** [feat-0033 PRODUCT](./feature/feat-0033/PRODUCT.md) — Figma **Background image** → API `banner` → web hero; API [feat-0016](../../api/feature/feat-0016/PRODUCT.md).
+
+**Dashboard sidebar:** [feat-0034 PRODUCT](./feature/feat-0034/PRODUCT.md) — always render onboarding **Dashboard UI** (`AppSidebar`); do not unmount on sermon edit workspace.
+
+**Get Started:** [feat-0031 GET_STARTED_UPLOAD_SERMON_CTA_SPEC](./feature/feat-0031/GET_STARTED_UPLOAD_SERMON_CTA_SPEC.md) — hub item 4 **Upload sermon** preflight and studio upload launch.
 
 ## Numbered UX / flow docs
 
