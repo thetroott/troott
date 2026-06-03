@@ -33,6 +33,12 @@ export interface ProfileBase {
     bio?: string;
     avatar?: Asset | null;
     coverImage?: Asset | null;
+    phoneNumber?: string;
+    phoneCode?: string;
+    countryPhone?: string;
+    /** Public contact email from nested profile when distinct from account email. */
+    profileEmail?: string;
+    monthlyListeners?: number;
     createdAt: string;
     updatedAt: string;
 }
@@ -51,6 +57,13 @@ export interface MinisterProfile extends ProfileBase {
 }
 
 export type ProfileDTO = ListenerProfile | MinisterProfile;
+
+/** Aggregated read-model for insight cards (feat-0024). */
+export interface ProfileInsightStats {
+    sermonsPublished?: number;
+    totalListens?: number;
+    followers?: number;
+}
 
 export interface UpdateProfilePayload {
     bio?: string;

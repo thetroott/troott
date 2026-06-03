@@ -85,7 +85,7 @@ export function ImageUploadTile({
     onChange,
     helperText,
     className,
-    accept = 'image/jpeg,image/png,image/webp',
+    accept = 'image/jpeg,image/png,image/webp,image/bmp',
     ariaLabel,
 }: ImageUploadTileProps) {
     const [state, setState] = React.useState<State>('idle');
@@ -99,10 +99,15 @@ export function ImageUploadTile({
         async (file: File) => {
             setErrorMessage(null);
 
-            const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+            const allowed = [
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'image/bmp',
+            ];
             if (!allowed.includes(file.type)) {
                 setState('error');
-                setErrorMessage('JPEG, PNG, or WEBP only');
+                setErrorMessage('JPEG, PNG, WEBP, or BMP only');
                 return;
             }
             const maxBytes = 5 * 1024 * 1024;
