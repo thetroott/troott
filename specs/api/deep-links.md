@@ -79,7 +79,7 @@ The mobile app uses Expo Router segments `app/sermon/[id].tsx`, `app/playlist/[i
 ## Audit: `GET /api/v1/sermon/:id` (full document)
 
 - **Middleware:** **`Protect`** — Bearer required; silent reissue via `X-New-Token` in last 5 hours of JWT lifetime (feat-0004).
-- **Visibility:** Signed-in callers see catalog-public or entitled sermons per `sermon-access.util.ts`. Non-entitled or non-catalog responses return **404** (`sermon not found`) where appropriate.
+- **Visibility:** Signed-in callers see catalog-public or entitled sermons per **`sermonService.canUserViewSermonDetail`** ([feat-0011](./feature/feat-0011/TECH.md)). Non-entitled or non-catalog responses return **404** (`sermon not found`) where appropriate.
 - **Caching:** `private, no-store` for authenticated sermon detail.
 
 ## Paywall and subscription (stable links)
@@ -108,7 +108,7 @@ Stable sermon pages on the marketing or web shell should expose `og:title`, `og:
 
 ## Automated tests
 
-Jest covers URL parsing (`parse-stable-target` contract) and sermon access rules (`canAccessSermonDocument`). Add integration/E2E tests when a harness exists for cold-start universal links and post-auth resume.
+Jest covers URL parsing (`parse-stable-target` contract) and sermon access rules (`canUserViewSermonDetail` on `sermon.service.ts` — see [feat-0011](./feature/feat-0011/TECH.md)). Add integration/E2E tests when a harness exists for cold-start universal links and post-auth resume.
 
 ## Call site inventory: `generateShareableLink`
 

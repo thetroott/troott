@@ -92,7 +92,7 @@ Order-of-magnitude for **compressed** uploads (MP3/AAC/M4A):
 
 ### Processing time (ffmpeg HLS, CPU)
 
-Rough planning numbers (single job, 3 renditions, no loudnorm):
+Rough planning numbers (single job, 3 renditions, **with single-pass loudnorm**):
 
 | Sermon length | vCPU | Estimated wall time |
 | ------------- | ---- | ------------------- |
@@ -100,7 +100,7 @@ Rough planning numbers (single job, 3 renditions, no loudnorm):
 | 2 hours | 4 | ~30–60 min |
 | 2 hours | 8 | ~20–40 min |
 
-With `AUDIO_LOUDNORM_BEFORE_HLS=true`, add **~1× ingest duration** for the extra WAV pass (large temp file).
+Every sermon upload includes **single-pass loudnorm → AAC → HLS** inline (no WAV intermediate on disk).
 
 **Implication:** Processing often exceeds **AWS Lambda’s 15-minute limit** — Lambda is **not** the primary transcode target. EC2/Fargate long-running tasks are.
 
@@ -110,10 +110,10 @@ On the compute host (EC2 volume mounted for `/tmp` or Fargate ephemeral):
 
 | Artifact | ~2 hr sermon |
 | -------- | ------------ |
-| Ingest copy from S3 | 110–120 MiB (MP3) up to **1+ GiB** (WAV) |
-| Normalized WAV (optional) | up to **~1.2 GiB** stereo 44.1 kHz |
-| HLS scratch (3 renditions) | **200–400 MiB** typical |
-| **Peak working set** | **Plan 15–25 GiB** safe; **50 GiB** if loudnorm + WAV ingest |
+| Ingest copy from S3 (legacy disk path) | 110–120 MiB (MP3) up to **1+ GiB** (WAV upload) |
+| Normalized WAV intermediate (legacy) | **Removed** — loudnorm → AAC inline ([feat-0007](./feature/feat-0007/PRODUCT.md)) |
+| HLS segment scratch (3 renditions) | **200–400 MiB** typical; segments deleted after stream upload |
+| **Peak working set** | **Plan 5–15 GiB** with stream-native worker |
 
 ---
 
@@ -264,7 +264,7 @@ Task role should **not** grant blanket `s3:*` on all three buckets if a narrower
 | `MEDIA_CDN_BASE_URL` | CloudFront base (origin: **`troott-playback`**) |
 | `SERMON_AUDIO_MAX_BYTES` | **≥ 536870912 (512 MiB)** prod; see § Content constraints |
 | `SERMON_AUDIO_MIME_ALLOWLIST` | Restrict to compressed formats if size is a concern |
-| `AUDIO_LOUDNORM_BEFORE_HLS` | `false` in prod until disk/CPU validated for 2 hr |
+| `AUDIO_LOUDNORM_FILTER` | `loudnorm=I=-16:TP=-1.5:LRA=11` (optional override; loudnorm always on) |
 | `PORT` | Container port (e.g. 5000) |
 
 ---
@@ -321,7 +321,7 @@ If stop timeout < longest transcode, **in-flight HLS** should fail and **Bull re
 | Bull failed jobs (`audio:processing`) | Alert |
 | Sermon `item.uploadStatus=failed` | Dashboard / support runbook |
 | Task CPU sustained > 80% during transcode | Scale instance size or add ASG capacity |
-| Disk full on `/tmp` or data volume | Increase gp3 size; check WAV + loudnorm |
+| Disk full on `/tmp` or data volume | Increase gp3 size; check HLS segment scratch (`HLS_WORK_DIR`) |
 | HLS stage timing logs | `audio-hls-processor` label |
 
 ---
@@ -334,7 +334,7 @@ For **1–2 hour** sermons (internal targets, not client guarantees until measur
 | ----- | ------ |
 | Upload complete (network dependent) | User-driven |
 | Metadata job | < 2 min after upload |
-| HLS ready (3 renditions, 4 vCPU, no loudnorm) | **≤ 45 min** for 2 hr (p50); **≤ 90 min** (p95) until tuned |
+| HLS ready (3 renditions, 4 vCPU, with loudnorm) | **≤ 45 min** for 2 hr (p50); **≤ 90 min** (p95) until tuned |
 | Failed processing | Visible `uploadStatus=failed`; user can retry upload/reprocess |
 
 Clients already fall back to `item.item` (raw ingest URL) until HLS is ready (`audio-pipeline-flow.md` §6).
@@ -391,7 +391,7 @@ flowchart LR
 ### P3 — Cost optimization (after split)
 
 - [ ] Worker-only Spot fleet or AWS Batch
-- [ ] Consider loudnorm 2-pass only when CPU/disk validated
+- [ ] Consider 2-pass loudnorm only when CPU/disk validated (single-pass is required today)
 
 ---
 

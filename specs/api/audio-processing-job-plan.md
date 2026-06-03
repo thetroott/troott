@@ -1,5 +1,7 @@
 # Audio Processing Job Plan (API)
 
+> **End-to-end upload → processing spec:** [`feature/feat-0006/PRODUCT.md`](./feature/feat-0006/PRODUCT.md) + [`TECH.md`](./feature/feat-0006/TECH.md). This document is implementation design notes and phase-2 roadmap.
+
 This spec defines the background audio processing workflow for sermons in `apps/api/src/tasks`.
 
 ## Goal
@@ -239,11 +241,11 @@ sermons/{sermonId}/adaptive/
 ### Phase 1 (MVP)
 
 - Metadata extraction + HLS only + 3 renditions (`64k`, `96k`, `128k`)
-- No loudnorm pass yet (optional)
+- **Single-pass loudnorm** before HLS (`sermonAudioLoudnormFilter`; required)
 
 ### Phase 2
 
-- Add loudness normalization (2-pass)
+- Upgrade to 2-pass loudnorm (optional accuracy improvement)
 - Add DASH output
 - Add finer rendition ladder (`32k`, `64k`, `96k`, `128k`)
 
