@@ -3,8 +3,6 @@ import Minister from '@/models/core/minister.model';
 import { IMinisterDoc } from '@/interfaces/core/minister.interface';
 import RepositoryService from '@/services/repository.service';
 import { IResult } from '@/interfaces/common.interface';
-import { mongoIdFromDoc } from '@/utils/resolve-public-id.util';
-
 class MinisterRepository extends RepositoryService<IMinisterDoc> {
     constructor() {
         super(Minister, 'Minister');
@@ -23,7 +21,10 @@ class MinisterRepository extends RepositoryService<IMinisterDoc> {
         if (!trimmed) return null;
         const r = await this.findMinister(trimmed);
         if (r.error || !r.data) return null;
-        return mongoIdFromDoc(r.data);
+        const doc = r.data as { _id?: unknown; id?: unknown };
+        if (doc._id != null) return String(doc._id);
+        if (doc.id != null) return String(doc.id);
+        return null;
     }
 
     public async getMinisters(

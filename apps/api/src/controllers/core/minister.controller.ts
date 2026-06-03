@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import asyncHandler from '../../middlewares/async.mdw';
 import ErrorResponse from '../../utils/error.util';
-import { pathParam } from '../../utils/route-params.util';
 import ministerService from '@/services/core/minister.service';
 import ministerRepository from '@/repository/core/minister.repository';
 import {
@@ -150,6 +149,7 @@ export const inviteMinister: RequestHandler = asyncHandler(
 
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
         } catch (cacheError) {
             console.error('Cache invalidation failed:', cacheError);
         }
@@ -478,10 +478,21 @@ export const acceptMinisterInvitation: RequestHandler = asyncHandler(
 
 export const getMinister: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = (req as any).user?.id;
+        const user = (req as any).user as IUserDoc | undefined;
+        const userId = user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const cacheKey = `minister:profile:${userId}`;
+        if (user.userType !== UserType.MINISTER) {
+            return next(
+                new ErrorResponse(
+                    'Minister profile is only available for minister accounts',
+                    403,
+                    [],
+                ),
+            );
+        }
+
+        const cacheKey = `minister:profile:v2:${userId}`;
         const cacheTTL = 300;
 
         const cached = await redisWrapper.fetchData<any>(cacheKey);
@@ -529,7 +540,7 @@ export const getMinister: RequestHandler = asyncHandler(
  */
 export const getMinisterById: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const ministerId = pathParam(req.params.ministerId);
+        const ministerId = (Array.isArray(req.params.ministerId) ? req.params.ministerId[0] : req.params.ministerId);
         if (!ministerId) {
             return next(new ErrorResponse('ministerId is required', 400, []));
         }
@@ -660,6 +671,7 @@ export const updateMinister: RequestHandler = asyncHandler(
 
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (cacheError) {
             console.error('Cache invalidation failed:', cacheError);
@@ -810,6 +822,7 @@ export const submitMinisterVerification: RequestHandler = asyncHandler(
 
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);
@@ -841,6 +854,7 @@ export const onboardMinisterPersonalComplete: RequestHandler = asyncHandler(
         }
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);
@@ -871,6 +885,7 @@ export const onboardMinisterDocumentComplete: RequestHandler = asyncHandler(
         }
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);
@@ -901,6 +916,7 @@ export const onboardMinisterAddressComplete: RequestHandler = asyncHandler(
         }
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);
@@ -931,6 +947,7 @@ export const onboardMinisterMinistryComplete: RequestHandler = asyncHandler(
         }
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);
@@ -961,6 +978,7 @@ export const onboardMinisterTourComplete: RequestHandler = asyncHandler(
         }
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);
@@ -995,6 +1013,7 @@ export const onboardMinisterFirstSermonComplete: RequestHandler =
             }
             try {
                 await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
                 await redisWrapper.deleteData(`user:profile:${userId}`);
             } catch (e) {
                 console.error('Cache invalidation failed:', e);
@@ -1025,6 +1044,7 @@ export const skipMinisterOnboarding: RequestHandler = asyncHandler(
         }
         try {
             await redisWrapper.deleteData(`minister:profile:${userId}`);
+            await redisWrapper.deleteData(`minister:profile:v2:${userId}`);
             await redisWrapper.deleteData(`user:profile:${userId}`);
         } catch (e) {
             console.error('Cache invalidation failed:', e);

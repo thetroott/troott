@@ -21,6 +21,7 @@ import PermissionService from '@/services/permission.service';
 import ministerMapper from '@/mappers/minister.mapper';
 import studioService from '@/services/core/studio.service';
 import userRepository from '@/repository/user.repository';
+import { normalizeStorageReferenceToS3Key } from '@/utils/helpers.util';
 
 /** Canonical get-started ladder (aligned with web). */
 const STEP_PERSONAL = 1;
@@ -35,6 +36,13 @@ function ministerOnboardingStep(m: IMinisterDoc): number {
     return typeof s === 'number' ? s : 0;
 }
 
+function normalizeStorageWriteValue(value: unknown): unknown {
+    if (typeof value !== 'string' || !value.trim()) {
+        return value;
+    }
+    return normalizeStorageReferenceToS3Key(value);
+}
+
 function buildDotSetFromUpdateDTO(data: UpdateMinisterDTO): {
     $set: Record<string, unknown>;
 } {
@@ -46,7 +54,11 @@ function buildDotSetFromUpdateDTO(data: UpdateMinisterDTO): {
     } = data;
     for (const [key, value] of Object.entries(top)) {
         if (value !== undefined) {
-            $set[key] = value;
+            if (key === 'avatar' || key === 'banner') {
+                $set[key] = normalizeStorageWriteValue(value);
+            } else {
+                $set[key] = value;
+            }
         }
     }
     if (profilePatch) {
@@ -60,6 +72,8 @@ function buildDotSetFromUpdateDTO(data: UpdateMinisterDTO): {
                         $set[`profile.ministryHQLocation.${hk}`] = hv;
                     }
                 }
+            } else if (pk === 'ministryLogo') {
+                $set[`profile.${pk}`] = normalizeStorageWriteValue(pv);
             } else {
                 $set[`profile.${pk}`] = pv;
             }
@@ -304,7 +318,9 @@ class MinisterService {
         }
 
         result.message = 'Minister profile updated successfully';
-        result.data = updateResult.data;
+        result.data = await ministerMapper.mapMinisterOwnerResponse(
+            updateResult.data as IMinisterDoc,
+        );
         return result;
     }
 
@@ -330,7 +346,9 @@ class MinisterService {
             return result;
         }
 
-        result.data = ministerResult.data;
+        result.data = await ministerMapper.mapMinisterOwnerResponse(
+            ministerResult.data as IMinisterDoc,
+        );
         result.message = 'Minister profile retrieved successfully';
         return result;
     }
@@ -418,7 +436,19 @@ class MinisterService {
 
         const updateResult = await ministerRepository.updateMinister(id, {
             $set: {
-                'verification.document': document,
+                'verification.document': {
+                    ...document,
+                    frontPage: normalizeStorageReferenceToS3Key(
+                        document.frontPage,
+                    ),
+                    ...(document.backPage
+                        ? {
+                              backPage: normalizeStorageReferenceToS3Key(
+                                  document.backPage,
+                              ),
+                          }
+                        : {}),
+                },
                 'verification.status': VerificationStatus.PENDING,
             },
         } as any);

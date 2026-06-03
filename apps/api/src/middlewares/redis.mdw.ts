@@ -29,10 +29,18 @@ class redisHandler {
             
         } else {
             this.client = createClient({
-                url: `rediss://${REDIS_CONFIG.user}:${REDIS_CONFIG.password}@${REDIS_CONFIG.host}:${REDIS_CONFIG.port}/${REDIS_CONFIG.db}`,
+                socket: {
+                    host: REDIS_CONFIG.host,
+                    port: REDIS_CONFIG.port,
+                },
+                database: REDIS_CONFIG.db,
+                ...(REDIS_CONFIG.user ? { username: REDIS_CONFIG.user } : {}),
+                ...(REDIS_CONFIG.password
+                    ? { password: REDIS_CONFIG.password }
+                    : {}),
             });
 
-         //   await this.client.connect();
+            await this.client.connect();
         }
 
         if (process.env.APP_ENV === ENVType.DEVELOPMENT) {
@@ -64,6 +72,10 @@ class redisHandler {
         console.log(colors.yellow.inverse('Connected to REDIS'));
     }
 
+    private isReady(): boolean {
+        return Boolean(this.client?.isOpen);
+    }
+
     public async disconnect(): Promise<void> {
         if (this.client) {
             await this.client.quit();
@@ -72,22 +84,50 @@ class redisHandler {
     }
 
     public async keepData(data: IData, exp: number) {
-        const value = JSON.stringify(data.value);
-        return await this.client!.set(data.key, value, { EX: exp });
+        if (!this.isReady()) {
+            return null;
+        }
+        try {
+            const value = JSON.stringify(data.value);
+            return await this.client!.set(data.key, value, { EX: exp });
+        } catch {
+            return null;
+        }
     }
 
     public async fetchData<T = any>(key: string): Promise<T | null> {
-        const data = await this.client!.get(key);
-        return data ? JSON.parse(data) : null;
+        if (!this.isReady()) {
+            return null;
+        }
+        try {
+            const data = await this.client!.get(key);
+            return data ? JSON.parse(data) : null;
+        } catch {
+            return null;
+        }
     }
 
     public async deleteData(key: string) {
-        await this.client!.del(key);
+        if (!this.isReady()) {
+            return null;
+        }
+        try {
+            await this.client!.del(key);
+        } catch {
+            return null;
+        }
     }
 
     public async exists(key: string): Promise<boolean> {
-        const exists = await this.client!.exists(key);
-        return exists === 1;
+        if (!this.isReady()) {
+            return false;
+        }
+        try {
+            const exists = await this.client!.exists(key);
+            return exists === 1;
+        } catch {
+            return false;
+        }
     }
 
     public async paginate(data: any[], page = 1, limit = 10) {

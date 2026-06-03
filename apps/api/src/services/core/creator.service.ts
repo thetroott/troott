@@ -15,6 +15,8 @@ import roleService from '@/services/role.service';
 import PermissionService from '@/services/permission.service';
 import studioService from '@/services/core/studio.service';
 import userRepository from '@/repository/user.repository';
+import creatorMapper from '@/mappers/creator.mapper';
+import { normalizeStorageReferenceToS3Key } from '@/utils/helpers.util';
 
 const defaultDob = (): Date => new Date('1990-01-01T00:00:00.000Z');
 
@@ -245,6 +247,16 @@ class CreatorService {
         if (updatePayload.email !== undefined) {
             updatePayload.email = updatePayload.email.toLowerCase().trim();
         }
+        if (typeof updatePayload.avatar === 'string') {
+            updatePayload.avatar = normalizeStorageReferenceToS3Key(
+                updatePayload.avatar,
+            );
+        }
+        if (typeof updatePayload.banner === 'string') {
+            updatePayload.banner = normalizeStorageReferenceToS3Key(
+                updatePayload.banner,
+            );
+        }
 
         const updateResult = await creatorRepository.updateCreator(creatorId, {
             $set: { ...updatePayload },
@@ -257,7 +269,9 @@ class CreatorService {
         }
 
         result.message = 'Creator profile updated successfully';
-        result.data = updateResult.data;
+        result.data = await creatorMapper.mapCreatorOwnerResponse(
+            updateResult.data as ICreatorDoc,
+        );
         return result;
     }
 
@@ -283,7 +297,9 @@ class CreatorService {
             return result;
         }
 
-        result.data = creatorResult.data;
+        result.data = await creatorMapper.mapCreatorOwnerResponse(
+            creatorResult.data as ICreatorDoc,
+        );
         result.message = 'Creator profile retrieved successfully';
         return result;
     }
@@ -332,9 +348,55 @@ class CreatorService {
             };
         }
 
+        let verificationDocument: unknown = documents;
+        if (Array.isArray(documents)) {
+            verificationDocument = documents.map((doc) => {
+                if (!doc || typeof doc !== 'object') {
+                    return doc;
+                }
+                const d = doc as { frontPage?: string; backPage?: string };
+                return {
+                    ...d,
+                    ...(d.frontPage
+                        ? {
+                              frontPage: normalizeStorageReferenceToS3Key(
+                                  d.frontPage,
+                              ),
+                          }
+                        : {}),
+                    ...(d.backPage
+                        ? {
+                              backPage: normalizeStorageReferenceToS3Key(
+                                  d.backPage,
+                              ),
+                          }
+                        : {}),
+                };
+            });
+        } else if (documents && typeof documents === 'object') {
+            const d = documents as { frontPage?: string; backPage?: string };
+            verificationDocument = {
+                ...d,
+                ...(d.frontPage
+                    ? {
+                          frontPage: normalizeStorageReferenceToS3Key(
+                              d.frontPage,
+                          ),
+                      }
+                    : {}),
+                ...(d.backPage
+                    ? {
+                          backPage: normalizeStorageReferenceToS3Key(
+                              d.backPage,
+                          ),
+                      }
+                    : {}),
+            };
+        }
+
         const updateResult = await creatorRepository.updateCreator(id, {
             $set: {
-                'verification.document': documents,
+                'verification.document': verificationDocument,
                 'verification.status': VerificationStatus.PENDING,
             },
         } as any);

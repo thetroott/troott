@@ -4,6 +4,7 @@ import type {
 } from '@/dtos/core/minister.dto';
 import type IMinisterDoc from '@/interfaces/core/minister.interface';
 import { UserType } from '@/interfaces/user.interface';
+import { toStoragePublicUrl } from '@/utils/helpers.util';
 
 const idOf = (doc: unknown): string => {
     if (doc == null) {
@@ -28,16 +29,16 @@ class MinisterMapper {
 
         let avatarOut: string | undefined;
         if (typeof m.avatar === 'string') {
-            avatarOut = m.avatar;
+            avatarOut = toStoragePublicUrl(m.avatar);
         } else {
-            avatarOut = m.avatar?.s3Key;
+            avatarOut = toStoragePublicUrl(m.avatar?.s3Key);
         }
 
         let bannerOut: string | undefined;
         if (typeof m.banner === 'string') {
-            bannerOut = m.banner;
+            bannerOut = toStoragePublicUrl(m.banner);
         } else {
-            bannerOut = m.banner?.s3Key;
+            bannerOut = toStoragePublicUrl(m.banner?.s3Key);
         }
 
         let profileOut: MinisterResponseDTO['profile'];
@@ -46,7 +47,7 @@ class MinisterMapper {
                 description: m.profile.description,
                 ministerialName: m.profile.ministerialName,
                 ministryName: m.profile.ministryName,
-                ministryLogo: m.profile.ministryLogo,
+                ministryLogo: toStoragePublicUrl(m.profile.ministryLogo),
                 ministryType: m.profile.ministryType,
                 ministryHQLocation: m.profile.ministryHQLocation,
                 phoneNumber: m.profile.phoneNumber,
@@ -109,18 +110,18 @@ class MinisterMapper {
 
         let profileAvatar: string | null;
         if (typeof m.avatar === 'string') {
-            profileAvatar = m.avatar;
+            profileAvatar = toStoragePublicUrl(m.avatar);
         } else if (m.avatar?.s3Key != null) {
-            profileAvatar = m.avatar.s3Key;
+            profileAvatar = toStoragePublicUrl(m.avatar.s3Key);
         } else {
             profileAvatar = null;
         }
 
         let profileCover: string | null;
         if (typeof m.banner === 'string') {
-            profileCover = m.banner;
+            profileCover = toStoragePublicUrl(m.banner);
         } else if (m.banner?.s3Key != null) {
-            profileCover = m.banner.s3Key;
+            profileCover = toStoragePublicUrl(m.banner.s3Key);
         } else {
             profileCover = null;
         }
@@ -138,7 +139,7 @@ class MinisterMapper {
             coverImage: profileCover,
             ministerialName: prof.ministerialName,
             ministryName: prof.ministryName,
-            ministryLogo: prof.ministryLogo,
+            ministryLogo: toStoragePublicUrl(prof.ministryLogo),
             ministryType: prof.ministryType,
             ministryHQLocation: prof.ministryHQLocation,
             ministryWebsite: prof.websiteUrl,
@@ -150,6 +151,64 @@ class MinisterMapper {
             createdAt: m.createdAt ?? '',
             updatedAt: m.updatedAt ?? '',
         };
+    }
+
+    public async mapMinisterOwnerResponse(
+        minister: IMinisterDoc,
+    ): Promise<Record<string, unknown>> {
+        const m = minister as any;
+        const doc =
+            typeof m.toObject === 'function'
+                ? m.toObject({ virtuals: true })
+                : { ...m };
+
+        if (typeof doc.avatar === 'string') {
+            doc.avatar = toStoragePublicUrl(doc.avatar);
+        } else if (doc.avatar?.s3Key) {
+            doc.avatar = toStoragePublicUrl(doc.avatar.s3Key);
+        }
+
+        if (typeof doc.banner === 'string') {
+            doc.banner = toStoragePublicUrl(doc.banner);
+        } else if (doc.banner?.s3Key) {
+            doc.banner = toStoragePublicUrl(doc.banner.s3Key);
+        }
+
+        if (doc.profile && typeof doc.profile === 'object') {
+            doc.profile = { ...doc.profile };
+            if (doc.profile.ministryLogo) {
+                doc.profile.ministryLogo = toStoragePublicUrl(
+                    doc.profile.ministryLogo,
+                );
+            }
+        }
+
+        if (doc.verification?.document) {
+            doc.verification = { ...doc.verification };
+            doc.verification.document = { ...doc.verification.document };
+            if (doc.verification.document.frontPage) {
+                doc.verification.document.frontPage = toStoragePublicUrl(
+                    doc.verification.document.frontPage,
+                );
+            }
+            if (doc.verification.document.backPage) {
+                doc.verification.document.backPage = toStoragePublicUrl(
+                    doc.verification.document.backPage,
+                );
+            }
+        }
+
+        if (Array.isArray(doc.sermons)) {
+            doc.sermons = doc.sermons.map((sermon: any) => {
+                const s = { ...sermon };
+                if (typeof s.imageUrl === 'string') {
+                    s.imageUrl = toStoragePublicUrl(s.imageUrl);
+                }
+                return s;
+            });
+        }
+
+        return doc;
     }
 }
 

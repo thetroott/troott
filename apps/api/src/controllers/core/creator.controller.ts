@@ -34,6 +34,7 @@ import { VerificationStatus } from '@/interfaces/core/minister.interface';
 async function invalidateCreatorSessionCache(userId: string): Promise<void> {
     try {
         await redisWrapper.deleteData(`creator:profile:${userId}`);
+        await redisWrapper.deleteData(`creator:profile:v2:${userId}`);
         await redisWrapper.deleteData(`user:profile:${userId}`);
     } catch (e) {
         console.error('Cache invalidation failed:', e);
@@ -391,10 +392,21 @@ export const getCreators: RequestHandler = asyncHandler(
 
 export const getCreatorProfile: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const userId = (req as any).user?.id;
+        const user = (req as any).user as IUserDoc | undefined;
+        const userId = user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        const cacheKey = `creator:profile:${userId}`;
+        if (user.userType !== UserType.CREATOR) {
+            return next(
+                new ErrorResponse(
+                    'Creator profile is only available for creator accounts',
+                    403,
+                    [],
+                ),
+            );
+        }
+
+        const cacheKey = `creator:profile:v2:${userId}`;
         const cacheTTL = 300;
 
         const cached = await redisWrapper.fetchData<any>(cacheKey);
@@ -450,6 +462,7 @@ export const updateCreator: RequestHandler = asyncHandler(
 
         try {
             await redisWrapper.deleteData(`creator:profile:${userId}`);
+            await redisWrapper.deleteData(`creator:profile:v2:${userId}`);
             const doc = result.data as { _id?: { toString: () => string } };
             if (doc?._id) {
                 await redisWrapper.deleteData(`creator:${String(doc._id)}`);
