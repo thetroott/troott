@@ -31,6 +31,8 @@ Per-environment overrides are supported when variables are set on each Environme
 | `TURBO_TOKEN` | CI/CD build cache *(optional)* |
 | `EXPO_TOKEN` | `mobile-eas.yml` |
 
+Build job injects `VITE_APP_API_URL` and `NEXT_PUBLIC_APP_API_URL` from the `API_URL` variable when running `pnpm build:ci`.
+
 ## Workflows
 
 | File | Trigger | Purpose |

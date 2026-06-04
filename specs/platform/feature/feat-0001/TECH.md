@@ -246,7 +246,7 @@ Worker processes start inside the same container today (`startWorkers()` in `ser
 - Production URL: **`https://app.troott.com`**
 - Build output: `apps/web/dist` (Vite)
 - Serve via static file server or Coolify nginx template
-- Env: `VITE_*` injected at **build time** in CI/CD build job (document vars in Coolify build args; API base → `https://api.troott.com`)
+- Env: `VITE_APP_API_URL` injected at **build time** in CI/CD (`deploy.yml` uses `vars.API_URL`); studio dev server runs on port **5053**
 
 ---
 
@@ -258,7 +258,8 @@ Worker processes start inside the same container today (`startWorkers()` in `ser
 - Start: `next start` (Node server) — Coolify runs as Node app, not static export
 - Public URL: `https://troott.com` ([`siteConfig.url`](../../../../apps/website/app/siteConfig.tsx))
 - Lint: `next lint` via `pnpm --filter @troott/website lint` (included in root `pnpm lint` turbo graph)
-- Env: `NEXT_PUBLIC_*` at build time; server routes under `app/api/` (e.g. subscribe) need runtime env in Coolify
+- Env: `NEXT_PUBLIC_APP_API_URL` at build time; dev on port **3051**, Docker/`next start` on **3000**
+- Server routes under `app/api/` (e.g. subscribe) need runtime env (`MAILERLITE_*`) in Coolify
 - Pacepard analogue: `@pacepard/demo` (`pnpm build:demo`)
 
 **Do not** deploy `@troott/website` to the same Coolify app as `@troott/web` — different build output, domains, and env.
