@@ -50,3 +50,7 @@ Product and technical specifications for **`apps/web`**.
 ## Mobile listener app
 
 See [`specs/mobile/README.md`](../mobile/README.md).
+
+## Marketing website (`apps/website`)
+
+See [`specs/website/README.md`](../website/README.md) — `troott.com`; [feat-0001 dark mode only](../website/feature/feat-0001/PRODUCT.md).
