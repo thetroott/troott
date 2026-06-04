@@ -56,17 +56,19 @@ yarn install
 
 Create a `.env` file in the root directory and populate it with the required environment variables.
 
-Example `.env` file:
+Example `.env` file (see [`example.env`](example.env) in this directory):
 
 ```
-PORT=5000
+PORT=5025
 NODE_ENV=development
 MONGODB_URI=your_mongo_or_sql_url
 JWT_SECRET=your_jwt_secret
-TROOTT_API_URL_LOCAL=http://localhost:5000/api
+CLIENT_LOCAL_URL=http://localhost:5053
+CLIENT_LOCAL_API_URL=http://localhost:5025
+CORS_ALLOWED_ORIGINS=http://localhost:5053,http://localhost:3051
 ```
 
-> Check `.env.example` if available.
+> Copy `example.env` to `.env` and adjust values. The API listens on **`PORT`** (default **5025** in this monorepo).
 
 ### 4. **Start the server**
 
@@ -76,7 +78,7 @@ Run the development server:
 npm run dev
 ```
 
-> You should see a message like: `Server running on http://localhost:5000`
+> You should see a message like: `troott server running in development mode` (listening on `PORT`, e.g. **5025**).
 
 ---
 

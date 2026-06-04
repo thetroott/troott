@@ -15,6 +15,7 @@ By using Troott, African talents, organisations, and EdTech providers can collab
 
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
+- [Environment setup](#environment-setup)
 - [Project Structure](#project-structure)
 - [Development](#development)
 - [Adding Dependencies](#adding-dependencies)
@@ -27,16 +28,16 @@ By using Troott, African talents, organisations, and EdTech providers can collab
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** >= 20.x ([Download](https://nodejs.org/))
-- **pnpm** >= 9.0.0 ([Installation Guide](https://pnpm.io/installation))
+- **Node.js** >= 22.x ([Download](https://nodejs.org/))
+- **pnpm** >= 10.33.0 ([Installation Guide](https://pnpm.io/installation))
 - **Git** ([Download](https://git-scm.com/))
 - **Docker** (optional, for containerized deployments) ([Download](https://www.docker.com/products/docker-desktop))
 
 To verify your installations:
 
 ```bash
-node --version  # Should be >= 20
-pnpm --version  # Should be >= 9.0.0
+node --version  # Should be >= 22
+pnpm --version  # Should be >= 10.33.0
 git --version
 docker --version  # Optional, for Docker deployments
 ```
@@ -60,6 +61,38 @@ pnpm install
 
 This will install dependencies for all apps and packages in the workspace.
 
+### Environment setup
+
+Each app reads its own `.env` file (gitignored). Copy the samples before first run:
+
+```bash
+cp apps/api/example.env apps/api/.env
+cp apps/web/.env.sample apps/web/.env
+cp apps/website/.env.sample apps/website/.env
+cp apps/mobile/.env.sample apps/mobile/.env
+```
+
+Edit `apps/api/.env` for MongoDB, JWT, AWS, Redis, and mail. Point all clients at the same API origin.
+
+#### Local ports and URLs
+
+| App | Package | Dev command | URL |
+| --- | ------- | ----------- | --- |
+| API | `@troott/api` | `pnpm dev:api` | http://localhost:**5025** (`PORT` in `apps/api/.env`) |
+| Studio web | `@troott/web` | `pnpm dev:web` | http://localhost:**5053** |
+| Marketing site | `@troott/website` | `pnpm dev:website` | http://localhost:**3051** |
+| Mobile | `@troott/mobile` | `pnpm dev:mobile` | Expo dev server (see terminal) |
+
+#### Client → API env vars
+
+| App | Variable | Example (local) |
+| --- | -------- | ----------------- |
+| Web | `VITE_APP_API_URL` | `http://localhost:5025` |
+| Website | `NEXT_PUBLIC_APP_API_URL` | `http://localhost:5025` |
+| Mobile | `EXPO_PUBLIC_API_URL` | `http://localhost:5025` |
+
+The web client appends `/api/v1` in code. CORS on the API must allow the web and website origins — see `CORS_ALLOWED_ORIGINS` and `CLIENT_LOCAL_*` in [`apps/api/example.env`](apps/api/example.env).
+
 ## Project Structure
 
 This is a **monorepo** managed by [Turborepo](https://turbo.build/) and [pnpm workspaces](https://pnpm.io/workspaces). The project is organized as follows:
@@ -67,9 +100,9 @@ This is a **monorepo** managed by [Turborepo](https://turbo.build/) and [pnpm wo
 ```
 troott/
 ├── apps/              # Applications
-│   ├── website/      # Next.js site (@troott/website)
-│   ├── web/          # Vite/React SPA (@troott/web)
-│   ├── api/          # API server (@troott/api)
+│   ├── website/      # Next.js site (@troott/website) — Dockerfile, dev port 3051
+│   ├── web/          # Vite/React SPA (@troott/web) — Dockerfile, dev port 5053
+│   ├── api/          # API server (@troott/api) — Dockerfile, default PORT 5025
 │   └── mobile/       # Expo app (@troott/mobile)
 ├── packages/          # Shared packages
 │   ├── ui/           # Web UI primitives (@troott/ui)
@@ -142,14 +175,11 @@ pnpm dev:api      # API (`apps/api`)
 pnpm dev:mobile   # Expo (`apps/mobile`)
 ```
 
-### Development URLs
+Production preview for the studio web (after `pnpm build:web`):
 
-Ports depend on each app’s config. Typical local defaults:
-
-- **Vite web** (`apps/web`): see Vite dev server output (often port **5176**).
-- **Website** (`apps/website`): often **3020** when using `next dev` defaults.
-- **API** (`apps/api`): see `PORT` / server logs (often **5015** in this repo).
-- **Mobile** (`apps/mobile`): Expo dev server (see terminal after `pnpm dev:mobile`).
+```bash
+pnpm --filter @troott/web start   # vite preview on port 5053 by default
+```
 
 ---
 
@@ -235,8 +265,8 @@ Follow these steps for a complete local build of the monorepo:
 Ensure you have the required tools installed:
 
 ```bash
-node --version   # Should be >= 20
-pnpm --version   # Should be >= 9.0.0
+node --version   # Should be >= 22
+pnpm --version   # Should be >= 10.33.0
 ```
 
 #### Step 2: Install Dependencies
@@ -337,39 +367,28 @@ Each package and application has specific build configurations. Here's what happ
 ##### @troott/website (Next.js Application)
 
 - **Package**: `apps/website/package.json`
-- **Build Script**: `next build`
-- **Output**: `.next/` directory (Next.js production build)
-- **Dependencies**: (see app `package.json`)
-- **Build Details**:
-    - Compiles Next.js application
-    - Generates optimized production bundle
-    - Outputs static pages where applicable
-    - Creates server-side rendering artifacts
+- **Build Script**: `next build` (standalone output for Docker)
+- **Output**: `.next/` directory
+- **Dev**: port **3051**; Docker/`next start` uses **3000**
+- **Docker**: `apps/website/Dockerfile` — standalone Node server, exposes **3000**
+- **Build-time env**: `NEXT_PUBLIC_APP_API_URL`, `NEXT_PUBLIC_APP_ENVIRONMENT`
 
 ##### @troott/api (API Server)
 
 - **Package**: `apps/api/package.json`
-- **Build Script**: `tsc --noEmit false && tsc-alias && copyfiles -u 1 src/_data/**/* dist/ && copyfiles -u 1 src/views/**/* dist/`
+- **Build Script**: `tsc` compile + copy `_data/` and `views/` into `dist/`
 - **Output**: `dist/` directory (compiled JavaScript)
-- **Dependencies**: see `apps/api/package.json` (often `@troott/configs-typescript` as a dev tool)
-- **Build Details**:
-    1. Compiles TypeScript to JavaScript (`tsc`)
-    2. Resolves TypeScript path aliases (`tsc-alias`)
-    3. Copies static files from `src/_data/` to `dist/`
-    4. Copies template files from `src/views/` to `dist/`
-    - Environment variable `PORT` affects build (configured in `turbo.json`)
+- **Runtime**: `node dist/server.js` (default **`PORT=5025`** locally)
+- **Docker**: `apps/api/Dockerfile` — Node 22 + ffmpeg, exposes **5025**
 
 ##### @troott/web (Vite/React SPA)
 
 - **Package**: `apps/web/package.json`
-- **Build Script**: `tsc -b && vite build`
+- **Build Script**: `vite build`
 - **Output**: `dist/` directory (optimized production build)
-- **Dependencies**: (see `apps/web/package.json`)
-- **Build Details**:
-    1. Type-checks and compiles TypeScript (`tsc -b`)
-    2. Builds production bundle with Vite
-    3. Generates optimized static assets
-    - Uses Vite for fast builds and code splitting
+- **Dev**: port **5053**; preview/`start` defaults to **5053** via `PORT`
+- **Docker**: `apps/web/Dockerfile` — nginx static, exposes **8080**
+- **Build-time env**: `VITE_APP_API_URL`, `VITE_APP_ENVIRONMENT`, observability keys
 
 #### Shared packages
 
@@ -452,12 +471,12 @@ turbo run build --force
 
 #### Issue: Environment variables not found
 
-**Solution**: Ensure `.env` files are present:
+**Solution**: Copy sample env files (see [Environment setup](#environment-setup)):
 
 ```bash
-# Check for .env files in application directories
-ls apps/api/.env*
-ls apps/web/.env*
+cp apps/api/example.env apps/api/.env
+cp apps/web/.env.sample apps/web/.env
+cp apps/website/.env.sample apps/website/.env
 ```
 
 #### Issue: API build fails with "tsc-alias: command not found"
@@ -499,7 +518,33 @@ pnpm add -D tsc-alias copyfiles -w
 
 ## Deployment
 
-This monorepo does not ship a single container layout under `apps/*`. Deploy each application with the workflow that matches it (hosting provider, EAS for Expo, your API runtime, etc.). Optional notes may exist under [`docs/`](docs/).
+Deploy each app independently. CI/CD is defined in [`.github/workflows/`](.github/workflows/) (see [`.github/README.md`](.github/README.md) for secrets and variables).
+
+| App | Domain (prod) | Container port | Dockerfile |
+| --- | ------------- | -------------- | ---------- |
+| API | api.troott.com | 5025 | `apps/api/Dockerfile` |
+| Studio web | app.troott.com | 8080 | `apps/web/Dockerfile` |
+| Marketing | troott.com | 3000 | `apps/website/Dockerfile` |
+| Mobile | App stores | — | EAS (`mobile-eas.yml`) |
+
+### Docker (from repo root)
+
+```bash
+# API — set PORT=5025 in Coolify runtime env
+docker build -f apps/api/Dockerfile -t troott-api .
+
+# Studio web — bake API URL at build time
+docker build -f apps/web/Dockerfile -t troott-web \
+  --build-arg VITE_APP_API_URL=https://api.troott.com \
+  --build-arg VITE_APP_ENVIRONMENT=prod .
+
+# Marketing site
+docker build -f apps/website/Dockerfile -t troott-website \
+  --build-arg NEXT_PUBLIC_APP_API_URL=https://api.troott.com \
+  --build-arg NEXT_PUBLIC_APP_ENVIRONMENT=production .
+```
+
+Coolify triggers deploys via GitHub Actions (`deploy.yml`). Runtime secrets (MongoDB, JWT, AWS, MailerLite) belong in Coolify — not in the repo.
 
 ---
 
@@ -518,7 +563,9 @@ This monorepo does not ship a single container layout under `apps/*`. Deploy eac
 | `pnpm build`                                                      | All workspace `build` tasks          |
 | `pnpm build:fe`                                                   | Website + Vite app builds            |
 | `pnpm build:website` / `build:web` / `build:api` / `build:mobile` | Single app                           |
-| `pnpm lint`                                                       | Lint                                 |
+| `pnpm build:ci` | CI/deploy build (api + web + website) |
+| `pnpm lint` | Lint api + web + website |
+| `pnpm typecheck:workspace` / `typecheck:api` | Typecheck |
 | `pnpm test`                                                       | Tests                                |
 | `pnpm expo:mobile` / `expo:mobile:start`                          | Expo CLI via workspace               |
 | `pnpm android` / `ios` / `start:mobile`                           | Mobile shortcuts                     |

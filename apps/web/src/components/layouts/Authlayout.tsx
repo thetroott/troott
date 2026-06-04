@@ -34,7 +34,7 @@ export function AuthLayout(data: IAuthLayout) {
                             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
                                 <TroottLogo className="size-4" />
                             </div>
-                            troott
+                            Troott
                         </a>
                     </div>
                 )}
@@ -61,7 +61,7 @@ export function AuthLayout(data: IAuthLayout) {
 
                 {showCopyright && (
                     <div className="flex justify-start">
-                        <Copyright year={2025} company="troott" />
+                        <Copyright year={new Date().getFullYear()} company="Troott" />
                     </div>
                 )}
             </div>
