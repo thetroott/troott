@@ -42,6 +42,7 @@ COPY --from=build /app/apps/api/package.json ./package.json
 COPY --from=deps /app/node_modules /app/node_modules
 COPY --from=deps /app/apps/api/node_modules ./node_modules
 
-EXPOSE 5000
+ENV PORT=5025
+EXPOSE 5025
 
 CMD ["node", "dist/server.js"]
