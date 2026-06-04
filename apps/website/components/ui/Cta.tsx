@@ -33,19 +33,19 @@ export default function Cta() {
                         <div>
                             <h3
                                 id="cta-title"
-                                className="inline-block bg-gradient-to-t from-gray-900 to-gray-800 bg-clip-text p-2 text-4xl font-bold tracking-tighter text-transparent md:text-6xl dark:from-gray-50 dark:to-gray-300"
+                                className="inline-block bg-gradient-to-t from-gray-50 to-gray-300 bg-clip-text p-2 text-4xl font-bold tracking-tighter text-transparent md:text-6xl"
                             >
                                 Ready to get started?
                             </h3>
-                            <p className="mx-auto mt-4 max-w-2xl text-gray-600 sm:text-lg dark:text-gray-400">
+                            <p className="mx-auto mt-4 max-w-2xl text-gray-400 sm:text-lg">
                                 <Balancer>
                                     Launch a new cluster or migrate to Database
                                     with zero downtime.
                                 </Balancer>
                             </p>
                         </div>
-                        <div className="mt-14 w-full rounded-[16px] bg-gray-300/5 p-1.5 ring-1 ring-black/[3%] backdrop-blur dark:bg-gray-900/10 dark:ring-white/[3%]">
-                            <div className="rounded-xl bg-white p-4 shadow-lg shadow-indigo-500/10 ring-1 ring-black/5 dark:bg-gray-950 dark:shadow-indigo-500/10 dark:ring-white/5">
+                        <div className="mt-14 w-full rounded-[16px] bg-gray-900/10 p-1.5 ring-1 ring-white/[3%] backdrop-blur">
+                            <div className="rounded-xl bg-gray-950 p-4 shadow-lg shadow-indigo-500/10 ring-1 ring-white/5">
                                 <form
                                     className="flex flex-col items-center gap-3 sm:flex-row"
                                     onSubmit={(e) => e.preventDefault()}

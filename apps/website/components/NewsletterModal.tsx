@@ -209,7 +209,7 @@ export default function Newsletter(data: ISubscribeDialog) {
     return (
         <>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="container mx-auto sm:px-8 py-10 bg-white dark:bg-neutral-900 dark:text-white sm:max-w-[500px] items-start justify-start border border-neutral-900">
+                <DialogContent className="container mx-auto items-start justify-start border border-neutral-800 bg-neutral-900 py-10 text-white sm:max-w-[500px] sm:px-8">
                     <div className="mb-2 flex flex-col gap-2">
                         <div className="mb-2 flex items-center justify-center">
                             <Image
@@ -221,11 +221,11 @@ export default function Newsletter(data: ISubscribeDialog) {
                         </div>
 
                         <DialogHeader className="items-start justify-start">
-                            <DialogTitle className="text-5xl text-start dark:text-white">
+                            <DialogTitle className="text-start text-5xl text-white">
                                 Stay rooted in God’s word. Get early access!
                             </DialogTitle>
 
-                            <DialogDescription className="text-start text-lg pt-4 dark:text-neutral-400">
+                            <DialogDescription className="pt-4 text-start text-lg text-neutral-400">
                                 Troott is the new mobile space for life-giving
                                 sermons and spiritual nourishment, anytime,
                                 anywhere. Signup below to get your invite:

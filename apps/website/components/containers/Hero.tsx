@@ -16,14 +16,14 @@ export default function HeroSection() {
             <section className="mt-32 flex flex-col items-center justify-center text-center sm:mt-40">
                 <h1
                     id="hero-title"
-                    className="inline-block animate-slide-up-fade bg-gradient-to-br from-neutral-900 to-neutral-800 bg-clip-text p-2 text-4xl max-w-2xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-7xl dark:from-gray-50 dark:to-gray-300"
+                    className="inline-block animate-slide-up-fade bg-gradient-to-br from-gray-50 to-gray-300 bg-clip-text p-2 text-4xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-7xl"
                     style={{ animationDuration: '700ms' }}
                 >
                     All the sermons you love in one place.
                 </h1>
 
                 <p
-                    className="mt-6 max-w-lg animate-slide-up-fade text-lg text-gray-700 dark:text-gray-400"
+                    className="mt-6 max-w-lg animate-slide-up-fade text-lg text-gray-400"
                     style={{ animationDuration: '900ms' }}
                 >
                     Find, listen and share powerful teachings from your
@@ -43,10 +43,10 @@ export default function HeroSection() {
                         }}
                     >
                         <span className="flex items-center gap-x-2">
-                            <span className="flex size-6 items-center justify-center rounded-full bg-gray-50 transition-all group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
+                            <span className="flex size-6 items-center justify-center rounded-full bg-gray-800 transition-all group-hover:bg-gray-700">
                                 <RiPlayCircleFill
                                     aria-hidden="true"
-                                    className="size-4 shrink-0 text-gray-900 dark:text-gray-50"
+                                    className="size-4 shrink-0 text-gray-50"
                                 />
                             </span>
                             Start listening
@@ -55,17 +55,17 @@ export default function HeroSection() {
 
                     <Button
                         variant="secondary"
-                        className="h-14 px-8 md:h-12 md:px-6 group gap-x-2 bg-transparent font-semibold hover:bg-transparent dark:bg-transparent hover:dark:bg-transparent"
+                        className="group h-14 gap-x-2 bg-transparent px-8 font-semibold hover:bg-transparent md:h-12 md:px-6"
                         onClick={() => {
                             setRole('minister');
                             track('ministerSignup');
                             setDialogOpen(true);
                         }}
                     >
-                        <span className="flex size-6 items-center justify-center rounded-full bg-gray-50 transition-all group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
+                        <span className="flex size-6 items-center justify-center rounded-full bg-gray-800 transition-all group-hover:bg-gray-700">
                             <RiUploadCloudFill
                                 aria-hidden="true"
-                                className="size-4 shrink-0 text-gray-900 dark:text-gray-50"
+                                className="size-4 shrink-0 text-gray-50"
                             />
                         </span>
                         Upload your sermons
@@ -78,7 +78,7 @@ export default function HeroSection() {
                 >
                     <HeroImage />
                     <div
-                        className="absolute inset-x-0 -bottom-20 -mx-10 h-2/4 bg-gradient-to-t from-white via-white to-transparent lg:h-1/4 dark:from-neutral-950 dark:via-neutral-950"
+                        className="absolute inset-x-0 -bottom-20 -mx-10 h-2/4 bg-gradient-to-t from-neutral-950 via-neutral-950 to-transparent lg:h-1/4"
                         aria-hidden="true"
                     />
                 </div>

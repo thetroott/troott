@@ -11,11 +11,9 @@ const switchVariants = tv({
         root: [
             // base
             'group relative isolate inline-flex shrink-0 cursor-pointer items-center rounded-full p-0.5 shadow-inner outline-none ring-1 ring-inset transition-all',
-            'bg-gray-200 dark:bg-gray-950',
-            // ring color
-            'ring-black/5 dark:ring-gray-800',
-            // checked
-            'data-[state=checked]:bg-indigo-500 data-[state=checked]:dark:bg-indigo-500',
+            'bg-gray-950',
+            'ring-gray-800',
+            'data-[state=checked]:bg-indigo-500',
             // disabled
             'data-[disabled]:cursor-default',
             // disabled checked
@@ -36,10 +34,8 @@ const switchVariants = tv({
             // base
             'pointer-events-none relative inline-block transform appearance-none rounded-full border-none shadow-lg outline-none transition-all duration-150 ease-in-out focus:border-none focus:outline-none focus:outline-transparent',
             // background color
-            'bg-white dark:bg-gray-50',
-            // disabled
-            'group-data-[disabled]:shadow-none',
-            'group-data-[disabled]:bg-gray-50 group-data-[disabled]:dark:bg-gray-500',
+            'bg-gray-50',
+            'group-data-[disabled]:bg-gray-500',
         ],
     },
     variants: {

@@ -16,13 +16,13 @@ export default function CTASection() {
         >
             <h1
                 id="hero-title"
-                className="inline-block animate-slide-up-fade bg-gradient-to-br from-neutral-900 to-neutral-800 bg-clip-text p-2 text-4xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-7xl dark:from-gray-50 dark:to-gray-300"
+                className="inline-block animate-slide-up-fade bg-gradient-to-br from-gray-50 to-gray-300 bg-clip-text p-2 text-4xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-7xl"
                 style={{ animationDuration: '700ms' }}
             >
                 Hundreds of sermons <br /> are waiting for you.
             </h1>
             <p
-                className="mt-6 max-w-xl animate-slide-up-fade text-lg text-gray-700 dark:text-gray-400"
+                className="mt-6 max-w-xl animate-slide-up-fade text-lg text-gray-400"
                 style={{ animationDuration: '900ms' }}
             >
                 Join thousands who are ready to use sermons on troott to
@@ -41,10 +41,10 @@ export default function CTASection() {
                         setDialogOpen(true);
                     }}
                 >
-                    <span className="flex size-6 items-center justify-center rounded-full bg-gray-50 transition-all group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-gray-800 transition-all group-hover:bg-gray-700">
                         <RiPlayCircleFill
                             aria-hidden="true"
-                            className="size-4 shrink-0 text-gray-900 dark:text-gray-50"
+                            className="size-4 shrink-0 text-gray-50"
                         />
                     </span>
                     Start listening
@@ -52,17 +52,17 @@ export default function CTASection() {
 
                 <Button
                     variant="secondary"
-                    className="h-14 px-8 md:h-12 md:px-6 group gap-x-2 bg-transparent font-semibold hover:bg-transparent dark:bg-transparent hover:dark:bg-transparent"
+                    className="group h-14 gap-x-2 bg-transparent px-8 font-semibold hover:bg-transparent md:h-12 md:px-6"
                     onClick={() => {
                         setRole('minister');
                         track('ministerSignup');
                         setDialogOpen(true);
                     }}
                 >
-                    <span className="flex size-6 items-center justify-center rounded-full bg-gray-50 transition-all group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-gray-800 transition-all group-hover:bg-gray-700">
                         <RiUploadCloudFill
                             aria-hidden="true"
-                            className="size-4 shrink-0 text-gray-900 dark:text-gray-50"
+                            className="size-4 shrink-0 text-gray-50"
                         />
                     </span>
                     Upload your sermons

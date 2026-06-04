@@ -47,8 +47,8 @@ export function Navigation() {
                     'fixed inset-x-3 top-4 z-50 mx-auto flex max-w-6xl transform-gpu animate-slide-down-fade justify-center overflow-hidden rounded-xl border border-transparent px-3 py-3 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1.03)] will-change-transform',
                     'h-16', // fixed height
                     scrolled || open
-                        ? 'backdrop-blur-nav max-w-3xl border-gray-100 bg-white/80 shadow-xl shadow-black/5 dark:border-white/15 dark:bg-black/70'
-                        : 'bg-white/0 dark:bg-gray-950/0',
+                        ? 'backdrop-blur-nav max-w-3xl border-white/15 bg-black/70 shadow-xl shadow-black/5'
+                        : 'bg-transparent',
                 )}
             >
                 <div className="w-full md:my-auto">
@@ -123,8 +123,8 @@ export function Navigation() {
 
             {/* Mobile Fullscreen Menu */}
             {open && (
-                <div className="fixed inset-0 z-40 bg-white dark:bg-black flex flex-col justify-center px-6 text-xl font-semibold  md:hidden">
-                    <div className="space-y-1 divide-y divide-teal-100 dark:divide-teal-800 mt-36">
+                <div className="fixed inset-0 z-40 flex flex-col justify-center bg-black px-6 text-xl font-semibold md:hidden">
+                    <div className="mt-36 space-y-1 divide-y divide-teal-800">
                         <MobileLink
                             href={siteConfig.baseLinks.listeners}
                             onClick={() => setOpen(false)}
@@ -157,10 +157,10 @@ export function Navigation() {
                                     setDialogOpen(true);
                                 }}
                             >
-                                <span className="flex size-6 items-center justify-center rounded-full bg-gray-50 transition-all group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
+                                <span className="flex size-6 items-center justify-center rounded-full bg-gray-800 transition-all group-hover:bg-gray-700">
                                     <RiPlayCircleFill
                                         aria-hidden="true"
-                                        className="size-4 shrink-0 text-gray-900 dark:text-gray-50"
+                                        className="size-4 shrink-0 text-gray-50"
                                     />
                                 </span>
                                 Start listening
@@ -172,12 +172,12 @@ export function Navigation() {
                                     setDialogOpen(true);
                                 }}
                                 variant="secondary"
-                                className="h-14 px-8 md:h-12 md:px-6 group gap-x-2 bg-transparent font-semibold hover:bg-transparent dark:bg-transparent hover:dark:bg-transparent w-full sm:w-auto"
+                                className="h-14 px-8 md:h-12 md:px-6 group w-full gap-x-2 bg-transparent font-semibold hover:bg-transparent sm:w-auto"
                             >
-                                <span className="flex size-6 items-center justify-center rounded-full bg-gray-50 transition-all group-hover:bg-gray-200 dark:bg-gray-800 dark:group-hover:bg-gray-700">
+                                <span className="flex size-6 items-center justify-center rounded-full bg-gray-800 transition-all group-hover:bg-gray-700">
                                     <RiUploadCloudFill
                                         aria-hidden="true"
-                                        className="size-4 shrink-0 text-gray-900 dark:text-gray-50"
+                                        className="size-4 shrink-0 text-gray-50"
                                     />
                                 </span>
                                 Upload your sermons
@@ -186,23 +186,23 @@ export function Navigation() {
                     </div>
 
                     {/* Mobile Footer */}
-                    <div className="mt-auto flex items-center justify-between px-3 py-6 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="mt-auto flex items-center justify-between px-3 py-6 text-sm text-gray-400">
                         <span>© Troott</span>
 
                         <div className="flex gap-3">
                             <Link
                                 href="https://x.com/troott"
                                 target="_blank"
-                                className="size-9 flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                                className="flex size-9 items-center justify-center rounded-md border border-gray-700 transition hover:bg-gray-800"
                             >
-                                <RiTwitterXLine className="size-4 text-gray-700 dark:text-gray-200" />
+                                <RiTwitterXLine className="size-4 text-gray-200" />
                             </Link>
                             <Link
                                 href="https://instagram.com"
                                 target="_blank"
-                                className="size-9 flex items-center justify-center rounded-md border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                                className="flex size-9 items-center justify-center rounded-md border border-gray-700 transition hover:bg-gray-800"
                             >
-                                <RiLinkedinLine className="size-4 text-gray-700 dark:text-gray-200" />
+                                <RiLinkedinLine className="size-4 text-gray-200" />
                             </Link>
                         </div>
                     </div>

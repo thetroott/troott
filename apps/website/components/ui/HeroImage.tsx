@@ -7,8 +7,7 @@ export default function HeroImage() {
         <section aria-label="Hero Image of the website" className="flow-root">
             <div className="">
                 <ThemedImage
-                    lightSrc="/images/troott-hero-image.png"
-                    darkSrc="/images/troott-hero-image.png"
+                    src="/images/troott-hero-image.png"
                     alt="A preview of troott"
                     width={2400}
                     height={1600}

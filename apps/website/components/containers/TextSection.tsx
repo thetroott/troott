@@ -4,7 +4,7 @@ import ScrollBaseAnimation from '../ui/TextMarquee';
 function TextSection() {
     return (
         <>
-            <div className="h-[220px] md:h-[500px] sm:mt-16 grid place-content-center  text-gray-600 dark:text-white">
+            <div className="grid h-[220px] place-content-center text-white sm:mt-16 md:h-[500px]">
                 <ScrollBaseAnimation
                     delay={500}
                     baseVelocity={-3}

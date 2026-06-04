@@ -1,5 +1,4 @@
-import type { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import localFont from 'next/font/local';
@@ -27,7 +26,7 @@ const matter = localFont({
             style: 'normal',
         },
         {
-            path: '../public/fonts/matter/Matter-BoldItalic.ttf', // This is your BoldItalic file name from your list
+            path: '../public/fonts/matter/Matter-BoldItalic.ttf',
             weight: '700',
             style: 'italic',
         },
@@ -129,34 +128,32 @@ export const metadata: Metadata = {
     },
 };
 
+export const viewport: Viewport = {
+    themeColor: '#0a0a0a',
+};
+
 export default function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html
+            lang="en"
+            className="dark"
+            suppressHydrationWarning
+            style={{ colorScheme: 'dark' }}
+        >
             <head>
                 <MailerLiteScript />
             </head>
             <body
-                className={`${matter.className} min-h-screen p-4 scroll-auto antialiased selection:bg-cyan-400 selection:text-cyan-700 dark:bg-neutral-950`}
+                className={`${matter.className} min-h-screen scroll-auto bg-neutral-950 p-4 text-gray-50 antialiased selection:bg-cyan-400 selection:text-cyan-700`}
             >
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="system"
-                    disableTransitionOnChange
-                >
-                    {/* <ErrorBoundary> */}
-                    <Navigation />
-
-                    {children}
-                    <Toaster richColors position="top-center" />
-                    <Footer />
-
-                    {/* </ErrorBoundary> */}
-                </ThemeProvider>
-
+                <Navigation />
+                {children}
+                <Toaster richColors position="top-center" theme="dark" />
+                <Footer />
                 <Analytics />
             </body>
         </html>

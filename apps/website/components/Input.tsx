@@ -11,16 +11,11 @@ const inputStyles = tv({
         // base
         'relative block w-full appearance-none rounded-md border px-2.5 py-2 shadow-sm outline-none transition sm:text-sm',
         // border color
-        'border-gray-300 dark:border-gray-800',
-        // text color
-        'text-gray-900 dark:text-gray-50',
-        // placeholder color
-        'placeholder-gray-400 dark:placeholder-gray-500',
-        // background color
-        'bg-white dark:bg-gray-950',
-        // disabled
-        'disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-400',
-        'disabled:dark:border-gray-700 disabled:dark:bg-gray-800 disabled:dark:text-gray-500',
+        'border-gray-800',
+        'text-gray-50',
+        'placeholder-gray-500',
+        'bg-gray-950',
+        'disabled:border-gray-700 disabled:bg-gray-800 disabled:text-gray-500',
         // file
         [
             'file:-my-2 file:-ml-2.5 file:cursor-pointer file:rounded-l-[5px] file:rounded-r-none file:border-0 file:px-3 file:py-2 file:outline-none focus:outline-none disabled:pointer-events-none file:disabled:pointer-events-none',

@@ -20,11 +20,11 @@ export function InstaxImage({
     return (
         <figure
             className={cx(
-                'h-fit overflow-hidden rounded-lg bg-white shadow-xl shadow-black/10 ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-black/20 dark:bg-gray-900 dark:shadow-indigo-500/5 dark:ring-white/20 dark:hover:shadow-indigo-900/20',
+                'h-fit overflow-hidden rounded-lg bg-gray-900 shadow-xl shadow-indigo-500/5 ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:shadow-indigo-900/20',
                 className,
             )}
         >
-            <div className="bg-gray-50 p-2 dark:bg-gray-900">
+            <div className="bg-gray-900 p-2">
                 <div className="relative overflow-hidden rounded">
                     <div className="absolute inset-0 shadow-[inset_0px_0px_3px_0px_rgb(0,0,0,1)]"></div>
                     <Image src={src} alt={alt} width={width} height={height} />

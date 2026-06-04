@@ -11,11 +11,11 @@ export default function Mission() {
             <Badge>Grow your reach</Badge>
             <h2
                 id="our-mission-title"
-                className="mt-2 inline-block bg-gradient-to-br from-gray-900 to-gray-800 bg-clip-text py-2 text-4xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-6xl dark:from-gray-50 dark:to-gray-300"
+                className="mt-2 inline-block bg-gradient-to-br from-gray-50 to-gray-300 bg-clip-text py-2 text-4xl font-bold tracking-tighter text-transparent sm:text-6xl md:text-6xl"
             >
                 Disciple more people <br /> through your sermons.
             </h2>
-            <p className="mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400">
+            <p className="mt-6 max-w-2xl text-lg text-gray-400">
                 Troott helps you reach hungry hearts ready to listen, guide more
                 lives, with no distractions, clutter, or limits. We’re turning
                 audio sermons into a tool for true discipleship and help

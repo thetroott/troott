@@ -23,7 +23,7 @@ export default function NavBar() {
     return (
         <motion.nav
             className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 
-        ${scrolled ? 'bg-white/90 shadow-md py-2' : 'py-4'} 
+        ${scrolled ? 'bg-black/90 py-2 shadow-md' : 'py-4'} 
       `}
         >
             <div className="container flex items-center justify-between">
@@ -62,7 +62,7 @@ export default function NavBar() {
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="fixed inset-0 z-40 bg-white flex flex-col items-center justify-center gap-8 text-xl"
+                    className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 bg-black text-xl"
                 >
                     <Link href="/" onClick={() => setMenuOpen(false)}>
                         Hero

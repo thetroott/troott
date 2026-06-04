@@ -21,10 +21,9 @@ const Label = React.forwardRef<
             // base
             'text-sm leading-none',
             // text color
-            'text-gray-900 dark:text-gray-50',
-            // disabled
+            'text-gray-50',
             {
-                'text-gray-400 dark:text-gray-600': disabled,
+                'text-gray-600': disabled,
             },
             className,
         )}
