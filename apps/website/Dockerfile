@@ -17,6 +17,7 @@ RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY patches ./patches
+COPY configs ./configs
 COPY apps/website/package.json apps/website/
 
 RUN pnpm install --frozen-lockfile --filter @troott/website...
@@ -28,6 +29,7 @@ RUN corepack enable
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/website/node_modules ./apps/website/node_modules
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY configs ./configs
 COPY apps/website ./apps/website
 
 WORKDIR /app/apps/website
