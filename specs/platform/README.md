@@ -10,6 +10,7 @@ Cross-cutting specifications for the **Troott monorepo** (`apps/*`, shared tooli
 | feat-0002 | CI/CD remediation — green pipeline + production deploy | [PRODUCT](./feature/feat-0002/PRODUCT.md) | [TECH](./feature/feat-0002/TECH.md) |
 | feat-0003 | API route params + Turbo env — CI/CD follow-up | [PRODUCT](./feature/feat-0003/PRODUCT.md) | [TECH](./feature/feat-0003/TECH.md) |
 | feat-0004 | Docker pnpm patches + Jest JWT — GHCR deploy follow-up | [PRODUCT](./feature/feat-0004/PRODUCT.md) | [TECH](./feature/feat-0004/TECH.md) |
+| feat-0005 | Docker configs context + API types — build stage fix | [PRODUCT](./feature/feat-0005/PRODUCT.md) | [TECH](./feature/feat-0005/TECH.md) |
 
 ## Related app specs
 
