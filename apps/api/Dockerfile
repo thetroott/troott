@@ -48,4 +48,8 @@ COPY --from=deps /app/apps/api/node_modules ./node_modules
 ENV PORT=5025
 EXPOSE 5025
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:${APP_PORT:-5025}/api/v1/me || exit 1
+
+
 CMD ["node", "dist/server.js"]

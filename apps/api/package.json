@@ -11,7 +11,7 @@
         "clean:js": "find src -name '*.js' -type f -delete",
         "prebuild": "pnpm clean",
         "dev": "ts-node-dev -r tsconfig-paths/register --respawn --transpile-only src/server.ts",
-        "build": "tsc --noEmit false && node -e \"const fs=require('fs'); fs.cpSync('src/_data','dist/_data',{recursive:true}); fs.cpSync('src/views','dist/views',{recursive:true});\"",
+        "build": "tsc --noEmit false && tsc-alias -p tsconfig.json && node -e \"const fs=require('fs'); fs.cpSync('src/_data','dist/_data',{recursive:true}); fs.cpSync('src/views','dist/views',{recursive:true});\"",
         "start": "node dist/server.js",
         "staging": "NODE_ENV=staging node dist/server.js",
         "prod": "NODE_ENV=production node dist/server.js",
@@ -135,6 +135,7 @@
         "ts-jest": "^29.3.2",
         "ts-node": "^10.9.2",
         "ts-node-dev": "^2.0.0",
+        "tsc-alias": "^1.8.17",
         "tsconfig-paths": "^4.2.0",
         "typescript": "~5.9.2"
     }

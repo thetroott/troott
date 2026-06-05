@@ -50,11 +50,9 @@ ENV VITE_APP_API_URL=$VITE_APP_API_URL \
 
 RUN pnpm build
 
-FROM nginx:1.27-alpine AS runner
+FROM caddy:2-alpine AS runner
 
-COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/apps/web/dist /usr/share/nginx/html
+COPY apps/web/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/apps/web/dist /usr/share/caddy
 
 EXPOSE 8080
-
-CMD ["nginx", "-g", "daemon off;"]
