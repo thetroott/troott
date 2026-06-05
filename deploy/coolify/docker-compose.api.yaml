@@ -1,0 +1,23 @@
+# Coolify: Build Pack = Docker Compose. Point "Docker Compose Location" to this file.
+#
+# Resource env (Coolify UI):
+#   GHCR_ORG = GitHub owner/org in lowercase (must match ghcr.io namespace CI uses).
+#   IMAGE_TAG = floating tag CI pushes: development | staging | production
+#
+# CI image: ghcr.io/${GHCR_ORG}/troott-api:${IMAGE_TAG}
+#
+# "Error manifest unknown" on pull:
+#   - No image at that ref yet (GitHub Actions deploy build-and-push failed or did not run).
+#   - Wrong GHCR_ORG or IMAGE_TAG (typo or wrong environment).
+#   - GHCR package is private: add ghcr.io registry credentials in Coolify, or make the package public.
+#
+# Logs: bcrypt / secrets with $ in values — use $$ for each $ in Coolify env when compose substitutes.
+#
+# unauthorized on pull -> register ghcr.io in Coolify or make package public (see docs/coolify-monorepo-setup.md).
+services:
+  api:
+    image: ghcr.io/${GHCR_ORG?GHCR_ORG unset}/troott-api:${IMAGE_TAG?IMAGE_TAG unset}
+    pull_policy: always
+    restart: unless-stopped
+    expose:
+      - "5025"

@@ -1,0 +1,17 @@
+# Coolify: studio portal (@troott/web) — app.troott.com
+# Build Pack = Docker Compose. Docker Compose Location = this file.
+#
+# Resource env:
+#   GHCR_ORG = GitHub org/user (lowercase), e.g. thetroott
+#   IMAGE_TAG = development | staging | production
+#
+# CI image: ghcr.io/${GHCR_ORG}/troott-web:${IMAGE_TAG}
+#
+# unauthorized / manifest unknown -> see docs/coolify-monorepo-setup.md
+services:
+  web:
+    image: ghcr.io/${GHCR_ORG?GHCR_ORG unset}/troott-web:${IMAGE_TAG?IMAGE_TAG unset}
+    pull_policy: always
+    restart: unless-stopped
+    expose:
+      - "8080"
