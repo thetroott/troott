@@ -19,6 +19,7 @@ import useContextType from '@/hooks/shared/useContextType';
 import {
     isAdminPortalRole,
     isStudioContentRole,
+    normalizePortalUserType,
 } from '@/utils/roles.util';
 import { UserType } from '@/models/User.model';
 import { useMinister } from '@/context/minister/useMinister';
@@ -110,8 +111,35 @@ export function SessionState({ children }: { children: ReactNode }) {
 
                     const normalized = normalizeUserType(ut);
 
+                    const hydrateStudioPersonas = async () => {
+                        if (sessionUser.isMinister) {
+                            await ministerCtx.refresh({ force: true });
+                        }
+                        if (sessionUser.isCreator) {
+                            await creatorCtx.refresh({ force: true });
+                        }
+                        const portalUt = normalizePortalUserType(ut);
+                        const needsStudio =
+                            isStudioContentRole(portalUt) ||
+                            Boolean(sessionUser.studioCode) ||
+                            sessionUser.isMinister ||
+                            sessionUser.isCreator;
+                        if (needsStudio) {
+                            await studioCtx.refresh({ force: true });
+                        }
+                        if (sessionUser.studioCode) {
+                            storage.setStudioCode(sessionUser.studioCode);
+                        }
+                    };
+
                     if (isAdminPortalRole(normalized)) {
                         await adminCtx.refreshProfile({ force: true });
+                        if (
+                            sessionUser.isSuper ||
+                            normalizePortalUserType(ut) === UserType.SUPER
+                        ) {
+                            await hydrateStudioPersonas();
+                        }
                         return;
                     }
 
