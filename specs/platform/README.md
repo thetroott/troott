@@ -7,6 +7,7 @@ Cross-cutting specifications for the **Troott monorepo** (`apps/*`, shared tooli
 | ID | Topic | PRODUCT | TECH |
 | -- | ----- | ------- | ---- |
 | feat-0001 | CI/CD — GitHub Actions + Coolify + EAS | [PRODUCT](./feature/feat-0001/PRODUCT.md) | [TECH](./feature/feat-0001/TECH.md) |
+| feat-0002 | CI/CD remediation — green pipeline + production deploy | [PRODUCT](./feature/feat-0002/PRODUCT.md) | [TECH](./feature/feat-0002/TECH.md) |
 
 ## Related app specs
 
