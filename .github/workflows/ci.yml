@@ -1,4 +1,9 @@
 # feat-0001 — CI: lint, typecheck, test, build, expo-doctor
+#
+# GitHub Environments (staging, production): jobs targeting master or staging attach
+# `environment:` so env-scoped secrets/vars resolve (same pattern as deploy.yml).
+# development branch / PRs use repository-level secrets and variables only.
+#
 # Spec: specs/platform/feature/feat-0001/TECH.md
 
 name: CI
@@ -34,10 +39,38 @@ env:
     TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
+    determine-environment:
+        name: Determine environment
+        runs-on: ubuntu-latest
+        outputs:
+            env: ${{ steps.set-env.outputs.env }}
+            protected_environment: ${{ steps.set-env.outputs.protected_environment }}
+        steps:
+            - name: Set environment from branch
+              id: set-env
+              run: |
+                  if [ "${{ github.event_name }}" = "pull_request" ]; then
+                    BRANCH="${{ github.base_ref }}"
+                  else
+                    BRANCH="${{ github.ref_name }}"
+                  fi
+                  if [ "$BRANCH" = "master" ]; then
+                    echo "env=production" >> "$GITHUB_OUTPUT"
+                    echo "protected_environment=production" >> "$GITHUB_OUTPUT"
+                  elif [ "$BRANCH" = "staging" ]; then
+                    echo "env=staging" >> "$GITHUB_OUTPUT"
+                    echo "protected_environment=staging" >> "$GITHUB_OUTPUT"
+                  else
+                    echo "env=development" >> "$GITHUB_OUTPUT"
+                    echo "protected_environment=" >> "$GITHUB_OUTPUT"
+                  fi
+
     validate:
         name: Validate
         runs-on: ubuntu-latest
         timeout-minutes: 20
+        needs: [determine-environment]
+        environment: ${{ needs.determine-environment.outputs.protected_environment || null }}
 
         steps:
             - name: Checkout
@@ -65,7 +98,8 @@ jobs:
         name: Test
         runs-on: ubuntu-latest
         timeout-minutes: 15
-        needs: validate
+        needs: [determine-environment, validate]
+        environment: ${{ needs.determine-environment.outputs.protected_environment || null }}
 
         steps:
             - name: Checkout
@@ -81,7 +115,8 @@ jobs:
         name: Build
         runs-on: ubuntu-latest
         timeout-minutes: 25
-        needs: validate
+        needs: [determine-environment, validate]
+        environment: ${{ needs.determine-environment.outputs.protected_environment || null }}
 
         steps:
             - name: Checkout
@@ -108,7 +143,8 @@ jobs:
         name: Expo doctor
         runs-on: ubuntu-latest
         timeout-minutes: 15
-        needs: validate
+        needs: [determine-environment, validate]
+        environment: ${{ needs.determine-environment.outputs.protected_environment || null }}
 
         steps:
             - name: Checkout
@@ -125,6 +161,8 @@ jobs:
         name: Security
         runs-on: ubuntu-latest
         timeout-minutes: 10
+        needs: [determine-environment]
+        environment: ${{ needs.determine-environment.outputs.protected_environment || null }}
 
         steps:
             - name: Checkout
