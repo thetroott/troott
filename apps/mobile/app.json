@@ -27,7 +27,6 @@
       }
     },
     "android": {
-      "label": "Troott",
       "adaptiveIcon": {
         "backgroundColor": "#171717",
         "foregroundImage": "./assets/app-icon.png",

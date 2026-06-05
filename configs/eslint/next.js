@@ -44,9 +44,8 @@ export const nextJsConfig = [
         rules: {
             ...pluginReactHooks.configs.recommended.rules,
 
-            // indentation
+            // indentation (Prettier handles TS; @typescript-eslint/indent removed in v8)
             indent: ['error', 4],
-            '@typescript-eslint/indent': ['error', 4],
 
             // spacing
             'react/jsx-indent': ['error', 4],
