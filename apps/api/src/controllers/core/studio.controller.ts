@@ -63,7 +63,9 @@ export const createStudio: RequestHandler = asyncHandler(
 
 export const getStudio: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const id = req.params.id;
+        const id = Array.isArray(req.params.id)
+            ? req.params.id[0]
+            : req.params.id;
         if (!id) return next(new ErrorResponse('id is required', 400, []));
         const result = await studioService.getStudioById(id);
         if (result.error) {
@@ -146,7 +148,9 @@ export const patchStudio: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-        const studioId = req.params.id;
+        const studioId = Array.isArray(req.params.id)
+            ? req.params.id[0]
+            : req.params.id;
         if (!studioId) return next(new ErrorResponse('id is required', 400, []));
 
         const dto: UpdateStudioDTO = {
@@ -173,7 +177,9 @@ export const postStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-        const studioId = req.params.id;
+        const studioId = Array.isArray(req.params.id)
+            ? req.params.id[0]
+            : req.params.id;
         if (!studioId) {
             return next(new ErrorResponse('studio id is required', 400, []));
         }
