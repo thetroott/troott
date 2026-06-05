@@ -479,6 +479,7 @@ export const useAuth = (options?: UseAuthOptions) => {
             isActive: u.isActive,
             isAdmin: u.isAdmin,
             isSuper: u.isSuper,
+            isListener: u.isListener,
             isLocked: u.isLocked,
             roles: u.roles,
             status: u.status,

@@ -16,6 +16,10 @@ function profileAllowsListener(profile: unknown): boolean {
     if (!profile || typeof profile !== 'object') return false;
     const p = profile as Record<string, unknown>;
     if (p.kind === 'listener') return true;
+    if (p.isListener === true) return true;
+    if (typeof p.listenerCode === 'string' && p.listenerCode.trim()) {
+        return true;
+    }
     const ut = normalizeUserType(p.userType as string | undefined);
     return LISTENER_PORTAL_USER_TYPES.has(ut);
 }
@@ -39,17 +43,23 @@ export function useListenerPortalAccess() {
         const fromProfile = profileAllowsListener(profile);
         const fromStore =
             LISTENER_PORTAL_USER_TYPES.has(cachedType) && cachedType !== '';
+        const fromListenerFlag =
+            (profile as { isListener?: boolean } | undefined)?.isListener ===
+                true ||
+            (cachedUser as { isListener?: boolean } | null)?.isListener === true;
 
-        const isEligible = fromProfile || fromStore;
+        const isEligible =
+            fromProfile || fromStore || fromListenerFlag;
         const profileUt = normalizeUserType(
             (profile as { userType?: string } | undefined)?.userType,
         );
         const isInternalLike =
-            profileUt === 'minister' ||
-            cachedType === 'minister' ||
-            cachedType === 'admin' ||
-            cachedType === 'super-admin' ||
-            cachedType === 'creator';
+            !isEligible &&
+            (profileUt === 'minister' ||
+                cachedType === 'minister' ||
+                cachedType === 'admin' ||
+                cachedType === 'super-admin' ||
+                cachedType === 'creator');
 
         return {
             /** Listener / generic user roles intended for this app. */
