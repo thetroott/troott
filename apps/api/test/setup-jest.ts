@@ -6,3 +6,6 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 if (!process.env.JWT_SECRET) {
     process.env.JWT_SECRET = 'test-jwt-secret-for-jest-only';
 }
+if (!process.env.JWT_EXPIRY) {
+    process.env.JWT_EXPIRY = '30d';
+}
