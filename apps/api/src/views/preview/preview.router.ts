@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
+import { resolveRouteParam } from '@/utils/helpers.util';
 
 const previewRoutes: Router = Router({ mergeParams: true });
 
@@ -36,7 +37,7 @@ previewRoutes.get('/templates', (req: Request, res: Response) => {
 previewRoutes.get(
     '/reports/:template',
     (req: Request, res: Response, next: NextFunction) => {
-        const { template } = req.params;
+        const template = resolveRouteParam(req.params.template);
         if (!template) {
             return res.status(400).json({
                 error: true,
@@ -69,7 +70,7 @@ previewRoutes.get(
 previewRoutes.get(
     '/legal/:template',
     (req: Request, res: Response, next: NextFunction) => {
-        const { template } = req.params;
+        const template = resolveRouteParam(req.params.template);
         if (!template) {
             return res.status(400).json({
                 error: true,
@@ -92,7 +93,7 @@ previewRoutes.get(
             },
         };
 
-        const data = sampleData[template as string] || {
+        const data = sampleData[template] || {
             name: 'Damola',
             ...req.query,
         };
@@ -114,7 +115,8 @@ previewRoutes.get(
 previewRoutes.get(
     '/:category/:template',
     (req: Request, res: Response, next: NextFunction) => {
-        const { category, template } = req.params;
+        const category = resolveRouteParam(req.params.category);
+        const template = resolveRouteParam(req.params.template);
         if (!category || !template) {
             return res.status(400).json({
                 error: true,
@@ -185,7 +187,7 @@ previewRoutes.get(
             },
         };
 
-        const data = sampleData[template as string] || {
+        const data = sampleData[template] || {
             name: 'Damola',
             ...req.query,
         };

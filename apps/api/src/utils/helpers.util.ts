@@ -10,6 +10,15 @@ import { UserType } from '@/interfaces/user.interface';
 import { Random } from '@btffamily/pacitude';
 import { AWS_BUCKETS_STORAGE } from '@/configs/aws.config';
 
+/** Normalize Express route params (`string | string[]`) to a single string. */
+export function resolveRouteParam(
+    value: string | string[] | undefined,
+): string {
+    if (value == null) return '';
+    if (Array.isArray(value)) return value[0] ?? '';
+    return value;
+}
+
 /**
  * @name genUserCode
  * @description Generates a unique, standardized identification code for a user based on their type.

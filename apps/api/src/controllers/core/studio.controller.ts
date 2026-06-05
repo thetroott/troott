@@ -8,6 +8,7 @@ import studioMapper from '@/mappers/studio.mapper';
 import type { CreateStudioDTO, UpdateStudioDTO } from '@/dtos/core/studio.dto';
 import type IStudioDoc from '@/interfaces/core/studio.interface';
 import { UserType } from '@/interfaces/user.interface';
+import { resolveRouteParam } from '@/utils/helpers.util';
 
 function isPlatformAdmin(req: Request): boolean {
     const user = (req as any).user ?? {};
@@ -63,9 +64,7 @@ export const createStudio: RequestHandler = asyncHandler(
 
 export const getStudio: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-        const id = Array.isArray(req.params.id)
-            ? req.params.id[0]
-            : req.params.id;
+        const id = resolveRouteParam(req.params.id);
         if (!id) return next(new ErrorResponse('id is required', 400, []));
         const result = await studioService.getStudioById(id);
         if (result.error) {
@@ -148,9 +147,7 @@ export const patchStudio: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-        const studioId = Array.isArray(req.params.id)
-            ? req.params.id[0]
-            : req.params.id;
+        const studioId = resolveRouteParam(req.params.id);
         if (!studioId) return next(new ErrorResponse('id is required', 400, []));
 
         const dto: UpdateStudioDTO = {
@@ -177,9 +174,7 @@ export const postStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-        const studioId = Array.isArray(req.params.id)
-            ? req.params.id[0]
-            : req.params.id;
+        const studioId = resolveRouteParam(req.params.id);
         if (!studioId) {
             return next(new ErrorResponse('studio id is required', 400, []));
         }
@@ -209,7 +204,8 @@ export const deleteStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-        const { id: studioId, inviteId } = req.params;
+        const studioId = resolveRouteParam(req.params.id);
+        const inviteId = resolveRouteParam(req.params.inviteId);
         if (!studioId || !inviteId) {
             return next(
                 new ErrorResponse('studio id and invite id are required', 400, []),
@@ -239,7 +235,8 @@ export const acceptStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-        const { id: studioId, inviteId } = req.params;
+        const studioId = resolveRouteParam(req.params.id);
+        const inviteId = resolveRouteParam(req.params.inviteId);
         if (!studioId || !inviteId) {
             return next(
                 new ErrorResponse('studio id and invite id are required', 400, []),
@@ -265,7 +262,8 @@ export const rejectStudioInvite: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const userId = String((req.user as { id?: string } | undefined)?.id ?? '');
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
-        const { id: studioId, inviteId } = req.params;
+        const studioId = resolveRouteParam(req.params.id);
+        const inviteId = resolveRouteParam(req.params.inviteId);
         if (!studioId || !inviteId) {
             return next(
                 new ErrorResponse('studio id and invite id are required', 400, []),
