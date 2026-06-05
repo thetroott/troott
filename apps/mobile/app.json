@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "troott-app",
+    "name": "Troott",
     "slug": "troott",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,6 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.troott.app",
       "infoPlist": {
+        "CFBundleDisplayName": "Troott",
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
         "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to access your microphone",
@@ -26,6 +27,7 @@
       }
     },
     "android": {
+      "label": "Troott",
       "adaptiveIcon": {
         "backgroundColor": "#171717",
         "foregroundImage": "./assets/app-icon.png",

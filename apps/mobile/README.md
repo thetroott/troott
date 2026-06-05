@@ -44,6 +44,19 @@ We’re answering key questions to improve user experience:
 
 This app lives under `apps/mobile` in the Troott monorepo. From the repo root, do **not** run Expo at the repository root without a project directory.
 
+### App identity
+
+| Field | Value |
+| ----- | ----- |
+| Display name (home screen) | **Troott** — set in [`app.json`](app.json) `expo.name` |
+| iOS display name | `ios.infoPlist.CFBundleDisplayName` → **Troott** |
+| Android label | `android.label` → **Troott** (`app_name` in prebuild `strings.xml`) |
+| Expo slug | `troott` (EAS / project URL; do not change casually) |
+| Bundle ID | `com.troott.app` (iOS and Android) |
+| Deep link scheme | `troottmobile` |
+
+Changing the display name requires updating `app.json` and running **`pnpm prebuild:mobile:clean`** (or EAS build). OTA / JS-only updates do not rename an installed app.
+
 ### Native projects (Android / iOS)
 
 Generated native trees live **only** under this package: **`apps/mobile/android`** and **`apps/mobile/ios`**. Do **not** run bare `expo prebuild` with the monorepo root as the current working directory and no project path (that can recreate wrong root-level folders or resolve `./assets/...` from the wrong place).
