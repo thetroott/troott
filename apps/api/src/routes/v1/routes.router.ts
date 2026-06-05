@@ -21,6 +21,7 @@ import planRoutes from '@/routes/plan.router';
 import subscriptionRoutes from '@/routes/subscription.router';
 import { ENVType } from '@/types/common.enum';
 import { ENV } from '@/utils/env.util';
+import previewRoutes from '@/views/preview/preview.router';
 
 const router = express.Router();
 
@@ -44,6 +45,7 @@ router.use('/minister', ministerRoutes);
 router.use('/creator', creatorRoutes);
 router.use('/admin', adminRoutes);
 router.use('/studios', studioRoutes);
+router.use('/preview', previewRoutes);
 
 router.get('/', (req: Request, res: Response, next: NextFunction) => {
     let enviornemnt = ENVType.DEVELOPMENT;

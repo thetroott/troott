@@ -24,9 +24,9 @@ switch (process.env.NODE_ENV) {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
 
-      originalsBucket: process.env.AWS_STORAGE_BUCKET!,
-      playbackBucket: process.env.AWS_STORAGE_BUCKET!,
-      storageBucket: process.env.AWS_STORAGE_BUCKET!,
+      originalsBucket: process.env.AWS_BUCKET_STAGING!,
+      playbackBucket: process.env.AWS_BUCKET_STAGING!,
+      storageBucket: process.env.AWS_BUCKET_STAGING!,
     };
 
     break;
@@ -37,9 +37,9 @@ switch (process.env.NODE_ENV) {
       accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
 
-      originalsBucket: process.env.AWS_STORAGE_BUCKET!,
-      playbackBucket: process.env.AWS_STORAGE_BUCKET!,
-      storageBucket: process.env.AWS_STORAGE_BUCKET!,
+      originalsBucket: process.env.AWS_BUCKET_DEVELOPMENT!,
+      playbackBucket: process.env.AWS_BUCKET_DEVELOPMENT!,
+      storageBucket: process.env.AWS_BUCKET_DEVELOPMENT!,
     };
 
     break;
