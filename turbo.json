@@ -7,17 +7,41 @@
         "SUPERADMIN_EMAIL",
         "SUPERADMIN_PASSWORD",
         "SUPERADMIN_FIRSTNAME",
-        "SUPERADMIN_LASTNAME"
+        "SUPERADMIN_LASTNAME",
+        "NODE_ENV"
     ],
     "tasks": {
         "lint": {
             "outputs": []
         },
         "test": {
-            "inputs": ["**/*.{ts,tsx,js,jsx}"]
+            "inputs": ["**/*.{ts,tsx,js,jsx}"],
+            "env": [
+                "AWS_REGION",
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
+                "AWS_STORAGE_BUCKET",
+                "CLOUDFRONT_STORAGE_URL",
+                "JWT_SECRET"
+            ]
         },
         "build": {
             "dependsOn": ["^build"],
+            "env": [
+                "AWS_REGION",
+                "AWS_ACCESS_KEY_ID",
+                "AWS_SECRET_ACCESS_KEY",
+                "AWS_STORAGE_BUCKET",
+                "AWS_ORIGINALS_BUCKET",
+                "AWS_PLAYBACK_BUCKET",
+                "AWS_BUCKET_STAGING",
+                "AWS_BUCKET_DEVELOPMENT",
+                "CLOUDFRONT_STORAGE_URL",
+                "VITE_APP_API_URL",
+                "VITE_APP_ENVIRONMENT",
+                "NEXT_PUBLIC_APP_API_URL",
+                "NEXT_PUBLIC_APP_ENVIRONMENT"
+            ],
             "outputs": [
                 "dist/**",
                 ".next/**",

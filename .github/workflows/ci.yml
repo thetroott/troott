@@ -136,8 +136,7 @@ jobs:
               uses: ./.github/actions/setup-monorepo
 
             - name: pnpm audit
-              run: pnpm audit --prod
-              continue-on-error: true
+              run: pnpm audit --prod || true
 
             - name: TruffleHog secret scan (pull request)
               if: github.event_name == 'pull_request'
@@ -156,6 +155,10 @@ jobs:
                   base: ${{ github.event.before }}
                   head: ${{ github.sha }}
               continue-on-error: true
+
+            - name: Security summary
+              if: always()
+              run: echo "Security checks completed (audit and TruffleHog are warn-only)."
 
     ci-success:
         name: CI success
