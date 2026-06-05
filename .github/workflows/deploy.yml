@@ -73,11 +73,6 @@ jobs:
             - name: Setup monorepo
               uses: ./.github/actions/setup-monorepo
 
-            - name: Setup Turborepo cache
-              uses: turborepo/cache-action@v1
-              with:
-                  token: ${{ secrets.GITHUB_TOKEN }}
-
             - name: Build deployable apps
               env:
                   VITE_APP_API_URL: ${{ vars.API_URL }}
