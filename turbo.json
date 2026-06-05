@@ -2,6 +2,13 @@
     "$schema": "https://turbo.build/schema.json",
     "dangerouslyDisablePackageManagerCheck": true,
     "ui": "tui",
+    "globalEnv": [
+        "ENABLE_SEEDING",
+        "SUPERADMIN_EMAIL",
+        "SUPERADMIN_PASSWORD",
+        "SUPERADMIN_FIRSTNAME",
+        "SUPERADMIN_LASTNAME"
+    ],
     "tasks": {
         "lint": {
             "outputs": []

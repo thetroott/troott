@@ -7,72 +7,63 @@ import {
     OnboardStatus,
     InviteStatus,
 } from '@/interfaces/user.interface';
+import type { IListenerDoc } from '@/interfaces/core/listener.interface';
 import ErrorResponse from '@/utils/error.util';
 import authService from '@/services/auth.service';
 import { genUserCode } from '@/utils/helpers.util';
 import { genSlug } from '@/utils/helpers.util';
 import PermissionService from '@/services/permission.service';
 import adminService from '@/services/admin.service';
+import ministerService from '@/services/core/minister.service';
+import listenerService from '@/services/core/listener.service';
+import libraryService from '@/services/core/library.service';
+import recommendationService from '@/services/core/recommendation.service';
+import userService from '@/services/user.service';
+import userRepository from '@/repository/user.repository';
+import ministerRepository from '@/repository/core/minister.repository';
+import listenerRepository from '@/repository/core/listener.repository';
 import {
     AdminDepartmentEnum,
     AdminTypeEnum,
     CompanyRoleEnum,
 } from '@/interfaces/admin.interface';
 
-/**
- * @name seedUsers
- * @description Seeds the users collection in the database using environment variables
- * @async
- * @function seedUsers
- * @returns {Promise<void>}
- * @throws {ErrorResponse} If required environment variables are missing or role doesn't exist
- */
 const seedUsers = async (): Promise<void> => {
-    try {
-        // Get superadmin credentials from environment variables
-        const superAdminEmail = process.env.SUPERADMIN_EMAIL;
-        const superAdminPassword = process.env.SUPERADMIN_PASSWORD;
-        const superAdminFirstName = process.env.SUPERADMIN_FIRSTNAME;
-        const superAdminLastName = process.env.SUPERADMIN_LASTNAME;
+    const superAdminEmail = process.env.SUPERADMIN_EMAIL;
+    const superAdminPassword = process.env.SUPERADMIN_PASSWORD;
+    const superAdminFirstName = process.env.SUPERADMIN_FIRSTNAME;
+    const superAdminLastName = process.env.SUPERADMIN_LASTNAME;
 
-        if (
-            !superAdminEmail ||
-            !superAdminPassword ||
-            !superAdminFirstName ||
-            !superAdminLastName
-        ) {
-            throw new ErrorResponse(
-                'SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD, SUPERADMIN_FIRSTNAME, and SUPERADMIN_LASTNAME environment variables are required for seeding',
-                400,
-                [],
-            );
-        }
+    if (
+        !superAdminEmail ||
+        !superAdminPassword ||
+        !superAdminFirstName ||
+        !superAdminLastName
+    ) {
+        throw new ErrorResponse(
+            'SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD, SUPERADMIN_FIRSTNAME, and SUPERADMIN_LASTNAME environment variables are required for seeding',
+            400,
+            [],
+        );
+    }
 
-        // Find superadmin role
-        const superAdminRole = await Role.findOne({
-            name: UserType.SUPERADMIN,
-        });
-        if (!superAdminRole) {
-            throw new ErrorResponse(
-                `Role "${UserType.SUPERADMIN}" does not exist. Run role seeding first.`,
-                400,
-                [],
-            );
-        }
+    const superAdminRole = await Role.findOne({
+        name: UserType.SUPERADMIN,
+    });
+    if (!superAdminRole) {
+        throw new ErrorResponse(
+            `Role "${UserType.SUPERADMIN}" does not exist. Run role seeding first.`,
+            400,
+            [],
+        );
+    }
 
-        // Check if superadmin user already exists
-        const existingSuperAdmin = await User.findOne({
-            userType: UserType.SUPERADMIN,
-        });
-        if (existingSuperAdmin) {
-            logger.log({
-                type: 'info',
-                data: `Superadmin user already exists. Skipping.`,
-            });
-            return;
-        }
-        // Create superadmin user
-        let superAdmin = new User({
+    let superAdmin = await User.findOne({
+        userType: UserType.SUPERADMIN,
+    });
+
+    if (!superAdmin) {
+        superAdmin = new User({
             code: genUserCode(UserType.SUPERADMIN),
             email: superAdminEmail.toLowerCase(),
             firstName: superAdminFirstName,
@@ -84,9 +75,10 @@ const seedUsers = async (): Promise<void> => {
             isSuper: true,
             isUser: true,
             isAdmin: true,
+            isMinister: true,
+            isListener: true,
             isActivated: true,
             isActive: true,
-
             onboard: {
                 step: 0,
                 status: OnboardStatus.COMPLETED,
@@ -94,18 +86,13 @@ const seedUsers = async (): Promise<void> => {
             inviteStatus: InviteStatus.ACCEPTED,
         });
 
-        // Encrypt password, set createdBy, and save
         await authService.encryptUserPassword(superAdmin, superAdminPassword);
         superAdmin.createdBy = superAdmin._id;
         await superAdmin.save();
 
-        // Associate user with role
         superAdminRole.users.push(superAdmin._id);
         await superAdminRole.save();
 
-        // Initialize permissions from the SUPERADMIN role
-        // This assigns all permissions from the role to the user
-        // Note: initiatePermissionData already saves the user internally
         const permResult =
             await PermissionService.initiatePermissionData(superAdmin);
         if (permResult.error) {
@@ -114,16 +101,10 @@ const seedUsers = async (): Promise<void> => {
                 type: 'error',
                 data: `Failed to initialize permissions: ${permResult.message}`,
             });
-        } else {
-            // Update user reference from permission result
-            if (permResult.data) {
-                superAdmin = permResult.data as typeof superAdmin;
-            }
+        } else if (permResult.data) {
+            superAdmin = permResult.data as typeof superAdmin;
         }
 
-        // Create admin profile for superadmin
-        // Superadmin should have the highest access level (Executive)
-        // Superadmin is STAFF (operational), not BOARD (oversight)
         const adminProfileResult = await adminService.createAdmin({
             code: superAdmin.code,
             user: superAdmin,
@@ -148,19 +129,137 @@ const seedUsers = async (): Promise<void> => {
                 data: `Superadmin admin profile created successfully.`,
             });
         }
-
+    } else {
         logger.log({
-            type: 'success',
-            data: `Superadmin seeded successfully`,
+            type: 'info',
+            data: `Superadmin user already exists.`,
         });
-    } catch (err) {
-        logger.log({
-            label: 'SEEDING_ERROR',
-            type: 'error',
-            data: `User seeding failed: ${(err as Error).message}`,
-        });
-        throw err;
     }
+
+    const userId = String(superAdmin._id);
+
+    await userRepository.updateUser(userId, {
+        isSuper: true,
+        isAdmin: true,
+        isUser: true,
+        isMinister: true,
+        isCreator: false,
+        isListener: true,
+        isActivated: true,
+        isActive: true,
+        userType: UserType.SUPERADMIN,
+        'onboard.step': 6,
+        'onboard.status': OnboardStatus.COMPLETED,
+    } as never);
+
+    superAdmin = await User.findById(userId);
+    if (!superAdmin) {
+        throw new Error('Superadmin user not found');
+    }
+
+    if (!superAdmin.minister) {
+        const ministerResult = await ministerService.createMinister({
+            user: superAdmin,
+            userType: UserType.MINISTER,
+            email: superAdmin.email,
+            createdBy: superAdmin._id,
+        });
+        if (ministerResult.error) {
+            throw new Error(
+                ministerResult.message ||
+                    'Failed to create minister profile for superadmin',
+            );
+        }
+        superAdmin = await User.findById(userId);
+        if (!superAdmin) {
+            throw new Error('Superadmin user not found after minister create');
+        }
+    }
+
+    const listenerLookup = await listenerRepository.findOne({
+        user: userId,
+    });
+    let listener = listenerLookup.error
+        ? undefined
+        : (listenerLookup.data as IListenerDoc);
+
+    if (!listener) {
+        const listenerResult = await listenerService.createListener({
+            user: superAdmin,
+            userType: UserType.LISTENER,
+            email: superAdmin.email,
+            createdBy: userId,
+        });
+        if (listenerResult.error || !listenerResult.data?.listener) {
+            throw new Error(
+                listenerResult.message ||
+                    'Failed to create listener profile for superadmin',
+            );
+        }
+        listener = listenerResult.data.listener as IListenerDoc;
+    }
+
+    const listenerId = String(listener._id);
+
+    const libResult = await libraryService.getOrCreateLibrary(listenerId);
+    if (!libResult.error && libResult.data) {
+        const libraryId =
+            (libResult.data as { _id?: unknown })._id || libResult.data;
+        await listenerRepository.updateListener(listenerId, {
+            Library: libraryId,
+        } as never);
+        listener = { ...listener, Library: libraryId } as IListenerDoc;
+    }
+
+    await userService.assignFreeSubscriptionForListener(listenerId, listener);
+
+    try {
+        await recommendationService.seedColdStart(
+            listenerId,
+            superAdmin.location?.country || '',
+        );
+    } catch {
+        // non-critical
+    }
+
+    await userRepository.updateUser(userId, {
+        listener: listener._id,
+        isListener: true,
+    } as never);
+
+    const ministerDoc = await ministerRepository.findOne({ user: userId });
+    if (!ministerDoc.error && ministerDoc.data) {
+        const ministerId = String((ministerDoc.data as { _id: unknown })._id);
+        await ministerRepository.updateMinister(ministerId, {
+            $set: {
+                'onboarding.step': 6,
+                'onboarding.status': OnboardStatus.COMPLETED,
+            },
+        } as never);
+    }
+
+    await userRepository.updateUser(userId, {
+        'onboard.step': 6,
+        'onboard.status': OnboardStatus.COMPLETED,
+    } as never);
+
+    const ministerForStudio = await ministerRepository.findOne({
+        user: userId,
+    });
+    if (!ministerForStudio.error && ministerForStudio.data) {
+        const ministerStudio = (ministerForStudio.data as { studio?: unknown })
+            .studio;
+        if (ministerStudio != null) {
+            await userRepository.updateUser(userId, {
+                primaryStudio: ministerStudio,
+            } as never);
+        }
+    }
+
+    logger.log({
+        type: 'success',
+        data: `Superadmin seeded successfully`,
+    });
 };
 
 export default seedUsers;

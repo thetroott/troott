@@ -20,7 +20,7 @@ import logger from '../../utils/logger.util';
  *   - Roles: Only seeds if no roles exist
  *   - Permissions: Uses upsert (safe to rerun)
  *   - Plans: Creates or repairs free plan paystackPlanCodes
- *   - Users: Only seeds if superadmin doesn't exist
+ *   - Users: Creates superadmin if missing; upserts persona profiles when superadmin exists
  *   - Topics: Upserts by slug (safe to rerun)
  *
  * @async

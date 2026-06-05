@@ -31,6 +31,7 @@ import { IFile } from '@/interfaces/common.interface';
 import roleService from '@/services/role.service';
 import emailService from '@/services/email.service';
 import listenerService from '@/services/core/listener.service';
+import listenerRepository from '@/repository/core/listener.repository';
 import ministerService from '@/services/core/minister.service';
 import creatorService from '@/services/core/creator.service';
 import libraryService from '@/services/core/library.service';
@@ -174,8 +175,13 @@ class UserService {
                 const libResult =
                     await libraryService.getOrCreateLibrary(listenerId);
                 if (!libResult.error && libResult.data) {
-                    listener.Library = (libResult.data as any)._id || libResult.data;
-                    await (listener as any).save();
+                    const libraryId =
+                        (libResult.data as { _id?: unknown })._id ||
+                        libResult.data;
+                    await listenerRepository.updateListener(listenerId, {
+                        Library: libraryId,
+                    } as never);
+                    listener.Library = libraryId as IListenerDoc['Library'];
                 }
 
                 await this.assignFreeSubscription(listenerId, listener);
@@ -224,6 +230,13 @@ class UserService {
     /**
      * Finds the free plan and creates an active subscription for the listener.
      */
+    public async assignFreeSubscriptionForListener(
+        listenerId: string,
+        listener: IListenerDoc,
+    ): Promise<void> {
+        return this.assignFreeSubscription(listenerId, listener);
+    }
+
     private async assignFreeSubscription(
         listenerId: string,
         listener: IListenerDoc,
@@ -254,8 +267,11 @@ class UserService {
             });
 
             if (!subResult.error && subResult.data) {
-                listener.subscription = (subResult.data as any)._id || subResult.data;
-                await (listener as any).save();
+                const subscriptionId =
+                    (subResult.data as { _id?: unknown })._id || subResult.data;
+                await listenerRepository.updateListener(listenerId, {
+                    subscription: subscriptionId,
+                } as never);
             }
         } catch {
             // non-critical -- listener can still use the app without a subscription record
