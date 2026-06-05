@@ -1,5 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
-import sermonRouter from '../../../src/modules/core/sermon/sermon.router';
+import sermonRouter from '../../../src/routes/sermon.router';
 
 /**
  * Ensures multi-segment GET routes are registered before `/:id` so Express

@@ -16,6 +16,7 @@ process.env.CLOUDFRONT_STORAGE_URL ??= 'https://storage.troott.com';
  */
 const config: Config = {
     preset: 'ts-jest',
+    coverageProvider: 'v8',
     testEnvironment: 'node',
     roots: ['<rootDir>/test'],
     testMatch: ['**/*.test.ts', '**/*.spec.ts'],

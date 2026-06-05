@@ -1,32 +1,57 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { Types } from 'mongoose';
 
-const mockBulkUpsert = jest.fn<() => Promise<any>>();
-const mockFindByListenerOrGlobal = jest.fn<() => Promise<any>>();
-const mockRecordFeedback = jest.fn<() => Promise<any>>();
-
-jest.mock('../../../src/repository/core/recommendation.repository', () => ({
+jest.mock('@/repository/core/recommendation.repository', () => ({
+    __esModule: true,
     default: {
-        bulkUpsert: mockBulkUpsert,
-        findByListenerOrGlobal: mockFindByListenerOrGlobal,
-        recordFeedback: mockRecordFeedback,
+        bulkUpsert: jest.fn(),
+        findByListenerOrGlobal: jest.fn(),
+        recordFeedback: jest.fn(),
     },
 }));
 
-const mockFindAllSorted = jest.fn<() => Promise<any>>();
-const mockFindByTopic = jest.fn<() => Promise<any>>();
-const mockFindByMinisterSorted = jest.fn<() => Promise<any>>();
-
-jest.mock('../../../src/repository/core/sermon.repository', () => ({
+jest.mock('@/repository/core/sermon.repository', () => ({
+    __esModule: true,
     default: {
-        findAllSorted: mockFindAllSorted,
-        findByTopic: mockFindByTopic,
-        findByMinisterSorted: mockFindByMinisterSorted,
+        findAllSorted: jest.fn(),
+        findByTopic: jest.fn(),
+        findByMinisterSorted: jest.fn(),
     },
 }));
+
+import recommendationRepository from '@/repository/core/recommendation.repository';
+import sermonRepository from '@/repository/core/sermon.repository';
+
+const mockBulkUpsert = jest.mocked(recommendationRepository.bulkUpsert);
+const mockFindByListenerOrGlobal = jest.mocked(
+    recommendationRepository.findByListenerOrGlobal,
+);
+const mockFindAllSorted = jest.mocked(sermonRepository.findAllSorted);
+const mockFindByTopic = jest.mocked(sermonRepository.findByTopic);
+const mockFindByMinisterSorted = jest.mocked(
+    sermonRepository.findByMinisterSorted,
+);
 
 describe('RecommendationService', () => {
-    let recommendationService: any;
+    let recommendationService: {
+        seedColdStart: (
+            listenerId: string,
+            country?: string,
+        ) => Promise<{ error: boolean; data?: unknown }>;
+        seedFromTopics: (
+            listenerId: string,
+            topicIds: string[],
+        ) => Promise<{ error: boolean }>;
+        seedFromMinisters: (
+            listenerId: string,
+            ministerIds: string[],
+        ) => Promise<{ error: boolean }>;
+        getForListener: (
+            listenerId: string,
+            section?: string,
+            limit?: number,
+        ) => Promise<unknown>;
+    };
     const listenerId = new Types.ObjectId().toString();
 
     const mockSermons = (count: number) =>
@@ -43,26 +68,24 @@ describe('RecommendationService', () => {
         mockBulkUpsert.mockResolvedValue({
             error: false,
             data: { upserted: 5, modified: 0 },
-        });
+        } as never);
 
         mockFindAllSorted.mockResolvedValue({
             error: false,
             data: mockSermons(5),
-        });
+        } as never);
 
         mockFindByTopic.mockResolvedValue({
             error: false,
             data: mockSermons(3),
-        });
+        } as never);
 
         mockFindByMinisterSorted.mockResolvedValue({
             error: false,
             data: mockSermons(3),
-        });
+        } as never);
 
-        const mod = await import(
-            '../../../src/services/core/recommendation.service'
-        );
+        const mod = await import('@/services/core/recommendation.service');
         recommendationService = mod.default;
     });
 
@@ -80,15 +103,15 @@ describe('RecommendationService', () => {
             });
             expect(mockBulkUpsert).toHaveBeenCalledTimes(1);
 
-            const batch = mockBulkUpsert.mock.calls[0][0] as any[];
+            const batch = mockBulkUpsert.mock.calls[0][0] as Array<{
+                section: string;
+            }>;
             expect(batch.length).toBe(10);
 
             const trendingBatch = batch.filter(
                 (r) => r.section === 'trending_now',
             );
-            const newBatch = batch.filter(
-                (r) => r.section === 'new_sermons',
-            );
+            const newBatch = batch.filter((r) => r.section === 'new_sermons');
             expect(trendingBatch.length).toBe(5);
             expect(newBatch.length).toBe(5);
         });
@@ -97,7 +120,7 @@ describe('RecommendationService', () => {
             mockFindAllSorted.mockResolvedValue({
                 error: false,
                 data: [],
-            });
+            } as never);
 
             const result =
                 await recommendationService.seedColdStart(listenerId);
@@ -123,7 +146,10 @@ describe('RecommendationService', () => {
             expect(mockFindByTopic).toHaveBeenCalledTimes(2);
             expect(mockBulkUpsert).toHaveBeenCalledTimes(1);
 
-            const batch = mockBulkUpsert.mock.calls[0][0] as any[];
+            const batch = mockBulkUpsert.mock.calls[0][0] as Array<{
+                section: string;
+                reason: string;
+            }>;
             expect(batch.length).toBe(6);
             batch.forEach((r) => {
                 expect(r.section).toBe('based_on_topics');
@@ -145,7 +171,10 @@ describe('RecommendationService', () => {
             expect(mockFindByMinisterSorted).toHaveBeenCalledTimes(1);
             expect(mockBulkUpsert).toHaveBeenCalledTimes(1);
 
-            const batch = mockBulkUpsert.mock.calls[0][0] as any[];
+            const batch = mockBulkUpsert.mock.calls[0][0] as Array<{
+                section: string;
+                reason: string;
+            }>;
             expect(batch.length).toBe(3);
             batch.forEach((r) => {
                 expect(r.section).toBe('from_your_ministers');
@@ -159,7 +188,7 @@ describe('RecommendationService', () => {
             mockFindByListenerOrGlobal.mockResolvedValue({
                 error: false,
                 data: [],
-            });
+            } as never);
 
             await recommendationService.getForListener(listenerId);
             expect(mockFindByListenerOrGlobal).toHaveBeenCalledWith(

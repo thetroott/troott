@@ -1,9 +1,9 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { Types } from 'mongoose';
-import { UserType, PasswordType } from '../../../src/interfaces/user.interface';
-import type { createUserDTO } from '../../../src/dtos/user.dto';
+import { UserType, PasswordType } from '@/interfaces/user.interface';
+import type { createUserDTO } from '@/dtos/user.dto';
 
-const mockUserDoc = (overrides: Record<string, any> = {}) => ({
+const mockUserDoc = (overrides: Record<string, unknown> = {}) => ({
     _id: new Types.ObjectId(),
     email: 'test@example.com',
     firstName: 'John',
@@ -11,221 +11,256 @@ const mockUserDoc = (overrides: Record<string, any> = {}) => ({
     userType: UserType.USER,
     isActive: false,
     isActivated: false,
-    createdBy: null as any,
-    save: jest.fn<() => Promise<any>>().mockResolvedValue(undefined),
+    createdBy: null,
+    save: jest.fn<() => Promise<unknown>>().mockResolvedValue(undefined),
+    markModified: jest.fn(),
     ...overrides,
 });
 
-const mockListenerDoc = (userId: any) => ({
-    _id: new Types.ObjectId(),
-    user: userId,
-    Library: null,
-    subscription: null,
-    save: jest.fn<() => Promise<any>>().mockResolvedValue(undefined),
-});
-
-jest.mock('../../../src/repository/user.repository', () => ({
+jest.mock('@/repository/user.repository', () => ({
+    __esModule: true,
     default: {
-        createUser: jest.fn<(p: any) => Promise<any>>().mockImplementation(
-            (payload) =>
-                Promise.resolve({
-                    error: false,
-                    message: '',
-                    code: 201,
-                    data: mockUserDoc({
-                        ...payload,
-                        _id: new Types.ObjectId(),
-                    }),
-                }),
-        ),
-        updateUser: jest.fn<(id: string, d: any) => Promise<any>>().mockImplementation(
-            (_id, data) =>
-                Promise.resolve({
-                    error: false,
-                    message: '',
-                    code: 200,
-                    data: mockUserDoc(data),
-                }),
-        ),
-        findOne: jest.fn<(q: any) => Promise<any>>().mockResolvedValue({
-            error: true,
-            message: 'Not found',
-            code: 404,
-            data: null,
-        }),
-        findByEmail: jest.fn<(e: string) => Promise<any>>().mockResolvedValue({
-            error: true,
-            message: 'Not found',
-            code: 404,
-            data: null,
-        }),
-        findById: jest.fn<(id: string) => Promise<any>>().mockResolvedValue({
-            error: true,
-            message: 'Not found',
-            code: 404,
-            data: null,
-        }),
+        createUser: jest.fn(),
+        updateUser: jest.fn(),
+        findOne: jest.fn(),
+        findByEmail: jest.fn(),
+        findById: jest.fn(),
     },
 }));
 
-jest.mock('../../../src/services/auth.service', () => ({
+jest.mock('@/services/auth.service', () => ({
+    __esModule: true,
     default: {
-        updateUserType: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
-        encryptUserPassword: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
-        attachRole: jest.fn<() => Promise<any>>().mockResolvedValue({
-            error: false,
-            data: null,
-        }),
-        activateAccount: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
-        updateLastLogin: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+        updateUserType: jest.fn(),
+        encryptUserPassword: jest.fn(),
+        attachRole: jest.fn(),
+        activateAccount: jest.fn(),
+        updateLastLogin: jest.fn(),
     },
 }));
 
-jest.mock('../../../src/services/role.service', () => ({
+jest.mock('@/services/role.service', () => ({
+    __esModule: true,
     default: {
-        attachRole: jest.fn<() => Promise<any>>().mockResolvedValue({
-            error: false,
-            data: mockUserDoc(),
-        }),
+        attachRole: jest.fn(),
     },
 }));
 
-jest.mock('../../../src/services/permission.service', () => ({
+jest.mock('@/services/permission.service', () => ({
+    __esModule: true,
     default: {
-        initiatePermissionData: jest.fn<() => Promise<any>>().mockResolvedValue({
-            error: false,
-            data: mockUserDoc(),
-        }),
-        clearUserCache: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+        initiatePermissionData: jest.fn(),
+        clearUserCache: jest.fn(),
     },
 }));
 
-const mockCreateListener = jest.fn<() => Promise<any>>();
-jest.mock('../../../src/services/core/listener.service', () => ({
+jest.mock('@/services/core/listener.service', () => ({
+    __esModule: true,
     default: {
-        createListener: mockCreateListener,
+        createListener: jest.fn(),
     },
 }));
 
-const mockCreateMinister = jest.fn<() => Promise<any>>();
-jest.mock('../../../src/services/core/minister.service', () => ({
+jest.mock('@/services/core/minister.service', () => ({
+    __esModule: true,
     default: {
-        createMinister: mockCreateMinister,
+        createMinister: jest.fn(),
     },
 }));
 
-const mockCreateCreator = jest.fn<() => Promise<any>>();
-jest.mock('../../../src/services/core/creator.service', () => ({
+jest.mock('@/services/core/creator.service', () => ({
+    __esModule: true,
     default: {
-        createCreator: mockCreateCreator,
+        createCreator: jest.fn(),
     },
 }));
 
-const mockGetOrCreateLibrary = jest.fn<() => Promise<any>>();
-jest.mock('../../../src/services/core/library.service', () => ({
+jest.mock('@/services/core/library.service', () => ({
+    __esModule: true,
     default: {
-        getOrCreateLibrary: mockGetOrCreateLibrary,
+        getOrCreateLibrary: jest.fn(),
     },
 }));
 
-const mockSeedColdStart = jest.fn<() => Promise<any>>();
-jest.mock('../../../src/services/core/recommendation.service', () => ({
+jest.mock('@/services/core/recommendation.service', () => ({
+    __esModule: true,
     default: {
-        seedColdStart: mockSeedColdStart,
+        seedColdStart: jest.fn(),
     },
 }));
 
-const mockAddNewSubscription = jest.fn<() => Promise<any>>();
-jest.mock('../../../src/repository/subscription.repository', () => ({
+jest.mock('@/repository/subscription.repository', () => ({
+    __esModule: true,
     default: {
-        addNewSubscription: mockAddNewSubscription,
+        addNewSubscription: jest.fn(),
     },
 }));
 
-jest.mock('../../../src/models/plan.model', () => ({
+jest.mock('@/repository/core/listener.repository', () => ({
+    __esModule: true,
     default: {
-        findOne: jest.fn<() => Promise<any>>().mockResolvedValue({
-            _id: new Types.ObjectId(),
-            code: 'plan-free-listener',
-            name: 'Free',
-            planType: 'listener',
-            isEnabled: true,
-        }),
+        updateListener: jest.fn(),
     },
 }));
 
-jest.mock('../../../src/models/user.model', () => {
-    const actual = jest.requireActual('../../../src/models/user.model');
-    return actual;
-});
-
-jest.mock('../../../src/services/storage.service', () => ({
+jest.mock('@/models/plan.model', () => ({
+    __esModule: true,
     default: {
-        uploadFile: jest.fn<() => Promise<any>>().mockResolvedValue({
-            error: false,
-            data: { fileName: 'test', s3Key: 'test' },
-        }),
-        deleteFile: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+        findOne: jest.fn(),
     },
 }));
 
-jest.mock('../../../src/services/email.service', () => ({
+jest.mock('@/models/user.model', () =>
+    jest.requireActual('@/models/user.model'),
+);
+
+jest.mock('@/services/storage.service', () => ({
+    __esModule: true,
     default: {
-        sendUserWelcomeEmail: jest.fn<() => Promise<any>>().mockResolvedValue({
-            error: false,
-        }),
+        uploadFile: jest.fn(),
+        deleteFile: jest.fn(),
     },
 }));
 
-jest.mock('../../../src/utils/helpers.util', () => ({
-    ...jest.requireActual('../../../src/utils/helpers.util'),
-    genUserCode: jest.fn<() => string>().mockReturnValue('USR-TEST-001'),
+jest.mock('@/services/email.service', () => ({
+    __esModule: true,
+    default: {
+        sendUserWelcomeEmail: jest.fn(),
+    },
 }));
+
+jest.mock('@/utils/helpers.util', () => ({
+    ...jest.requireActual('@/utils/helpers.util'),
+    genUserCode: jest.fn(() => 'USR-TEST-001'),
+}));
+
+import userRepository from '@/repository/user.repository';
+import authService from '@/services/auth.service';
+import roleService from '@/services/role.service';
+import PermissionService from '@/services/permission.service';
+import listenerService from '@/services/core/listener.service';
+import listenerRepository from '@/repository/core/listener.repository';
+import ministerService from '@/services/core/minister.service';
+import creatorService from '@/services/core/creator.service';
+import libraryService from '@/services/core/library.service';
+import recommendationService from '@/services/core/recommendation.service';
+import subscriptionRepository from '@/repository/subscription.repository';
+import Plan from '@/models/plan.model';
+
+const mockCreateUser = jest.mocked(userRepository.createUser);
+const mockUpdateUser = jest.mocked(userRepository.updateUser);
+const mockCreateListener = jest.mocked(listenerService.createListener);
+const mockCreateMinister = jest.mocked(ministerService.createMinister);
+const mockCreateCreator = jest.mocked(creatorService.createCreator);
+const mockGetOrCreateLibrary = jest.mocked(libraryService.getOrCreateLibrary);
+const mockSeedColdStart = jest.mocked(recommendationService.seedColdStart);
+const mockAddNewSubscription = jest.mocked(
+    subscriptionRepository.addNewSubscription,
+);
 
 describe('UserService', () => {
-    let userService: any;
+    let userService: {
+        createUser: (dto: createUserDTO) => Promise<unknown>;
+    };
 
     beforeEach(async () => {
         jest.clearAllMocks();
 
         const userId = new Types.ObjectId();
         const listenerId = new Types.ObjectId();
-        const listenerDoc = mockListenerDoc(userId);
+
+        const createdUser = mockUserDoc({
+            _id: userId,
+            email: 'john@example.com',
+        });
+
+        mockCreateUser.mockImplementation((payload) =>
+            Promise.resolve({
+                error: false,
+                message: '',
+                code: 201,
+                data: mockUserDoc({
+                    ...payload,
+                    _id: userId,
+                }),
+            } as never),
+        );
+
+        mockUpdateUser.mockImplementation((_id, data) =>
+            Promise.resolve({
+                error: false,
+                message: '',
+                code: 200,
+                data: mockUserDoc({ ...createdUser, ...data, _id: userId }),
+            } as never),
+        );
+
+        jest.mocked(authService.updateUserType).mockResolvedValue(undefined);
+        jest.mocked(authService.encryptUserPassword).mockResolvedValue(undefined);
+        jest.mocked(roleService.attachRole).mockResolvedValue({
+            error: false,
+            data: createdUser,
+        } as never);
+        jest
+            .mocked(PermissionService.initiatePermissionData)
+            .mockResolvedValue({
+                error: false,
+                data: createdUser,
+            } as never);
+        jest.mocked(listenerRepository.updateListener).mockResolvedValue({
+            error: false,
+            data: {},
+        } as never);
 
         mockCreateListener.mockResolvedValue({
             error: false,
             message: '',
-            data: { listener: { ...listenerDoc, _id: listenerId }, user: mockUserDoc({ _id: userId }) },
-        });
+            data: {
+                listener: {
+                    _id: listenerId,
+                    user: userId,
+                    save: jest.fn(),
+                },
+                user: mockUserDoc({ _id: userId }),
+            },
+        } as never);
 
         mockCreateMinister.mockResolvedValue({
             error: false,
             message: '',
             data: { minister: {}, user: mockUserDoc({ _id: userId }) },
-        });
+        } as never);
 
         mockCreateCreator.mockResolvedValue({
             error: false,
             message: '',
             data: { creator: {}, user: mockUserDoc({ _id: userId }) },
-        });
+        } as never);
 
         mockGetOrCreateLibrary.mockResolvedValue({
             error: false,
             data: { _id: new Types.ObjectId() },
-        });
+        } as never);
 
         mockSeedColdStart.mockResolvedValue({
             error: false,
             data: {},
-        });
+        } as never);
 
         mockAddNewSubscription.mockResolvedValue({
             error: false,
             data: { _id: new Types.ObjectId() },
-        });
+        } as never);
 
-        const mod = await import('../../../src/services/user.service');
+        jest.mocked(Plan.findOne).mockResolvedValue({
+            _id: new Types.ObjectId(),
+            code: 'plan-free-listener',
+            name: 'Free',
+            planType: 'listener',
+            isEnabled: true,
+        } as never);
+
+        const mod = await import('@/services/user.service');
         userService = mod.default;
     });
 
@@ -305,7 +340,7 @@ describe('UserService', () => {
                 message: 'Listener creation failed',
                 code: 500,
                 data: {},
-            });
+            } as never);
 
             await expect(
                 userService.createUser({
