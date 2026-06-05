@@ -76,13 +76,13 @@ previewRoutes.get(
                 message: 'Template parameter is required',
             });
         }
-        const templatePath = `legal/${template}`;
+        const templatePath = `emails/legal/${template}`;
 
         const sampleData: Record<string, any> = {
             'terms-and-conditions': {
                 name: 'Damola',
                 effectiveDate: 'January 1, 2026',
-                termsLink: 'https://pacepard.com/terms',
+                termsLink: 'https://troott.com/terms',
                 keyChanges: [
                     'Clarified data usage and privacy practices',
                     'Updated service description and features',
@@ -127,12 +127,12 @@ previewRoutes.get(
         const sampleData: Record<string, any> = {
             'forgot-password': {
                 name: 'Damola',
-                resetLink: 'https://pacepard.com/reset-password?token=abc123',
+                resetLink: 'https://troott.com/reset-password?token=abc123',
                 expiry: '24 hours',
             },
             'reset-password': {
                 name: 'Damola',
-                loginLink: 'https://pacepard.com/login',
+                loginLink: 'https://troott.com/login',
             },
             'verify-otp': {
                 name: 'Damola',
@@ -141,10 +141,10 @@ previewRoutes.get(
             },
             welcome: {
                 name: 'Damola',
-                loginLink: 'https://pacepard.com/login',
-                templateLink: 'https://pacepard.com/templates',
-                inviteLink: 'https://pacepard.com/invite',
-                guideLink: 'https://pacepard.com/guide',
+                loginLink: 'https://troott.com/login',
+                templateLink: 'https://troott.com/templates',
+                inviteLink: 'https://troott.com/invite',
+                guideLink: 'https://troott.com/guide',
             },
             discount: {
                 name: 'Damola',
@@ -157,11 +157,11 @@ previewRoutes.get(
             'newsletter-suscriber': {
                 name: 'Damola',
                 unsubscribeLink:
-                    'https://pacepard.com/unsubscribe?token=xyz789',
+                    'https://troott.com/unsubscribe?token=xyz789',
             },
             'first-week': {
                 name: 'Damola',
-                templateLink: 'https://pacepard.com/templates',
+                templateLink: 'https://troott.com/templates',
             },
             trialactivation: {
                 name: 'Damola',
@@ -181,7 +181,7 @@ previewRoutes.get(
             },
             confirmation: {
                 name: 'Damola',
-                confirmationLink: 'https://pacepard.com/confirm?token=abc123',
+                confirmationLink: 'https://troott.com/confirm?token=abc123',
             },
         };
 

@@ -16,6 +16,7 @@ import { addJob } from '../tasks/jobs/job';
 import { JobChannel, QueueChannel } from '../queues/channel.queue';
 import { IUserDoc, OtpType } from '@/interfaces/user.interface';
 
+
 const BASE_FOLDER = path.join(appRootPath.path, 'src');
 
 class AppEmailService {
