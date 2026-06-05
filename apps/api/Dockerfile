@@ -16,6 +16,7 @@ FROM base AS deps
 RUN corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY patches ./patches
 COPY apps/api/package.json apps/api/
 
 RUN pnpm install --frozen-lockfile --filter @troott/api...
