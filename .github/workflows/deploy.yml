@@ -8,7 +8,7 @@ on:
         branches:
             - development
             - staging
-            - main
+            - master
         paths-ignore:
             - '**.md'
             - 'docs/**'
@@ -35,7 +35,7 @@ env:
     TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 concurrency:
-    group: deploy-${{ github.event.inputs.environment || (github.ref_name == 'main' && 'production' || (github.ref_name == 'staging' && 'staging' || 'development')) }}
+    group: deploy-${{ github.event.inputs.environment || (github.ref_name == 'master' && 'production' || (github.ref_name == 'staging' && 'staging' || 'development')) }}
     cancel-in-progress: false
 
 jobs:
@@ -50,7 +50,7 @@ jobs:
               run: |
                   if [ -n "${{ github.event.inputs.environment }}" ]; then
                     echo "env=${{ github.event.inputs.environment }}" >> "$GITHUB_OUTPUT"
-                  elif [ "${{ github.ref_name }}" = "main" ]; then
+                  elif [ "${{ github.ref_name }}" = "master" ]; then
                     echo "env=production" >> "$GITHUB_OUTPUT"
                   elif [ "${{ github.ref_name }}" = "staging" ]; then
                     echo "env=staging" >> "$GITHUB_OUTPUT"

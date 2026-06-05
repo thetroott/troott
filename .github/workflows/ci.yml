@@ -6,16 +6,18 @@ name: CI
 on:
     push:
         branches:
-            - development
+            - master
             - staging
-            - main
-            - favour-development
-            - damola-development
+            - development
         paths-ignore:
             - '**.md'
             - 'docs/**'
             - 'specs/**'
     pull_request:
+        branches:
+            - master
+            - staging
+            - development
         paths-ignore:
             - '**.md'
             - 'docs/**'
@@ -64,7 +66,7 @@ jobs:
     test:
         name: Test
         runs-on: ubuntu-latest
-        timeout-minutes: 20
+        timeout-minutes: 15
         needs: validate
 
         steps:

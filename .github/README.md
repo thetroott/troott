@@ -37,8 +37,8 @@ Build job injects `VITE_APP_API_URL` and `NEXT_PUBLIC_APP_API_URL` from the `API
 
 | File | Trigger | Purpose |
 | ---- | ------- | ------- |
-| `ci.yml` | PR + push to main branches | Lint, typecheck, build, expo-doctor |
-| `deploy.yml` | Push to `development` / `staging` / `main`, manual | Coolify deploy api + web + website |
+| `ci.yml` | PR + push to `development` / `staging` / `master` | Lint, typecheck, build, expo-doctor |
+| `deploy.yml` | Push to `development` / `staging` / `master`, manual | Coolify deploy api + web + website |
 | `mobile-eas.yml` | Manual | EAS build for `@troott/mobile` |
 
 Spec: [`specs/platform/feature/feat-0001/PRODUCT.md`](../../specs/platform/feature/feat-0001/PRODUCT.md)
