@@ -396,7 +396,11 @@ export const getCreatorProfile: RequestHandler = asyncHandler(
         const userId = user?.id;
         if (!userId) return next(new ErrorResponse('Unauthorized', 401, []));
 
-        if (user.userType !== UserType.CREATOR) {
+        if (
+            user.userType !== UserType.CREATOR &&
+            user.isCreator !== true &&
+            user.isSuper !== true
+        ) {
             return next(
                 new ErrorResponse(
                     'Creator profile is only available for creator accounts',

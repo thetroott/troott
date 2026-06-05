@@ -68,6 +68,21 @@ async function resolveCode(
     return codeFromDoc(res.data);
 }
 
+function personaFlags(user: IUserDoc): {
+    isMinister: boolean;
+    isCreator: boolean;
+    isListener: boolean;
+} {
+    return {
+        isMinister:
+            user.isMinister === true || user.userType === UserType.MINISTER,
+        isCreator:
+            user.isCreator === true || user.userType === UserType.CREATOR,
+        isListener:
+            user.isListener === true || user.userType === UserType.LISTENER,
+    };
+}
+
 class AuthMapper {
     constructor() {}
 
@@ -97,9 +112,7 @@ class AuthMapper {
             isSuper: user.isSuper,
             isAdmin: user.isAdmin,
             isUser: user.isUser,
-            isMinister: user.userType === UserType.MINISTER,
-            isCreator: user.userType === UserType.CREATOR,
-            isListener: user.userType === UserType.LISTENER,
+            ...personaFlags(user),
 
             isActive: user.isActive,
             isLocked: user.isLocked,
@@ -140,8 +153,18 @@ class AuthMapper {
             (await resolveCode(u.minister, (id) =>
                 ministerRepository.findById(id),
             )) ?? null;
+
+        let listenerRef = u.listener;
+        if (!refId(listenerRef)) {
+            const listenerByUser = await listenerRepository.findOne({
+                user: userDocId(user),
+            });
+            if (!listenerByUser.error && listenerByUser.data) {
+                listenerRef = listenerByUser.data;
+            }
+        }
         result.listenerCode =
-            (await resolveCode(u.listener, (id) =>
+            (await resolveCode(listenerRef, (id) =>
                 listenerRepository.findById(id),
             )) ?? null;
         result.studioCode =
@@ -149,18 +172,14 @@ class AuthMapper {
                 studioRepository.findStudioById(id),
             )) ?? null;
 
-        if (user.userType === UserType.CREATOR) {
-            const cRes = await creatorRepository.findOne({
-                user: user.id,
-            } as never);
-            result.creatorCode = cRes.error
-                ? null
-                : (codeFromDoc(cRes.data) ?? null);
-        } else {
-            result.creatorCode = null;
-        }
+        const creatorRes = await creatorRepository.findOne({
+            user: userDocId(user),
+        } as never);
+        result.creatorCode = creatorRes.error
+            ? null
+            : (codeFromDoc(creatorRes.data) ?? null);
 
-        if (user.isAdmin || user.userType === UserType.ADMIN) {
+        if (user.isAdmin || user.userType === UserType.ADMIN || user.isSuper) {
             const aRes = await adminRepository.findAdminByUser(userDocId(user));
             result.adminCode = aRes.error
                 ? null
