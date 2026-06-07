@@ -26,9 +26,26 @@ Create one Coolify resource per surface (API, studio web, marketing).
 ### Configuration (all three)
 
 - **Source**: GitHub `thetroott/troott` (branch per environment, or same branch with different `IMAGE_TAG`).
-- **Build Pack**: **Docker Compose** (not Dockerfile).
-- **Docker Compose Location**: path in table above (repo-relative).
-- **Do not** set Base Directory to `apps/web/Dockerfile` — that causes `mkdir .../Dockerfile: File exists`.
+- **Build Pack**: **Docker Compose** (not Dockerfile, not Nixpacks). Images are built in **GitHub Actions** and pushed to GHCR; Coolify only **pulls** them.
+- **Base Directory**: `/` (repo root). Leave empty if Coolify treats that as root.
+- **Docker Compose Location**: path in table above (repo-relative), e.g. `deploy/coolify/docker-compose.website.yaml`.
+- **Preserve Repository During Deployment**: enabled (recommended).
+- After saving, click **Reload Compose File** (or **Save & Reload Compose File**). The **Docker Compose Content (raw)** box must show the `services:` block from that file. If it stays **empty**, Traefik has nothing to route and browsers show **no available server**.
+- **Do not** set Base Directory to `apps/website/Dockerfile` or switch to **Dockerfile / Nixpacks** on Coolify — that breaks the GHCR pull model and causes phantom “healthy” containers with no app behind Traefik.
+
+### Domains (critical for Traefik)
+
+Enter **full URLs with protocol**, not bare hostnames:
+
+| App | Example domains field | Container port |
+| --- | --------------------- | -------------- |
+| Website | `https://troott.com,https://www.troott.com` | **3000** |
+| Studio | `https://app.troott.com` | **8080** |
+| API | `https://api.troott.com` | **5025** |
+
+Wrong domain format (e.g. `troott.com` without `https://`) can produce broken Traefik rules like `Host(\`\`) && PathPrefix(\`troott.com\`)` and **no available server** / 503. After changing domains, **Redeploy**.
+
+In **Advanced**, disable **Strip Prefixes** unless you intentionally need path stripping.
 
 ### Required resource environment variables
 
@@ -65,7 +82,37 @@ Compose interpolates `$`. In Coolify env values that flow into compose, escape d
 
 ### 4.4 Large image / exit 255 during extract
 
-Increase Coolify deploy timeout or server disk; studio/web images include nginx + static assets.
+Increase Coolify deploy timeout or server disk; studio/web images include Caddy/static assets.
+
+### 4.5 Empty “Docker Compose Content (raw)” / no available server
+
+Symptoms: resource shows **Running (healthy)** but `https://troott.com` returns Traefik **no available server**; raw compose box is blank.
+
+**Do not** switch to Dockerfile or Nixpacks — use **Docker Compose** + GHCR images from CI.
+
+Fix:
+
+1. **Build Pack** = **Docker Compose**.
+2. **Base Directory** = repo root (`/` or empty).
+3. **Docker Compose Location** = `deploy/coolify/docker-compose.website.yaml` (or `.api.yaml` / `.web.yaml` for other apps).
+4. **Git Source** connected; branch includes that file (e.g. `master`).
+5. Click **Save**, then **Reload Compose File**. Raw box should list `services: website:` with `image: ghcr.io/...`.
+6. If reload still fails, paste the file contents from the repo into the raw box manually, then Save.
+7. Set **Environment Variables**: `GHCR_ORG` (lowercase, e.g. `thetroott`), `IMAGE_TAG` (`production`).
+8. **Domains**: `https://troott.com,https://www.troott.com` with port **3000**.
+9. **Redeploy** (Force Stop in Danger Zone first if a phantom deployment persists).
+
+Verify on server:
+
+```bash
+docker inspect <website-container> --format '{{json .Config.Labels}}' | jq 'with_entries(select(.key|test("traefik")))'
+```
+
+Router rule should include `Host(\`troott.com\`)` or `Host(\`www.troott.com\`)`, not empty `Host(\`\`)`.
+
+### 4.6 SSL / ERR_CERT_AUTHORITY_INVALID
+
+See section **Domains** above. Ensure port **80/443** open on the server, Let’s Encrypt enabled per domain, and HTTP routers exist during certificate issuance (temporarily disable **Force HTTPS** if ACME HTTP-01 returns 404).
 
 ## 5. Local smoke test
 
