@@ -52,7 +52,12 @@ RUN pnpm build
 
 FROM caddy:2-alpine AS runner
 
+RUN apk add --no-cache wget
+
 COPY apps/web/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/apps/web/dist /usr/share/caddy
 
 EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:8080/ || exit 1
