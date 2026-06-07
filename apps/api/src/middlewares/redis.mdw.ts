@@ -16,7 +16,7 @@ class redisHandler {
                     host: REDIS_CONFIG.host,
                     port: REDIS_CONFIG.port,
                     connectTimeout: 30000,
-               //     tls: true,
+                    tls: true,
                     rejectUnauthorized: REDIS_CONFIG.tls.rejectUnauthorized,
                     minVersion: 'TLSv1.2',
                 },
@@ -24,23 +24,10 @@ class redisHandler {
                 username: REDIS_CONFIG.user,
                 password: REDIS_CONFIG.password,
             });
-
-            await this.client.connect();
-            
         } else {
             this.client = createClient({
-                socket: {
-                    host: REDIS_CONFIG.host,
-                    port: REDIS_CONFIG.port,
-                },
-                database: REDIS_CONFIG.db,
-                ...(REDIS_CONFIG.user ? { username: REDIS_CONFIG.user } : {}),
-                ...(REDIS_CONFIG.password
-                    ? { password: REDIS_CONFIG.password }
-                    : {}),
+                url: `rediss://${REDIS_CONFIG.user}:${REDIS_CONFIG.password}@${REDIS_CONFIG.host}:${REDIS_CONFIG.port}/${REDIS_CONFIG.db}`,
             });
-
-            await this.client.connect();
         }
 
         if (process.env.APP_ENV === ENVType.DEVELOPMENT) {
@@ -72,10 +59,6 @@ class redisHandler {
         console.log(colors.yellow.inverse('Connected to REDIS'));
     }
 
-    private isReady(): boolean {
-        return Boolean(this.client?.isOpen);
-    }
-
     public async disconnect(): Promise<void> {
         if (this.client) {
             await this.client.quit();
@@ -84,50 +67,26 @@ class redisHandler {
     }
 
     public async keepData(data: IData, exp: number) {
-        if (!this.isReady()) {
-            return null;
-        }
-        try {
-            const value = JSON.stringify(data.value);
-            return await this.client!.set(data.key, value, { EX: exp });
-        } catch {
-            return null;
-        }
+        if (!this.client) return;
+        const value = JSON.stringify(data.value);
+        return await this.client.set(data.key, value, { EX: exp });
     }
 
     public async fetchData<T = any>(key: string): Promise<T | null> {
-        if (!this.isReady()) {
-            return null;
-        }
-        try {
-            const data = await this.client!.get(key);
-            return data ? JSON.parse(data) : null;
-        } catch {
-            return null;
-        }
+        if (!this.client) return null;
+        const data = await this.client.get(key);
+        return data ? JSON.parse(data) : null;
     }
 
     public async deleteData(key: string) {
-        if (!this.isReady()) {
-            return null;
-        }
-        try {
-            await this.client!.del(key);
-        } catch {
-            return null;
-        }
+        if (!this.client) return;
+        await this.client.del(key);
     }
 
     public async exists(key: string): Promise<boolean> {
-        if (!this.isReady()) {
-            return false;
-        }
-        try {
-            const exists = await this.client!.exists(key);
-            return exists === 1;
-        } catch {
-            return false;
-        }
+        if (!this.client) return false;
+        const exists = await this.client.exists(key);
+        return exists === 1;
     }
 
     public async paginate(data: any[], page = 1, limit = 10) {
@@ -135,6 +94,7 @@ class redisHandler {
         const end = start + limit;
         return data.slice(start, end);
     }
+
 }
 
 export default new redisHandler();
