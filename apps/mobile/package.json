@@ -1,6 +1,6 @@
 {
     "name": "@troott/mobile",
-    "version": "1.0.0",
+    "version": "00.01.00",
     "private": true,
     "description": "subscription based sermon-streaming service",
     "homepage": "https://github.com/thebuildershq/troott-client-mobile#readme",

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
+import Constants from 'expo-constants';
 import { ArrowLeft2, ArrowUp } from 'iconsax-react-nativejs';
 import { router } from 'expo-router';
 
@@ -87,7 +88,10 @@ export default function AboutTroottScreen() {
             </View>
 
             <View style={styles.content}>
-                <AboutRow label="App version" value="00.01.00" />
+                <AboutRow
+                    label="App version"
+                    value={Constants.expoConfig?.version ?? '—'}
+                />
                 <AboutRow
                     label="Privacy policy"
                     external

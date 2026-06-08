@@ -2,7 +2,7 @@
   "expo": {
     "name": "Troott",
     "slug": "troott",
-    "version": "1.0.0",
+    "version": "00.01.00",
     "orientation": "portrait",
     "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "automatic",
@@ -34,26 +34,19 @@
         "monochromeImage": "./assets/app-icon.png"
       },
       "permissions": [
-        "CAMERA",
-        "RECORD_AUDIO",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
-        "CALL_PHONE",
-        "CALL_PRIVILEGED"
+        "android.permission.CALL_PHONE",
+        "android.permission.CALL_PRIVILEGED"
       ],
-      "package": "com.troott.app"
+      "package": "com.troott.app",
+      "versionCode": 2
     },
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png",
       "bundler": "metro"
     },
-    "extra": {
-      "eas": {
-        "projectId": "48464c89-4d39-460d-b9b3-f451321cce9c"
-      }
-    },
-    "owner": "troott",
     "plugins": [
       [
         "expo-build-properties",
@@ -87,6 +80,13 @@
       "@react-native-community/datetimepicker",
       "expo-asset",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "87856a53-43b2-47ef-9b14-e161d92372e5"
+      }
+    },
+    "owner": "troott-app"
   }
 }
