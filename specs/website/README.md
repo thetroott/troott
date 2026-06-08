@@ -9,6 +9,7 @@ Distinct from the studio portal (`apps/web` → `app.troott.com`). See [`specs/w
 | ID | Topic | PRODUCT | TECH |
 | -- | ----- | ------- | ---- |
 | feat-0001 | Dark mode only — no light theme | [PRODUCT](./feature/feat-0001/PRODUCT.md) | [TECH](./feature/feat-0001/TECH.md) |
+| feat-0002 | Navbar — Pacepard-style dropdown nav | [PRODUCT](./feature/feat-0002/PRODUCT.md) | [TECH](./feature/feat-0002/TECH.md) |
 
 ## Related
 
