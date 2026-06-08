@@ -9,6 +9,8 @@ export const siteConfig = {
         listeners: '#listener',
         ministers: '#minister',
         faqs: '#faqs',
+        login: 'https://app.troott.com/login',
+        studio: 'https://app.troott.com',
         imprint: '/',
         privacy:
             '/https://troott.notion.site/Troott-Privacy-Policy-24bb2bbd63c7806382bcfffe3fe1a1bf',

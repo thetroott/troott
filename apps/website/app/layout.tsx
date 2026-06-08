@@ -148,7 +148,7 @@ export default function RootLayout({
                 <MailerLiteScript />
             </head>
             <body
-                className={`${matter.className} min-h-screen scroll-auto bg-neutral-950 p-4 text-gray-50 antialiased selection:bg-cyan-400 selection:text-cyan-700`}
+                className={`${matter.className} min-h-screen scroll-auto bg-neutral-950 text-gray-50 antialiased selection:bg-cyan-400 selection:text-cyan-700`}
             >
                 <Navigation />
                 {children}
