@@ -10,7 +10,7 @@ export function AuthLayout(data: IAuthLayout) {
         showLogo = true,
         showCopyright = true,
         maxWidth = 'xs',
-        backgroundImage = '/public/images/assets/troott-o.png',
+        backgroundImage = '/images/assets/troott-o.png',
         className = '',
         hideHeaderOnSuccess = false,
     } = data;
