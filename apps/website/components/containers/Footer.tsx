@@ -1,11 +1,13 @@
 import { RiArrowRightUpLine } from '@remixicon/react';
 import Link from 'next/link';
+
+import { siteConfig } from '@/app/siteConfig';
 import { TroottLogo } from '@/public/TroottLogo';
 
 const navigation = {
     product: [
-        { name: 'Ministers', href: '#minister', external: false },
-        { name: 'Listeners', href: '#listener', external: false },
+        { name: 'Ministers', href: siteConfig.baseLinks.ministers, external: false },
+        { name: 'Listeners', href: siteConfig.baseLinks.listeners, external: false },
         { name: 'faqs', href: '#faqs', external: false },
     ],
     resources: [
@@ -25,29 +27,27 @@ const navigation = {
         { name: 'Contact', href: 'mailto:hello@troott.com', external: false },
     ],
     legal: [
-        {
-            name: 'Privacy',
-            href: 'https://troott.notion.site/Troott-Privacy-Policy-24bb2bbd63c7806382bcfffe3fe1a1bf',
-            external: true,
-        },
-        { name: 'Terms', href: '#', external: false },
+        { name: 'Legal', href: siteConfig.baseLinks.legal, external: false },
+        { name: 'Privacy', href: siteConfig.baseLinks.privacy, external: false },
+        { name: 'Terms', href: siteConfig.baseLinks.terms, external: false },
+        { name: 'Cookies', href: siteConfig.baseLinks.cookies, external: false },
     ],
 };
 
 export default function Footer() {
     return (
-        <footer id="footer">
-            <div className="mx-auto max-w-6xl px-3 pb-8 pt-16 sm:pt-24 lg:pt-32">
+        <footer id="footer" className="bg-stone-900">
+            <div className="mx-auto max-w-7xl px-3 pb-8 pt-16">
                 <div className="xl:grid xl:grid-cols-3 xl:gap-20">
                     <div className="space-y-8">
                         <TroottLogo className="w-32 sm:w-40" />
-                        <p className="text-sm leading-6 text-gray-400">
+                        <p className="text-lgleading-6 text-gray-400">
                             Turning audio sermons into a tool for true
                             discipleship. Made with ❤️ in Nigeria, crafted for
                             the world.
                         </p>
                     </div>
-                    <div className="mt-16 grid grid-cols-1 gap-14 sm:gap-8 md:grid-cols-2 xl:col-span-2 xl:mt-0">
+                    <div className="mt-16 pb-40 grid grid-cols-1 gap-14 sm:gap-8 md:grid-cols-2 xl:col-span-2 xl:mt-0">
                         <div className="grid grid-cols-2 gap-8">
                             <div>
                                 <h3 className="text-sm font-semibold leading-6 text-gray-50">
@@ -210,22 +210,29 @@ export default function Footer() {
                         </div>
                     </div>
                 </div>
-                <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-gray-800 pt-8 sm:mt-20 sm:flex-row lg:mt-24">
+                <div className="mt-16  flex flex-col items-center justify-between gap-4 border-t border-gray-800 pt-8 sm:mt-20 sm:flex-row lg:mt-34">
                     <p className="text-sm leading-5 text-gray-400">
-                        &copy; {new Date().getFullYear()} Troott Technologies.
-                        All rights reserved.
+                        All rights reserved
+                        &copy; {new Date().getFullYear()} Troott
+                       
                     </p>
-                    <div className="rounded-full border border-gray-800 py-1 pl-1 pr-2">
+                    <Link
+                        href="https://status.troott.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded-full border border-gray-800 py-1 pl-1 pr-2 transition-colors hover:border-gray-700 hover:bg-gray-900/50"
+                        aria-label="System status — opens status.troott.com"
+                    >
                         <div className="flex items-center gap-1.5">
                             <div className="relative size-4 shrink-0">
                                 <div className="absolute inset-[1px] rounded-full bg-emerald-600/20" />
                                 <div className="absolute inset-1 rounded-full bg-emerald-500" />
                             </div>
                             <span className="text-xs text-gray-50">
-                                private alpha
+                                All Systems Operational
                             </span>
                         </div>
-                    </div>
+                    </Link>
                 </div>
             </div>
         </footer>

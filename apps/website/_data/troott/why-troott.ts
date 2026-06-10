@@ -28,6 +28,15 @@ export type WhyTroottContent = {
     label: string;
     heading: string;
     headingMuted: string;
+    subtitle?: string;
+    defaultTabId: WhyTroottTabId;
+    tabs: WhyTroottTab[];
+};
+
+export type ProductWorkflowsContent = {
+    label: string;
+    heading: string;
+    subtitle: string;
     defaultTabId: WhyTroottTabId;
     tabs: WhyTroottTab[];
 };
@@ -45,10 +54,10 @@ export const whyTroottContent: WhyTroottContent = {
             eyebrow: 'Troott App',
             title: 'Your sermon library, organized',
             description:
-                'Every message you love in one place. Find ministers, pick up where you left off, and listen without ads or clutter.',
+                'Every message you love in one place. Find ministers, pick up where you left off, and listen without ads or clutter. You’ll be able to listen to sermons, podcasts, and more.',
             cta: { label: 'Get the app', useGetTroott: true },
             image: {
-                src: '/images/troott-hero-image.png',
+                src: '/images/exact.png',
                 alt: 'Troott app preview showing sermon library',
             },
         },
@@ -66,7 +75,7 @@ export const whyTroottContent: WhyTroottContent = {
                 external: true,
             },
             image: {
-                src: '/images/website-prop.png',
+                src: '/images/troott-hero-image.png',
                 alt: 'Troott Studio for ministers',
             },
         },
@@ -105,4 +114,13 @@ export const whyTroottContent: WhyTroottContent = {
             },
         },
     ],
+};
+
+export const productWorkflowsContent: ProductWorkflowsContent = {
+    label: 'WHY TROOTT',
+    heading: 'Workflows that feel native.',
+    subtitle:
+        'Switch between listening, publishing, and sharing without leaving Troott.',
+    defaultTabId: whyTroottContent.defaultTabId,
+    tabs: whyTroottContent.tabs,
 };

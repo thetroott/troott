@@ -4,6 +4,30 @@ import path from 'node:path';
 const nextConfig: NextConfig = {
     output: 'standalone',
     outputFileTracingRoot: path.join(process.cwd(), '../..'),
+    async redirects() {
+        return [
+            {
+                source: '/privacy',
+                destination: '/legal/listener/privacy-policy',
+                permanent: true,
+            },
+            {
+                source: '/terms',
+                destination: '/legal/listener/terms-of-use',
+                permanent: true,
+            },
+            {
+                source: '/listeners',
+                destination: '/listener',
+                permanent: true,
+            },
+            {
+                source: '/ministers',
+                destination: '/minister',
+                permanent: true,
+            },
+        ];
+    },
     images: {
         remotePatterns: [
             {

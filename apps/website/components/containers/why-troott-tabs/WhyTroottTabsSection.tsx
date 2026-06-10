@@ -51,7 +51,7 @@ export function WhyTroottTabsSection() {
                     <nav aria-label="Why Troott products" className="mb-8">
                         <ul
                             role="tablist"
-                            className="flex flex-wrap gap-2"
+                            className="inline-flex max-w-full flex-wrap gap-1 rounded-sm bg-[#262626] p-1.5"
                         >
                             {tabs.map((tab, index) => {
                                 const isActive = tab.id === activeTabId;
@@ -72,11 +72,11 @@ export function WhyTroottTabsSection() {
                                                 onTabKeyDown(event, index)
                                             }
                                             className={cx(
-                                                'h-10 rounded-full px-5 text-sm font-normal transition-colors',
-                                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                                                'font-matter inline-flex h-9 items-center rounded-sm px-5 text-sm font-normal leading-none transition-colors sm:h-10',
+                                                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#262626]',
                                                 isActive
-                                                    ? 'bg-white text-black'
-                                                    : 'bg-[#262626] text-zinc-400 hover:bg-[#333333] hover:text-zinc-200',
+                                                    ? 'bg-background/70 text-white shadow-sm'
+                                                    : 'bg-transparent text-white hover:text-white/90',
                                             )}
                                         >
                                             {tab.navLabel}
@@ -106,10 +106,13 @@ export function WhyTroottTabsSection() {
 
                         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-10">
                             <div className="min-w-0 flex-1">
-                                <p className="mb-3 text-sm leading-5 text-zinc-500">
+                                <p className="mb-3 font-matter text-sm leading-5 text-zinc-500">
                                     {activeTab.eyebrow}
                                 </p>
-                                <p className="max-w-[28rem] text-[15px] leading-[1.65] text-zinc-400 sm:text-base sm:leading-[1.7]">
+                                <p
+                                    className="max-w-3xl font-matter text-base font-normal leading-[1.6] text-white sm:text-xl sm:leading-[1.65]"
+                                    aria-live="polite"
+                                >
                                     {activeTab.description}
                                 </p>
                             </div>

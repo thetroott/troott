@@ -10,18 +10,19 @@ export const siteConfig = {
     image: siteUrl ? joinUrl(siteUrl, '/images/troott-og.png') : '',
     baseLinks: {
         home: '/',
-        listeners: '#listener',
-        ministers: '#minister',
+        listeners: '/listener',
+        ministers: '/minister',
         faqs: '#faqs',
         login: webAppUrl ? joinUrl(webAppUrl, '/login') : '',
-        requestDemo: requestDemoUrl || '#minister',
+        requestDemo: requestDemoUrl || '/minister',
         studio: webAppUrl,
         getTroott: getGetTroottBaseUrl(),
         listenersWeb: webAppUrl,
         imprint: '/',
-        privacy:
-            '/https://troott.notion.site/Troott-Privacy-Policy-24bb2bbd63c7806382bcfffe3fe1a1bf',
-        terms: '/',
+        legal: '/legal',
+        privacy: '/legal/listener/privacy-policy',
+        terms: '/legal/listener/terms-of-use',
+        cookies: '/legal/listener/cookies',
     },
 };
 

@@ -27,10 +27,13 @@ function FaqsHeader({
             </p>
             <h2
                 id="faqs-section-heading"
-                className="mt-5 font-semibold text-[2.75rem] leading-[1.05] tracking-[-0.03em] text-white lg:text-[3.5rem]"
+                className="mt-5 text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.03em] lg:whitespace-nowrap lg:text-[2.5rem]"
             >
-                <span className="block">{heading}</span>
-                <span className="block text-zinc-500">{headingMuted}</span>
+                <span className="block text-white lg:inline">{heading}</span>
+                <span className="block text-zinc-500 lg:inline">
+                    {' '}
+                    {headingMuted}
+                </span>
             </h2>
         </header>
     );
@@ -46,8 +49,8 @@ export function FaqsSection() {
             className="bg-background py-24 sm:py-32 lg:py-40"
         >
             <div className="container mx-auto max-w-7xl px-4 md:px-6">
-                <div className="lg:grid lg:grid-cols-[minmax(280px,360px)_1fr] lg:gap-12 xl:gap-20">
-                    <div className="relative hidden lg:block">
+                <div className="lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-16 xl:gap-x-24">
+                    <div className="relative hidden shrink-0 lg:block">
                         <FaqsHeader
                             className="sticky z-10"
                             style={{
@@ -56,7 +59,7 @@ export function FaqsSection() {
                         />
                     </div>
 
-                    <div>
+                    <div className="min-w-0">
                         <FaqsHeader className="mb-12 lg:hidden" />
 
                         <Accordion

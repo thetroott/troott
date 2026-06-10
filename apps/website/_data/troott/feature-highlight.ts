@@ -26,7 +26,7 @@ export const featureHighlightContent: FeatureHighlightContent = {
     screenshot: {
         src: '/blocks/phone-screenshot-appstore.png',
         alt: 'Troott mobile app',
-        width: 375,
-        height: 380,
+        width: 520,
+        height: 880,
     },
 };
