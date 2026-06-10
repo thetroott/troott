@@ -26,6 +26,7 @@ Product and technical specifications for **`apps/web`**.
 | feat-0032 | Upload modal — immediate sermon cover image API upload | [PRODUCT](./feature/feat-0032/PRODUCT.md) | [TECH](./feature/feat-0032/TECH.md) |
 | feat-0033 | Profile cover (`banner`) / Background image not visible on web | [PRODUCT](./feature/feat-0033/PRODUCT.md) | [TECH](./feature/feat-0033/TECH.md) |
 | feat-0034 | Dashboard sidebar — always show onboarding Dashboard UI | [PRODUCT](./feature/feat-0034/PRODUCT.md) | [TECH](./feature/feat-0034/TECH.md) |
+| feat-0035 | `/get-troott` smart redirect (app host) | [PRODUCT](./feature/feat-0035/PRODUCT.md) | [TECH](./feature/feat-0035/TECH.md) |
 
 **Cross-cutting:** [feat-0026 EMPTY_STATE_LAYOUT_SPEC](./feature/feat-0026/EMPTY_STATE_LAYOUT_SPEC.md) — all empty states centered in page / region / panel.
 
