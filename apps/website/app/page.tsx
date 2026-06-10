@@ -1,11 +1,13 @@
 import { getStartedContent } from '@/_data/troott/get-started';
 import { coreFeaturesContent } from '@/_data/troott/core-features';
 import CTASection from '@/components/containers/CallToAction';
-import { DownloadsSection } from '@/components/containers/downloads';
 import { CoreFeaturesSection } from '@/components/containers/feature-showcase';
+import { AppShowcaseSection } from '@/components/containers/app-showcase';
+import { AudienceStorySection } from '@/components/containers/audience-story';
 import { BenefitsSection } from '@/components/containers/benefits/BenefitsSection';
 import { FaqsSection } from '@/components/containers/faqs/FaqsSection';
 import { FeatureHighlightSection } from '@/components/containers/feature-highlight/FeatureHighlightSection';
+import { ProductWorkflowsSection } from '@/components/containers/product-workflows';
 import { Faqs } from '@/components/containers/Faqs';
 import HeroSection from '@/components/containers/HeroSection';
 import { FeaturedPartnersSection } from '@/components/containers/featured-partners';
@@ -29,9 +31,15 @@ export default function Home() {
 
             <WhyTroottTabsSection />
 
+            <ProductWorkflowsSection />
+
             <BenefitsSection />
 
+            <AudienceStorySection />
+
             <FeatureHighlightSection />
+
+            <AppShowcaseSection />
 
             <CoreFeaturesSection {...coreFeaturesContent} />
 
@@ -44,11 +52,12 @@ export default function Home() {
 
             <FaqsSection />
 
-            <Faqs />
+            {/* <Faqs />
+            <CTASection /> */}
 
-            <DownloadsSection />
+         
 
-            <CTASection />
+           
         </main>
     );
 }
