@@ -1,0 +1,1 @@
+export { WhyTroottSection } from './WhyTroottSection';
