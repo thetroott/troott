@@ -43,8 +43,8 @@ function SplitDemoContent({
                     target={cta.external ? '_blank' : undefined}
                     rel={cta.external ? 'noopener noreferrer' : undefined}
                     className={cx(
-                        'inline-flex h-10 items-center justify-center rounded-full',
-                        'bg-white px-5 text-sm font-medium text-black',
+                        'inline-flex h-10 items-center justify-center rounded-sm',
+                        'bg-white px-5 text-sm font-normal text-black',
                         'transition-colors hover:bg-white/90',
                     )}
                 >

@@ -100,7 +100,7 @@ export function MobileNavList({
                             <button
                                 type="button"
                                 onClick={() => onToggleDropdown(link.label)}
-                                className="text-foreground flex w-full items-center justify-between text-2xl font-medium tracking-tight"
+                                className="text-foreground flex w-full items-center justify-between text-2xl font-normal tracking-tight"
                             >
                                 {link.label}
                                 <ChevronDown
@@ -133,7 +133,7 @@ export function MobileNavList({
                             key={link.label}
                             href={link.href}
                             className={cx(
-                                'text-foreground hover:text-foreground/80 py-5 text-2xl font-medium tracking-tight transition-colors first:pt-0 last:pb-0',
+                                'text-foreground hover:text-foreground/80 py-5 text-2xl font-normal tracking-tight transition-colors first:pt-0 last:pb-0',
                                 pathname === link.href &&
                                     'text-muted-foreground',
                             )}

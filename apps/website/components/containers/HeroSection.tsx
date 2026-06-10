@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { RiPlayCircleFill, RiUploadCloudFill } from '@remixicon/react';
+import { RiUploadCloudFill } from '@remixicon/react';
 import { cx } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import HeroImage from '@/components/ui/HeroImage';
 import { siteConfig } from '@/app/siteConfig';
+import { GetTroottButton } from '../ui/get-troott-button';
 
 export default function HeroSection() {
     return (
@@ -23,32 +24,18 @@ export default function HeroSection() {
                             family, and stay rooted in God&apos;s Word.
                         </p>
                         <div className="flex flex-wrap items-center justify-start gap-4 md:justify-center">
-                            <Button
-                                asChild
-                                size="lg"
-                                className={cx(
-                                    'h-11 rounded-md px-5 text-base font-medium',
-                                    'bg-foreground text-background hover:bg-foreground/90',
-                                    'shadow-sm transition-colors',
-                                )}
-                            >
-                                <Link
-                                    href={siteConfig.baseLinks.listeners}
-                                    className="inline-flex items-center gap-2"
-                                >
-                                    Start listening
-                                    <RiPlayCircleFill
-                                        aria-hidden="true"
-                                        className="size-4 shrink-0"
-                                    />
-                                </Link>
-                            </Button>
+                            <GetTroottButton
+                                label="Start listening"
+                                showShortcut
+                                onFallback={() => {}}
+                                className="h-11 rounded-sm px-5 text-base font-normal"
+                            />
                             <Button
                                 asChild
                                 variant="outline"
                                 size="lg"
                                 className={cx(
-                                    'h-11 rounded-md px-5 text-base font-medium',
+                                    'h-11 rounded-sm px-5 text-base font-normal',
                                     'border-foreground/30 bg-background text-foreground',
                                     'hover:bg-muted hover:text-foreground',
                                     'shadow-sm transition-colors',

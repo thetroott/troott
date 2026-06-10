@@ -61,8 +61,8 @@ function FeatureShowcaseContent({
                     target={cta.external ? '_blank' : undefined}
                     rel={cta.external ? 'noopener noreferrer' : undefined}
                     className={cx(
-                        'inline-flex h-10 items-center justify-center rounded-lg',
-                        'bg-white px-4 text-sm font-medium text-black',
+                        'inline-flex h-10 items-center justify-center rounded-sm',
+                        'bg-white px-4 text-sm font-normal text-black',
                         'transition-colors hover:bg-white/90',
                     )}
                 >

@@ -18,7 +18,7 @@ const AccordionTrigger = React.forwardRef<
         <AccordionPrimitives.Trigger
             className={cx(
                 // base
-                'group flex flex-1 cursor-pointer items-center justify-between py-3 text-left text-sm font-medium leading-none',
+                'group flex flex-1 cursor-pointer items-center justify-between py-3 text-left text-sm font-normal leading-none',
                 // text color
                 'text-neutral-900 dark:text-neutral-50',
                 // disabled

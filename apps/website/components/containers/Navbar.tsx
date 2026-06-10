@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Linkedin, X } from 'lucide-react';
-import { RiPlayCircleFill, RiUploadCloudFill } from '@remixicon/react';
+import { RiUploadCloudFill } from '@remixicon/react';
 import { track } from '@vercel/analytics';
 
 import { siteConfig } from '@/app/siteConfig';
 import { NavigationItems, type NavItem } from '@/_data/troott/navigation';
 import { Button } from '@/components/ui/button';
+import { GetTroottButton } from '@/components/ui/get-troott-button';
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -35,42 +36,33 @@ function HeaderActions({
     loginClassName?: string;
 }) {
     return (
-        <div className={cx('flex flex-wrap items-center gap-2', className)}>
+        <div
+            className={cx(
+                'flex flex-wrap items-center gap-2 font-normal',
+                className,
+            )}
+        >
             <Button
                 asChild
                 variant="link"
                 size="lg"
                 className={cx(
-                    'h-10 px-3 text-sm font-medium md:text-base',
+                    'h-10 rounded-sm px-3 text-sm font-normal md:text-base',
                     loginClassName,
                 )}
             >
-                <Link
-                    href={siteConfig.baseLinks.login}
-                   
-                >
-                    Request Demo
-                </Link>
+                <Link href={siteConfig.baseLinks.requestDemo}>Request Demo</Link>
             </Button>
-            <Button
-                size="lg"
-                className={cx(
-                    'h-10 rounded-md px-4 text-sm font-medium md:text-base',
-                    'bg-foreground text-background hover:bg-foreground/90',
-                )}
-                onClick={onOpenListener}
-            >
-                Start listening
-                <RiPlayCircleFill
-                    aria-hidden="true"
-                    className="size-4 shrink-0"
-                />
-            </Button>
+            <GetTroottButton
+                showShortcut
+                onFallback={onOpenListener}
+                className="h-10 rounded-sm px-4 text-sm font-normal md:text-base"
+            />
             {/* <Button
                 variant="outline"
                 size="lg"
                 className={cx(
-                    'h-10 rounded-sm px-4 text-sm font-medium md:text-base',
+                    'h-10 rounded-sm px-4 text-sm font-normal md:text-base',
                     'border-foreground/30 bg-background text-foreground',
                     'hover:bg-muted hover:text-foreground',
                 )}
@@ -141,7 +133,7 @@ export function Navigation() {
         if ('sections' in link && link.sections) {
             return (
                 <NavigationMenuItem key={link.label}>
-                    <NavigationMenuTrigger className="h-9 bg-transparent! px-2 text-sm font-medium md:px-2.5 md:text-base data-[state=open]:bg-accent/50">
+                    <NavigationMenuTrigger className="h-9 bg-transparent! px-2 text-sm font-normal md:px-2.5 md:text-base data-[state=open]:bg-accent/50">
                         {link.label}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent className="left-0 top-full mt-1.5 w-auto rounded-md border border-border/80 bg-popover p-0 shadow-md">
@@ -169,7 +161,7 @@ export function Navigation() {
         if ('dropdownItems' in link && link.dropdownItems) {
             return (
                 <NavigationMenuItem key={link.label}>
-                    <NavigationMenuTrigger className="h-9 bg-transparent! px-2 text-sm font-medium md:px-2.5 md:text-base data-[state=open]:bg-accent/50">
+                    <NavigationMenuTrigger className="h-9 bg-transparent! px-2 text-sm font-normal md:px-2.5 md:text-base data-[state=open]:bg-accent/50">
                         {link.label}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent className="left-0 top-full mt-1.5 w-auto rounded-md border border-border/80 bg-popover p-0 shadow-md">
@@ -191,7 +183,7 @@ export function Navigation() {
                     <Link
                         href={link.href}
                         className={cx(
-                            'relative h-9 bg-transparent px-2 text-sm font-medium transition-opacity hover:opacity-75 md:px-2.5 md:text-base',
+                            'relative h-9 bg-transparent px-2 text-sm font-normal transition-opacity hover:opacity-75 md:px-2.5 md:text-base',
                             pathname === link.href && 'text-muted-foreground',
                         )}
                     >
@@ -208,7 +200,7 @@ export function Navigation() {
         <>
             <header
                 className={cx(
-                    'sticky top-0 z-50 w-full transition-all duration-300',
+                    'sticky top-0 z-50 w-full font-normal transition-all duration-300',
                     'border-border/70 bg-background/70 backdrop-blur-md',
                     isMenuOpen && 'max-lg:bg-background',
                 )}
@@ -325,14 +317,14 @@ export function Navigation() {
                             The discipleship infra for ministers and teachers.
                         </p>
                         <div className="flex items-center gap-4">
-                            <p className="text-foreground text-sm font-medium">
+                            <p className="text-foreground text-sm font-normal">
                                 Follow us:
                             </p>
                             <div className="flex gap-3">
                                 <Link
                                     href="https://x.com/thetroott"
                                     aria-label="Follow on X (Twitter)"
-                                    className="bg-accent hover:bg-primary flex size-9 items-center justify-center rounded-lg transition-colors"
+                                    className="bg-accent hover:bg-primary flex size-9 items-center justify-center rounded-sm transition-colors"
                                     onClick={closeMobileMenu}
                                 >
                                     <X className="size-5" />
@@ -340,7 +332,7 @@ export function Navigation() {
                                 <Link
                                     href="https://www.linkedin.com/company/troott"
                                     aria-label="Follow on LinkedIn"
-                                    className="bg-accent hover:bg-primary flex size-9 items-center justify-center rounded-lg transition-colors"
+                                    className="bg-accent hover:bg-primary flex size-9 items-center justify-center rounded-sm transition-colors"
                                     onClick={closeMobileMenu}
                                 >
                                     <Linkedin className="size-5" />

@@ -12,7 +12,7 @@ export default function CTASection() {
     return (
         <section
             aria-labelledby="hero-title"
-            className="mt-32 flex flex-col items-center justify-center text-center sm:mt-40"
+            className="mt-16 flex flex-col items-center justify-center text-center sm:mt-24"
         >
             <h1
                 id="hero-title"
@@ -34,7 +34,7 @@ export default function CTASection() {
                 style={{ animationDuration: '1100ms' }}
             >
                 <Button
-                    className="h-14 px-8 group gap-x-2 font-semibold md:h-12 md:px-6 text-base md:text-sm"
+                    className="h-14 px-8 group gap-x-2 font-normal md:h-12 md:px-6 text-base md:text-sm"
                     onClick={() => {
                         setRole('listener');
                         track('listenerSignup');
@@ -52,7 +52,7 @@ export default function CTASection() {
 
                 <Button
                     variant="secondary"
-                    className="group h-14 gap-x-2 bg-transparent px-8 font-semibold hover:bg-transparent md:h-12 md:px-6"
+                    className="group h-14 gap-x-2 bg-transparent px-8 font-normal hover:bg-transparent md:h-12 md:px-6"
                     onClick={() => {
                         setRole('minister');
                         track('ministerSignup');

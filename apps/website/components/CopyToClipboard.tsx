@@ -21,7 +21,7 @@ export default function CopyToClipboard({ code }: { code: string }) {
     return (
         <button
             onClick={copyToClipboard}
-            className="select-none rounded border border-white/10 bg-white/20 p-1.5 backdrop-blur-xl"
+            className="select-none rounded-sm border border-white/10 bg-white/20 p-1.5 backdrop-blur-xl"
         >
             {!copied ? (
                 <RiFileCopy2Line

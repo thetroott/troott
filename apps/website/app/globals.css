@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+    --site-header-height: 4rem;
+}
+
 @font-face {
     font-family: 'Matter-Heavy';
     src: url('/fonts/matter/Matter-Heavy.ttf') format('truetype');
