@@ -318,7 +318,10 @@ export default function Newsletter(data: ISubscribeDialog) {
                                 className="text-sm dark:text-neutral-400"
                             >
                                 By subscribing you agree to our{' '}
-                                <a href="#" className="  text-neutral-300/80">
+                                <a
+                                    href="/legal/listener/privacy-policy"
+                                    className="text-neutral-300/80 underline"
+                                >
                                     Privacy Policy
                                 </a>
                                 .
