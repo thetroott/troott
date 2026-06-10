@@ -64,7 +64,7 @@ export default function TourGuidePage() {
                         <Button
                             type="button"
                             onClick={handleStartTour}
-                            className="h-9 rounded-lg bg-[#08ffdb] px-6 font-matter text-sm font-medium leading-5 tracking-[0.14px] text-[#292929] hover:bg-[#07e8c9]"
+                            className="h-9 rounded-sm bg-[#08ffdb] px-6 font-matter text-sm font-medium leading-5 tracking-[0.14px] text-[#292929] hover:bg-[#07e8c9]"
                         >
                             Start tour
                         </Button>

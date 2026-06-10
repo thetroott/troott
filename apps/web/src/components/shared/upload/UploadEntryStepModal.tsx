@@ -142,7 +142,7 @@ const UploadEntryStepModal: React.FC<UploadEntryStepModalProps> = ({
                             handleOpenChange(false);
                         }}
                         disabled={isLoading}
-                        className="shrink-0 rounded-md p-1 text-[#eaeaea] opacity-90 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 disabled:pointer-events-none"
+                        className="shrink-0 rounded-sm p-1 text-[#eaeaea] opacity-90 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 disabled:pointer-events-none"
                         aria-label="Close"
                     >
                         <X className="h-6 w-6" strokeWidth={2} />

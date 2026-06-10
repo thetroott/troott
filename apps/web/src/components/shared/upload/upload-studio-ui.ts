@@ -34,7 +34,7 @@ export const UPLOAD_SHELL = {
     tabActiveLine: 'h-0.5 w-full shrink-0 rounded-full bg-[#eaeaea]',
     tabInactiveLine: 'h-0.5 w-full shrink-0 bg-transparent',
     tabInnerRow:
-        'flex h-8 min-h-[32px] max-h-8 w-full min-w-0 shrink-0 items-center rounded-md pl-1.5 pr-2 font-matter-medium text-[14px] leading-5 tracking-wide gap-2.5',
+        'flex h-8 min-h-[32px] max-h-8 w-full min-w-0 shrink-0 items-center rounded-sm pl-1.5 pr-2 font-matter-medium text-[14px] leading-5 tracking-wide gap-2.5',
     /**
      * Inactive only — optional inner chip (`Frame 40449` in Figma) for wider tabs.
      */
@@ -74,15 +74,15 @@ export const UPLOAD_SHELL = {
     footerLinkField:
         'flex flex-1 items-center gap-2 rounded-md border border-[#545454]/60 bg-[#242325] px-3 py-2.5',
     primaryCta:
-        'h-[34px] min-h-[34px] rounded-md bg-[#08ffdb] px-3 font-matter-medium text-[12px] leading-[18px] tracking-wide text-[#292929] shadow-none hover:bg-[#07e8c9]',
+        'h-[34px] min-h-[34px] rounded-sm bg-[#08ffdb] px-3 font-matter-medium text-[12px] leading-[18px] tracking-wide text-[#292929] shadow-none hover:bg-[#07e8c9]',
     ghostCta:
-        'h-[26px] min-h-[26px] rounded-md border-0 bg-transparent px-2 font-matter-medium text-[12px] leading-[18px] tracking-wide text-[#eaeaea] hover:bg-white/5',
+        'h-[26px] min-h-[26px] rounded-sm border-0 bg-transparent px-2 font-matter-medium text-[12px] leading-[18px] tracking-wide text-[#eaeaea] hover:bg-white/5',
     /**
      * Bordered studio secondary — Cancel upload (progress) + Remove audio on complete.
      * Figma details / destructive-adjacent control [`4660:6496`](https://www.figma.com/design/9lFM6TncipSv0pNVGBWZwA/Troott?node-id=4660-6496).
      */
     studioOutlineCta:
-        'h-[38px] min-w-[151px] rounded-md border border-[#707070] bg-transparent font-matter-medium text-[14px] leading-5 tracking-wide text-[#eaeaea] shadow-none hover:bg-white/5',
+        'h-[38px] min-w-[151px] rounded-sm border border-[#707070] bg-transparent font-matter-medium text-[14px] leading-5 tracking-wide text-[#eaeaea] shadow-none hover:bg-white/5',
     studioOutlineCtaDisabled: 'pointer-events-none text-[#707070] opacity-80',
     progressTrack: 'h-1.5 w-full max-w-[394px] rounded-md bg-[#9d9d9d]',
     progressFill:
@@ -107,7 +107,7 @@ export const UPLOAD_OPTIONS_BAR = {
     chipRow:
         'scrollbar-none flex min-w-0 flex-nowrap items-stretch justify-start gap-4 overflow-x-auto',
     chipBase:
-        'flex min-h-[70px] w-[207px] shrink-0 cursor-pointer flex-row items-center gap-2 rounded-lg border px-4 py-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:pointer-events-none disabled:opacity-50',
+        'flex min-h-[70px] w-[207px] shrink-0 cursor-pointer flex-row items-center gap-2 rounded-sm border px-4 py-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#171717] disabled:pointer-events-none disabled:opacity-50',
     chipInactive:
         'border-[#545454]/50 bg-[#1a1a1a] text-[#eaeaea] hover:bg-[#242325]',
     chipActive:

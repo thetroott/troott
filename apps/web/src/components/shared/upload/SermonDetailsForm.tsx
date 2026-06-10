@@ -840,7 +840,7 @@ const SermonDetailsForm: React.FC = () => {
                     <Button
                         type="button"
                         onClick={() => setShowMoreFields(true)}
-                        className="rounded-full border-0 bg-[#707070] px-4 font-matter-medium text-[13px] text-[#eaeaea] hover:bg-[#5a5a5a]"
+                        className="rounded-sm border-0 bg-[#707070] px-4 font-matter-medium text-[13px] text-[#eaeaea] hover:bg-[#5a5a5a]"
                     >
                         Show more
                     </Button>
@@ -976,7 +976,7 @@ const SermonDetailsForm: React.FC = () => {
                                             {tags.map((tag, index) => (
                                                 <div
                                                     key={index}
-                                                    className="inline-flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-sm"
+                                                    className="inline-flex items-center gap-1 rounded-sm bg-secondary px-2 py-1 text-sm text-secondary-foreground"
                                                 >
                                                     {tag}
                                                     <button
@@ -1267,7 +1267,7 @@ const SermonDetailsForm: React.FC = () => {
                     ) : (
                         <div
                             className={cn(
-                                'flex min-h-[220px] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 text-center transition-colors',
+                                'flex min-h-[220px] w-full cursor-pointer flex-col items-center justify-center rounded-sm border-2 border-dashed p-8 text-center transition-colors',
                                 dragActive
                                     ? 'border-[#08ffdb] bg-[#08ffdb]/5'
                                     : 'border-[#707070]/60 hover:border-[#707070]',

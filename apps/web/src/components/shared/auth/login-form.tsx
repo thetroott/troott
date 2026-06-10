@@ -13,6 +13,11 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { PATH_FORGOT_PASSWORD, PATH_REGISTER } from '@/routes/paths';
 import storage from '@/api/services/local-storage';
+import {
+    authInputClass,
+    authPasswordToggleClass,
+    authSubmitButtonClass,
+} from '@/components/shared/auth/auth-form.utils';
 
 const LoginForm = (data: IForm) => {
     const { className, ...props } = data;
@@ -124,9 +129,9 @@ const LoginForm = (data: IForm) => {
                                         }));
                                 }}
                                 className={cn(
+                                    authInputClass,
                                     'pl-9',
                                     'pr-10',
-                                    'h-12',
                                     'focus-visible:ring-2',
                                     'focus-visible:ring-teal-400',
                                     'focus-visible:outline-none',
@@ -192,9 +197,9 @@ const LoginForm = (data: IForm) => {
                                         }));
                                 }}
                                 className={cn(
+                                    authInputClass,
                                     'pl-9',
                                     'pr-10',
-                                    'h-12',
                                     errors.password &&
                                         touched.password &&
                                         'border-destructive focus-visible:ring-destructive',
@@ -215,7 +220,7 @@ const LoginForm = (data: IForm) => {
                                 type="button"
                                 variant="ghost"
                                 size="sm"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                className={authPasswordToggleClass}
                                 onClick={() => setShowPassword((s) => !s)}
                                 aria-label={
                                     showPassword
@@ -301,7 +306,7 @@ const LoginForm = (data: IForm) => {
 
                     <Button
                         type="submit"
-                        className="w-full h-12"
+                        className={authSubmitButtonClass}
                         disabled={submitting}
                     >
                         {submitting ? (

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +13,12 @@ import { PATH_FORGOT_PASSWORD, PATH_LOGIN } from '@/routes/paths';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
 import { clearLocalAuth } from '@/utils/auth-session.util';
-import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
+import {
+    authInputClass,
+    authPasswordToggleClass,
+    authSubmitButtonClass,
+    cleanStoredEmail,
+} from '@/components/shared/auth/auth-form.utils';
 
 const ResetPasswordForm = () => {
     const [formData, setFormData] = useState({
@@ -137,14 +143,17 @@ const ResetPasswordForm = () => {
                             handleChange('newPassword', e.target.value)
                         }
                         onBlur={() => handleBlur('newPassword')}
-                        className={errors.newPassword ? 'border-red-500' : ''}
+                        className={cn(
+                            authInputClass,
+                            errors.newPassword ? 'border-red-500' : '',
+                        )}
                         placeholder="Enter your new password"
                     />
                     <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className={authPasswordToggleClass}
                         onClick={() => setShowPassword(!showPassword)}
                     >
                         {showPassword ? (
@@ -195,16 +204,17 @@ const ResetPasswordForm = () => {
                             handleChange('confirmPassword', e.target.value)
                         }
                         onBlur={() => handleBlur('confirmPassword')}
-                        className={
-                            errors.confirmPassword ? 'border-red-500' : ''
-                        }
+                        className={cn(
+                            authInputClass,
+                            errors.confirmPassword ? 'border-red-500' : '',
+                        )}
                         placeholder="Confirm your new password"
                     />
                     <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className={authPasswordToggleClass}
                         onClick={() =>
                             setShowConfirmPassword(!showConfirmPassword)
                         }
@@ -225,7 +235,7 @@ const ResetPasswordForm = () => {
 
             <Button
                 type="submit"
-                className="w-full"
+                className={authSubmitButtonClass}
                 disabled={submitting}
             >
                 {submitting ? (

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Get Troott</title>
+        <meta name="robots" content="noindex" />
+        <script>
+            (function () {
+                var TARGETS = {
+                    android: "https://play.google.com/store/apps/details?id=com.troott.app",
+                    ios: "https://apps.apple.com/ng/app/troott/id1234567890",
+                    web: "http://localhost:5053",
+                    dmg: "http://localhost:5053",
+                    exe: "http://localhost:5053",
+                };
+
+                function detectPackage(ua) {
+                    if (/Android/i.test(ua)) return 'android';
+                    if (/iPhone|iPod|iPad/i.test(ua)) return 'ios';
+                    if (/Windows/i.test(ua)) return 'exe';
+                    if (/Macintosh|Mac OS X/i.test(ua)) return 'dmg';
+                    return 'web';
+                }
+
+                var params = new URLSearchParams(window.location.search);
+                var pkg = params.get('package');
+                var ua = navigator.userAgent || '';
+                var key = pkg && TARGETS[pkg] ? pkg : detectPackage(ua);
+                var target = TARGETS[key] || TARGETS.web;
+                window.location.replace(target);
+            })();
+        </script>
+    </head>
+    <body>
+        <p>Redirecting to Troott…</p>
+        <p>
+            <a href="http://localhost:5053">Continue to Troott web app</a>
+        </p>
+    </body>
+</html>

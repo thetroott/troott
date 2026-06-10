@@ -18,7 +18,7 @@ export default function BreakdownSegmentedControl({
 }: BreakdownSegmentedControlProps) {
     return (
         <div
-            className="inline-flex overflow-hidden rounded-lg border border-[#545454]/50 bg-[#333234]"
+            className="inline-flex overflow-hidden rounded-sm border border-[#545454]/50 bg-[#333234]"
             role="group"
             aria-label="Breakdown dimension"
         >

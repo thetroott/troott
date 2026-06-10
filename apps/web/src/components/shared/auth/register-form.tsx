@@ -18,6 +18,11 @@ import {
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
 import { setVerificationEmail } from '@/api/services/local-storage';
+import {
+    authInputClass,
+    authPasswordToggleClass,
+    authSubmitButtonClass,
+} from '@/components/shared/auth/auth-form.utils';
 import { clearLocalAuth } from '@/utils/auth-session.util';
 
 const REGISTER_FORM_DEFAULT = {
@@ -165,8 +170,8 @@ const RegisterForm = (data: IForm) => {
                                 onChange={handleInputChange('firstName')}
                                 onBlur={handleBlur('firstName')}
                                 className={cn(
+                                    authInputClass,
                                     'pl-10',
-                                    'h-12',
                                     errors.firstName &&
                                         touched.firstName &&
                                         'border-destructive focus-visible:ring-destructive',
@@ -206,8 +211,8 @@ const RegisterForm = (data: IForm) => {
                                 onChange={handleInputChange('lastName')}
                                 onBlur={handleBlur('lastName')}
                                 className={cn(
+                                    authInputClass,
                                     'pl-10',
-                                    'h-12',
                                     errors.lastName &&
                                         touched.lastName &&
                                         'border-destructive focus-visible:ring-destructive',
@@ -249,9 +254,9 @@ const RegisterForm = (data: IForm) => {
                             onChange={handleInputChange('email')}
                             onBlur={handleBlur('email')}
                             className={cn(
+                                authInputClass,
                                 'pl-9',
                                 'pr-10',
-                                'h-12',
                                 errors.email &&
                                     touched.email &&
                                     'border-destructive focus-visible:ring-destructive',
@@ -296,9 +301,9 @@ const RegisterForm = (data: IForm) => {
                             onChange={handleInputChange('password')}
                             onBlur={handleBlur('password')}
                             className={cn(
+                                authInputClass,
                                 'pl-9',
                                 'pr-10',
-                                'h-12',
                                 errors.password &&
                                     touched.password &&
                                     'border-destructive focus-visible:ring-destructive',
@@ -319,7 +324,7 @@ const RegisterForm = (data: IForm) => {
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            className={authPasswordToggleClass}
                             onClick={() => setShowPassword((p) => !p)}
                             aria-label={
                                 showPassword ? 'Hide password' : 'Show password'
@@ -403,7 +408,7 @@ const RegisterForm = (data: IForm) => {
 
                 <Button
                     type="submit"
-                    className="w-full h-12"
+                    className={authSubmitButtonClass}
                     disabled={submitting}
                 >
                     {submitting ? (

@@ -1,8 +1,16 @@
 :8080
 
-root * /usr/share/caddy
-file_server
-try_files {path} /index.html
+@get_troott path /get-troott /get-troott/*
+handle @get_troott {
+	rewrite * /get-troott.html{query}
+	file_server
+}
+
+handle {
+	root * /usr/share/caddy
+	try_files {path} /index.html
+	file_server
+}
 
 encode zstd gzip
 header Cache-Control "public, max-age=31536000, immutable" /assets/*

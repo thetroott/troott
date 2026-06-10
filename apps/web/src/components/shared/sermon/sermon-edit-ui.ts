@@ -21,7 +21,7 @@ export const SERMON_EDIT = {
         'line-clamp-2 font-matter-medium text-sm leading-5 text-[#eaeaea]',
     sidebarNav: 'flex min-h-0 flex-1 flex-col gap-0.5 px-2 py-3',
     sidebarNavItem:
-        'flex w-full items-center gap-3 rounded-md px-3 py-2 text-left font-matter text-sm leading-5 text-[#bdbdbd] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
+        'flex w-full items-center gap-3 rounded-sm px-3 py-2 text-left font-matter text-sm leading-5 text-[#bdbdbd] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
     sidebarNavItemActive:
         'bg-[#545454]/50 text-[#eaeaea] hover:bg-[#545454]/50 hover:text-[#eaeaea]',
     sidebarNavItemDisabled:
@@ -30,7 +30,7 @@ export const SERMON_EDIT = {
     sidebarFooter:
         'mt-auto border-t border-[#545454]/50 px-2 py-3',
     sidebarFooterLink:
-        'flex w-full items-center gap-3 rounded-md px-3 py-2 font-matter text-sm text-[#bdbdbd] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea]',
+        'flex w-full items-center gap-3 rounded-sm px-3 py-2 font-matter text-sm text-[#bdbdbd] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea]',
     contentColumn: 'flex min-h-0 min-w-0 flex-1 flex-col',
     header:
         'sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-[#545454]/50 bg-[#2b2a2c] px-4',

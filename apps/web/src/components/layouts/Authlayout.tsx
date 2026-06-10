@@ -31,7 +31,7 @@ export function AuthLayout(data: IAuthLayout) {
                             href="#"
                             className="flex items-center gap-2 font-medium"
                         >
-                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-none bg-primary text-primary-foreground">
                                 <TroottLogo className="size-4" />
                             </div>
                             Troott

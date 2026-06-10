@@ -73,7 +73,7 @@ export function SearchForm(data: ISearchForm) {
                                         type="button"
                                         data-active={true}
                                         aria-label="Search"
-                                        className="ps-0 pe-0 h-9 w-full flex items-center justify-start gap-2 rounded-md hover:bg-muted data-[active=true]:bg-muted"
+                                        className="ps-0 pe-0 h-9 w-full flex items-center justify-start gap-2 rounded-sm hover:bg-muted data-[active=true]:bg-muted"
                                     >
                                         <div className="relative w-full ">
                                             <SidebarInput
@@ -91,7 +91,7 @@ export function SearchForm(data: ISearchForm) {
                                                 />
                                             </div>
                                             <div className="pointer-events-none absolute inset-y-0 end-0 flex items-center justify-center pe-1  text-neutral-900  dark:text-neutral-100">
-                                                <kbd className="inline-flex p-3 size-5 max-h-full items-center justify-center rounded-md bg-input font-[inherit] text-[0.825rem] font-medium text-neutral-900  dark:text-neutral-100">
+                                                <kbd className="inline-flex p-3 size-5 max-h-full items-center justify-center rounded-sm bg-input font-[inherit] text-[0.825rem] font-medium text-neutral-900  dark:text-neutral-100">
                                                     ⌘K
                                                 </kbd>
                                             </div>

@@ -177,7 +177,7 @@ const AppSidebar = (data: ISideBar) => {
                                                     data-active={false}
                                                     className={`
                           group/menu-button
-                          flex items-center w-full h-9 gap-3 px-2 rounded-md
+                          flex items-center w-full h-9 gap-3 px-2 rounded-sm
                           opacity-50 cursor-not-allowed
                           group-data-[collapsible=icon]:w-9
                           group-data-[collapsible=icon]:justify-center
@@ -218,7 +218,7 @@ const AppSidebar = (data: ISideBar) => {
                                                     }}
                                                     className={`
                           group/menu-button
-                          flex items-center w-full h-9 gap-3 px-2 rounded-md
+                          flex items-center w-full h-9 gap-3 px-2 rounded-sm
                           hover:bg-muted
                           group-data-[collapsible=icon]:w-9
                           group-data-[collapsible=icon]:justify-center
@@ -251,7 +251,7 @@ const AppSidebar = (data: ISideBar) => {
                                                     data-active={isActive}
                                                     className={`
                           group/menu-button
-                          flex items-center w-full h-9 gap-3 px-2 rounded-md
+                          flex items-center w-full h-9 gap-3 px-2 rounded-sm
                           hover:bg-muted
 
                           data-[active=true]:bg-white/10
@@ -298,7 +298,7 @@ const AppSidebar = (data: ISideBar) => {
             <Separator orientation="horizontal" className="mr-2 h-4" />
 
             <SidebarFooter>
-                <SidebarMenu className="font-medium gap-3 rounded-md bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto">
+                <SidebarMenu className="font-medium gap-3 rounded-sm bg-gradient-to-r hover:bg-transparent hover:from-sidebar-accent hover:to-sidebar-accent/40 data-[active=true]:from-primary/20 data-[active=true]:to-primary/5 [&>svg]:size-auto">
                     {navFooterItems.map((item) => (
                         <SidebarMenuItem key={item.title}>
                             {item.title === 'Logout' ? (

@@ -14,7 +14,11 @@ import { useNavigate } from 'react-router-dom';
 import { isApiHttp2xxErrorEnvelope } from '@/api/core/api-envelope-toast';
 import { toast } from 'sonner';
 import { UserType } from '@/models/User.model';
-import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
+import {
+    authOtpInputClass,
+    authSubmitButtonClass,
+    cleanStoredEmail,
+} from '@/components/shared/auth/auth-form.utils';
 import { PATH_LOGIN, PATH_REGISTER } from '@/routes/paths';
 
 const ActivateUserForm = (data: IForm) => {
@@ -454,7 +458,7 @@ const ActivateUserForm = (data: IForm) => {
                                     }
                                 }}
                                 className={cn(
-                                    'w-12 h-12 text-center text-lg font-semibold',
+                                    authOtpInputClass,
                                     errors.otp &&
                                         touched &&
                                         'border-destructive focus-visible:ring-destructive',
@@ -501,7 +505,7 @@ const ActivateUserForm = (data: IForm) => {
 
                 <Button
                     type="submit"
-                    className="w-full h-12 "
+                    className={authSubmitButtonClass}
                     disabled={isSubmitting}
                 >
                     {isSubmitting ? (

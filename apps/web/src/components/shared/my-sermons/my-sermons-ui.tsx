@@ -34,7 +34,7 @@ export const MY_SERMONS_PAGE = {
     title: 'font-matter-medium text-base leading-6 tracking-[0.16px] text-[#eaeaea]',
     /** Primary CTA — **32** tall, radius **6**, `#08ffdb` / `#1f2020` (`Button`). */
     createCta:
-        'inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md bg-[#08ffdb] px-4 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#1f2020] transition-[filter,opacity] hover:brightness-110 active:brightness-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50',
+        'inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-sm bg-[#08ffdb] px-4 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#1f2020] transition-[filter,opacity] hover:brightness-110 active:brightness-95 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50',
     /** Tabs — **42px** row, bottom stroke `#545454` (`Frame 1618868806`). */
     tabStrip:
         'mt-0 flex h-[42px] w-full items-stretch border-b border-[#545454]',
@@ -55,13 +55,13 @@ export const MY_SERMONS_PAGE = {
         'h-8 w-full cursor-text rounded-lg border border-[#545454]/50 bg-transparent py-0 pl-[34px] pr-3 font-matter text-sm leading-5 tracking-[0.14px] text-[#eaeaea] placeholder:text-[#bdbdbd] placeholder:opacity-100 focus-visible:border-[#545454] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#08ffdb]/40',
     /** Filters / Sort — **32** tall, radius **6**, fill `#2b2a2c`, label `#bdbdbd`. */
     pillBtn:
-        'inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-md border border-transparent bg-[#2b2a2c] px-2 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#bdbdbd] transition-[color,background-color,border-color] hover:border-[#545454]/40 hover:bg-[#353437] hover:text-[#eaeaea] active:bg-[#3d3c3f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
+        'inline-flex h-8 shrink-0 cursor-pointer items-center gap-2 rounded-sm border border-transparent bg-[#2b2a2c] px-2 font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#bdbdbd] transition-[color,background-color,border-color] hover:border-[#545454]/40 hover:bg-[#353437] hover:text-[#eaeaea] active:bg-[#3d3c3f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
     pillBtnIcon: 'h-4 w-4 shrink-0 opacity-90',
     /** Grid / list segmented control — **54×30**, radius **7**, fill `#000` @ 93%, stroke `#545454` @ 50%. */
     viewToggle:
-        'inline-flex h-[30px] w-[54px] shrink-0 items-center justify-center gap-0 rounded-[7px] border border-[#545454]/50 bg-black/90 p-[3px]',
+        'inline-flex h-[30px] w-[54px] shrink-0 items-center justify-center gap-0 rounded-sm border border-[#545454]/50 bg-black/90 p-[3px]',
     viewToggleBtn:
-        'inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-[5px] text-[#bdbdbd] transition-[color,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
+        'inline-flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm text-[#bdbdbd] transition-[color,background-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
     viewToggleBtnActive:
         'bg-[#545454]/50 text-[#eaeaea] hover:bg-[#5c5c5e]/70 hover:text-[#eaeaea]',
     viewToggleBtnIdle: 'text-[#bdbdbd] hover:bg-white/10 hover:text-[#eaeaea]',
@@ -71,11 +71,11 @@ export const MY_SERMONS_PAGE = {
     paginationCluster: 'flex items-center gap-2',
     /** **32×32** icon host (INSTANCE chip in file). */
     paginationNavBtn:
-        'inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded bg-[#333234] text-[#eaeaea] transition-colors hover:bg-white/10 active:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
+        'inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-sm bg-[#333234] text-[#eaeaea] transition-colors hover:bg-white/10 active:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-40',
     paginationRange:
         'font-matter text-sm font-normal leading-5 tracking-[0.14px] text-[#eaeaea]',
     pageSelect:
-        'box-border h-[33px] min-w-[56px] cursor-pointer rounded border border-[#545454]/50 bg-[#333234] px-2 text-center font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#eaeaea] transition-colors hover:border-[#6a6a6a] hover:bg-[#3a393c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
+        'box-border h-[33px] min-w-[56px] cursor-pointer rounded-sm border border-[#545454]/50 bg-[#333234] px-2 text-center font-matter-medium text-sm leading-5 tracking-[0.14px] text-[#eaeaea] transition-colors hover:border-[#6a6a6a] hover:bg-[#3a393c] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/30',
 } as const;
 
 /**
@@ -111,7 +111,7 @@ export const MY_SERMONS_LIST = {
     rowQuickActionsWrap:
         'flex shrink-0 items-center gap-1 opacity-0 pointer-events-none transition-opacity duration-150 group-hover/sermon-row:pointer-events-auto group-hover/sermon-row:opacity-100',
     rowQuickActionBtn:
-        'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-[3px] border border-[#545454] bg-[#2b2a2c] text-[#eaeaea] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
+        'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-[#545454] bg-[#2b2a2c] text-[#eaeaea] transition-colors hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
     tdCell:
         'box-border h-[64px] border-b border-[#545454]/50 px-4 py-0 align-middle whitespace-nowrap first:pl-4 last:pr-4',
     tdCellMetric: 'px-5',
@@ -130,7 +130,7 @@ export const MY_SERMONS_LIST = {
         'font-matter-medium text-[14px] leading-5 tracking-[0.14px] text-[#eaeaea]',
     /** Row kebab host — **46×46**, fill `#333234`, radius **4** (`Frame 1618869360`). */
     rowActionTrigger:
-        'inline-flex h-[46px] w-[46px] shrink-0 cursor-pointer items-center justify-center rounded bg-[#333234] text-[#bdbdbd] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea] active:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
+        'inline-flex h-[46px] w-[46px] shrink-0 cursor-pointer items-center justify-center rounded-sm bg-[#333234] text-[#bdbdbd] transition-colors hover:bg-white/[0.06] hover:text-[#eaeaea] active:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
     /** Wrapper inside last `td` — centers **46×46** kebab host in the **64px** row. */
     tdActionInner:
         'flex h-[64px] w-[46px] max-w-[46px] items-center justify-center',
@@ -228,7 +228,7 @@ export const MY_SERMONS_GRID = {
         'mt-1 font-matter text-[12px] leading-[18px] tracking-[0.02em] text-[#9d9d9d]',
     /** Kebab host — #252525, 24×24, radius 4 (`Frame 1618868820`). */
     gridMenuTrigger:
-        'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded bg-[#252525] text-[#eaeaea] transition-[background-color,opacity] hover:bg-[#323232] hover:opacity-100 active:bg-[#3a3a3a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
+        'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-sm bg-[#252525] text-[#eaeaea] transition-[background-color,opacity] hover:bg-[#323232] hover:opacity-100 active:bg-[#3a3a3a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/40',
 } as const;
 
 /** Iconify mic path (256×256 viewBox), scaled to **20×20** for page title. */

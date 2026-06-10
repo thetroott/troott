@@ -12,7 +12,11 @@ import type { VerifyOtpDTO } from '@/dtos/auth.dto';
 import useAuth from '@/hooks/app/useAuth';
 import storage from '@/api/services/local-storage';
 import { OtpType } from '@/api/enums';
-import { cleanStoredEmail } from '@/components/shared/auth/auth-form.utils';
+import {
+    authOtpInputClass,
+    authSubmitButtonClass,
+    cleanStoredEmail,
+} from '@/components/shared/auth/auth-form.utils';
 import { PATH_ACTIVATE_ACCOUNT, PATH_LOGIN } from '@/routes/paths';
 import { Link } from 'react-router-dom';
 
@@ -258,7 +262,7 @@ const OtpForm = (data: IForm) => {
                                     index === 0 ? handleOTPPaste : undefined
                                 }
                                 className={cn(
-                                    'w-12 h-12 text-center text-lg font-semibold',
+                                    authOtpInputClass,
                                     errors.otp &&
                                         touched &&
                                         'border-destructive focus-visible:ring-destructive',
@@ -315,7 +319,7 @@ const OtpForm = (data: IForm) => {
 
                 <Button
                     type="submit"
-                    className="w-full h-12 "
+                    className={authSubmitButtonClass}
                     disabled={pending}
                 >
                     {pending ? (

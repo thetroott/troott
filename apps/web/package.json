@@ -5,7 +5,9 @@
     "type": "module",
     "homepage": "./",
     "scripts": {
+        "predev": "node scripts/generate-get-troott-html.mjs",
         "dev": "vite --port 5053",
+        "prebuild": "node scripts/generate-get-troott-html.mjs",
         "build": "vite build",
         "lint": "eslint .",
         "test": "vitest run",

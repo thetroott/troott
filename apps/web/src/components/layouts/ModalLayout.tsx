@@ -56,7 +56,7 @@ export function ModalLayout(data: IModalLayout) {
                     {showBackButton && (
                         <button
                             onClick={handleClose}
-                            className="absolute left-0 top-0 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="absolute left-0 top-0 rounded-sm p-2 transition-colors hover:bg-gray-100"
                         >
                             <ChevronLeft className="h-5 w-5" />
                         </button>

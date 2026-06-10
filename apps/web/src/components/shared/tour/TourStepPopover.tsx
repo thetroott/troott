@@ -133,7 +133,7 @@ const TourStepPopover: React.FC<TourStepPopoverProps> = ({
                             type="button"
                             onClick={onPrimary}
                             disabled={busy}
-                            className="h-9 min-w-[72px] rounded-lg bg-[#08ffdb] px-4 font-matter text-sm font-medium leading-5 tracking-[0.14px] text-[#292929] hover:bg-[#07e8c9]"
+                            className="h-9 min-w-[72px] rounded-sm bg-[#08ffdb] px-4 font-matter text-sm font-medium leading-5 tracking-[0.14px] text-[#292929] hover:bg-[#07e8c9]"
                         >
                             {busy ? 'Saving…' : step.primaryLabel}
                         </Button>

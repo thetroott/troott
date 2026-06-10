@@ -108,7 +108,7 @@ const PublishSettings: React.FC = () => {
                     <div
                         onClick={() => handleVisibilityChange(true)}
                         className={cn(
-                            'flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors',
+                            'flex items-center space-x-3 p-4 border rounded-sm cursor-pointer transition-colors',
                             uploadData.isPublic
                                 ? 'border-primary bg-primary/5'
                                 : 'border-border hover:bg-muted/50',
@@ -138,7 +138,7 @@ const PublishSettings: React.FC = () => {
                     <div
                         onClick={() => handleVisibilityChange(false)}
                         className={cn(
-                            'flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors',
+                            'flex items-center space-x-3 p-4 border rounded-sm cursor-pointer transition-colors',
                             !uploadData.isPublic
                                 ? 'border-primary bg-primary/5'
                                 : 'border-border hover:bg-muted/50',
@@ -176,7 +176,7 @@ const PublishSettings: React.FC = () => {
                     <div
                         onClick={() => handleScheduleTypeChange('now')}
                         className={cn(
-                            'flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors',
+                            'flex items-center space-x-3 p-4 border rounded-sm cursor-pointer transition-colors',
                             scheduleType === 'now'
                                 ? 'border-primary bg-primary/5'
                                 : 'border-border hover:bg-muted/50',
@@ -206,7 +206,7 @@ const PublishSettings: React.FC = () => {
                     <div
                         onClick={() => handleScheduleTypeChange('later')}
                         className={cn(
-                            'flex items-center space-x-3 p-4 border rounded-lg cursor-pointer transition-colors',
+                            'flex items-center space-x-3 p-4 border rounded-sm cursor-pointer transition-colors',
                             scheduleType === 'later'
                                 ? 'border-primary bg-primary/5'
                                 : 'border-border hover:bg-muted/50',

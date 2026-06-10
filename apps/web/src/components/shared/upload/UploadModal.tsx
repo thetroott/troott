@@ -534,7 +534,7 @@ const UploadModal: React.FC<UploadModalProps> = ({
                         <button
                             type="button"
                             onClick={() => void handleClose()}
-                            className="shrink-0 rounded-md p-1 text-[#eaeaea] opacity-90 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50"
+                            className="shrink-0 rounded-sm p-1 text-[#eaeaea] opacity-90 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#08ffdb]/50"
                             aria-label="Close"
                         >
                             <X className="h-5 w-5" strokeWidth={2} />

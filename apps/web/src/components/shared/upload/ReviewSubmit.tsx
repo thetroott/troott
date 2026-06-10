@@ -550,7 +550,7 @@ const ReviewSubmit: React.FC<ReviewSubmitProps> = ({
                     <Button
                         type="button"
                         onClick={() => setShowMoreFields(true)}
-                        className="bg-[#707070] cursor-pointer hover:bg-[#404040] text-[#EAEAEA] rounded-full border-0"
+                        className="bg-[#707070] cursor-pointer hover:bg-[#404040] text-[#EAEAEA] rounded-sm border-0"
                     >
                         <ChevronUp className="h-4 w-4 mr-2" />
                         Show more

@@ -156,7 +156,7 @@ const ThumbnailUpload: React.FC = () => {
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
                         className={cn(
-                            'border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors',
+                            'border-2 border-dashed rounded-sm p-8 text-center cursor-pointer transition-colors',
                             'hover:border-primary/50 hover:bg-primary/5',
                             dragActive && 'border-primary bg-primary/10',
                             error && 'border-destructive',

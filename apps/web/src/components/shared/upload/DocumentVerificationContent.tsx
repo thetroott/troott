@@ -78,7 +78,7 @@ const DocumentVerificationContent: React.FC<
                         <div key={field.id} className="flex flex-col gap-2">
                             <div
                                 className={cn(
-                                    'relative flex w-full flex-col items-center justify-center overflow-hidden rounded-lg text-center transition-colors',
+                                    'relative flex w-full flex-col items-center justify-center overflow-hidden rounded-sm text-center transition-colors',
                                     isDual ? 'h-[156px]' : 'h-[180px]',
                                     filled
                                         ? 'border border-[#707070] bg-[#eaeaea]/20'

@@ -27,6 +27,12 @@ import { handleMutationError } from '@/utils/helpers.util';
 import { setVerificationEmail } from '@/api/services/local-storage';
 import { PATH_LOGIN, PATH_RESET_PASSWORD } from '@/routes/paths';
 import { clearLocalAuth } from '@/utils/auth-session.util';
+import {
+    authInputClass,
+    authOtpInputClass,
+    authSecondaryButtonClass,
+    authSubmitButtonClass,
+} from '@/components/shared/auth/auth-form.utils';
 
 function ForgotPasswordForm(data: IForm) {
     const { className, onStepChange, ...props } = data;
@@ -297,8 +303,8 @@ function ForgotPasswordForm(data: IForm) {
                             value={formData.email}
                             onChange={handleEmailChange}
                             className={cn(
+                                authInputClass,
                                 'pl-10',
-                                'h-12',
                                 errors.email &&
                                     touched.email &&
                                     'border-destructive focus-visible:ring-destructive',
@@ -326,7 +332,7 @@ function ForgotPasswordForm(data: IForm) {
 
                 <Button
                     type="submit"
-                    className="w-full h-12"
+                    className={authSubmitButtonClass}
                     disabled={sendOtpMutation.isPending}
                 >
                     {sendOtpMutation.isPending ? (
@@ -392,7 +398,7 @@ function ForgotPasswordForm(data: IForm) {
                                         index === 0 ? handleOTPPaste : undefined
                                     }
                                     className={cn(
-                                        'w-12 h-12 text-center text-lg font-semibold',
+                                        authOtpInputClass,
                                         errors.otp &&
                                             touched.otp &&
                                             'border-destructive focus-visible:ring-destructive',
@@ -441,7 +447,7 @@ function ForgotPasswordForm(data: IForm) {
 
                     <Button
                         type="submit"
-                        className="w-full"
+                        className={authSubmitButtonClass}
                         disabled={verifyOtpMutation.isPending}
                     >
                         {verifyOtpMutation.isPending ? (
@@ -457,7 +463,7 @@ function ForgotPasswordForm(data: IForm) {
                     <Button
                         type="button"
                         variant="ghost"
-                        className="w-full"
+                        className={authSecondaryButtonClass}
                         onClick={handleBackToEmail}
                         disabled={
                             verifyOtpMutation.isPending ||
@@ -506,7 +512,7 @@ function ForgotPasswordForm(data: IForm) {
 
             <Button
                 onClick={() => navigate(PATH_RESET_PASSWORD)}
-                className="w-full"
+                className={authSubmitButtonClass}
             >
                 Create new password
             </Button>
@@ -514,7 +520,7 @@ function ForgotPasswordForm(data: IForm) {
             <Button
                 onClick={() => navigate(PATH_LOGIN)}
                 variant="outline"
-                className="w-full"
+                className={authSecondaryButtonClass}
             >
                 Back to login
             </Button>

@@ -36,13 +36,13 @@ const IconRadioSelect = (data: IconRadioSelectProps) => {
                         'flex cursor-pointer items-center justify-between transition-colors',
                         isDocument
                             ? [
-                                  'h-[58px] rounded-lg border bg-[#333234] px-4',
+                                  'h-[58px] rounded-sm border bg-[#333234] px-4',
                                   'border-[#545454]/50',
                                   value === option.value &&
                                       'border-[#08ffdb]',
                               ]
                             : [
-                                  'rounded-md border border-border bg-muted/70 px-4 py-4',
+                                  'rounded-sm border border-border bg-muted/70 px-4 py-4',
                                   'hover:border-primary/30',
                                   value === option.value && 'border-teal-400',
                               ],

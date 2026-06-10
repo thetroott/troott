@@ -36,7 +36,7 @@ import { normalizeUserType } from '@/utils/auth-redirect.util';
 import { toast } from 'sonner';
 
 const hubCtaClass =
-    'h-8 min-h-8 rounded-md px-4 font-matter text-sm leading-5 tracking-[0.14px]';
+    'h-8 min-h-8 rounded-sm px-4 font-matter text-sm leading-5 tracking-[0.14px]';
 
 const hubActiveCtaClass =
     'bg-[#08ffdb] text-[#292929] hover:bg-[#07e8c9] disabled:opacity-50';
