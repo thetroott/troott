@@ -18,8 +18,13 @@ Distinct from the studio portal (`apps/web` → `app.troott.com`). See [`specs/w
 | feat-0008 | Homepage — **new** Benefits 3×2 grid (`#benefits`) | [PRODUCT](./feature/feat-0008/PRODUCT.md) | [TECH](./feature/feat-0008/TECH.md) |
 | feat-0009 | Homepage — **new** product surfaces / use cases (`#why-troott`) | [PRODUCT](./feature/feat-0009/PRODUCT.md) | [TECH](./feature/feat-0009/TECH.md) |
 | feat-0010 | Homepage — **new** feature highlight + mobile mockup rise | [PRODUCT](./feature/feat-0010/PRODUCT.md) | [TECH](./feature/feat-0010/TECH.md) |
+| feat-0011 | Homepage — **new** vertical tabs + single visual panel (Warp Terminal) | [PRODUCT](./feature/feat-0011/PRODUCT.md) | [TECH](./feature/feat-0011/TECH.md) |
+| feat-0012 | Homepage — **new** centered story headline + audience tags | [PRODUCT](./feature/feat-0012/PRODUCT.md) | [TECH](./feature/feat-0012/TECH.md) |
+| feat-0013 | Homepage — **new** app showcase (center phone + tile marquees) | [PRODUCT](./feature/feat-0013/PRODUCT.md) | [TECH](./feature/feat-0013/TECH.md) |
+| feat-0014 | **Legal** — audience chooser + scrollspy document pages | [PRODUCT](./feature/feat-0014/PRODUCT.md) | [TECH](./feature/feat-0014/TECH.md) |
+| feat-0015 | **Audience landings** — `/listener` and `/minister` homepages | [PRODUCT](./feature/feat-0015/PRODUCT.md) | [TECH](./feature/feat-0015/TECH.md) |
 
-### New homepage sections (feat-0007 – feat-0010)
+### New homepage sections (feat-0007 – feat-0013)
 
 These specs define **additive sections** on the marketing homepage — not redesigns of `CoreFeaturesSection`, `Mission`, `TextSection`, or other existing blocks.
 
@@ -28,18 +33,56 @@ These specs define **additive sections** on the marketing homepage — not redes
 | [feat-0009](./feature/feat-0009/PRODUCT.md) | Product surfaces (Exact-style tabs) | `#why-troott` | `FeaturedPartnersSection` → `BenefitsSection` |
 | [feat-0008](./feature/feat-0008/PRODUCT.md) | Benefits grid | `#benefits` | `WhyTroottSection` → `CoreFeaturesSection` |
 | [feat-0010](./feature/feat-0010/PRODUCT.md) | Feature highlight + mockup rise | `#feature-highlight` | `BenefitsSection` → `CoreFeaturesSection` |
+| [feat-0012](./feature/feat-0012/PRODUCT.md) | Centered story headline + audience tags | `#audience-story` | `BenefitsSection` → `FeatureHighlightSection` |
 | [feat-0007](./feature/feat-0007/PRODUCT.md) | FAQ accordion | `#faqs` | `SplitDemoSection` → `DownloadsSection` |
+| [feat-0011](./feature/feat-0011/PRODUCT.md) | Vertical tabs + visual panel | `#product-workflows` | TBD — after `WhyTroottTabsSection` (proposed) |
+| [feat-0013](./feature/feat-0013/PRODUCT.md) | App showcase (phone + tile marquees) | `#app-showcase` | `FeatureHighlightSection` → `CoreFeaturesSection` |
 
-[feat-0004](./feature/feat-0004/PRODUCT.md) (Warp-style Why Troott) is a **separate design reference** — not modified by feat-0009.
+[feat-0004](./feature/feat-0004/PRODUCT.md) (Warp scroll-spy Why Troott) and [feat-0011](./feature/feat-0011/PRODUCT.md) (Warp vertical tabs + single panel) are **separate design references** — not modified by feat-0009.
+
+### Audience landing routes (feat-0015)
+
+Standalone marketing pages — not part of the homepage stack.
+
+| Route | Purpose |
+| ----- | ------- |
+| `/listener` | Listener landing — get the app, listening value props |
+| `/minister` | Minister landing — Studio CTA, publishing value props |
+| `/listeners`, `/ministers` | Redirect to singular routes |
+
+Nav/footer `siteConfig.baseLinks.listeners` and `.ministers` point here (replaces `#listener` / `#minister`).
+
+### Legal routes (feat-0014)
+
+Not part of the homepage stack. Standalone routes under `/legal` — layout matches [Why Troott scrollspy](../../../apps/website/components/containers/why-troott/WhyTroottSection.tsx).
+
+| Route | Purpose |
+| ----- | ------- |
+| `/legal` | Choose Minister vs Listener |
+| `/legal/listener` | Listener legal hub |
+| `/legal/listener/terms-of-use` | Listener Terms of Use |
+| `/legal/listener/privacy-policy` | Listener Privacy Policy |
+| `/legal/listener/cookies` | Listener Cookie Policy |
+| `/legal/listener/gdpr` | Listener GDPR |
+| `/legal/minister` | Minister legal hub |
+| `/legal/minister/terms-of-use` | Minister Terms of Use (Studio) |
+| `/legal/minister/privacy-policy` | Minister Privacy Policy (Studio) |
+| `/legal/minister/cookies` | Minister Cookie Policy |
+| `/legal/minister/gdpr` | Minister GDPR |
+| `/privacy`, `/terms` | Redirect to listener docs (mobile compatibility) |
 
 **Target homepage stack** (`apps/website/app/page.tsx`):
 
 ```text
 HeroSection
 FeaturedPartnersSection
-WhyTroottSection          ← feat-0009
+WhyTroottSection          ← feat-0004
+WhyTroottTabsSection      ← feat-0009
+ProductWorkflowsSection   ← feat-0011
 BenefitsSection           ← feat-0008
+AudienceStorySection      ← feat-0012
 FeatureHighlightSection   ← feat-0010
+AppShowcaseSection        ← feat-0013
 CoreFeaturesSection
 TextSection
 Mission
