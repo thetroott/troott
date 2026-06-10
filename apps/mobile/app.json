@@ -40,7 +40,7 @@
         "android.permission.CALL_PRIVILEGED"
       ],
       "package": "com.troott.app",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "output": "static",

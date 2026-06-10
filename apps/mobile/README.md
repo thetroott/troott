@@ -71,6 +71,16 @@ Open **`apps/mobile/ios/*.xcworkspace`** in Xcode and the **`apps/mobile/android
 
 **EAS:** `eas.json` lives in this package; run EAS commands with **`apps/mobile`** as the project directory (for example `cd apps/mobile` before `eas build`, or pass your CLI’s equivalent of `--project-dir apps/mobile` from the repo root).
 
+### App versioning (EAS + stores)
+
+| What | Where | Notes |
+| ---- | ----- | ----- |
+| **Version name** (e.g. `00.01.00`) | `app.json` → `expo.version` | Shown in About, Play Console, App Store. Change when you ship a new user-facing release. |
+| **Android version code** | EAS remote + `autoIncrement` | `eas.json` uses `appVersionSource: remote` and production `autoIncrement: true`. EAS bumps the integer on each production build; do not rely on `app.json` `android.versionCode` for releases. |
+| **iOS build number** | Same EAS remote counter | Bumped with `autoIncrement` on production builds. |
+
+After `eas build --profile production`, confirm **version code** in the build log (must be higher than the last upload on Play). Upload one `.aab` per release, or use `eas submit --latest`. See `docs/google-play-store-listing.md`.
+
 - **Metro (port 8177, matches `expo run:ios`):** `pnpm start:mobile` or `pnpm dev:mobile`, or `pnpm expo:mobile:start`. For ad-hoc Expo CLI subcommands use `pnpm expo:mobile -- <args>` (if you run `start` this way, pass `--port 8177`).
 - **iOS native build + install:** `pnpm ios` from the repo root (uses the same Metro port).
 - **Use your development build** (bundle id `com.dmlscript.troottclient`), not Expo Go, when the project depends on `expo-dev-client` and custom native modules.

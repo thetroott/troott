@@ -2,7 +2,7 @@
 
 Complete reference for publishing **Troott** on Google Play. Values are derived from `apps/mobile/app.json`, product specs, and marketing copy in the Troott monorepo. Review and adjust anything marked **TODO** before submission.
 
-**Last synced with app config:** `version 1.0.0`, `package com.troott.app`, EAS project `@troott-app/troott`.
+**Last synced with app config:** `version 00.01.00`, `package com.troott.app`, EAS project `@troott-app/troott`.
 
 ---
 
@@ -13,8 +13,8 @@ Complete reference for publishing **Troott** on Google Play. Values are derived 
 | **App name (store listing)** | Troott | `expo.name` |
 | **Android application ID** | `com.troott.app` | `expo.android.package` |
 | **Default language** | English (United States) — **TODO:** confirm primary market (Nigeria / UK / global) | Play Console |
-| **Version name** | `1.0.0` | `app.json` |
-| **Version code** | Managed remotely by EAS (`appVersionSource: remote`, `autoIncrement: true`) | `eas.json` |
+| **Version name** | `00.01.00` (user-facing; set in `app.json` → `expo.version`) | `app.json` |
+| **Version code** | Managed by EAS (`appVersionSource: remote`, `autoIncrement: true` on production). Each Play upload must use a higher code than the last; check the build log or Play **App bundle explorer** before submitting. | `eas.json` |
 | **Expo slug** | `troott` | `app.json` |
 | **Deep link scheme** | `troottmobile://` | `expo.scheme` |
 | **EAS owner** | `troott-app` | `app.json` |
@@ -450,7 +450,7 @@ We would love your feedback at hello@troott.com
 
 | Item | Current state | Action |
 | ---- | ------------- | ------ |
-| About screen version | Shows `00.01.00` in UI | Align with `app.json` `1.0.0` |
+| About screen version | Reads `Constants.expoConfig.version` | Keep in sync with `app.json` `expo.version` |
 | Privacy URL | Website uses Notion link in footer; app uses `troott.com/privacy` | Ensure both resolve |
 | Subscription UI | “Coming soon” toast | Do not claim full Premium checkout until live |
 | Offline downloads | Not fully wired | Avoid “download for offline” in v1 copy unless shipped |
