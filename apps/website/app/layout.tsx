@@ -7,6 +7,7 @@ import { Navigation } from '@/components/containers/Navbar';
 import Footer from '@/components/containers/Footer';
 import { MailerLiteScript } from '@/public/scripts/ml';
 import { Toaster } from 'sonner';
+import { DownloadsSection } from '@/components/containers/downloads';
 
 const matter = localFont({
     src: [
@@ -152,7 +153,8 @@ export default function RootLayout({
             >
                 <Navigation />
                 {children}
-                <Toaster richColors position="top-center" theme="dark" />
+                <Toaster position="top-right"  />
+                <DownloadsSection/>
                 <Footer />
                 <Analytics />
             </body>

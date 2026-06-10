@@ -1,9 +1,9 @@
 import { siteConfig } from '@/app/siteConfig';
 
-export type DownloadPlatformId = 'ios' | 'android' | 'web';
+import type { DesktopDownloadTile } from '@/components/containers/downloads/types';
 
-export type DownloadPlatform = {
-    id: DownloadPlatformId;
+export type StandardDownloadPlatform = {
+    id: 'ios' | 'android' | 'web';
     title: string;
     primary: {
         title: string;
@@ -11,6 +11,25 @@ export type DownloadPlatform = {
         package: 'ios' | 'android' | 'web';
     };
 };
+
+export type DesktopDownloadPlatform = {
+    id: 'desktop';
+    mac: {
+        title: string;
+        tile: DesktopDownloadTile;
+        installCommand: string;
+    };
+    windows: {
+        title: string;
+        tiles: [DesktopDownloadTile, DesktopDownloadTile];
+        installCommand: string;
+        archOptions: [{ id: 'x64'; label: string }, { id: 'arm64'; label: string }];
+    };
+};
+
+export type DownloadPlatform =
+    | StandardDownloadPlatform
+    | DesktopDownloadPlatform;
 
 export type DownloadsContent = {
     label: string;
@@ -57,5 +76,43 @@ export const downloadsContent: DownloadsContent = {
                 package: 'web',
             },
         },
+        {
+            id: 'desktop',
+            mac: {
+                title: 'macOS',
+                tile: {
+                    title: '.dmg',
+                    subtitle: 'Version 10.14+',
+                    package: 'dmg',
+                },
+                installCommand: 'brew install --cask troott',
+            },
+            windows: {
+                title: 'Windows',
+                tiles: [
+                    {
+                        title: '.exe',
+                        subtitle: 'Windows 11/10 x64',
+                        package: 'exe',
+                    },
+                    {
+                        title: '.exe',
+                        subtitle: 'Windows 11/10 ARM64',
+                        package: 'exe',
+                    },
+                ],
+                installCommand: 'winget install Troott.Troott',
+                archOptions: [
+                    { id: 'x64', label: 'x64' },
+                    { id: 'arm64', label: 'ARM64' },
+                ],
+            },
+        },
     ],
 };
+
+export function isDesktopPlatform(
+    platform: DownloadPlatform,
+): platform is DesktopDownloadPlatform {
+    return platform.id === 'desktop';
+}

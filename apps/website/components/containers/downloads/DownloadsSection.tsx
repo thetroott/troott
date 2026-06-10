@@ -3,18 +3,25 @@
 import Link from 'next/link';
 import {
     RiAppleFill,
-    RiGooglePlayFill,
     RiGlobalLine,
+    RiGooglePlayFill,
 } from '@remixicon/react';
 import { track } from '@vercel/analytics';
-import { useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { useState, type ReactNode } from 'react';
 
-import { downloadsContent } from '@/_data/troott/downloads';
+import {
+    downloadsContent,
+    isDesktopPlatform,
+    type StandardDownloadPlatform,
+} from '@/_data/troott/downloads';
 import Newsletter from '@/components/NewsletterModal';
 import { getTroottDownloadUrlByPackage } from '@/lib/build-get-troott-url';
 
 import { CopyDownloadLink } from './CopyDownloadLink';
 import { DownloadPlatformTile } from './DownloadPlatformTile';
+import { MacDownloadsColumn } from './MacDownloadsColumn';
+import { WindowsDownloadsColumn } from './WindowsDownloadsColumn';
 
 const platformIcons = {
     ios: RiAppleFill,
@@ -22,11 +29,32 @@ const platformIcons = {
     web: RiGlobalLine,
 } as const;
 
-function DownloadPlatformColumn({
+function DownloadPlatformCell({
+    children,
+    className,
+    'aria-hidden': ariaHidden,
+}: {
+    children?: ReactNode;
+    className?: string;
+    'aria-hidden'?: boolean;
+}) {
+    return (
+        <div
+            className={['min-w-0 py-8 md:px-6 lg:px-10 lg:py-0', className]
+                .filter(Boolean)
+                .join(' ')}
+            aria-hidden={ariaHidden}
+        >
+            {children}
+        </div>
+    );
+}
+
+function StandardDownloadPlatformColumn({
     platform,
     onOpenListener,
 }: {
-    platform: (typeof downloadsContent.platforms)[number];
+    platform: StandardDownloadPlatform;
     onOpenListener: () => void;
 }) {
     const Icon = platformIcons[platform.id];
@@ -53,19 +81,32 @@ function DownloadPlatformColumn({
 }
 
 export function DownloadsSection() {
+    const pathname = usePathname();
     const [dialogOpen, setDialogOpen] = useState(false);
+
+    if (pathname?.startsWith('/legal')) {
+        return null;
+    }
 
     const openListenerModal = () => {
         track('listenerSignup', { source: 'downloads_section' });
         setDialogOpen(true);
     };
 
+    const standardPlatforms = downloadsContent.platforms.filter(
+        (platform): platform is StandardDownloadPlatform =>
+            !isDesktopPlatform(platform),
+    );
+    const desktopPlatform = downloadsContent.platforms.find(isDesktopPlatform);
+
+    const [ios, android, web] = standardPlatforms;
+
     return (
         <>
             <section
                 id="downloads"
                 aria-labelledby="downloads-heading"
-                className="w-full bg-background py-20 pb-24 sm:py-28 sm:pb-32"
+                className="w-full bg-stone-950 py-20 pb-24 sm:py-28 sm:pb-32"
             >
                 <div className="container mx-auto max-w-7xl px-4 md:px-6">
                     <div className="mb-12 sm:mb-16">
@@ -79,26 +120,66 @@ export function DownloadsSection() {
                             {downloadsContent.heading}
                         </h2>
                         <p className="mt-4 max-w-2xl text-base text-zinc-400">
-                            {downloadsContent.description}
+                            {downloadsContent.description}{' '}
+                            <Link
+                                href={downloadsContent.studioLink.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-white underline underline-offset-4 hover:text-zinc-300"
+                            >
+                                {downloadsContent.studioLink.label} →
+                            </Link>
                         </p>
-                        <Link
-                            href={downloadsContent.studioLink.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-3 inline-block text-white underline underline-offset-4 hover:text-zinc-300"
-                        >
-                            {downloadsContent.studioLink.label} →
-                        </Link>
                     </div>
 
-                    <div className="grid gap-8 md:grid-cols-3 lg:gap-12">
-                        {downloadsContent.platforms.map((platform) => (
-                            <DownloadPlatformColumn
-                                key={platform.id}
-                                platform={platform}
-                                onOpenListener={openListenerModal}
-                            />
-                        ))}
+                    <div className="divide-y divide-stone-900">
+                        <div className="grid divide-y divide-stone-900 md:grid-cols-3 md:divide-y-0 md:divide-x lg:pb-10">
+                            {ios ? (
+                                <DownloadPlatformCell>
+                                    <StandardDownloadPlatformColumn
+                                        platform={ios}
+                                        onOpenListener={openListenerModal}
+                                    />
+                                </DownloadPlatformCell>
+                            ) : null}
+                            {android ? (
+                                <DownloadPlatformCell>
+                                    <StandardDownloadPlatformColumn
+                                        platform={android}
+                                        onOpenListener={openListenerModal}
+                                    />
+                                </DownloadPlatformCell>
+                            ) : null}
+                            {web ? (
+                                <DownloadPlatformCell>
+                                    <StandardDownloadPlatformColumn
+                                        platform={web}
+                                        onOpenListener={openListenerModal}
+                                    />
+                                </DownloadPlatformCell>
+                            ) : null}
+                        </div>
+
+                        {desktopPlatform ? (
+                            <div className="grid divide-y divide-stone-900 md:grid-cols-3 md:divide-y-0 md:divide-x lg:pt-10">
+                                <DownloadPlatformCell>
+                                    <MacDownloadsColumn
+                                        mac={desktopPlatform.mac}
+                                        onOpenListener={openListenerModal}
+                                    />
+                                </DownloadPlatformCell>
+                                <DownloadPlatformCell>
+                                    <WindowsDownloadsColumn
+                                        windows={desktopPlatform.windows}
+                                        onOpenListener={openListenerModal}
+                                    />
+                                </DownloadPlatformCell>
+                                <DownloadPlatformCell
+                                    className="hidden md:block"
+                                    aria-hidden
+                                />
+                            </div>
+                        ) : null}
                     </div>
                 </div>
             </section>

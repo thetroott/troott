@@ -28,7 +28,7 @@ export function CopyDownloadLink({ url, platform }: CopyDownloadLinkProps) {
     }
 
     return (
-        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900 px-4 py-2.5">
+        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900 px-4 py-2.5 bg-stone-900">
             <code className="min-w-0 flex-1 truncate text-xs text-zinc-400 sm:text-sm">
                 <span className="hidden sm:inline">{url}</span>
                 <span className="sm:hidden">{formatCopyDisplayUrl(url)}</span>
