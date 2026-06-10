@@ -110,23 +110,24 @@ Reference artboard: **1440 × ~900px** visible section region. Values below are 
 | Heading → tab row | 32 |
 | Tab row → visual card | 32 |
 
-### Horizontal tab pills
+### Horizontal tab pills (segmented control)
 
 | Property | Value | Tailwind |
 | -------- | ----- | -------- |
-| Container | `nav` + `ul[role=tablist]` | `flex flex-wrap gap-2 mb-8` |
-| Pill height | **40px** | `h-10` |
-| Pill padding X | **20px** | `px-5` |
-| Border radius | pill | `rounded-full` |
-| Font | 14px Regular | `text-sm font-normal` |
-| Gap between pills | **8px** | `gap-2` |
+| Tablist track | shared pill bar | `inline-flex flex-wrap gap-1 rounded-full bg-[#262626] p-1.5` |
+| Tab height | **36px** → **40px** `sm+` | `h-9 sm:h-10` |
+| Tab padding X | **20px** | `px-5` |
+| Tab radius | pill | `rounded-full` |
+| Font | 14px Regular | `text-sm font-normal font-matter` |
+| Gap inside track | **4px** | `gap-1` |
 
 | State | Background | Text |
 | ----- | ---------- | ---- |
-| Active | `#FFFFFF` | `#000000` |
-| Inactive | `#262626` | `#A1A1AA` |
-| Inactive hover | `#333333` | `#E4E4E7` |
-| Focus visible | — | `ring-2 ring-white/40 ring-offset-2 ring-offset-background` |
+| Track (wraps all tabs) | `#262626` | — |
+| Active tab | `#ECECEC` | `#000000` |
+| Inactive tab | transparent (on track) | `#FFFFFF` |
+| Inactive hover | transparent | `white/90` |
+| Focus visible | — | `ring-2 ring-white/40 ring-offset-2 ring-offset-[#262626]` |
 
 **No icons** in pills. **Reject** vertical sidebar, scroll-spy stacked sections ([feat-0004](../feat-0004/PRODUCT.md) Warp pattern).
 
@@ -156,7 +157,7 @@ Reference artboard: **1440 × ~900px** visible section region. Values below are 
 
 ```text
 ┌─ footer row ───────────────────────────────────────────────────────────┐
-│  [ eyebrow 14px ] + [ description max 448px ]     [ CTA h-40 right ]    │
+│  [ eyebrow 14px ] + [ description white 16–18px ]  [ CTA h-40 right ]   │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -180,10 +181,13 @@ Reference artboard: **1440 × ~900px** visible section region. Values below are 
 
 | Property | Value | Tailwind |
 | -------- | ----- | -------- |
-| Size | **15px** → **16px** `sm+` | `text-[15px] sm:text-base` |
-| Line height | **1.65** / **1.7** | `leading-[1.65] sm:leading-[1.7]` |
-| Color | `#A1A1AA` | `text-zinc-400` |
-| Max width | **448px** | `max-w-[28rem]` |
+| Copy | `tab.description` | e.g. listen tab body copy |
+| Font | Matter Regular | `font-matter` |
+| Size | **16px** → **18px** `sm+` | `text-base sm:text-lg` |
+| Line height | **1.6** / **1.65** | `leading-[1.6] sm:leading-[1.65]` |
+| Color | `#FFFFFF` | `text-white` |
+| Max width | **672px** | `max-w-2xl` |
+| Live region | tab change | `aria-live="polite"` |
 
 #### CTA button
 
@@ -212,8 +216,9 @@ Reference artboard: **1440 × ~900px** visible section region. Values below are 
 | Text primary | `#FAFAFA` | H2 line 1 |
 | Text muted | `#71717A` | H2 line 2, eyebrows |
 | Text body | `#A1A1AA` | Description |
-| Tab active | `#FFFFFF` / `#000000` | Pill fill / text |
-| Tab idle | `#262626` / `#A1A1AA` | Pill fill / text |
+| Tab track | `#262626` | Shared pill bar |
+| Tab active | `#ECECEC` / `#000000` | Elevated pill on track |
+| Tab idle | transparent / `#FFFFFF` | Label on track |
 | CTA | `#FFFFFF` / `#000000` | Button |
 
 Troott teal (`#08FFDB`) is **not** used in this section.
@@ -339,7 +344,7 @@ Full strings in `why-troott.ts`.
 
 ### R4 — Monochrome chrome
 
-No teal accent, no tab icons — white/black pill states only per Exact reference.
+No teal accent, no tab icons — `#262626` segmented track with `#ececec` active pill per Exact reference.
 
 ### R5 — Homepage stack
 
@@ -352,7 +357,8 @@ See [README — new homepage sections](../../README.md#new-homepage-sections-fea
 ### Visual / UX (@ 1440px, `lg+`)
 
 - [ ] Layout matches [measurement checklist](#measurement-checklist-qa--1440px) within ±2px.
-- [ ] Horizontal pills: active `#FFFFFF`/`#000000`, inactive `#262626`/`#A1A1AA`.
+- [ ] Segmented tab track `#262626`; active pill `#ECECEC`/`#000000`; inactive white on track.
+- [ ] Footer description `text-white` at 16–18px (`max-w-2xl`).
 - [ ] Single visual card + single footer; tab click swaps content in < 200ms.
 - [ ] No left sidebar at any breakpoint.
 - [ ] Visual card: 16:10, `rounded-[20px]`, no border.

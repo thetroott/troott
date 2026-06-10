@@ -130,13 +130,21 @@ WhyTroottSection
 └── Newsletter (open state for listen fallback)
 ```
 
-**Tab pill classes (normative):**
+**Tab segmented control (normative — Exact reference):**
 
 ```tsx
-// active
-'rounded-full h-10 px-5 text-sm font-normal bg-white text-black';
-// inactive
-'rounded-full h-10 px-5 text-sm font-normal bg-[#262626] text-zinc-400 hover:bg-[#333333] hover:text-zinc-200';
+// track
+<ul role="tablist" className="inline-flex flex-wrap gap-1 rounded-full bg-[#262626] p-1.5">
+// active tab (elevated on track)
+'… h-9 sm:h-10 rounded-full px-5 bg-[#ececec] text-black shadow-sm';
+// inactive tab
+'… h-9 sm:h-10 rounded-full px-5 bg-transparent text-white hover:text-white/90';
+```
+
+**Footer description:**
+
+```tsx
+<p className="max-w-2xl font-matter text-base leading-[1.6] text-white sm:text-lg sm:leading-[1.65]" aria-live="polite">
 ```
 
 **Visual card:**
@@ -210,7 +218,7 @@ Side-by-side with `./assets/exact-use-cases-reference.png`.
 
 - Single active panel; click-to-switch tabs.
 - Text-only pills (no icons).
-- Monochrome tab chrome (white/black).
+- Tab chrome: `#262626` track + `#ececec` active pill + white inactive labels.
 - `rounded-[20px]` visual card, no border.
 - Four tabs from `why-troott.ts`.
 
