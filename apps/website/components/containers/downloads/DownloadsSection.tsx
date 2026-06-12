@@ -108,11 +108,11 @@ export function DownloadsSection() {
                 aria-labelledby="downloads-heading"
                 className="w-full bg-stone-950 py-20 pb-24 sm:py-28 sm:pb-32"
             >
-                <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <div className="container mx-auto max-w-7xl px-4 md:px-6 ">
                     <div className="mb-12 sm:mb-16">
-                        <p className="font-mono text-[13px] text-zinc-500">
+                        {/* <p className="font-mono text-[13px] text-zinc-500">
                             {downloadsContent.label}
-                        </p>
+                        </p> */}
                         <h2
                             id="downloads-heading"
                             className="mt-5 text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-5xl lg:text-[3.5rem]"
