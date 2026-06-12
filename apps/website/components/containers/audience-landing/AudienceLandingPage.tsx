@@ -35,7 +35,7 @@ export function AudienceLandingPage({ content }: AudienceLandingPageProps) {
                         </p>
                         <h1
                             id={`${content.audience}-landing-heading`}
-                            className="mt-5 text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white lg:text-5xl"
+                            className="mt-5 text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white lg:text-6xl"
                         >
                             {content.headline}
                             <span className="block text-zinc-500">
