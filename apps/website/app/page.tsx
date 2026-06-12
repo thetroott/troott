@@ -25,39 +25,31 @@ export default function Home() {
             <HeroSection />
             {/* <LogoCloudSection /> */}
 
-            <FeaturedPartnersSection />
+            {/* <FeaturedPartnersSection /> */}
 
             <WhyTroottSection />
 
-            <WhyTroottTabsSection />
-
-            <ProductWorkflowsSection />
-
-            <BenefitsSection />
-
-            <AudienceStorySection />
-
             <FeatureHighlightSection />
-
-            <AppShowcaseSection />
-
-            <CoreFeaturesSection {...coreFeaturesContent} />
-
-
-            <TextSection />
-
-            <Mission />
-
-            <SplitDemoSection {...getStartedContent} />
-
-            <FaqsSection />
-
-            {/* <Faqs />
-            <CTASection /> */}
+            <FeatureHighlightSection />
+            
+            <WhyTroottTabsSection />
 
          
 
            
+
+            <CoreFeaturesSection {...coreFeaturesContent} />
+{/* 
+            <TextSection />
+
+            <Mission /> */}
+
+       
+
+           
+
+            {/* <Faqs />
+            <CTASection /> */}
         </main>
     );
 }

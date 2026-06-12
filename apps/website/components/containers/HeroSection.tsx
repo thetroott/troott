@@ -14,11 +14,17 @@ export default function HeroSection() {
             <div className="container mx-auto max-w-7xl px-4 md:px-6">
                 <div className="flex flex-col gap-8 text-left md:items-center md:text-center">
                     <div className="w-full min-w-0 max-w-4xl space-y-6 md:mx-auto">
-                        <h1 className="text-pretty text-4xl font-normal tracking-tight text-foreground md:text-balance md:text-5xl">
-                            All the sermons and teachings you love, in one
-                            place.
+                        <h1
+                            id={`hero-landing-heading`}
+                            className="mt-5 text-[2.5rem] font-semibold leading-[1.05] text-pretty tracking-[-0.03em] text-white lg:text-6xl"
+                        >
+                            All the sermons and teachings
+                            <span className="sm:block text-zinc-500">
+                                {' '}
+                                you love, in one place.
+                            </span>
                         </h1>
-                        <p className="max-w-xl text-lg leading-relaxed text-muted-foreground md:mx-auto">
+                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground md:mx-auto">
                             Find powerful messages from your favourite
                             ministers. Listen anytime, share with friends and
                             family, and stay rooted in God&apos;s Word.
