@@ -30,3 +30,22 @@ export const featureHighlightContent: FeatureHighlightContent = {
         height: 880,
     },
 };
+
+export const featureHighlightStudioContent: FeatureHighlightContent = {
+    id: 'feature-highlight-studio',
+    eyebrow: 'Troott Studio',
+    heading: 'Publish sermons without the busywork',
+    description:
+        'Upload once from Studio and Troott handles processing, hosting, and delivery to listeners on mobile and web.',
+    bullets: [
+        'Simple upload and metadata editing',
+        'Organised sermon library for your ministry',
+        'Reach listeners wherever they are',
+    ],
+    screenshot: {
+        src: '/blocks/phone-screenshot-appstore.png',
+        alt: 'Troott Studio dashboard',
+        width: 640,
+        height: 480,
+    },
+};

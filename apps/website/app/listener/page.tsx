@@ -4,7 +4,8 @@ import { listenerLandingContent } from '@/_data/troott/audience-landing';
 import { AudienceLandingPage } from '@/components/containers/audience-landing';
 import { BenefitsSection } from '@/components/containers/benefits/BenefitsSection';
 import { AudienceStorySection } from '@/components/containers/audience-story';
-import { FeatureHighlightSection } from '@/components/containers/feature-highlight/FeatureHighlightSection';
+import { featureHighlightContent } from '@/_data/troott/feature-highlight';
+import { FeatureHighlightSection } from '@/components/containers/feature-highlight';
 import { AppShowcaseSection } from '@/components/containers/app-showcase';
 import { FaqsSection } from '@/components/containers/faqs/FaqsSection';
 
@@ -19,7 +20,7 @@ export default function ListenerPage() {
             <AudienceLandingPage content={listenerLandingContent} />
             <AudienceStorySection />
 
-            <FeatureHighlightSection />
+            <FeatureHighlightSection content={featureHighlightContent} />
 
             <AppShowcaseSection />
             <BenefitsSection/>
