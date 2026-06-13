@@ -7,11 +7,11 @@ import {
     Filter,
     LayoutGrid,
     List,
-import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
     RotateCcw,
     Search,
     Trash2,
 } from 'lucide-react';
+import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
 import { toast } from 'sonner';
 import api from '@/api/config';
 import storage from '@/api/services/local-storage';
