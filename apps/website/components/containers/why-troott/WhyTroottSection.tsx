@@ -103,7 +103,7 @@ export function WhyTroottSection() {
             <section
                 id="why-troott"
                 aria-labelledby="why-troott-heading"
-                className="relative w-full overflow-visible bg-background py-20 sm:py-28"
+                className="relative w-full overflow-visible bg-[#0d0d0d] py-20 sm:py-28"
             >
                 <div className="container mx-auto max-w-7xl px-4 md:px-6">
                     <div className="mb-12 sm:mb-16">
