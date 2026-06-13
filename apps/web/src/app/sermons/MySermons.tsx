@@ -19,7 +19,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 import { StudioPageCenter } from '@/components/shared/studio/StudioPageCenter';
-import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
 
 const Sermons = () => {
     const { userContext } = useContextType();

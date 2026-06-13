@@ -34,7 +34,6 @@ import {
 } from '@/utils/sermon-studio-policy.util';
 import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
-import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
 import {
     DropdownMenu,
     DropdownMenuContent,
