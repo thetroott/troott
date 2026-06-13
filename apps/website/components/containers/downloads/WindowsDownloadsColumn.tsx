@@ -56,7 +56,7 @@ export function WindowsDownloadsColumn({
                     platform="windows"
                 />
             </div>
-            <div className="mt-4 flex w-full items-center justify-between gap-3">
+            <div className="mt-4 flex w-full min-w-0 flex-wrap items-center justify-between gap-3">
                 <span className="text-sm font-medium text-white">.exe</span>
                 <div className="flex gap-2">
                     {windows.archOptions.map((arch) => (

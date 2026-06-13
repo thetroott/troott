@@ -61,7 +61,7 @@ function StandardDownloadPlatformColumn({
     const url = getTroottDownloadUrlByPackage(platform.primary.package);
 
     return (
-        <div className="flex flex-col items-center text-center">
+        <div className="flex w-full min-w-0 flex-col items-center text-center">
             <Icon aria-hidden="true" className="mx-auto mb-3 size-8 text-white" />
             <h3 className="mb-4 text-lg font-medium text-white">
                 {platform.title}
@@ -106,16 +106,13 @@ export function DownloadsSection() {
             <section
                 id="downloads"
                 aria-labelledby="downloads-heading"
-                className="w-full bg-stone-950 py-20 pb-24 sm:py-28 sm:pb-32"
+                className="w-full overflow-x-clip bg-stone-950 py-20 pb-24 sm:py-28 sm:pb-32"
             >
-                <div className="container mx-auto max-w-7xl px-4 md:px-6 ">
+                <div className="container mx-auto max-w-7xl min-w-0 px-4 md:px-6">
                     <div className="mb-12 sm:mb-16">
-                        {/* <p className="font-mono text-[13px] text-zinc-500">
-                            {downloadsContent.label}
-                        </p> */}
                         <h2
                             id="downloads-heading"
-                            className="mt-5 text-[2.75rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-5xl lg:text-[3.5rem]"
+                            className="text-4xl font-semibold leading-[1.05] tracking-[-0.03em] text-white sm:text-5xl lg:text-[3.5rem]"
                         >
                             {downloadsContent.heading}
                         </h2>
@@ -132,8 +129,8 @@ export function DownloadsSection() {
                         </p>
                     </div>
 
-                    <div className="divide-y divide-stone-900">
-                        <div className="grid divide-y divide-stone-900 md:grid-cols-3 md:divide-y-0 md:divide-x lg:pb-10">
+                    <div className="min-w-0 divide-y divide-stone-900 px-2">
+                        <div className="grid min-w-0 divide-y divide-stone-900 md:grid-cols-3 md:divide-y-0 md:divide-x lg:pb-10">
                             {ios ? (
                                 <DownloadPlatformCell>
                                     <StandardDownloadPlatformColumn
@@ -161,7 +158,7 @@ export function DownloadsSection() {
                         </div>
 
                         {desktopPlatform ? (
-                            <div className="grid divide-y divide-stone-900 md:grid-cols-3 md:divide-y-0 md:divide-x lg:pt-10">
+                            <div className="grid min-w-0 divide-y divide-stone-900 md:grid-cols-3 md:divide-y-0 md:divide-x lg:pt-10">
                                 <DownloadPlatformCell>
                                     <MacDownloadsColumn
                                         mac={desktopPlatform.mac}

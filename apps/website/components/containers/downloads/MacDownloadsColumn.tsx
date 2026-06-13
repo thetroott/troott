@@ -20,7 +20,7 @@ export function MacDownloadsColumn({
     const macUrl = getTroottDownloadUrlByPackage(mac.tile.package);
 
     return (
-        <div className="flex flex-col items-center text-center">
+        <div className="flex w-full min-w-0 flex-col items-center text-center">
             <RiAppleFill
                 aria-hidden="true"
                 className="mb-3 size-8 text-white"
