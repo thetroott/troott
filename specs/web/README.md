@@ -27,8 +27,11 @@ Product and technical specifications for **`apps/web`**.
 | feat-0033 | Profile cover (`banner`) / Background image not visible on web | [PRODUCT](./feature/feat-0033/PRODUCT.md) | [TECH](./feature/feat-0033/TECH.md) |
 | feat-0034 | Dashboard sidebar — always show onboarding Dashboard UI | [PRODUCT](./feature/feat-0034/PRODUCT.md) | [TECH](./feature/feat-0034/TECH.md) |
 | feat-0035 | `/get-troott` smart redirect (app host) | [PRODUCT](./feature/feat-0035/PRODUCT.md) | [TECH](./feature/feat-0035/TECH.md) |
+| feat-0036 | Portal shell loading — sidebar-first, region-scoped fetch | [PRODUCT](./feature/feat-0036/PRODUCT.md) | [TECH](./feature/feat-0036/TECH.md) |
 
 **Cross-cutting:** [feat-0026 EMPTY_STATE_LAYOUT_SPEC](./feature/feat-0026/EMPTY_STATE_LAYOUT_SPEC.md) — all empty states centered in page / region / panel.
+
+**Portal shell loading:** [feat-0036 PRODUCT](./feature/feat-0036/PRODUCT.md) — one bootstrap model; sidebar static chrome immediate; API regions load in place. Normative: [PORTAL_SHELL_LOADING_SPEC](./feature/feat-0036/PORTAL_SHELL_LOADING_SPEC.md). **Per-route implementation:** [ROUTE_IMPLEMENTATION](./feature/feat-0036/ROUTE_IMPLEMENTATION.md).
 
 **Upload modal cover:** [feat-0032 PRODUCT](./feature/feat-0032/PRODUCT.md) — `POST /sermon/image-upload` on Details step, not only on Publish; API [feat-0014](../../api/feature/feat-0014/PRODUCT.md).
 
