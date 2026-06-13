@@ -126,6 +126,12 @@ jobs:
               uses: ./.github/actions/setup-monorepo
 
             - name: Build deployable apps
+              env:
+                  VITE_APP_API_URL: ${{ vars.API_URL || 'http://localhost:5025' }}
+                  VITE_APP_ENVIRONMENT: development
+                  VITE_TROOTT_PLAY_STORE_URL: ${{ vars.TROOTT_PLAY_STORE_URL || 'https://play.google.com/store/apps/details?id=com.troott.app' }}
+                  VITE_TROOTT_APP_STORE_URL: ${{ vars.TROOTT_APP_STORE_URL || 'https://apps.apple.com/ng/app/troott/id1234567890' }}
+                  VITE_TROOTT_WEB_APP_URL: ${{ vars.WEB_APP_URL || vars.APP_URL || 'https://app.troott.com' }}
               run: pnpm build:ci
 
             - name: Upload build artifacts

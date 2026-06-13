@@ -217,6 +217,9 @@ jobs:
                   DOCKER_BUILDKIT: 1
                   VITE_APP_API_URL: ${{ vars.API_URL }}
                   VITE_APP_ENVIRONMENT: prod
+                  VITE_TROOTT_PLAY_STORE_URL: ${{ vars.TROOTT_PLAY_STORE_URL || 'https://play.google.com/store/apps/details?id=com.troott.app' }}
+                  VITE_TROOTT_APP_STORE_URL: ${{ vars.TROOTT_APP_STORE_URL || 'https://apps.apple.com/ng/app/troott/id1234567890' }}
+                  VITE_TROOTT_WEB_APP_URL: ${{ vars.WEB_APP_URL || vars.API_URL }}
               run: |
                   OWNER="${{ steps.meta.outputs.owner }}"
                   FLOAT="${{ steps.meta.outputs.float }}"
@@ -227,6 +230,9 @@ jobs:
                     --cache-to type=gha,mode=max,scope=troott-web \
                     --build-arg VITE_APP_API_URL \
                     --build-arg VITE_APP_ENVIRONMENT \
+                    --build-arg VITE_TROOTT_PLAY_STORE_URL \
+                    --build-arg VITE_TROOTT_APP_STORE_URL \
+                    --build-arg VITE_TROOTT_WEB_APP_URL \
                     -f apps/web/Dockerfile \
                     -t "ghcr.io/${OWNER}/troott-web:${FLOAT}" \
                     -t "ghcr.io/${OWNER}/troott-web:${FLOAT}-${SHA}" \
