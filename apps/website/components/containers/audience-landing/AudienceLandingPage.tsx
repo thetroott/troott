@@ -50,6 +50,7 @@ export function AudienceLandingPage({ content }: AudienceLandingPageProps) {
                                 <GetTroottButton
                                     label={content.primaryCta.label}
                                     showShortcut
+                                    shortcutClassName="hidden"
                                     onFallback={openListenerModal}
                                     className="h-11 rounded-sm px-5 text-base font-normal"
                                 />

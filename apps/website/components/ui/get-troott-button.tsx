@@ -19,6 +19,7 @@ type GetTroottButtonProps = {
     labelMode?: 'compact' | 'full';
     variant?: 'primary' | 'neutral' | 'pill';
     showShortcut?: boolean;
+    shortcutClassName?: string;
     shortcutKey?: string;
     onFallback?: () => void;
     getTroottEnabled?: boolean;
@@ -31,6 +32,7 @@ export function GetTroottButton({
     labelMode = 'compact',
     variant = 'primary',
     showShortcut = false,
+    shortcutClassName,
     shortcutKey = 'D',
     onFallback,
     getTroottEnabled = isGetTroottEnabled(),
@@ -82,7 +84,12 @@ export function GetTroottButton({
             <span>{label ?? cta.label}</span>
             <cta.Icon aria-hidden="true" className="size-4 shrink-0" />
             {showShortcut ? (
-                <kbd className="border-border/70 text-muted-foreground hidden rounded-sm bg-neutral-200/50 px-2 py-0 text-[10px] font-medium md:inline">
+                <kbd
+                    className={cx(
+                        'border-border/70 text-muted-foreground rounded-sm bg-neutral-200/50 px-2 py-0 text-[10px] font-medium',
+                        shortcutClassName ?? 'hidden md:inline-flex',
+                    )}
+                >
                     {shortcutKey}
                 </kbd>
             ) : null}

@@ -33,6 +33,7 @@ export default function HeroSection() {
                             <GetTroottButton
                                 label="Start listening"
                                 showShortcut
+                                shortcutClassName="hidden"
                                 onFallback={() => {}}
                                 className="h-11 rounded-sm px-5 text-base font-normal"
                             />

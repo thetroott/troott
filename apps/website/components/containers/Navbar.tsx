@@ -54,7 +54,6 @@ function HeaderActions({
                 <Link href={siteConfig.baseLinks.requestDemo}>Request Demo</Link>
             </Button>
             <GetTroottButton
-                showShortcut
                 onFallback={onOpenListener}
                 className="h-10 rounded-sm px-4 text-sm font-normal md:text-base"
             />
@@ -237,6 +236,14 @@ export function Navigation() {
                             onOpenMinister={openMinisterModal}
                         />
 
+                        <GetTroottButton
+                            label="Download"
+                            showShortcut
+                            shortcutClassName="inline-flex"
+                            onFallback={openListenerModal}
+                            className="h-9 rounded-sm px-3 text-sm font-normal lg:hidden"
+                        />
+
                         <button
                             type="button"
                             className="text-muted-foreground relative flex size-8 lg:hidden"
@@ -298,23 +305,9 @@ export function Navigation() {
                         onNavigate={closeMobileMenu}
                     />
 
-                    <div className="mt-8 space-y-4">
-                        <HeaderActions
-                            className="flex-col items-stretch [&_button]:w-full [&_a]:w-full [&_a]:justify-center"
-                            onOpenListener={() => {
-                                openListenerModal();
-                                closeMobileMenu();
-                            }}
-                            onOpenMinister={() => {
-                                openMinisterModal();
-                                closeMobileMenu();
-                            }}
-                        />
-                    </div>
-
                     <div className="border-border/70 mt-8 border-t pt-6">
                         <p className="text-muted-foreground mb-4 text-left text-sm">
-                            The discipleship infra for ministers and teachers.
+                            Discipleship infrastructure for ministers and teachers.
                         </p>
                         <div className="flex items-center gap-4">
                             <p className="text-foreground text-sm font-normal">
