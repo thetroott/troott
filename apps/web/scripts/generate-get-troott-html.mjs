@@ -5,9 +5,10 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(__dirname, '..');
 const envPath = resolve(webRoot, '.env');
+const samplePath = resolve(webRoot, '.env.sample');
 
-function loadDotEnv(filePath) {
-    const merged = { ...process.env };
+function parseDotEnvFile(filePath) {
+    const parsed = {};
     try {
         const content = readFileSync(filePath, 'utf8');
         for (const line of content.split('\n')) {
@@ -23,27 +24,36 @@ function loadDotEnv(filePath) {
             ) {
                 value = value.slice(1, -1);
             }
-            if (!(key in process.env)) {
-                merged[key] = value;
-            }
+            parsed[key] = value;
         }
     } catch {
-        // .env optional when Docker passes ARGs as process.env
+        // optional file
+    }
+    return parsed;
+}
+
+/** process.env wins, then `.env`, then `.env.sample` for unset keys (CI has no `.env`). */
+function resolveBuildEnv() {
+    const merged = { ...process.env, ...parseDotEnvFile(envPath) };
+    for (const [key, value] of Object.entries(parseDotEnvFile(samplePath))) {
+        if (!String(merged[key] ?? '').trim()) {
+            merged[key] = value;
+        }
     }
     return merged;
 }
 
 function requireEnv(env, key) {
-    const value = env[key];
+    const value = String(env[key] ?? '').trim();
     if (!value) {
         throw new Error(
-            `[generate-get-troott-html] Missing ${key}. Set it in apps/web/.env or the build environment.`,
+            `[generate-get-troott-html] Missing ${key}. Set it in apps/web/.env, apps/web/.env.sample, or the build environment.`,
         );
     }
     return value;
 }
 
-const env = loadDotEnv(envPath);
+const env = resolveBuildEnv();
 
 const playStore = requireEnv(env, 'VITE_TROOTT_PLAY_STORE_URL');
 const appStore = requireEnv(env, 'VITE_TROOTT_APP_STORE_URL');
