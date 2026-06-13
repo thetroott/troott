@@ -3,7 +3,7 @@ import React from 'react';
 
 type TroottLogoProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
-export const TroottLogo: React.FC<Omit<TroottLogoProps, 'src' | 'alt'>> = (
+export const TLogo: React.FC<Omit<TroottLogoProps, 'src' | 'alt'>> = (
     props,
 ) => {
 
@@ -12,7 +12,7 @@ export const TroottLogo: React.FC<Omit<TroottLogoProps, 'src' | 'alt'>> = (
     //     resolvedTheme === 'dark'
     //         ? '/images/assets/troott-icon.svg'
     //         : '/images/assets/troott-icon-dark.svg';
-    const logoSrc = '/images/assets/troott-icon-dark.svg';
+    const logoSrc = '/images/assets/troott-logo.svg';
 
     return (
         <img

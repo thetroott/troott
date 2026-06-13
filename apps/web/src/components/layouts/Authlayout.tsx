@@ -1,4 +1,4 @@
-import { TroottLogo } from '../shared/app/troot-logo';
+import { TLogo } from '../shared/app/logo';
 import { Copyright } from '../ui/copyright';
 import type { IAuthLayout } from '@/utils/interfaces.util';
 
@@ -24,18 +24,10 @@ export function AuthLayout(data: IAuthLayout) {
 
     return (
         <div className={`grid min-h-svh lg:grid-cols-2 ${className}`}>
-            <div className="flex flex-col gap-4 p-6 md:p-10">
+            <div className="flex flex-col gap-4 px-6">
                 {showLogo && (
-                    <div className="flex justify-center gap-2 md:justify-start">
-                        <a
-                            href="#"
-                            className="flex items-center gap-2 font-medium"
-                        >
-                            <div className="flex h-6 w-6 items-center justify-center rounded-none bg-primary text-primary-foreground">
-                                <TroottLogo className="size-4" />
-                            </div>
-                            Troott
-                        </a>
+                    <div className="flex justify-center md:justify-start">
+                        <TLogo className="size-20" />
                     </div>
                 )}
 
@@ -60,7 +52,7 @@ export function AuthLayout(data: IAuthLayout) {
                 </div>
 
                 {showCopyright && (
-                    <div className="flex justify-start">
+                    <div className="flex justify-center md:justify-start pb-4">
                         <Copyright year={new Date().getFullYear()} company="Troott" />
                     </div>
                 )}
