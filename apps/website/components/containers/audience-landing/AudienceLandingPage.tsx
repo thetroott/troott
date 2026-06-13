@@ -35,7 +35,7 @@ export function AudienceLandingPage({ content }: AudienceLandingPageProps) {
                         </p>
                         <h1
                             id={`${content.audience}-landing-heading`}
-                            className="mt-5 text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white lg:text-6xl"
+                            className="mt-5 text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.03em] text-white lg:text-5xl"
                         >
                             {content.headline}
                             <span className="block text-zinc-500">
@@ -132,15 +132,7 @@ export function AudienceLandingPage({ content }: AudienceLandingPageProps) {
                             </li>
                         ))}
                     </ul>
-                    <p className="mt-12 text-center text-sm text-zinc-400">
-                        {content.crossLink.prefix}{' '}
-                        <Link
-                            href={content.crossLink.href}
-                            className="text-white underline underline-offset-4 hover:text-zinc-300"
-                        >
-                            {content.crossLink.linkLabel}
-                        </Link>
-                    </p>
+              
                 </div>
             </section>
 

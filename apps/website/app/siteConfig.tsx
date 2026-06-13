@@ -3,7 +3,7 @@ import { getGetTroottBaseUrl, joinUrl, publicEnv } from '@/lib/public-env';
 const { siteUrl, webAppUrl, requestDemoUrl } = publicEnv;
 
 export const siteConfig = {
-    name: 'Troott - The new mobile space for sermons and teachings',
+    name: 'Troott | Discipleship infrastructure for ministers and teachers',
     url: siteUrl,
     description:
         'Troott helps you stay rooted in God’s Word. You find, listen to teachings and sermsons and share with friends and family - no distractions, no interruptions.',

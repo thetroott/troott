@@ -24,7 +24,7 @@ export type AudienceLandingContent = {
 export const listenerLandingContent: AudienceLandingContent = {
     audience: 'listener',
     metadata: {
-        title: 'Troott for Listeners | Find and listen to sermons',
+        title: 'Listeners | Find and listen to sermons',
         description:
             'Discover sermons from your favourite ministers. Listen ad-free on iOS and Android, save teachings, and share with friends and family.',
     },
@@ -66,7 +66,7 @@ export const listenerLandingContent: AudienceLandingContent = {
 export const ministerLandingContent: AudienceLandingContent = {
     audience: 'minister',
     metadata: {
-        title: 'Troott Studio for Ministers | Publish and grow your reach',
+        title: 'Ministers | Publish and distribute your sermons',
         description:
             'Upload sermons, manage your library, and help more people hear the Gospel. Troott Studio is built for ministers, preachers, and ministry teams.',
     },

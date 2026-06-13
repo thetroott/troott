@@ -226,7 +226,7 @@ export default function Newsletter(data: ISubscribeDialog) {
                             </DialogTitle>
 
                             <DialogDescription className="pt-4 text-start text-lg text-neutral-400">
-                                Troott is the new mobile space for life-giving
+                                Troott is the discipleship infrastructure for ministers and teachers, anytime,
                                 sermons and spiritual nourishment, anytime,
                                 anywhere. Signup below to get your invite:
                             </DialogDescription>
