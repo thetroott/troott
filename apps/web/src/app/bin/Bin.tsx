@@ -7,7 +7,7 @@ import {
     Filter,
     LayoutGrid,
     List,
-    Loader2,
+import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
     RotateCcw,
     Search,
     Trash2,
@@ -601,44 +601,40 @@ const Bin = () => {
         );
     }
 
-    if (isLoading) {
-        return (
-            <StudioPageCenter>
-                <StudioEmptyState placement="page">
-                    <Loader2
-                        className="h-8 w-8 animate-spin text-[#9d9d9d]"
-                        aria-hidden
-                    />
-                    <p className="font-matter text-sm text-[#9d9d9d]">
-                        Loading bin…
-                    </p>
-                </StudioEmptyState>
-            </StudioPageCenter>
-        );
-    }
-
     if (isError) {
         const message =
             error && typeof error === 'object' && 'message' in error
                 ? String((error as { message: unknown }).message)
                 : 'Could not load bin.';
         return (
-            <StudioPageCenter>
-                <StudioEmptyState
-                    placement="page"
-                    description={
-                        <span className="text-destructive">{message}</span>
-                    }
-                >
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => void refetch()}
-                    >
-                        Retry
-                    </Button>
-                </StudioEmptyState>
-            </StudioPageCenter>
+            <div className={cn(MY_SERMONS_PAGE.pageBg, MY_SERMONS_PAGE.pageRoot)}>
+                <div className={MY_SERMONS_PAGE.mainColumn}>
+                    <header className="flex items-center justify-between gap-4 border-b border-[#545454]/50 pb-4">
+                        <h1 className="text-base font-medium text-[#eaeaea]">
+                            Bin
+                        </h1>
+                    </header>
+                    <div className={MY_SERMONS_PAGE.contentStack}>
+                        <StudioEmptyState
+                            placement="region"
+                            className="min-h-[40vh]"
+                            description={
+                                <span className="text-destructive">
+                                    {message}
+                                </span>
+                            }
+                        >
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => void refetch()}
+                            >
+                                Retry
+                            </Button>
+                        </StudioEmptyState>
+                    </div>
+                </div>
+            </div>
         );
     }
 
@@ -873,8 +869,13 @@ const Bin = () => {
                     </div>
                 </div>
 
-                <div className={MY_SERMONS_PAGE.contentStack}>
-                    {isEmptyBin ? (
+                <div
+                    className={MY_SERMONS_PAGE.contentStack}
+                    aria-busy={isLoading || undefined}
+                >
+                    {isLoading ? (
+                        <PortalContentLoader label="Loading bin…" />
+                    ) : isEmptyBin ? (
                         <StudioEmptyState
                             placement="region"
                             title="Bin is empty"

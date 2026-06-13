@@ -33,6 +33,8 @@ import {
     SERMON_PUBLISHED_TRASH_POLICY_MESSAGE,
 } from '@/utils/sermon-studio-policy.util';
 import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
+import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
+import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -97,6 +99,8 @@ interface SermonsTableProps {
     onDateFromChange?: (v: string) => void;
     onDateToChange?: (v: string) => void;
     isFetching?: boolean;
+    isLoading?: boolean;
+    listLoadingLabel?: string;
 }
 
 type MainTab = 'Sermon';
@@ -176,6 +180,8 @@ const SermonsTable = ({
     onDateFromChange,
     onDateToChange,
     isFetching = false,
+    isLoading = false,
+    listLoadingLabel = 'Loading sermons…',
 }: SermonsTableProps) => {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -898,8 +904,13 @@ const SermonsTable = ({
                     </div>
                 </div>
 
-                <div className={MY_SERMONS_PAGE.contentStack}>
-                    {hasFilteredSermons ? (
+                <div
+                    className={MY_SERMONS_PAGE.contentStack}
+                    aria-busy={isLoading || undefined}
+                >
+                    {isLoading ? (
+                        <PortalContentLoader label={listLoadingLabel} />
+                    ) : hasFilteredSermons ? (
                         <div className={MY_SERMONS_PAGE.contentWithFooter}>
                             <div className={MY_SERMONS_PAGE.contentScroll}>
                                 {viewMode === 'grid' ? (

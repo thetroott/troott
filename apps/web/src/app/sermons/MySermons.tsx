@@ -19,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 import { StudioPageCenter } from '@/components/shared/studio/StudioPageCenter';
-import { Loader2 } from 'lucide-react';
+import { PortalContentLoader } from '@/components/shared/studio/PortalContentLoader';
 
 const Sermons = () => {
     const { userContext } = useContextType();
@@ -139,22 +139,6 @@ const Sermons = () => {
         );
     }
 
-    if (isLoading) {
-        return (
-            <StudioPageCenter>
-                <StudioEmptyState placement="page">
-                    <Loader2
-                        className="h-8 w-8 animate-spin text-[#9d9d9d]"
-                        aria-hidden
-                    />
-                    <p className="font-matter text-sm text-[#9d9d9d]">
-                        Loading sermons…
-                    </p>
-                </StudioEmptyState>
-            </StudioPageCenter>
-        );
-    }
-
     if (isError) {
         const message =
             error && typeof error === 'object' && 'message' in error
@@ -207,6 +191,8 @@ const Sermons = () => {
                 onDateFromChange={setDateFrom}
                 onDateToChange={setDateTo}
                 isFetching={isFetching}
+                isLoading={isLoading}
+                listLoadingLabel="Loading sermons…"
             />
         );
     }
@@ -231,6 +217,8 @@ const Sermons = () => {
             onDateFromChange={setDateFrom}
             onDateToChange={setDateTo}
             isFetching={isFetching}
+            isLoading={isLoading}
+            listLoadingLabel="Loading sermons…"
         />
     );
 };
