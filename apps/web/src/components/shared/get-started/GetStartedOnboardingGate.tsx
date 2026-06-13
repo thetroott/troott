@@ -6,6 +6,7 @@ import { useMinister } from '@/context/minister/useMinister';
 import { useCreator } from '@/context/creator/useCreator';
 import { useStudio } from '@/context/studio/useStudio';
 import useContextType from '@/hooks/shared/useContextType';
+import { PortalRegionLoader } from '@/components/shared/studio/PortalRegionLoader';
 import { isStudioContentRole } from '@/utils/roles.util';
 import { UserType } from '@/models/User.model';
 import { normalizeUserType } from '@/utils/auth-redirect.util';
@@ -72,11 +73,11 @@ export default function GetStartedOnboardingGate() {
     ]);
 
     if (profileLoading) {
-        return null;
+        return <PortalRegionLoader label="Loading your profile…" />;
     }
 
     if (onboardingComplete && isStudioContentRole(userType)) {
-        return null;
+        return <PortalRegionLoader label="Opening your studio…" />;
     }
 
     return <Outlet />;

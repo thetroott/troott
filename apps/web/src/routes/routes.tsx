@@ -57,19 +57,11 @@ function AuthGate({
         );
     }
 
-    if (roles?.length && isHydrating) {
-        return (
-            <div
-                className="text-muted-foreground flex min-h-[40vh] w-full items-center justify-center"
-                role="status"
-                aria-live="polite"
-            >
-                Loading…
-            </div>
-        );
-    }
-
-    if (roles?.length && !roleMatchesAllowList(roles, userType)) {
+    if (
+        roles?.length &&
+        !isHydrating &&
+        !roleMatchesAllowList(roles, userType)
+    ) {
         return (
             <Navigate
                 to={PATH_UNAUTHORIZED}

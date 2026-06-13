@@ -49,8 +49,8 @@ const AppSidebar = (data: ISideBar) => {
     const currentPath = location.pathname;
     const { logout } = useAuth();
     const { userContext } = useContextType();
-    const { minister } = useMinister();
-    const { creator } = useCreator();
+    const { minister, isLoading: ministerLoading } = useMinister();
+    const { creator, isLoading: creatorLoading } = useCreator();
     const user = userContext.user as {
         onboard?: { status?: string };
     } | null;
@@ -78,6 +78,9 @@ const AppSidebar = (data: ISideBar) => {
                         navItem.showOnboarding ||
                         navItem.title === 'Get Started'
                     ) {
+                        if (ministerLoading || creatorLoading) {
+                            return false;
+                        }
                         return shouldShowGetStartedNavItem(
                             userRole,
                             minister,
@@ -90,7 +93,7 @@ const AppSidebar = (data: ISideBar) => {
                 return { ...group, items };
             })
             .filter((group) => group.items.length > 0);
-    }, [allGroups, userRole, minister, creator, user]);
+    }, [allGroups, userRole, minister, creator, user, ministerLoading, creatorLoading]);
 
     return (
         <Sidebar collapsible="icon" className="overflow-hidden" {...props}>

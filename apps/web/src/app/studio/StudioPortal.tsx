@@ -10,8 +10,10 @@ import { useCreator } from '@/context/creator/useCreator';
 import useContextType from '@/hooks/shared/useContextType';
 import type { StudioResponseDTO } from '@/dtos/studio.dto';
 import { normalizeStudioCode } from '@/utils/studio-nav.util';
+import { PortalRegionLoader } from '@/components/shared/studio/PortalRegionLoader';
 import { StudioEmptyState } from '@/components/shared/studio/StudioEmptyState';
 import { StudioPageCenter } from '@/components/shared/studio/StudioPageCenter';
+import { UserType } from '@/models/User.model';
 import { PATH_GET_STARTED } from '@/routes/paths';
 import { isStudioContentRole } from '@/utils/roles.util';
 import { isStudioOnboardingComplete } from '@/utils/portal-onboarding.util';
@@ -32,7 +34,7 @@ const StudioPortal = () => {
     const { studio, studioCode: contextCode } = useStudio();
     const { isHydratingSession } = useSession();
     const { minister, isLoading: ministerLoading } = useMinister();
-    const { creator } = useCreator();
+    const { creator, isLoading: creatorLoading } = useCreator();
     const { userContext } = useContextType();
     const location = useLocation();
     const navigate = useNavigate();
@@ -53,7 +55,18 @@ const StudioPortal = () => {
     }, [routeCode, location.pathname, location.search, location.hash, navigate]);
 
     useEffect(() => {
-        if (isHydratingSession || ministerLoading) {
+        const utEarly = normalizeUserType(
+            String(
+                (userContext.user as { userType?: string } | null)?.userType ??
+                    cookieService.getUserType() ??
+                    '',
+            ),
+        );
+        const profileContextLoading =
+            (utEarly === UserType.MINISTER && ministerLoading) ||
+            (utEarly === UserType.CREATOR && creatorLoading);
+
+        if (isHydratingSession || profileContextLoading) {
             return;
         }
 
@@ -93,6 +106,7 @@ const StudioPortal = () => {
     }, [
         isHydratingSession,
         ministerLoading,
+        creatorLoading,
         minister,
         creator,
         userContext.user,
@@ -117,9 +131,13 @@ const StudioPortal = () => {
         sessionUser,
         tourSearch,
     );
+    const profileContextLoading =
+        (portalUserType === UserType.MINISTER && ministerLoading) ||
+        (portalUserType === UserType.CREATOR && creatorLoading);
+
     const onboardingComplete =
         !isHydratingSession &&
-        !ministerLoading &&
+        !profileContextLoading &&
         (!isStudioContentRole(portalUserType) ||
             isStudioOnboardingComplete(
                 portalUserType,
@@ -183,10 +201,6 @@ const StudioPortal = () => {
         };
     }, [routeCode, studio, contextCode, onboardingComplete]);
 
-    if (!onboardingComplete) {
-        return null;
-    }
-
     if (error) {
         return (
             <StudioPageCenter>
@@ -199,8 +213,8 @@ const StudioPortal = () => {
         );
     }
 
-    if (!ready) {
-        return null;
+    if (!onboardingComplete || !ready) {
+        return <PortalRegionLoader label="Loading studio…" />;
     }
 
     return <Outlet />;
