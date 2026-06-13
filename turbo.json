@@ -3,16 +3,37 @@
     "dangerouslyDisablePackageManagerCheck": true,
     "ui": "tui",
     "globalEnv": [
+        "APP_ENV",
         "ENABLE_SEEDING",
         "SUPERADMIN_EMAIL",
         "SUPERADMIN_PASSWORD",
         "SUPERADMIN_FIRSTNAME",
         "SUPERADMIN_LASTNAME",
-        "NODE_ENV"
+        "NODE_ENV",
+        "MAILERLITE_API_KEY",
+        "MAILERLITE_GROUP_ID"
     ],
     "tasks": {
         "lint": {
-            "outputs": []
+            "outputs": [],
+            "env": [
+                "APP_ENV",
+                "CLIENT_APP_URL",
+                "CLIENT_API_URL",
+                "CLIENT_PAYMENT_REDIRECT_URL",
+                "CLIENT_DASHBOARD_URL",
+                "CLIENT_STAGING_BASE_URL",
+                "CLIENT_STAGING_API_URL",
+                "CLIENT_STAGING_PAYMENT_REDIRECT_URL",
+                "CLIENT_STAGING_DASHBOARD_URL",
+                "CLIENT_STAGING_URL",
+                "CLIENT_LOCAL_URL",
+                "CLIENT_LOCAL_API_URL",
+                "CLIENT_LOCAL_PAYMENT_REDIRECT_URL",
+                "CLIENT_LOCAL_DASHBOARD_URL",
+                "MAILERLITE_API_KEY",
+                "MAILERLITE_GROUP_ID"
+            ]
         },
         "test": {
             "inputs": ["**/*.{ts,tsx,js,jsx}"],
@@ -28,6 +49,7 @@
         "build": {
             "dependsOn": ["^build"],
             "env": [
+                "APP_ENV",
                 "AWS_REGION",
                 "AWS_ACCESS_KEY_ID",
                 "AWS_SECRET_ACCESS_KEY",
@@ -37,8 +59,26 @@
                 "AWS_BUCKET_STAGING",
                 "AWS_BUCKET_DEVELOPMENT",
                 "CLOUDFRONT_STORAGE_URL",
+                "CLIENT_APP_URL",
+                "CLIENT_API_URL",
+                "CLIENT_PAYMENT_REDIRECT_URL",
+                "CLIENT_DASHBOARD_URL",
+                "CLIENT_STAGING_BASE_URL",
+                "CLIENT_STAGING_API_URL",
+                "CLIENT_STAGING_PAYMENT_REDIRECT_URL",
+                "CLIENT_STAGING_DASHBOARD_URL",
+                "CLIENT_STAGING_URL",
+                "CLIENT_LOCAL_URL",
+                "CLIENT_LOCAL_API_URL",
+                "CLIENT_LOCAL_PAYMENT_REDIRECT_URL",
+                "CLIENT_LOCAL_DASHBOARD_URL",
                 "VITE_APP_API_URL",
                 "VITE_APP_ENVIRONMENT",
+                "VITE_TROOTT_PLAY_STORE_URL",
+                "VITE_TROOTT_APP_STORE_URL",
+                "VITE_TROOTT_WEB_APP_URL",
+                "VITE_TROOTT_DMG_URL",
+                "VITE_TROOTT_EXE_URL",
                 "NEXT_PUBLIC_APP_API_URL",
                 "NEXT_PUBLIC_APP_ENVIRONMENT"
             ],
