@@ -37,7 +37,7 @@ const navigation = {
 export default function Footer() {
     return (
         <footer id="footer" className="bg-stone-900">
-            <div className="mx-auto max-w-7xl px-3 pb-8 pt-16">
+            <div className="mx-auto max-w-7xl px-6 pb-8 pt-16">
                 <div className="xl:grid xl:grid-cols-3 xl:gap-20">
                     <div className="space-y-8">
                         <TroottLogo className="w-32 sm:w-40" />
