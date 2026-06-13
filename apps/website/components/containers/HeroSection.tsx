@@ -68,7 +68,7 @@ export default function HeroSection() {
                 >
                     <HeroImage />
                     <div
-                        className="absolute inset-x-0 -bottom-20 h-2/4 bg-gradient-to-t from-neutral-950 via-neutral-950 to-transparent lg:h-1/4"
+                        className="absolute inset-x-0 -bottom-20 h-2/4 bg-gradient-to-t from-background via-background to-transparent lg:h-1/4"
                         aria-hidden="true"
                     />
                 </div>

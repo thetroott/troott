@@ -220,11 +220,11 @@ a {
 @layer base {
     :root {
         color-scheme: dark;
-        --background: 0 0% 3.9%;
+        --background: oklch(18.69% 0.0067 35.9);
         --foreground: 0 0% 98%;
-        --card: 0 0% 3.9%;
+        --card: oklch(18.69% 0.0067 35.9);
         --card-foreground: 0 0% 98%;
-        --popover: 0 0% 3.9%;
+        --popover: oklch(18.69% 0.0067 35.9);
         --popover-foreground: 0 0% 98%;
         --primary: 0 0% 98%;
         --primary-foreground: 0 0% 9%;
@@ -312,7 +312,7 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0px 1000px #171717 inset !important;
-    box-shadow: 0 0 0px 1000px #171717 inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #131312 inset !important;
+    box-shadow: 0 0 0px 1000px #131312 inset !important;
     -webkit-text-fill-color: #d4d4d4 !important;
 }

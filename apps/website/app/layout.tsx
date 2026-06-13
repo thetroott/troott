@@ -130,7 +130,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-    themeColor: '#0a0a0a',
+    themeColor: '#131312',
 };
 
 export default function RootLayout({
@@ -149,7 +149,7 @@ export default function RootLayout({
                 <MailerLiteScript />
             </head>
             <body
-                className={`${matter.className} min-h-screen overflow-x-clip scroll-auto bg-neutral-950 text-gray-50 antialiased selection:bg-cyan-400 selection:text-cyan-700`}
+                className={`${matter.className} min-h-screen overflow-x-clip scroll-auto bg-background text-gray-50 antialiased selection:bg-cyan-400 selection:text-cyan-700`}
             >
                 <Navigation />
                 {children}
