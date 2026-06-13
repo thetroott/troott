@@ -31,7 +31,7 @@ Product and technical specifications for **`apps/web`**.
 
 **Cross-cutting:** [feat-0026 EMPTY_STATE_LAYOUT_SPEC](./feature/feat-0026/EMPTY_STATE_LAYOUT_SPEC.md) — all empty states centered in page / region / panel.
 
-**Portal shell loading:** [feat-0036 PRODUCT](./feature/feat-0036/PRODUCT.md) — one bootstrap model; sidebar static chrome immediate; API regions load in place. Normative: [PORTAL_SHELL_LOADING_SPEC](./feature/feat-0036/PORTAL_SHELL_LOADING_SPEC.md). **Per-route implementation:** [ROUTE_IMPLEMENTATION](./feature/feat-0036/ROUTE_IMPLEMENTATION.md).
+**Portal shell loading:** [feat-0036 PRODUCT](./feature/feat-0036/PRODUCT.md) — one bootstrap model; sidebar static chrome immediate; API regions load in place. [TECH](./feature/feat-0036/TECH.md) — loading tiers, per-route implementation.
 
 **Upload modal cover:** [feat-0032 PRODUCT](./feature/feat-0032/PRODUCT.md) — `POST /sermon/image-upload` on Details step, not only on Publish; API [feat-0014](../../api/feature/feat-0014/PRODUCT.md).
 
