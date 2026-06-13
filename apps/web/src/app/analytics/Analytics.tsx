@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import AnalyticsOverview from '@/app/analytics/AnalyticsOverview';
@@ -30,6 +30,8 @@ export default function Analytics() {
     const tab = parseTab(searchParams.get('tab'));
     const sermonId = searchParams.get('sermonId')?.trim() ?? '';
     const code = studioCode?.trim() ?? '';
+
+    const [overviewLoading, setOverviewLoading] = useState(false);
 
     useEffect(() => {
         if (sermonId && code && (tab === 'overview' || tab === 'sermon')) {
@@ -63,17 +65,26 @@ export default function Analytics() {
         tab === 'overview' && sermonId ? 'sermon' : tab;
 
     const tabContent = useMemo(() => {
-        if (!code) {
-            return null;
-        }
         if (effectiveTab === 'overview') {
-            return <AnalyticsOverview studioCode={code} />;
+            if (!code) {
+                return (
+                    <AnalyticsTabPlaceholder message="Studio analytics will appear once your studio is ready." />
+                );
+            }
+            return (
+                <AnalyticsOverview
+                    studioCode={code}
+                    onLoadingChange={setOverviewLoading}
+                />
+            );
         }
         if (effectiveTab === 'sermon') {
             if (!sermonId) {
                 return (
                     <AnalyticsSermonEmpty
-                        sermonsListPath={studioSermonsListPath(code)}
+                        sermonsListPath={
+                            code ? studioSermonsListPath(code) : '#'
+                        }
                     />
                 );
             }
@@ -99,7 +110,16 @@ export default function Analytics() {
                         onValueChange={handleTabChange}
                     />
                 </div>
-                <div className="mt-2 min-h-0 flex-1">{tabContent}</div>
+                <div
+                    className="mt-2 min-h-0 flex-1"
+                    aria-busy={
+                        effectiveTab === 'overview' && overviewLoading
+                            ? true
+                            : undefined
+                    }
+                >
+                    {tabContent}
+                </div>
             </div>
         </div>
     );

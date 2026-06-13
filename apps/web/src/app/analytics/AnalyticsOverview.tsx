@@ -17,9 +17,13 @@ import { toast } from 'sonner';
 
 interface AnalyticsOverviewProps {
     studioCode: string;
+    onLoadingChange?: (loading: boolean) => void;
 }
 
-export default function AnalyticsOverview({ studioCode }: AnalyticsOverviewProps) {
+export default function AnalyticsOverview({
+    studioCode,
+    onLoadingChange,
+}: AnalyticsOverviewProps) {
     const queryClient = useQueryClient();
     const [granularity, setGranularity] =
         useState<AnalyticsGranularity>('daily');
@@ -39,6 +43,10 @@ export default function AnalyticsOverview({ studioCode }: AnalyticsOverviewProps
         overviewParams,
         dateRange,
     );
+
+    useEffect(() => {
+        onLoadingChange?.(isLoading);
+    }, [isLoading, onLoadingChange]);
 
     useEffect(() => {
         if (isError) {

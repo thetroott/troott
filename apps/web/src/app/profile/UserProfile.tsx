@@ -68,7 +68,7 @@ function UserProfile() {
         return (
             <ProfilePageShell>
                 <div className="space-y-4">
-                    <div className="h-[84px] animate-pulse rounded-xl bg-[#333234]" />
+                    <ProfilePageHeader />
                     <div className="h-[368px] animate-pulse rounded-xl bg-[#333234]" />
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                         {[0, 1, 2, 3].map((i) => (
@@ -86,25 +86,28 @@ function UserProfile() {
     if (isError || !profile) {
         return (
             <ProfilePageShell>
-                <StudioEmptyState
-                    placement="region"
-                    className="min-h-[40vh]"
-                    description={
-                        <span className="text-red-400">
-                            {error instanceof Error
-                                ? error.message
-                                : 'Could not load profile. Please refresh.'}
-                        </span>
-                    }
-                >
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => void refetch()}
+                <div className="space-y-4">
+                    <ProfilePageHeader />
+                    <StudioEmptyState
+                        placement="region"
+                        className="min-h-[40vh]"
+                        description={
+                            <span className="text-red-400">
+                                {error instanceof Error
+                                    ? error.message
+                                    : 'Could not load profile. Please refresh.'}
+                            </span>
+                        }
                     >
-                        Retry
-                    </Button>
-                </StudioEmptyState>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => void refetch()}
+                        >
+                            Retry
+                        </Button>
+                    </StudioEmptyState>
+                </div>
             </ProfilePageShell>
         );
     }
@@ -232,8 +235,18 @@ function UserProfile() {
                     </div>
                 </section>
 
-                <section className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
-                    {insightCards.map(({ icon: Icon, label, value }) => (
+                <section
+                    className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4"
+                    aria-busy={statsLoading || undefined}
+                >
+                    {statsLoading
+                        ? [0, 1, 2, 3].map((i) => (
+                              <div
+                                  key={i}
+                                  className="h-20 animate-pulse rounded-xl bg-[#333234]"
+                              />
+                          ))
+                        : insightCards.map(({ icon: Icon, label, value }) => (
                         <article
                             key={label}
                             className="rounded-xl border border-[#545454] bg-[#2b2a2c] px-4 py-4"

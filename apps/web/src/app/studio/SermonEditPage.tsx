@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import AnalyticsSermonView from '@/app/analytics/AnalyticsSermonView';
 import { SermonEditSidebar } from '@/components/shared/sermon/SermonEditSidebar';
@@ -357,8 +357,49 @@ const SermonEditPage = () => {
         [],
     );
 
+    const listPath = code ? studioSermonsListPath(code) : '#';
+    const shellAnalyticsPath =
+        code && sermonId
+            ? studioSermonAnalyticsPath(code, sermonId)
+            : '#';
+
+    const renderEditShell = (content: ReactNode) => (
+        <div className={SERMON_EDIT.page}>
+            <div className={SERMON_EDIT.shell}>
+                <SermonEditSidebar
+                    listPath={listPath}
+                    detailsPath="#"
+                    analyticsPath={shellAnalyticsPath}
+                    sermonTitle="Loading…"
+                    activeSection={
+                        isAnalyticsSection ? 'analytics' : 'details'
+                    }
+                    onReplaceAudio={() => {}}
+                />
+                <div className={SERMON_EDIT.contentColumn}>{content}</div>
+            </div>
+        </div>
+    );
+
     if (!sermonId) {
-        return null;
+        return renderEditShell(
+            <div
+                className={cn(
+                    SERMON_EDIT.loadingShell,
+                    'flex-1 gap-4 px-4 text-center',
+                )}
+                role="status"
+            >
+                <p className="max-w-md font-matter text-sm text-[#9d9d9d]">
+                    Sermon not specified.
+                </p>
+                {code ? (
+                    <Button type="button" variant="ghost" asChild>
+                        <Link to={listPath}>Back to My Sermons</Link>
+                    </Button>
+                ) : null}
+            </div>,
+        );
     }
 
     if (
@@ -366,22 +407,27 @@ const SermonEditPage = () => {
         (!form && !isError) ||
         (!isAnalyticsSection && isDraftSermon)
     ) {
-        return (
-            <div className={SERMON_EDIT.loadingShell}>
+        return renderEditShell(
+            <div
+                className={SERMON_EDIT.loadingShell}
+                aria-busy="true"
+                role="status"
+            >
                 <Loader2 className="h-8 w-8 animate-spin" aria-hidden />
                 <p className="font-matter text-sm">Loading sermon…</p>
-            </div>
+            </div>,
         );
     }
 
     if (isError || !form) {
         const notFound = isSermonDetailNotFoundError(error);
-        return (
+        return renderEditShell(
             <div
                 className={cn(
                     SERMON_EDIT.loadingShell,
-                    'gap-4 px-4 text-center',
+                    'flex-1 gap-4 px-4 text-center',
                 )}
+                role="status"
             >
                 <p className="max-w-md font-matter text-sm text-[#9d9d9d]">
                     {notFound
@@ -389,22 +435,23 @@ const SermonEditPage = () => {
                         : 'Could not load sermon for editing.'}
                 </p>
                 {!notFound ? (
-                    <Button type="button" variant="outline" onClick={() => void refetch()}>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => void refetch()}
+                    >
                         Retry
                     </Button>
                 ) : null}
                 {code ? (
                     <Button type="button" variant="ghost" asChild>
-                        <Link to={studioSermonsListPath(code)}>
-                            Back to My Sermons
-                        </Link>
+                        <Link to={listPath}>Back to My Sermons</Link>
                     </Button>
                 ) : null}
-            </div>
+            </div>,
         );
     }
 
-    const listPath = code ? studioSermonsListPath(code) : '#';
     const detailsDestination =
         code && sermonId
             ? resolveSermonEditDestination(code, sermonId, {
