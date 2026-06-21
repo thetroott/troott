@@ -22,10 +22,10 @@ export const audienceStoryContent: AudienceStoryContent = {
         { type: 'text', value: 'Stay rooted in ' },
         {
             type: 'image',
-            src: '/images/troott-mobile-app.png',
+            src: '/images/listen.png',
             alt: 'Listener using Troott on mobile',
-            width: 112,
-            height: 48,
+            width: 45,
+            height: 148,
         },
         {
             type: 'text',

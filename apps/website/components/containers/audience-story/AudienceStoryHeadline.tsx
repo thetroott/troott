@@ -12,7 +12,7 @@ export function AudienceStoryHeadline({
     return (
         <h2
             id={id}
-            className="text-[2.25rem] font-bold leading-[1.15] tracking-[-0.02em] text-white md:text-5xl lg:text-[3.5rem]"
+            className="text-2xl font-bold leading-[1.15] tracking-[-0.02em] text-white md:text-4xl lg:text-5xl"
         >
             {segments.map((segment, index) => {
                 if (segment.type === 'text') {
@@ -34,13 +34,13 @@ export function AudienceStoryHeadline({
                 return (
                     <span
                         key={index}
-                        className="relative mx-1.5 inline-block h-10 w-[5.5rem] shrink-0 align-middle overflow-hidden rounded-full ring-1 ring-white/10 md:h-12 md:w-28"
+                        className="relative mx-1.5 inline-block h-8 w-8 sm:h-14 sm:w-14 shrink-0 align-middle overflow-hidden "
                     >
                         <Image
                             src={segment.src}
                             alt={segment.alt}
                             fill
-                            className="object-cover"
+                            className="object-c"
                             sizes="112px"
                         />
                     </span>
