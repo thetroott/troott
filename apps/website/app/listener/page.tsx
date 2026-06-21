@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
 
-import { listenerLandingContent } from '@/_data/troott/audience-landing';
+import {
+    listenerHeroContent,
+    listenerLandingContent,
+} from '@/_data/troott/audience-landing';
 import { AudienceLandingPage } from '@/components/containers/audience-landing';
+import HeroSection from '@/components/containers/HeroSection';
 import { BenefitsSection } from '@/components/containers/benefits/BenefitsSection';
 import { AudienceStorySection } from '@/components/containers/audience-story';
 import { featureHighlightContent } from '@/_data/troott/feature-highlight';
@@ -17,7 +21,11 @@ export const metadata: Metadata = {
 export default function ListenerPage() {
     return (
         <main className="flex flex-col">
-            <AudienceLandingPage content={listenerLandingContent} />
+            <HeroSection content={listenerHeroContent} />
+            <AudienceLandingPage
+                content={listenerLandingContent}
+                showHero={false}
+            />
             <AudienceStorySection />
 
             <FeatureHighlightSection content={featureHighlightContent} />

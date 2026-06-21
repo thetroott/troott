@@ -4,6 +4,18 @@ export type AudienceLandingCta =
     | { kind: 'get-troott'; label: string }
     | { kind: 'link'; label: string; href: string; external?: boolean };
 
+export type HeroSectionContent = {
+    audience: 'listener' | 'minister';
+    headline: string;
+    headlineMuted: string;
+    subtext: string;
+    primaryCta: AudienceLandingCta;
+    secondaryCta?: Extract<AudienceLandingCta, { kind: 'link' }>;
+    heroImage: { src: string; alt: string };
+    primaryCtaIcon?: 'upload';
+    secondaryCtaIcon?: 'upload';
+};
+
 export type AudienceLandingContent = {
     audience: 'listener' | 'minister';
     metadata: { title: string; description: string };
@@ -91,24 +103,93 @@ export const ministerLandingContent: AudienceLandingContent = {
         : undefined,
     valueProps: [
         {
-            title: 'Publish once',
+            title: 'Stop losing your sermons',
             description:
-                'Upload audio from Studio. Troott handles processing, hosting, and delivery to listeners on mobile and web.',
+                'Your messages should not live in WhatsApp forwards and random uploads. Troott gives every sermon a proper home — with your name, your ministry, and a link you can trust.',
         },
         {
-            title: 'Grow your library',
+            title: 'Upload once, we handle the rest',
             description:
-                "Organise series, update metadata, and keep your congregation's teachings in one trusted place.",
+                'Upload audio from Studio. Troott processes it, hosts it, and delivers it to listeners on mobile and web. You preach. We take care of the tech.',
         },
         {
-            title: 'Reach further',
+            title: 'Reach people who are ready to listen',
             description:
-                'Share a public profile and let listeners follow your ministry from anywhere in the world.',
+                'Listeners are already searching for voices they trust. Share your profile, build your library, and let hungry hearts follow you — without fighting an algorithm.',
         },
     ],
     crossLink: {
         prefix: 'Just want to listen?',
         linkLabel: 'Get Troott for listeners',
         href: '/listener',
+    },
+};
+
+export const listenerHeroContent: HeroSectionContent = {
+    audience: 'listener',
+    headline: 'Every sermon you love,',
+    headlineMuted: 'in your pocket.',
+    subtext:
+        "Find powerful messages from ministers you trust. Listen anytime, share with friends and family, and stay rooted in God's Word — ad-free and organised.",
+    primaryCta: { kind: 'get-troott', label: 'Start listening' },
+    secondaryCta: {
+        kind: 'link',
+        label: 'Upload sermons',
+        href: siteConfig.baseLinks.ministers,
+    },
+    secondaryCtaIcon: 'upload',
+    heroImage: {
+        src: '/images/hero-listener.png',
+        alt: 'A preview of Troott for listeners',
+    },
+};
+
+export const homeHeroContent: HeroSectionContent = {
+    audience: 'listener',
+    headline: 'All the sermons and teachings',
+    headlineMuted: 'you love, in one place.',
+    subtext:
+        'Find powerful messages from your favourite ministers. Listen anytime, share with friends and family, and stay rooted in God\u2019s Word.',
+    primaryCta: { kind: 'get-troott', label: 'Start listening' },
+    secondaryCta: {
+        kind: 'link',
+        label: 'Upload sermons',
+        href: siteConfig.baseLinks.ministers,
+    },
+    secondaryCtaIcon: 'upload',
+    heroImage: {
+        src: '/images/hero-listener.png',
+        alt: 'A preview of Troott for listeners',
+    },
+};
+
+export const ministerHeroContent: HeroSectionContent = {
+    audience: 'minister',
+    headline: 'Disciple more people',
+    headlineMuted: 'through your sermons.',
+    subtext:
+        'Most pastors give their sermons away because there is no easy way to share them. Troott is your home for life-giving messages — upload once, reach people who are already looking, and stop losing your work in random chats and reposts.',
+    primaryCta: {
+        kind: 'link',
+        label: 'Upload sermons',
+        href: siteConfig.baseLinks.studio,
+        external: true,
+    },
+    primaryCtaIcon: 'upload',
+    secondaryCta: siteConfig.baseLinks.requestDemo.startsWith('http')
+        ? {
+              kind: 'link',
+              label: 'Request demo',
+              href: siteConfig.baseLinks.requestDemo,
+              external: true,
+          }
+        : {
+              kind: 'link',
+              label: 'Contact Sales',
+              href: 'mailto:hello@troott.com',
+          },
+    heroImage: {
+        src: '/blocks/upload-list.svg',
+        alt: 'Troott Studio for ministers',
     },
 };

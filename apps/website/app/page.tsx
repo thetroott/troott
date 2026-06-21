@@ -14,6 +14,7 @@ import { FeatureHighlightSection } from '@/components/containers/feature-highlig
 import { ProductWorkflowsSection } from '@/components/containers/product-workflows';
 import { Faqs } from '@/components/containers/Faqs';
 import HeroSection from '@/components/containers/HeroSection';
+import { homeHeroContent } from '@/_data/troott/audience-landing';
 import { FeaturedPartnersSection } from '@/components/containers/featured-partners';
 import { WhyTroottTabsSection } from '@/components/containers/why-troott-tabs/WhyTroottTabsSection';
 // import { LogoCloudSection } from '@/components/containers/logo-cloud';
@@ -28,7 +29,7 @@ import { whyTroottIntroContent } from '@/_data/troott/section-intro';
 export default function Home() {
     return (
         <main className="flex flex-col">
-            <HeroSection />
+            <HeroSection content={homeHeroContent} />
             {/* <LogoCloudSection /> */}
 
             {/* <FeaturedPartnersSection /> */}
