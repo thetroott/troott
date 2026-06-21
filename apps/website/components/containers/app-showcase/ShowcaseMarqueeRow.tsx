@@ -1,10 +1,13 @@
 'use client';
 
 import type { ShowcaseTile as ShowcaseTileType } from '@/_data/troott/app-showcase';
-import { Marquee } from '@/components/magicui/marquee';
-import { ProgressiveBlur } from '@/components/ui/progressive-blur';
+import { InfiniteSlider } from '@/components/ui/infinite-slider';
 
 import { ShowcaseTile } from './ShowcaseTile';
+
+function buildLoopTiles(tiles: ShowcaseTileType[], copies = 3) {
+    return Array.from({ length: copies }, () => tiles).flat();
+}
 
 export function ShowcaseMarqueeRow({
     tiles,
@@ -13,31 +16,21 @@ export function ShowcaseMarqueeRow({
     tiles: ShowcaseTileType[];
     reverse?: boolean;
 }) {
-    return (
-        <div className="relative" aria-hidden>
-            <Marquee
-                reverse={reverse}
-                pauseOnHover
-                className="[--duration:45s] [--gap:1rem] motion-reduce:[animation:none]"
-                repeat={2}
-            >
-                {tiles.map((tile) => (
-                    <ShowcaseTile key={tile.id} tile={tile} />
-                ))}
-            </Marquee>
+    const loopTiles = buildLoopTiles(tiles);
 
-            <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-32 bg-gradient-to-r from-background" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-32 bg-gradient-to-l from-background" />
-            <ProgressiveBlur
-                className="pointer-events-none absolute inset-y-0 left-0 z-20 h-full w-20"
-                direction="left"
-                blurIntensity={1}
-            />
-            <ProgressiveBlur
-                className="pointer-events-none absolute inset-y-0 right-0 z-20 h-full w-20"
-                direction="right"
-                blurIntensity={1}
-            />
+    return (
+        <div className="w-full" aria-hidden>
+            <InfiniteSlider
+                speed={36}
+                speedOnHover={18}
+                gap={16}
+                reverse={reverse}
+                className="w-full"
+            >
+                {loopTiles.map((tile, index) => (
+                    <ShowcaseTile key={`${tile.id}-${index}`} tile={tile} />
+                ))}
+            </InfiniteSlider>
         </div>
     );
 }

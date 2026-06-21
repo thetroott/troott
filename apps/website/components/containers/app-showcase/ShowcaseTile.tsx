@@ -1,9 +1,6 @@
 import Image from 'next/image';
 
-import {
-    accentClasses,
-    type ShowcaseTile as ShowcaseTileType,
-} from '@/_data/troott/app-showcase';
+import type { ShowcaseTile as ShowcaseTileType } from '@/_data/troott/app-showcase';
 import { cx } from '@/lib/utils';
 
 export function ShowcaseTile({ tile }: { tile: ShowcaseTileType }) {
@@ -25,23 +22,16 @@ export function ShowcaseTile({ tile }: { tile: ShowcaseTileType }) {
     }
 
     const Icon = tile.icon;
-    const accent = accentClasses[tile.accent];
 
     return (
         <div
             className={cx(
                 shellClass,
-                'flex flex-col items-center justify-center gap-3 bg-[#161616] p-4',
-                accent.glow,
+                'flex flex-col items-center justify-center gap-3 bg-[#161616] p-4 shadow-teal-500/10',
             )}
         >
-            <span
-                className={cx(
-                    'flex size-10 items-center justify-center rounded-full',
-                    accent.badge,
-                )}
-            >
-                <Icon aria-hidden className="size-5" />
+            <span className="flex size-10 items-center justify-center rounded-full bg-teal-400/20">
+                <Icon aria-hidden className="size-5 text-teal-400" />
             </span>
             <p className="text-center text-[13px] leading-tight text-zinc-400">
                 {tile.label}

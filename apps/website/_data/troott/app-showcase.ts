@@ -8,8 +8,6 @@ import {
     RiTimeLine,
 } from '@remixicon/react';
 
-export type ShowcaseAccent = 'cyan' | 'orange' | 'violet' | 'rose' | 'blue';
-
 export type ShowcasePhotoTile = {
     id: string;
     kind: 'photo';
@@ -22,7 +20,6 @@ export type ShowcaseActionTile = {
     kind: 'action';
     icon: RemixiconComponentType;
     label: string;
-    accent: ShowcaseAccent;
 };
 
 export type ShowcaseTile = ShowcasePhotoTile | ShowcaseActionTile;
@@ -34,32 +31,6 @@ export type AppShowcaseContent = {
         { id: 'top'; tiles: ShowcaseTile[] },
         { id: 'bottom'; tiles: ShowcaseTile[] },
     ];
-};
-
-export const accentClasses: Record<
-    ShowcaseAccent,
-    { badge: string; glow: string }
-> = {
-    cyan: {
-        badge: 'bg-cyan-500/20 text-cyan-300',
-        glow: 'shadow-cyan-500/20',
-    },
-    blue: {
-        badge: 'bg-blue-500/20 text-blue-300',
-        glow: 'shadow-blue-500/20',
-    },
-    orange: {
-        badge: 'bg-orange-500/20 text-orange-300',
-        glow: 'shadow-orange-500/20',
-    },
-    violet: {
-        badge: 'bg-violet-500/20 text-violet-300',
-        glow: 'shadow-violet-500/20',
-    },
-    rose: {
-        badge: 'bg-rose-500/20 text-rose-300',
-        glow: 'shadow-rose-500/20',
-    },
 };
 
 const topRowTiles: ShowcaseTile[] = [
@@ -74,7 +45,6 @@ const topRowTiles: ShowcaseTile[] = [
         kind: 'action',
         icon: RiHeadphoneLine,
         label: 'Listen anywhere',
-        accent: 'cyan',
     },
     {
         id: 'photo-tolu',
@@ -87,7 +57,6 @@ const topRowTiles: ShowcaseTile[] = [
         kind: 'action',
         icon: RiBookmarkLine,
         label: 'Save sermons',
-        accent: 'blue',
     },
     {
         id: 'photo-arome',
@@ -100,7 +69,6 @@ const topRowTiles: ShowcaseTile[] = [
         kind: 'action',
         icon: RiShareForwardLine,
         label: 'Share a message',
-        accent: 'orange',
     },
 ];
 
@@ -116,7 +84,6 @@ const bottomRowTiles: ShowcaseTile[] = [
         kind: 'action',
         icon: RiPlayListAddLine,
         label: 'Build playlists',
-        accent: 'violet',
     },
     {
         id: 'photo-jd',
@@ -129,7 +96,6 @@ const bottomRowTiles: ShowcaseTile[] = [
         kind: 'action',
         icon: RiTimeLine,
         label: 'Pick up where you left off',
-        accent: 'rose',
     },
     {
         id: 'photo-abenezer',
@@ -142,7 +108,6 @@ const bottomRowTiles: ShowcaseTile[] = [
         kind: 'action',
         icon: RiCompass3Line,
         label: 'Discover ministers',
-        accent: 'cyan',
     },
 ];
 

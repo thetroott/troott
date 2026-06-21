@@ -3,65 +3,60 @@
 import Image from 'next/image';
 
 import { appShowcaseContent } from '@/_data/troott/app-showcase';
+import { ProgressiveBlur } from '@/components/ui/progressive-blur';
+import { cx } from '@/lib/utils';
 
 import { ShowcaseMarqueeRow } from './ShowcaseMarqueeRow';
-import { ShowcaseTile } from './ShowcaseTile';
 
-function MobileShowcase() {
-    const previewTiles = [
-        ...appShowcaseContent.rows[0].tiles.slice(0, 4),
-    ];
-
+function ShowcaseEdgeFade() {
     return (
-        <div className="flex flex-col items-center gap-8 lg:hidden">
-            <div
-                className="flex flex-wrap justify-center gap-4"
-                aria-hidden
-            >
-                {previewTiles.map((tile) => (
-                    <ShowcaseTile key={tile.id} tile={tile} />
-                ))}
-            </div>
-            <Image
-                src={appShowcaseContent.phone.src}
-                alt={appShowcaseContent.phone.alt}
-                width={appShowcaseContent.phone.width}
-                height={560}
-                className="h-auto w-[220px] drop-shadow-[0_24px_48px_rgba(0,0,0,0.55)] sm:w-[272px]"
-                priority
+        <>
+            <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-16 bg-gradient-to-r from-background to-transparent sm:w-24 md:w-32 lg:w-40" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-16 bg-gradient-to-l from-background to-transparent sm:w-24 md:w-32 lg:w-40" />
+            <ProgressiveBlur
+                className="pointer-events-none absolute inset-y-0 left-0 z-20 h-full w-12 sm:w-16 md:w-24"
+                direction="left"
+                blurIntensity={1}
             />
-        </div>
+            <ProgressiveBlur
+                className="pointer-events-none absolute inset-y-0 right-0 z-20 h-full w-12 sm:w-16 md:w-24"
+                direction="right"
+                blurIntensity={1}
+            />
+        </>
     );
 }
 
-export function AppShowcaseSection() {
+export function AppShowcaseSection({ className }: { className?: string }) {
     const { phone, rows } = appShowcaseContent;
 
     return (
         <section
             id="app-showcase"
             aria-label="Troott app showcase"
-            className="overflow-hidden bg-background py-20 lg:py-24"
+            className={cx('overflow-hidden bg-background pt-0 pb-12 lg:pb-16', className)}
         >
-            <div className="relative w-screen left-1/2 -translate-x-1/2">
-                <MobileShowcase />
+            <div className="container mx-auto max-w-7xl px-4 md:px-6">
+                <div className="relative -mx-4 w-[calc(100%+2rem)] sm:mx-0 sm:w-full">
+                    <ShowcaseEdgeFade />
 
-                <div className="relative hidden lg:block lg:min-h-[560px]">
-                    <div className="absolute inset-x-0 top-[calc(50%-156px)]">
-                        <ShowcaseMarqueeRow tiles={rows[0].tiles} />
-                    </div>
-                    <div className="absolute inset-x-0 top-[calc(50%+24px)]">
-                        <ShowcaseMarqueeRow tiles={rows[1].tiles} reverse />
-                    </div>
-                    <div className="pointer-events-none absolute left-1/2 top-1/2 z-30 -translate-x-1/2 -translate-y-1/2">
-                        <Image
-                            src={phone.src}
-                            alt={phone.alt}
-                            width={phone.width}
-                            height={560}
-                            className="h-auto w-[272px] drop-shadow-[0_24px_48px_rgba(0,0,0,0.55)]"
-                            priority
-                        />
+                    <div className="relative z-10 flex min-h-[420px] items-center justify-center sm:min-h-[480px] lg:min-h-[560px]">
+                        <div className="absolute inset-x-0 top-1/2 -translate-y-[calc(50%+64px)] sm:-translate-y-[calc(50%+76px)] lg:-translate-y-[calc(50%+88px)]">
+                            <ShowcaseMarqueeRow tiles={rows[0].tiles} />
+                        </div>
+                        <div className="absolute inset-x-0 top-1/2 translate-y-3 sm:translate-y-5 lg:translate-y-6">
+                            <ShowcaseMarqueeRow tiles={rows[1].tiles} reverse />
+                        </div>
+                        <div className="relative z-30">
+                            <Image
+                                src={phone.src}
+                                alt={phone.alt}
+                                width={phone.width}
+                                height={560}
+                                className="h-auto w-[270px] drop-shadow-[0_24px_48px_rgba(0,0,0,0.55)] sm:w-[272px] lg:w-[410px]"
+                                priority
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
