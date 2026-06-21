@@ -65,7 +65,7 @@ async function dispatchSearchByResource(
 }
 
 const useSearch = (_props: IUseSearch) => {
-    const { popNetwork } = useNetwork();
+    useNetwork();
     const { logout } = useAuth();
     const { appContext } = useContextType();
     const { search, setLoading, unsetLoading, setCollection } = appContext;
@@ -155,8 +155,6 @@ const useSearch = (_props: IUseSearch) => {
                 clearSearch();
                 if (response.status === 401) {
                     void logout();
-                } else if (response.message === 'Error: Network Error') {
-                    popNetwork();
                 } else if (response.data) {
                     console.log(
                         `Error! could not search ${resource} ${response.data}`,
@@ -170,7 +168,6 @@ const useSearch = (_props: IUseSearch) => {
             setCollection,
             pageSearch,
             logout,
-            popNetwork,
         ],
     );
 
@@ -241,8 +238,6 @@ const useSearch = (_props: IUseSearch) => {
                 clearSearch();
                 if (response.status === 401) {
                     void logout();
-                } else if (response.message === 'Error: Network Error') {
-                    popNetwork();
                 } else if (response.data) {
                     console.log(
                         `Error! Could not filter ${resource} ${response.data}`,
@@ -256,7 +251,6 @@ const useSearch = (_props: IUseSearch) => {
             setCollection,
             pageSearch,
             logout,
-            popNetwork,
         ],
     );
 

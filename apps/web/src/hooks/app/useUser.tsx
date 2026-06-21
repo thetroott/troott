@@ -13,7 +13,6 @@ import { INTERNAL_PORTAL_ROLES } from '@/utils/roles.util';
 
 import useAuth from './useAuth';
 import useContextType from '../shared/useContextType';
-import useNetwork from '../shared/useNetwork';
 import { useSession } from '@/context/session/sessionState';
 import cookieService from '@/api/services/cookies';
 
@@ -62,7 +61,6 @@ export function useWebPortalEligibility() {
 const useUser = () => {
     const { userContext } = useContextType();
     const { logout } = useAuth();
-    const { popNetwork } = useNetwork(false);
 
     const {
         users,
@@ -141,8 +139,6 @@ const useUser = () => {
                 });
                 if (res.status === 401) {
                     onUnauthorized();
-                } else if (res.message === 'Error: Network Error') {
-                    popNetwork();
                 }
             }
         },
@@ -151,7 +147,6 @@ const useUser = () => {
             unsetLoading,
             setCollection,
             onUnauthorized,
-            popNetwork,
         ],
     );
 
@@ -177,8 +172,6 @@ const useUser = () => {
 
                 if (res.status === 401) {
                     onUnauthorized();
-                } else if (res.message === 'Error: Network Error') {
-                    popNetwork();
                 }
             }
         },
@@ -187,7 +180,6 @@ const useUser = () => {
             unsetLoading,
             setResource,
             onUnauthorized,
-            popNetwork,
         ],
     );
 

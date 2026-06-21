@@ -2,6 +2,7 @@ import Axios, { AxiosInstance, type AxiosResponse } from 'axios';
 import { CallApiDTO } from '../../dtos/axios.dto';
 import storage from '@/api/services/local-storage';
 import { toastIfApiEnvelopeError } from '@/api/core/api-envelope-toast';
+import { PATH_NO_NETWORK } from '@/routes/paths';
 import { IAPIResponse } from '../types';
 
 function applyReissuedToken(response: AxiosResponse): void {
@@ -174,6 +175,14 @@ class AxiosService {
                     };
                 }
             });
+
+        if (result.status === 0 && window.location.pathname !== PATH_NO_NETWORK) {
+            sessionStorage.setItem(
+                'troott_no_network_return',
+                `${window.location.pathname}${window.location.search}`,
+            );
+            window.location.assign(PATH_NO_NETWORK);
+        }
 
         return result;
     }

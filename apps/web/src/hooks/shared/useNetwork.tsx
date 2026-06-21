@@ -1,22 +1,37 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { PATH_NO_NETWORK } from '@/routes/paths';
 
 const useNetwork = (trigger: boolean = true) => {
-    useEffect(() => {
-        if (trigger) {
-            window.addEventListener(`offline`, toggleNetwork, false);
-            window.addEventListener(`online`, () => {}, false);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const popNetwork = useCallback(() => {
+        if (location.pathname === PATH_NO_NETWORK) {
+            return;
         }
-    }, [trigger]);
+        navigate(PATH_NO_NETWORK, {
+            replace: true,
+            state: {
+                from: `${location.pathname}${location.search}`,
+            },
+        });
+    }, [location.pathname, location.search, navigate]);
 
-    //eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const toggleNetwork = () => {
-        popNetwork();
-    };
+    useEffect(() => {
+        if (!trigger) {
+            return;
+        }
 
-    const popNetwork = () => {
-        // redirect
-        window.location.href = '/no-network'; // PATH_NO_NETWORK
-    };
+        const onOffline = () => {
+            popNetwork();
+        };
+
+        window.addEventListener('offline', onOffline, false);
+        return () => {
+            window.removeEventListener('offline', onOffline);
+        };
+    }, [trigger, popNetwork]);
 
     return { popNetwork };
 };

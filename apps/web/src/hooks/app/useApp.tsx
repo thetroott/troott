@@ -6,7 +6,6 @@ import type { IAPIResponse } from '@/api/types';
 
 import useContextType from '../shared/useContextType';
 import useGoTo from '../shared/useGoTo';
-import useNetwork from '../shared/useNetwork';
 
 type DiscoveryHomeData = {
     banners?: unknown;
@@ -17,7 +16,6 @@ type DiscoveryHomeData = {
 const useApp = () => {
     const { appContext } = useContextType();
     const { toDetailRoute } = useGoTo();
-    const { popNetwork } = useNetwork(false);
     const { loading, setLoading, unsetLoading } = appContext;
 
     const [discovery, setDiscovery] = useState<DiscoveryHomeData>({});
@@ -63,12 +61,10 @@ const useApp = () => {
                 });
                 if (response.status === 401) {
                     await api.auth.logout();
-                } else if (response.message === 'Error: Network Error') {
-                    popNetwork();
                 }
             }
         },
-        [setLoading, unsetLoading, popNetwork],
+        [setLoading, unsetLoading],
     );
 
     return {
