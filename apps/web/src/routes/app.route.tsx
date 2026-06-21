@@ -7,6 +7,7 @@ import ResetPassword from '@/app/auth/ResetPassword';
 import Verification from '@/app/auth/Verification';
 import Preview from '@/app/Preview';
 import NotFound from '@/app/error/NotFound';
+import NoNetwork from '@/app/error/NoNetwork';
 import RouteFallback from '@/app/error/ErrorUI';
 import Unauthorized from '@/app/error/Unauthorized';
 import { IRoute } from '@/utils/interfaces';
@@ -87,7 +88,7 @@ const appRoutes: Array<IRoute> = [
         url: PATH_NO_NETWORK,
         isAuth: false,
         path: PATH_NO_NETWORK,
-        element: <NotFound />,
+        element: <NoNetwork />,
     },
     {
         name: 'unauthorized',
