@@ -4,7 +4,6 @@ import {
 } from '@remixicon/react';
 import Link from 'next/link';
 
-import { LegalBreadcrumbs } from './LegalBreadcrumbs';
 import { LegalPageHeader } from './LegalPageHeader';
 
 const audiences = [
@@ -27,11 +26,9 @@ export function LegalAudiencePage() {
         <section className="relative w-full bg-background py-20 lg:py-28">
             <div className="container mx-auto max-w-7xl px-4 md:px-6">
                 <div className="mx-auto max-w-[640px] text-center">
-                    <LegalBreadcrumbs />
                     <LegalPageHeader
                         heading="Choose your"
                         headingMuted="legal documents."
-                        className="mt-5"
                     />
 
                     <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
