@@ -23,6 +23,7 @@ Distinct from the studio portal (`apps/web` → `app.troott.com`). See [`specs/w
 | feat-0013 | Homepage — **new** app showcase (center phone + tile marquees) | [PRODUCT](./feature/feat-0013/PRODUCT.md) | [TECH](./feature/feat-0013/TECH.md) |
 | feat-0014 | **Legal** — audience chooser + scrollspy document pages | [PRODUCT](./feature/feat-0014/PRODUCT.md) | [TECH](./feature/feat-0014/TECH.md) |
 | feat-0015 | **Audience landings** — `/listener` and `/minister` homepages | [PRODUCT](./feature/feat-0015/PRODUCT.md) | [TECH](./feature/feat-0015/TECH.md) |
+| feat-0016 | **Minister page** — full content, JTBD, and section copy | [PRODUCT](./feature/feat-0016/PRODUCT.md) · [CONTENT](./feature/feat-0016/MINISTER_PAGE_CONTENT.md) | — |
 
 ### New homepage sections (feat-0007 – feat-0013)
 
