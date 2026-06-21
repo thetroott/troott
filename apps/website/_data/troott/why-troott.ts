@@ -1,6 +1,12 @@
 import { siteConfig } from '@/app/siteConfig';
 
-export type WhyTroottTabId = 'listen' | 'studio' | 'share' | 'churches';
+export type WhyTroottTabId =
+    | 'listen'
+    | 'studio'
+    | 'share'
+    | 'churches'
+    | 'reach'
+    | 'protect';
 
 export type WhyTroottIconId =
     | 'headphone'
@@ -57,7 +63,7 @@ export const whyTroottContent: WhyTroottContent = {
                 'Every message you love in one place. Find ministers, pick up where you left off, and listen without ads or clutter. You’ll be able to listen to sermons, podcasts, and more.',
             cta: { label: 'Get the app', useGetTroott: true },
             image: {
-                src: '/images/exact.png',
+                src: '/blocks/sermons.svg',
                 alt: 'Troott app preview showing sermon library',
             },
         },
@@ -75,7 +81,7 @@ export const whyTroottContent: WhyTroottContent = {
                 external: true,
             },
             image: {
-                src: '/images/troott-hero-image.png',
+                src: '/blocks/upload.svg',
                 alt: 'Troott Studio for ministers',
             },
         },
@@ -92,7 +98,7 @@ export const whyTroottContent: WhyTroottContent = {
                 href: siteConfig.baseLinks.listeners,
             },
             image: {
-                src: '/images/hero-mockup.png',
+                src: '/blocks/profile.svg',
                 alt: 'Troott mobile sharing experience',
             },
         },
@@ -109,7 +115,7 @@ export const whyTroottContent: WhyTroottContent = {
                 href: siteConfig.baseLinks.ministers,
             },
             image: {
-                src: '/images/troott-hero-image.png',
+                src: '/blocks/analytics.svg',
                 alt: 'Troott for churches and ministries',
             },
         },

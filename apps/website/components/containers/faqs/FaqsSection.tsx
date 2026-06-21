@@ -2,7 +2,7 @@
 
 import type { CSSProperties } from 'react';
 
-import { faqsContent } from '@/_data/troott/faqs';
+import { faqsContent, type FaqsContent } from '@/_data/troott/faqs';
 import {
     Accordion,
     AccordionContent,
@@ -12,13 +12,15 @@ import {
 import { cx } from '@/lib/utils';
 
 function FaqsHeader({
+    content,
     className,
     style,
 }: {
+    content: FaqsContent;
     className?: string;
     style?: CSSProperties;
 }) {
-    const { label, heading, headingMuted } = faqsContent;
+    const { label, heading, headingMuted } = content;
 
     return (
         <header className={className} style={style}>
@@ -39,8 +41,12 @@ function FaqsHeader({
     );
 }
 
-export function FaqsSection() {
-    const { items } = faqsContent;
+type FaqsSectionProps = {
+    content?: FaqsContent;
+};
+
+export function FaqsSection({ content = faqsContent }: FaqsSectionProps) {
+    const { items } = content;
 
     return (
         <section
@@ -52,6 +58,7 @@ export function FaqsSection() {
                 <div className="lg:grid lg:grid-cols-[auto_minmax(0,1fr)] lg:items-start lg:gap-x-16 xl:gap-x-24">
                     <div className="relative hidden shrink-0 lg:block">
                         <FaqsHeader
+                            content={content}
                             className="sticky z-10"
                             style={{
                                 top: 'calc(var(--site-header-height, 4rem) + 1.5rem)',
@@ -60,7 +67,7 @@ export function FaqsSection() {
                     </div>
 
                     <div className="min-w-0">
-                        <FaqsHeader className="mb-12 lg:hidden" />
+                        <FaqsHeader content={content} className="mb-12 lg:hidden" />
 
                         <Accordion
                             type="single"

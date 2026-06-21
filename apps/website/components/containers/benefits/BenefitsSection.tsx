@@ -1,8 +1,14 @@
-import { benefitsContent } from '@/_data/troott/benefits';
+import { benefitsContent, type BenefitsContent } from '@/_data/troott/benefits';
 import { cx } from '@/lib/utils';
 
-export function BenefitsSection() {
-    const { id, label, heading, headingMuted, items } = benefitsContent;
+type BenefitsSectionProps = {
+    content?: BenefitsContent;
+};
+
+export function BenefitsSection({
+    content = benefitsContent,
+}: BenefitsSectionProps) {
+    const { id, label, heading, headingMuted, items } = content;
 
     return (
         <section

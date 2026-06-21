@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { track } from '@vercel/analytics';
 
+import type { WhyTroottContent } from '@/_data/troott/why-troott';
 import { whyTroottContent } from '@/_data/troott/why-troott';
 import Newsletter from '@/components/NewsletterModal';
 import { GetTroottButton } from '@/components/ui/get-troott-button';
@@ -12,9 +13,16 @@ import { cx } from '@/lib/utils';
 
 import { useWhyTroottTabs } from './useWhyTroottTabs';
 
-export function WhyTroottTabsSection() {
-    const { label, heading, headingMuted, tabs } = whyTroottContent;
-    const { activeTabId, setActiveTabId, onTabKeyDown } = useWhyTroottTabs();
+type WhyTroottTabsSectionProps = {
+    content?: WhyTroottContent;
+};
+
+export function WhyTroottTabsSection({
+    content = whyTroottContent,
+}: WhyTroottTabsSectionProps) {
+    const { label, heading, headingMuted, tabs, defaultTabId } = content;
+    const { activeTabId, setActiveTabId, onTabKeyDown } =
+        useWhyTroottTabs(content);
     const [dialogOpen, setDialogOpen] = useState(false);
 
     const activeTab =
@@ -75,8 +83,8 @@ export function WhyTroottTabsSection() {
                                                 'font-matter inline-flex h-9 items-center rounded-sm px-5 text-sm font-normal leading-none transition-colors sm:h-10',
                                                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#262626]',
                                                 isActive
-                                                    ? 'bg-background/70 text-white shadow-sm'
-                                                    : 'bg-transparent text-white hover:text-white/90',
+                                                    ? 'bg-[#161616] text-white shadow-sm ring-1 ring-white/10'
+                                                    : 'bg-transparent text-zinc-400 hover:bg-white/5 hover:text-white',
                                             )}
                                         >
                                             {tab.navLabel}
@@ -92,7 +100,7 @@ export function WhyTroottTabsSection() {
                         role="tabpanel"
                         aria-labelledby={`why-troott-tab-${activeTab.id}`}
                     >
-                        <div className="relative mb-10 aspect-[16/10] min-h-[320px] w-full overflow-hidden rounded-[20px]">
+                        <div className="relative mb-10 aspect-[16/10] min-h-[320px] w-full overflow-hidden">
                             <Image
                                 key={activeTab.id}
                                 src={activeTab.image.src}
@@ -100,7 +108,7 @@ export function WhyTroottTabsSection() {
                                 fill
                                 className="object-cover"
                                 sizes="(max-width: 1024px) 100vw, 1232px"
-                                priority={activeTab.id === 'listen'}
+                                priority={activeTab.id === defaultTabId}
                             />
                         </div>
 

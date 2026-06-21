@@ -17,7 +17,7 @@ export type BenefitIconId =
     | 'share';
 
 export type BenefitItem = {
-    id: BenefitIconId;
+    id: string;
     icon: RemixiconComponentType;
     title: string;
     description: string;

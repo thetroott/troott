@@ -3,15 +3,20 @@
 import { useCallback, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
-import type { WhyTroottTabId } from '@/_data/troott/why-troott';
+import type {
+    ProductWorkflowsContent,
+    WhyTroottTabId,
+} from '@/_data/troott/why-troott';
 import { productWorkflowsContent } from '@/_data/troott/why-troott';
 
 export function useProductWorkflowsTabs(
-    defaultTabId: WhyTroottTabId = productWorkflowsContent.defaultTabId,
+    content: ProductWorkflowsContent = productWorkflowsContent,
 ) {
-    const [activeTabId, setActiveTabId] = useState<WhyTroottTabId>(defaultTabId);
+    const [activeTabId, setActiveTabId] = useState<WhyTroottTabId>(
+        content.defaultTabId,
+    );
 
-    const tabIds = productWorkflowsContent.tabs.map((tab) => tab.id);
+    const tabIds = content.tabs.map((tab) => tab.id);
 
     const onTabKeyDown = useCallback(
         (event: KeyboardEvent<HTMLButtonElement>, index: number) => {

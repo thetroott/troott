@@ -71,7 +71,7 @@ function TabPanelContent({
                     )}
                 </div>
             </div>
-            <div className="relative mt-10 aspect-[16/10] min-h-[320px] w-full overflow-hidden rounded-2xl border border-white/10">
+            <div className="relative mt-10 aspect-[16/10] min-h-[320px] w-full overflow-hidden">
                 <Image
                     key={tab.id}
                     src={tab.image.src}

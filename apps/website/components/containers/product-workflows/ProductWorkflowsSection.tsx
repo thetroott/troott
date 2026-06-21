@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useMemo, type KeyboardEvent } from 'react';
 
+import type { ProductWorkflowsContent } from '@/_data/troott/why-troott';
 import {
     productWorkflowsContent,
     type WhyTroottTab,
@@ -128,10 +129,13 @@ function MobileTabChips({
     );
 }
 
-export function ProductWorkflowsSection() {
-    const content = productWorkflowsContent;
+export function ProductWorkflowsSection({
+    content = productWorkflowsContent,
+}: {
+    content?: ProductWorkflowsContent;
+}) {
     const { activeTabId, setActiveTabId, onTabKeyDown } =
-        useProductWorkflowsTabs();
+        useProductWorkflowsTabs(content);
 
     const activeTab = useMemo(
         () => content.tabs.find((tab) => tab.id === activeTabId) ?? content.tabs[0]!,
@@ -179,7 +183,7 @@ export function ProductWorkflowsSection() {
                         role="tabpanel"
                         aria-labelledby={`product-workflows-tab-${activeTab.id}`}
                     >
-                        <div className="relative aspect-[16/10] min-h-[320px] w-full overflow-hidden rounded-2xl">
+                        <div className="relative aspect-[16/10] min-h-[320px] w-full overflow-hidden">
                             <Image
                                 key={activeTab.id}
                                 src={activeTab.image.src}
@@ -187,7 +191,7 @@ export function ProductWorkflowsSection() {
                                 fill
                                 className="object-cover motion-reduce:transition-none transition-opacity duration-200 ease-out"
                                 sizes="(max-width: 1024px) 100vw, 58vw"
-                                priority={activeTab.id === 'listen'}
+                                priority={activeTab.id === content.defaultTabId}
                             />
                         </div>
                     </div>
