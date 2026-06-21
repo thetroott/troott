@@ -49,8 +49,8 @@ export type ProductWorkflowsContent = {
 
 export const whyTroottContent: WhyTroottContent = {
     label: '// Why Troott',
-    heading: 'Listen with focus.',
-    headingMuted: 'Share with confidence.',
+    heading: 'Stay rooted in God\u2019s Word.',
+    headingMuted: 'Wherever you are.',
     defaultTabId: 'listen',
     tabs: [
         {
@@ -58,13 +58,13 @@ export const whyTroottContent: WhyTroottContent = {
             navLabel: 'Troott App',
             icon: 'headphone',
             eyebrow: 'Troott App',
-            title: 'Your sermon library, organized',
+            title: 'Your sermon library, organised',
             description:
-                'Every message you love in one place. Find ministers, pick up where you left off, and listen without ads or clutter. You’ll be able to listen to sermons, podcasts, and more.',
+                'Every message you love in one place. Stream ad-free, pick up where you left off, and stop juggling downloads and random links.',
             cta: { label: 'Get the app', useGetTroott: true },
             image: {
                 src: '/blocks/sermons.svg',
-                alt: 'Troott app preview showing sermon library',
+                alt: 'Troott app sermon library',
             },
         },
         {
@@ -72,9 +72,9 @@ export const whyTroottContent: WhyTroottContent = {
             navLabel: 'Troott Studio',
             icon: 'upload',
             eyebrow: 'Troott Studio',
-            title: 'Upload and reach listeners',
+            title: 'Upload once. Reach everywhere.',
             description:
-                'Ministers publish sermons from Troott Studio. Upload audio, manage your library, and help more people stay rooted in God’s Word.',
+                'Ministers publish from Studio. Troott handles processing, hosting, and delivery so listeners get a clean, official home for your messages.',
             cta: {
                 label: 'Open Studio',
                 href: siteConfig.baseLinks.studio,
@@ -92,7 +92,7 @@ export const whyTroottContent: WhyTroottContent = {
             eyebrow: 'Share & grow',
             title: 'Share teachings in one tap',
             description:
-                'Send a sermon to a friend, your small group, or family. Troott makes it easy to pass on what helped you grow.',
+                'Send a sermon to family, your small group, or a friend — without leaving the app. Grow together through shared listening.',
             cta: {
                 label: 'Start listening',
                 href: siteConfig.baseLinks.listeners,
@@ -107,9 +107,9 @@ export const whyTroottContent: WhyTroottContent = {
             navLabel: 'For churches',
             icon: 'building',
             eyebrow: 'For churches',
-            title: 'Scale across your church',
+            title: 'One app for your whole church',
             description:
-                'Give every minister a home for their messages and every listener one app to grow together. Troott keeps your church library organized and easy to share.',
+                'Give every minister a library and every listener one place to follow, save, and return. Troott keeps your church\u2019s messages organised and easy to share.',
             cta: {
                 label: 'For ministers',
                 href: siteConfig.baseLinks.ministers,
