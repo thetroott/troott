@@ -9,10 +9,10 @@ import redisHandler from '../middlewares/redis.mdw';
 export const getCacheData = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
         const cacheKey = req.originalUrl.split('?')[0] ?? '';
-        const cached = await redisHandler.fetchData(cacheKey);
+        const cached = await redisHandler.fetchData<unknown>(cacheKey);
 
         if (cached) {
-            const parsed = JSON.parse(cached);
+            const parsed = cached;
             const isArray = Array.isArray(parsed);
 
             const page = parseInt(req.query.page as string) || 1;

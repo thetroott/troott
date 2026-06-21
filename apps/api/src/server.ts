@@ -36,13 +36,18 @@ const server = app.listen(PORT, () => {
     );
 });
 
-process.on('unhandledRejection', (err: any) => {
-    console.log(colors.bold.red(`Server Error: ${err.message}`));
-    server.close(() => process.exit(1));
+process.on('unhandledRejection', (err: unknown) => {
+    const message =
+        err instanceof Error ? err.message : String(err ?? 'Unknown error');
+    console.log(colors.bold.red(`Unhandled rejection: ${message}`));
+    if (process.env.NODE_ENV === 'production') {
+        server.close(() => process.exit(1));
+    }
 });
 
 process.on('SIGINT', async () => {
     console.log(colors.yellow('Server shutting down...'));
     await shutdownScheduler();
+    await redisHandler.disconnect();
     server.close(() => process.exit(0));
 });

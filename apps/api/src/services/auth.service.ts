@@ -588,7 +588,7 @@ class AuthService {
             code: 200,
             data: {},
         };
-        const { req, isAdmin } = data;
+        const { req } = data;
 
         const userId = String(
             (req.user as { id?: string } | undefined)?.id ?? '',
@@ -606,14 +606,6 @@ class AuthService {
         if (!user) {
             result.error = true;
             result.message = `authorized  - user details not found`;
-            result.code = 401;
-        } else if (
-            isAdmin === false &&
-            (user.userType === UserType.ADMIN ||
-                user.userType === UserType.SUPERADMIN)
-        ) {
-            result.error = true;
-            result.message = `user is not authorized to access this route`;
             result.code = 401;
         } else {
             result.error = false;
