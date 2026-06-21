@@ -296,6 +296,32 @@ a {
             transform: translateY(0);
         }
     }
+
+    @keyframes tab-progress-fill {
+        from {
+            transform: scaleX(0);
+        }
+        to {
+            transform: scaleX(1);
+        }
+    }
+
+    @keyframes tab-progress-ring {
+        from {
+            stroke-dashoffset: var(--ring-circumference);
+        }
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    .animate-tab-progress-fill {
+        animation: tab-progress-fill var(--tab-duration, 6s) linear forwards;
+    }
+
+    .animate-tab-progress-ring {
+        animation: tab-progress-ring var(--tab-duration, 6s) linear forwards;
+    }
 }
 
 @keyframes reveal {

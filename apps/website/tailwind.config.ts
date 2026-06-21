@@ -137,6 +137,18 @@ const config: Config = {
                         transform: 'translate(-50%, -50%) scale(1)',
                     },
                 },
+                'tab-progress-from-end': {
+                    from: { transform: 'scaleX(0)' },
+                    to: { transform: 'scaleX(1)' },
+                },
+                'tab-progress-ring': {
+                    from: { strokeDashoffset: 'var(--ring-circumference)' },
+                    to: { strokeDashoffset: '0' },
+                },
+                'step-indicator-swap': {
+                    from: { opacity: '0', transform: 'scale(0.72)' },
+                    to: { opacity: '1', transform: 'scale(1)' },
+                },
             },
             animation: {
                 reveal: 'reveal var(--duration) ease-in-out forwards',
@@ -161,6 +173,11 @@ const config: Config = {
                     'dialogOverlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
                 dialogContentShow:
                     'dialogContentShow 150ms cubic-bezier(0.16, 1, 0.3, 1)',
+                'tab-progress-from-end':
+                    'tab-progress-from-end var(--tab-duration, 6s) linear forwards',
+                'tab-progress-ring':
+                    'tab-progress-ring var(--tab-duration, 6s) linear forwards',
+                'step-indicator-swap': 'step-indicator-swap 220ms ease-out',
             },
         },
         screens: {

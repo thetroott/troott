@@ -10,16 +10,72 @@ import {
 } from '@/_data/troott/why-troott';
 import { cx } from '@/lib/utils';
 
-import { useProductWorkflowsTabs } from './useProductWorkflowsTabs';
+import {
+    useProductWorkflowsTabs,
+    type ProductWorkflowsTabProgressStyle,
+} from './useProductWorkflowsTabs';
+
+function TabProgressLine({
+    tabId,
+    cycleKey,
+    durationMs,
+    isPaused,
+    animateProgress,
+    className,
+}: {
+    tabId: string;
+    cycleKey: number;
+    durationMs: number;
+    isPaused: boolean;
+    animateProgress: boolean;
+    className?: string;
+}) {
+    if (!animateProgress) {
+        return (
+            <span
+                aria-hidden
+                className={cx(
+                    'absolute bottom-0 left-0 h-0.5 w-full origin-left bg-teal-500',
+                    className,
+                )}
+            />
+        );
+    }
+
+    return (
+        <span
+            key={`${tabId}-${cycleKey}`}
+            aria-hidden
+            className={cx(
+                'absolute bottom-0 left-0 h-0.5 w-full origin-left bg-teal-500 animate-tab-progress-fill',
+                className,
+            )}
+            style={
+                {
+                    '--tab-duration': `${durationMs}ms`,
+                    animationPlayState: isPaused ? 'paused' : 'running',
+                } as ProductWorkflowsTabProgressStyle
+            }
+        />
+    );
+}
 
 function VerticalTabList({
     tabs,
     activeTabId,
+    cycleKey,
+    durationMs,
+    isPaused,
+    animateProgress,
     onSelect,
     onTabKeyDown,
 }: {
     tabs: WhyTroottTab[];
     activeTabId: string;
+    cycleKey: number;
+    durationMs: number;
+    isPaused: boolean;
+    animateProgress: boolean;
     onSelect: (id: WhyTroottTab['id']) => void;
     onTabKeyDown: (
         event: KeyboardEvent<HTMLButtonElement>,
@@ -36,10 +92,7 @@ function VerticalTabList({
                         <li
                             key={tab.id}
                             role="presentation"
-                            className={cx(
-                                'border-b border-white/10',
-                                isActive && 'my-2',
-                            )}
+                            className="relative border-b border-white/10"
                         >
                             <button
                                 type="button"
@@ -53,16 +106,12 @@ function VerticalTabList({
                                 className={cx(
                                     'w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                                     isActive
-                                        ? 'relative rounded-lg bg-[#161616] p-6'
+                                        ? 'rounded-lg bg-[#161616] p-6'
                                         : 'bg-transparent py-5 text-base font-medium text-zinc-600 hover:text-zinc-400 lg:text-lg',
                                 )}
                             >
                                 {isActive ? (
                                     <>
-                                        <span
-                                            className="absolute inset-x-0 top-0 h-0.5 rounded-t-lg bg-violet-500"
-                                            aria-hidden
-                                        />
                                         <span className="mb-3 block text-lg font-semibold text-white lg:text-xl">
                                             {tab.navLabel}
                                         </span>
@@ -74,6 +123,22 @@ function VerticalTabList({
                                     tab.navLabel
                                 )}
                             </button>
+
+                            {isActive ? (
+                                <>
+                                    <span
+                                        aria-hidden
+                                        className="absolute bottom-0 left-0 h-0.5 w-full bg-white/10"
+                                    />
+                                    <TabProgressLine
+                                        tabId={tab.id}
+                                        cycleKey={cycleKey}
+                                        durationMs={durationMs}
+                                        isPaused={isPaused}
+                                        animateProgress={animateProgress}
+                                    />
+                                </>
+                            ) : null}
                         </li>
                     );
                 })}
@@ -82,48 +147,158 @@ function VerticalTabList({
     );
 }
 
-function MobileTabChips({
+function TabProgressRing({
+    tabId,
+    cycleKey,
+    durationMs,
+    isPaused,
+    animateProgress,
+}: {
+    tabId: string;
+    cycleKey: number;
+    durationMs: number;
+    isPaused: boolean;
+    animateProgress: boolean;
+}) {
+    const radius = 18;
+    const circumference = 2 * Math.PI * radius;
+
+    if (!animateProgress) {
+        return (
+            <svg
+                aria-hidden
+                className="absolute inset-0 h-full w-full -rotate-90"
+                viewBox="0 0 44 44"
+            >
+                <circle
+                    cx="22"
+                    cy="22"
+                    r={radius}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    className="text-teal-500"
+                />
+            </svg>
+        );
+    }
+
+    return (
+        <svg
+            key={`${tabId}-${cycleKey}`}
+            aria-hidden
+            className="absolute inset-0 h-full w-full -rotate-90"
+            viewBox="0 0 44 44"
+        >
+            <circle
+                cx="22"
+                cy="22"
+                r={radius}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="text-white/15"
+            />
+            <circle
+                cx="22"
+                cy="22"
+                r={radius}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="text-teal-500 animate-tab-progress-ring"
+                style={
+                    {
+                        strokeDasharray: circumference,
+                        strokeDashoffset: circumference,
+                        '--ring-circumference': `${circumference}`,
+                        '--tab-duration': `${durationMs}ms`,
+                        animationPlayState: isPaused ? 'paused' : 'running',
+                    } as ProductWorkflowsTabProgressStyle
+                }
+            />
+        </svg>
+    );
+}
+
+function MobileFloatingStepOrb({
     tabs,
     activeTabId,
+    cycleKey,
+    durationMs,
+    isPaused,
+    animateProgress,
     onSelect,
 }: {
     tabs: WhyTroottTab[];
     activeTabId: string;
+    cycleKey: number;
+    durationMs: number;
+    isPaused: boolean;
+    animateProgress: boolean;
     onSelect: (id: WhyTroottTab['id']) => void;
 }) {
-    return (
-        <div className="lg:hidden">
-            <div
-                role="tablist"
-                aria-label="Troott product workflows"
-                className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
-            >
-                {tabs.map((tab) => {
-                    const isActive = tab.id === activeTabId;
+    const activeIndex = Math.max(
+        0,
+        tabs.findIndex((tab) => tab.id === activeTabId),
+    );
+    const activeTab = tabs[activeIndex] ?? tabs[0]!;
+    const nextTab = tabs[(activeIndex + 1) % tabs.length]!;
 
-                    return (
+    return (
+        <>
+            <div className="sr-only">
+                <div role="tablist" aria-label="Troott product workflows">
+                    {tabs.map((tab, index) => (
                         <button
                             key={tab.id}
                             type="button"
                             role="tab"
                             id={`product-workflows-tab-${tab.id}`}
-                            aria-selected={isActive}
+                            aria-selected={tab.id === activeTabId}
                             aria-controls="product-workflows-panel"
                             onClick={() => onSelect(tab.id)}
-                            className={cx(
-                                'h-9 shrink-0 rounded-lg border px-4 text-sm font-medium transition-colors',
-                                isActive
-                                    ? 'border-transparent border-t-2 border-t-violet-500 bg-[#161616] text-white'
-                                    : 'border-white/10 bg-transparent text-zinc-500',
-                            )}
                         >
-                            {tab.navLabel}
+                            {tab.navLabel}, step {index + 1}
                         </button>
-                    );
-                })}
+                    ))}
+                </div>
             </div>
-            <p className="mt-4 text-sm leading-[1.65] text-zinc-400 lg:hidden">
-                {tabs.find((tab) => tab.id === activeTabId)?.description}
+
+            <button
+                type="button"
+                aria-label={`${activeTab.navLabel}, step ${activeIndex + 1} of ${tabs.length}. Tap for next step.`}
+                onClick={() => onSelect(nextTab.id)}
+                className="absolute bottom-4 right-4 z-10 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/55 text-white shadow-[0_8px_32px_rgba(0,0,0,0.45)] backdrop-blur-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black/50 lg:hidden"
+            >
+                <TabProgressRing
+                    tabId={activeTab.id}
+                    cycleKey={cycleKey}
+                    durationMs={durationMs}
+                    isPaused={isPaused}
+                    animateProgress={animateProgress}
+                />
+                <span
+                    key={activeTabId}
+                    aria-hidden
+                    className="relative z-[1] text-sm font-semibold tabular-nums motion-reduce:animate-none animate-step-indicator-swap"
+                >
+                    {activeIndex + 1}
+                </span>
+            </button>
+        </>
+    );
+}
+
+function MobileTabCaption({ tab }: { tab: WhyTroottTab }) {
+    return (
+        <div className="mt-4 lg:hidden">
+            <p className="text-xs font-medium uppercase tracking-[0.06em] text-zinc-500">
+                {tab.navLabel}
+            </p>
+            <p className="mt-1 text-sm leading-[1.65] text-zinc-400">
+                {tab.description}
             </p>
         </div>
     );
@@ -134,8 +309,17 @@ export function ProductWorkflowsSection({
 }: {
     content?: ProductWorkflowsContent;
 }) {
-    const { activeTabId, setActiveTabId, onTabKeyDown } =
-        useProductWorkflowsTabs(content);
+    const {
+        activeTabId,
+        selectTab,
+        onTabKeyDown,
+        cycleKey,
+        isPaused,
+        pause,
+        resume,
+        tabAutoDurationMs,
+        animateProgress,
+    } = useProductWorkflowsTabs(content);
 
     const activeTab = useMemo(
         () => content.tabs.find((tab) => tab.id === activeTabId) ?? content.tabs[0]!,
@@ -164,17 +348,31 @@ export function ProductWorkflowsSection({
 
                 <div className="mt-8 h-px w-full bg-white/10" />
 
-                <MobileTabChips
-                    tabs={content.tabs}
-                    activeTabId={activeTabId}
-                    onSelect={setActiveTabId}
-                />
-
-                <div className="mt-8 lg:grid lg:grid-cols-[minmax(280px,360px)_1fr] lg:items-start lg:gap-12 xl:gap-16">
+                <div
+                    className="relative"
+                    onPointerEnter={pause}
+                    onPointerLeave={resume}
+                    onFocusCapture={pause}
+                    onBlurCapture={(event) => {
+                        const next = event.relatedTarget;
+                        if (
+                            next instanceof Node &&
+                            event.currentTarget.contains(next)
+                        ) {
+                            return;
+                        }
+                        resume();
+                    }}
+                >
+                <div className="mt-8 flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(280px,360px)_1fr] lg:items-start lg:gap-12 xl:gap-16">
                     <VerticalTabList
                         tabs={content.tabs}
                         activeTabId={activeTabId}
-                        onSelect={setActiveTabId}
+                        cycleKey={cycleKey}
+                        durationMs={tabAutoDurationMs}
+                        isPaused={isPaused}
+                        animateProgress={animateProgress}
+                        onSelect={selectTab}
                         onTabKeyDown={onTabKeyDown}
                     />
 
@@ -182,8 +380,9 @@ export function ProductWorkflowsSection({
                         id="product-workflows-panel"
                         role="tabpanel"
                         aria-labelledby={`product-workflows-tab-${activeTab.id}`}
+                        className="relative"
                     >
-                        <div className="relative aspect-[16/10] min-h-[320px] w-full overflow-hidden">
+                        <div className="relative aspect-[16/10] min-h-[320px] w-full overflow-hidden rounded-sm">
                             <Image
                                 key={activeTab.id}
                                 src={activeTab.image.src}
@@ -193,8 +392,21 @@ export function ProductWorkflowsSection({
                                 sizes="(max-width: 1024px) 100vw, 58vw"
                                 priority={activeTab.id === content.defaultTabId}
                             />
+
+                            <MobileFloatingStepOrb
+                                tabs={content.tabs}
+                                activeTabId={activeTabId}
+                                cycleKey={cycleKey}
+                                durationMs={tabAutoDurationMs}
+                                isPaused={isPaused}
+                                animateProgress={animateProgress}
+                                onSelect={selectTab}
+                            />
                         </div>
+
+                        <MobileTabCaption tab={activeTab} />
                     </div>
+                </div>
                 </div>
             </div>
         </section>
