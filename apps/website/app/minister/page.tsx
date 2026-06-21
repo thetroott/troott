@@ -26,10 +26,10 @@ export default function MinisterPage() {
     return (
         <main className="flex flex-col">
             <HeroSection content={ministerHeroContent} />
-            <AudienceLandingPage
+            {/* <AudienceLandingPage
                 content={ministerLandingContent}
                 showHero={false}
-            />
+            /> */}
             <WhyTroottTabsSection content={ministerWhyTroottContent} />
             <BenefitsSection content={ministerBenefitsContent} />
             <ProductWorkflowsSection content={ministerProductWorkflowsContent} />

@@ -132,7 +132,7 @@ export default function HeroSection({ content }: HeroSectionProps) {
                             alt={content.heroImage.alt}
                             width={2400}
                             height={1600}
-                            className="rounded-xl"
+                            className="rounded-sm"
                         />
                         <div
                             className="absolute inset-x-0 -bottom-20 h-2/4 bg-gradient-to-t from-background via-background to-transparent lg:h-1/4"

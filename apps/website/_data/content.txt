@@ -1,0 +1,1153 @@
+Vist = https://leadwithjd.substack.com/
+
+=
+troott - sermon streaming application
+Product Requirement Document (PRD)
+
+[IMPORTANT DOCS + LINKS TO THEM GO HERE] / FILE / FILE / FILE
+Figma Design (Old): streamsqr design file 
+Troot figma file: Figma m
+
+
+Product Engineering
+ Damola Oladipo 
+Design
+ justiehussein@gmail.com
+PRD Status
+ Approved
+Last Updated
+ Feb 12, 2025
+
+
+1.0 Product Summary
+<concise and informative overview of the feature >
+We are building a version 0.1.0 of troott consisting of the customer application, the admin application (preachers and troott team), and the website.  Our customers interface with the sermons using the mobile app, the preachers/admin upload the sermons, the troott admin team manages both the customer and the preachers  apps with a monolith service while the website serves as a single source of information about troott. 
+
+Problem Space
+
+1.0 Product Opportunity
+<should explain what user problem you’re solving and why the time is right to prioritize this product>
+Many Christians find it hard to listen to both new and old sermons from their favorite preachers on their mobile phones anytime, anywhere  without struggling with unwanted Ads. It’s frustrating to search for specific content without knowing the exact title, and downloading sermons often leads to a disorganized mess on their phones.
+On top of that, the current  platforms don’t offer a great mobile experience  for listening to sermons, making it harder than it should be for users to engage with the content they care about. The current value propositions offer poor experience (no mobile first experience) for our target users. 
+Fixing these problems is key to delivering a seamless, enjoyable experience. By making it easier to find, organize, access  and listen to sermons, we can help users grow spiritually and stay more connected.
+1.1 Problem Statement
+<Contextual description of the user pain points and need>
+To build this enhanced product experience, we asking the following questions:
+How can we eliminate the frustration of people in searching, listening and sharing sermons on the go? 
+How can we help people feel organised and free from the clutter of downloaded sermon collections to make more space for other items on their phones? ~ Allow users the freedom to carry their entire sermon collection in their pockets.
+How can we help people gain control of their spiritual life by listening to sermons seamlessly so that they can improve their lifestyle?
+How can we help people to share a common spiritual experience by sharing messages to their loved ones on their mobile device?
+
+1.2 Pain-points and Frustrations 
+<what headaches keep the target customer group(s) awake at night?>
+
+Difficulty in accessing Old messages, it's challenging and annoying scrolling down on YouTube/Facebook pages to look for the messages - You have to know the Title of the message before you even search.
+Inability to create personalised libraries of messages or teachings - this leads to not being able to come back to messages - download OR bookmark is underperforming in delivering this experience.
+The difficulty and frustrations in discovering new preachers and teachings - especially if they are not heavily promoted or included popular playlists.
+The lack of social features - Frustrated by the limited social features on existing products like YouTube, Spotify, - There is a desire for more interactive options to discover christian content through their friends or connect with others enthusiasts.
+The annoyance of Frequent ads - Users find the presence of frequent ads on the free version of Spotify disruptive to their streaming experience.
+Limited skips and offline listening - Free users have limitations on the number of skips they can use and are unable to download contents for offline listening, which can be frustrating when they want more control over their listening habits.
+
+
+2.0 Customer Segmentation
+< explain who you’re building the product or feature for.>
+
+User Group
+Segments
+Description
+Premium Users
+Casual Users
+Users who will pay for a subscription to enjoy ad-free sermons and other premium features.
+
+
+Sermon Lovers
+Users who listen to a lot of sermons and want an ad-free experience with full control over playback for uninterrupted listening.
+
+
+Sermon Explorers
+People who listen to sermons during workouts and value uninterrupted playlists.
+
+
+Preacher Fans
+Fans who follow specific preachers and want easy access to their messages and sermons.
+
+
+
+
+3.0 Customer Insights
+<captures the most important insights from your user research.>
+
+Jobs to Be Done (JTBD)
+Description
+#1: Take control of spiritual life
+Help users improve their lifestyle and deepen their morality by easily accessing sermons that guide their spiritual journey.
+#2:Mobile-first sermons
+experience 
+Allow users to fully engage with sermons, offering comfort, satisfaction, and meaningful spiritual growth.
+#3: Organise sermon collection & free up space
+Help users stay organized removing the frustration of downloads, letting them carry their entire sermon library on their phone while freeing up storage for other important things.
+#4:Build faith and grow spiritually.
+Help  users to deepen their faith and share their beliefs by sharing sermons, creating meaningful connections with others.  
+#5: Bond with loved ones through shared sermon experiences
+Enable users to strengthen their bonds with family and friends by listening to sermons together, fostering shared experiences and spiritual connection.  
+
+
+
+4.0 Competitive Insights
+<Write the key learnings from your  research and your key  differentiation from the competition.>
+
+Sites for website design inspiration 
+https://trybaze.com
+Tiiny.host
+https://maven.com/teach
+https://maven.com/teach
+https://www.spotify.com/ng/free/
+https://www.spotify.com/ng/premium/
+https://artists.spotify.com/home
+Apple music
+Youtube Music
+
+
+Direct: 
+Replacement
+Naija Sermons, iSermons, SermonAudio
+Church Apps, Christian TV stations, Facebook
+Indirect: 
+Future/Potential 
+Mixlr, YouTube Music, Spotify Podcasts, Apple Podcasts
+New/Mainstream Streaming Platforms, Social Media Aps
+
+
+
+Solution Space
+
+
+1.0 What are we building
+<describe the ideas and solutions and how it will deliver value for the users>
+
+troott is a subscription-based sermon and teaching streaming service, powered by AI. We're building a mobile app that makes it easy to find, listen to, and share sermons anytime, anywhere. No ads, no clutter—just a seamless way to grow spiritually.
+
+We are developing a mobile app that makes it easy for users to access and engage with sermons anytime, anywhere. Our solution focuses on helping users grow spiritually by providing organized access to sermons, offering ad-free listening, and saving space on their devices. It also allows users to share content, deepen their faith, and build connections with others. This platform aims to deliver real value by making the sermon experience seamless, enjoyable, and more meaningful for users.
+
+2.0 Feature Specifications 
+<the specific functionality or features the landing page of troott  will have to meet user needs and achieve its intended goals>
+The troott
+
+Features
+Solutions
+Long Form Content (Playing a Sermon)
+Playing a Sermon: Stream and listen to full-length sermons.
+Shuffle and Repeat: Turn on shuffle and repeat modes for sermon playback.
+Message Interactions:
+Like a message.
+Share a message.
+Add to a play queue.
+Remove from the queue.
+Add to a playlist or create a new one.
+View message series, by month or year.
+Enable notifications for new messages.
+View minister profile and collection.
+See stories and message details.
+Set a sleep timer for automatic playback stop.
+
+Short Form Content (Playing Clips/Stories/Reels)
+Clip Highlights:
+Discover clips via preachers' profiles, playlists, or home feed.
+Scroll through clips feed (swiping).
+Engage with clips by liking, sharing, or adding to the library.
+
+Playlists and Libraries
+Playlist Details:
+View clips within playlists.
+Add playlists to the library or home screen.
+Share playlists.
+Add to or create new playlists.
+Manage playlist options, including making playlists private or deleting them.
+Library Management:
+Search and sort your library.
+Switch to GridView.
+Edit, invite collaborators, and manage saved playlists.
+Search and Discovery
+Search Functionality:
+Search for ministers or messages.
+Browse charts for trending content.
+User Account and Settings
+Profile Management:
+View and edit profile.
+Follow users and view followers.
+Account settings, including plan overview and notifications.
+Access terms, privacy policy, and logout options.
+
+
+Advanced Search and Filtering
+Idea: Implement powerful search and filtering options to help users easily find specific sermons and messages.
+Value: Reduces frustration by allowing users to locate content quickly without needing exact titles. This feature saves time and improves user satisfaction by making content discovery more intuitive.
+Personalised Libraries and Management Tools
+Idea: Provide tools for users to create and manage personalised libraries of sermons and teachings.
+Value: Enables users to organise their favourite messages efficiently, eliminating clutter and making it easy to revisit and manage their content. This personalised approach enhances user control and convenience.
+Offline Listening and Downloading
+Idea: Allow users to download sermons for offline listening and provide robust offline access features.
+Value: Offers flexibility for users to listen to content without an internet connection, accommodating various lifestyles and reducing dependency on continuous online access.
+Enhanced Content Discovery
+Idea: Utilise intelligent algorithms and curated playlists to recommend new preachers and teachings based on user preferences and listening history.
+Value: Broadens users’ spiritual perspectives by exposing them to diverse content and new preachers, enhancing their overall experience and engagement with the platform.
+Social Features and Interactivity
+Idea: Introduce social features that allow users to share content, follow other preachers.
+Value: Fosters community and interaction, enabling users to connect with others who share their religious interests. This social aspect enhances user engagement and creates a sense of belonging.
+Ad-Free Premium Experience
+Idea: Offer a premium subscription option that provides an ad-free listening experience.
+Value: Improves user satisfaction by removing interruptions from ads, appealing to users who value an uninterrupted and high-quality experience.
+Flexible Listening Options
+Idea: Remove restrictions on skips and provide comprehensive offline listening capabilities.
+Value: Gives users greater control over their listening habits, allowing them to skip, repeat, or listen to content without limitations, thereby enhancing their overall experience.
+
+
+
+
+
+Feature/Functionality
+Job  Stories
+Acceptance Criteria
+Status
+Comments
+User Registration & Login
+This feature lets new users sign up and log in using their email, phone number, or third-party services like Google, or Apple. 
+As a new user, I want to create an account quickly so I can start using the app without hassle.
+As a returning user, I want to log in easily so I can continue where I left off.
+As a user concerned about security, I want to log in with my email or phone number and receive a verification code so I know my account is safe.
+As a user who prefers convenience, I want to log in with my Google, or Apple account so I don’t have to remember another password.
+Users can sign up using email, phone number, or third-party services.
+If signing up with email or phone, they receive a verification code.
+Users can log in using the same method they signed up with.
+If a user enters the wrong password or code, they see an error message.
+If they forget their password, they can reset it via email or phone.
+Logged-in users stay signed in unless they choose to log out.
+ Not Started
+
+
+Playing a Sermon
+
+
+This feature allows users to play, pause, stop, shuffle, and repeat sermons, as well as set a sleep timer for timed listening.
+As a listener, I want to play and pause a sermon so I can control my listening experience.
+As a busy user, I want to stop playback and return later so I can pick up where I left off.
+As someone who likes variety, I want to shuffle sermons so I don’t have to choose manually.
+As a user who enjoys repeated listening, I want to loop a sermon so I can listen again without pressing play.
+As someone who listens before bed, I want to set a sleep timer so playback stops automatically.
+Users can play, pause, and stop sermons.
+Users can shuffle and repeat sermons.
+Users can set a sleep timer for playback to stop after a set duration.
+The UI updates to show playback progress, elapsed time, and remaining time.
+Playback continues in the background if the user switches apps.
+ Not Started
+
+
+Sermon Interactions
+This feature lets users interact with sermons by liking them, sharing them with others, adding them to a queue, or saving them in a playlist. The UI makes it easy to engage with sermons.
+As a listener, I want to like a sermon so I can find it easily later.
+As a user who enjoys sharing content, I want to share a sermon with friends so they can listen too.
+As someone who listens often, I want to queue sermons so I can play them in order without searching.
+As a user who likes organization, I want to save sermons to a playlist so I can group my favorites together.
+Users can like a sermon, and the like to count updates in real time.
+Users can share a sermon via social media, messaging apps, or a copy link option.
+Users can add sermons to a queue, and the queue plays in order.
+Users can create and manage playlists with their saved sermons.
+The UI includes clear buttons for like, share, queue, and playlist actions.
+ Not Started
+
+
+Seeing a Video Clip
+This feature allows users to browse video clips seamlessly, with an infinite scrolling experience. Users can also swipe through clips and engage with them easily (like, share, etc.).
+As a user who likes short content, I want to scroll through video clips endlessly so I can keep discovering new content.
+As a user who likes fast interactions, I want to swipe between clips so I can move to the next one easily.
+As someone who enjoys engagement, I want to like and share clips so I can interact with the content.
+Users can scroll infinitely through video clips without interruption.
+Users can swipe left or right to move between clips.
+The UI displays engagement buttons (like, share, etc.) clearly on each clip.
+The video player loads clips quickly with smooth transitions.
+ Not Started
+For a first user coming through a URL, the user can view the video, after the first view, the user then can sign-up.
+Video Clip Interactions
+This feature lets users interact with video clips just like they do with sermons—by liking, sharing, saving or and adding them to a  bookmark.
+As a user who enjoys short clips, I want to like a video so I can find and watch it again.
+As someone who likes to share content, I want to send a clip to friends so they can watch it too.
+As a user who enjoys continuous playback, I want to queue clips so I can watch them in a flow.
+As a user who likes organization, I want to add clips to a playlist so I can save my favorites.
+Users can like a clip, and the like count updates instantly.
+Users can share clips via social media, messaging apps, or a copy link option.
+Users can add clips to a queue for continuous playback.
+Users can create and manage playlists for saved clips.
+The UI ensures all interaction buttons are easy to access and use.
+ Not Started
+
+
+Playlists & Library
+This feature lets users create and manage playlists, as well as organize their saved sermons in a personal library. The library has a grid view for easy browsing.
+As a user who likes organization, I want to create playlists so I can group my favorite sermons together.
+As someone with a large collection, I want an easy-to-browse library so I can quickly find what I saved.
+As a user who listens often, I want tools to manage my library so I can remove or rearrange content.
+
+
+Users can create, edit, and delete playlists.
+Users can add and remove sermons from playlists.
+The library is displayed in a grid format for easy navigation.
+Users can sort or filter their library based on date added, most played, or alphabetical order.
+The UI is clean and intuitive, making playlist and library management simple.
+
+
+ Not Started
+Majorly useful for the sermons while a button or icon and link to a page to see bookmarked short videos.
+
+When a user likes a sermon, it goes to the default sermon playlist “liked sermons”. And when a user saves a video (sermon bites) it goes to a default sermon bite playlist “your sermon bites”
+Search and Discovery
+This feature helps users find sermons easily with a search bar. It also suggests trending sermons so users can discover new content.
+As a user looking for something specific, I want to type in a search bar so I can find a sermon quickly.
+As a user who likes discovering new content, I want to see trending sermons so I can explore what others are listening to.
+As someone who doesn’t always know what to search for, I want search suggestions so I can get ideas.
+
+
+Users can type a keyword into the search bar to find sermons.
+The search function provides real-time suggestions as users type.
+A “Trending” section displays popular sermons.
+The UI makes search easy to find and use.
+
+
+ Not Started
+Majorly useful for the sermons
+ Advanced Search
+This feature adds advanced filters to the search function, allowing users to refine results based on date, minister, or sermon topic.
+As a user who listens to specific ministers, I want to filter sermons by minister so I can find content from my favorite speakers.
+As someone looking for a past sermon, I want to search by date so I can find a sermon from a specific time.
+As a user interested in specific topics, I want to search by sermon topic so I can focus on relevant messages.
+
+
+Users can filter search results by minister, date, or topic.
+The filters are easy to access and apply.
+Search results update instantly when filters are applied.
+The UI remains clean and user-friendly, even with multiple filters.
+ Not Started
+
+
+Enhanced Discovery
+This feature helps users discover new sermons through curated playlists and personalized recommendations.
+As a user who loves new content, I want to see recommended sermons so I can discover what fits my interests.
+As a user who trusts expert curation, I want to browse curated playlists so I can listen to handpicked content.
+As someone who doesn’t always know what to search for, I want personalized suggestions so I don’t have to look for content myself.
+Users see a “Recommended for You” section based on their listening habits.
+Users can browse curated playlists created by experts.
+The UI presents recommendations in an engaging and visually appealing way.
+Users can explore new content without manually searching.
+ Not Started
+
+
+User Account & Settings
+This feature allows users to manage their profile and account settings. Users can edit their profile details, adjust preferences, and control their account settings.
+As a user, I want to edit my profile so I can update my name, photo, and other details.
+As someone who values control, I want to adjust my account settings so I can personalize my experience.
+As a security-conscious user, I want to manage my password and login options so I can keep my account safe.
+Users can edit their profile (name, profile picture, etc.).
+Users can update account settings like notifications and privacy preferences.
+Users can change their password and manage linked accounts (Google, Facebook, Apple).
+The UI makes profile editing and account management simple and intuitive.
+ Not Started
+
+
+Notifications
+This feature sends users notifications based on their preferences, such as new sermon uploads, upcoming live streams, or personalized recommendations.
+As a user who follows a specific minister, I want to get notified when they upload a new sermon so I don’t miss it.
+As someone who likes live events, I want to receive alerts for upcoming live streams so I can tune in on time.
+As a listener who wants personalized recommendations, I want notifications about sermons I might like so I can discover new content.
+
+
+Users can customize their notification preferences.
+Notifications are relevant and based on user interests.
+The UI displays notifications in an easy-to-access section.
+Users can opt in or out of different types of notifications.
+ Not Started
+
+
+Subscriptions 
+This feature lets users upgrade to premium, manage their subscriptions, view billing details, and cancel if needed.
+As a user interested in premium, I want an easy way to subscribe so I can access premium features.
+As a paying subscriber, I want to view my billing details so I know when my next payment is due.
+As a user who might need to cancel, I want a simple way to manage my subscription so I don’t get charged unexpectedly.
+
+
+Users can upgrade to a premium subscription.
+Users can view billing details, including the next payment date.
+Users can cancel their subscription easily if they choose to.
+The UI clearly shows subscription status and available plans.
+
+
+ Not Started
+
+Subscription for 1 person
+Subscriptions for 2 person
+Subscriptions for a group of 5
+
+Subscription is NGN999
+Discover Weekly & Personalization
+This feature provides personalized sermon recommendations using algorithms. Users get curated playlists like "Discover Weekly," "Daily Mix," and "Release Radar" based on their listening habits.
+
+As a user who likes discovering new content, I want a weekly playlist of sermons I might enjoy so I can explore without searching.
+As someone who listens regularly, I want a daily mix of sermons based on my taste so I always have something relevant to listen to.
+As a fan of certain ministers or topics, I want to see new sermon releases from them so I can stay updated.
+Discover Weekly: A playlist updates every week with new sermon recommendations tailored to the user.
+Daily Mix: Users get multiple mixes based on their favorite topics, ministers, or genres.
+Release Radar: A playlist updates automatically with new sermons from ministers the user follows or listens to often.
+The UI clearly displays personalized playlists in a dedicated section.
+The system adapts over time, improving recommendations based on user behavior.
+Users can save or share recommended sermons.
+
+
+ Not Started
+
+
+ADMIN APPLICATION
+
+
+User Management
+This feature lets administrators manage user accounts, set permissions, and control access levels for different types of users, including customers, preachers, and the Troott team.
+As an admin, I want to view all users so I can monitor and manage the platform effectively.
+As an admin, I want to edit user details (name, email, role) so I can keep information accurate.
+As an admin, I want to set permissions for different users so they only access what they need.
+As an admin, I want to suspend or deactivate accounts so I can manage platform security.
+As an admin, I want to filter and search for users quickly so I can find specific accounts easily.
+
+
+Admins can view a list of all users with details like name, email, and role.
+Admins can edit user details and update roles (e.g., customer, preacher, Troott team member).
+Admins can assign different permissions based on roles.
+Admins can suspend or delete user accounts.
+The UI includes a search and filter feature to quickly find users.
+Changes made by admins take effect immediately.
+
+
+ Not Started
+The admin app has 2 customer groups:
+troott management 
+preachers application
+
+The troott management manages the whole application.
+
+While the preachers part manages the single preacher information similar to a single music record label.
+Track Uploading
+This feature allows internal teams and creators (preachers) to upload new tracks (sermons, music, or other audio content) to the platform.
+As a creator, I want to upload new tracks easily so my content is available to listeners.
+As an internal team member, I want a simple way to review and approve uploads so only quality content goes live.
+As an admin, I want to track all uploads so I can monitor what’s being added to the platform.
+Users (creators and internal teams) can upload audio files.
+Upload progress is visible to ensure completion.
+Admins can review and approve/reject uploads before they go live.
+The system provides error messages for failed uploads (e.g., incorrect file type).
+
+
+ Not Started
+Applies to both
+Metadata Management
+This feature ensures all uploaded content has proper metadata (track name, genre, release date, lyrics, etc.) for accurate organization and searchability.
+As a content uploader, I want to add metadata to my track so users can find it easily.
+As a platform admin, I want to ensure all tracks have accurate details so the library is well-organized.
+As a user searching for content, I want correct track information so I know what I’m listening to.
+Users must enter metadata (title, artist, genre, release date) when uploading a track.
+Metadata fields are standardized to ensure consistency.
+The system auto-fills certain metadata (e.g., duration from the audio file).
+Users can edit metadata after uploading, but changes require approval from admins.
+
+
+ Not Started
+Applies to both
+Content Curation
+This feature allows internal teams to organize and feature content, including curated playlists and recommendations.
+As a content manager, I want to create curated playlists so users can discover the best content easily.
+As an admin, I want to feature specific sermons or music so important content gets more visibility.
+As a content strategist, I want to recommend content based on trends and user behavior so engagement increases.
+Internal teams can create and edit curated playlists.
+Featured content sections can be updated regularly.
+Content recommendations can be personalized for users.
+The UI allows easy selection and management of curated content.
+
+
+ Not Started
+Applies to both
+Content Scheduling
+This feature allows internal teams to schedule when content goes live, ensuring a coordinated release across time zones.
+As an admin, I want to schedule content releases so they go live at the right time globally.
+As a content manager, I want to set release dates for upcoming sermons so they appear automatically when planned.
+As a creator, I want to schedule my uploads in advance so I don’t have to publish them manually.
+Users can select a date and time for content to go live.
+Scheduled content automatically becomes available at the set time.
+A dashboard shows upcoming scheduled releases.
+Admins can reschedule or cancel a release if needed.
+ Not Started
+Troott team
+User Activity Analytics
+This feature tracks user behavior in real-time, including listening habits, preferences, and demographics. It provides insights into platform performance, user engagement, and growth trends.
+As a platform admin, I want to see how users engage with content so I can improve recommendations.
+As a content creator, I want insights into my audience’s listening habits so I can create better content.
+As a business manager, I want to track user growth and demographics so I can make data-driven decisions.
+Tracks user listening habits, including most-played content and session durations.
+Provides demographic insights (age, location, device type).
+Displays real-time and historical trends in an analytics dashboard.
+Allows filtering and exporting data for deeper analysis.
+
+
+ Not Started
+Applies to both
+Subscription Management
+This feature manages user subscriptions, renewals, and payments for both free and premium users.
+As a user, I want to easily subscribe and upgrade to premium so I can access exclusive features.
+As a subscriber, I want automatic renewals so I don’t have to renew manually every time.
+As an admin, I want to track active subscriptions and payments so I can manage billing effectively.
+Users can subscribe to free or premium plans.
+System handles automatic renewals and cancellations.
+Payment processing is secure and supports multiple payment methods.
+Admins can track and manage subscription statuses.
+ Not Started
+Troott team
+System Monitoring
+This feature monitors the platform’s health in real-time, tracking server load, response times, and streaming performance.
+As a system admin, I want to monitor server performance so I can prevent downtime.
+As a developer, I want to track response times so I can optimize streaming speed.
+As a platform manager, I want alerts for system issues so we can fix them quickly.
+
+
+Real-time monitoring of server load, response times, and streaming quality.
+Alerts for performance issues or server downtime.
+Dashboard displaying system health metrics.
+Logs of past incidents for troubleshooting.
+
+
+ Not Started
+
+
+Fraud Detection
+This feature detects fraudulent activities, such as fake subscriptions or bots artificially inflating streaming numbers.
+As a platform security admin, I want to detect fake accounts and fraudulent activity so I can prevent revenue loss.
+As a business manager, I want to ensure subscription payments are legitimate so I can maintain financial integrity.
+As a content creator, I want fair streaming metrics so real engagement is accurately counted.
+
+
+Identifies suspicious activity, such as multiple logins from different locations.
+Flags irregular streaming behavior (e.g., non-stop playback from a single account).
+Detects fraudulent payment attempts or subscription abuse.
+Provides reports and alerts for further investigation.
+
+
+ Not Started
+
+
+
+
+
+3.0 troott Launch Strategy
+
+3.1 Pre-Launch Activities 
+Share a short demo clip of how troott works with contacts via different platforms like WhatsApp, Telegram, Facebook and Instagram stories or posts, etc.
+With the short clip, a link is attached that leads respondents  to fill their data for reference capturing and directs them to the Flock WhatsApp group to join the wait-list.
+Conduct Beta testing of troot with The Flock (wait-list users) to get their feedback on areas of improvement before launching.
+
+
+4.0 Risks
+<What assumptions or hypotheses may turn out to be false, and how do we plan on pressure testing them? What open questions do we need to answer, and how do we plan on answering them?>
+
+
+Execution Space
+
+1.0 Technical Implications 
+<What, if anything, in the functional requirements do we expect to significantly alter the user experience? What metrics need to be instrumented for us in-product to gather data on feature usage?>
+
+< Information about the technical requirements, architecture, and any specific technologies that should be used in the development.>
+
+System design
+ER DIagram
+
+1️⃣ User opens the app and requests a song.
+2️⃣ Backend (Node.js with Express/Fastify/NestJS) fetches song metadata (GraphQL/REST).
+3️⃣ Backend checks available bitrates (FFmpeg-generated HLS/DASH files).
+4️⃣ HLS/DASH stream is provided based on user's internet speed.
+5️⃣ Node Streams API streams audio in real-time.
+6️⃣ WebSockets update listener count in real-time.
+7️⃣ Compressed API responses (Gzip/Brotli) optimize performance.
+
+2.0 Go To Market Plan
+<What is the product/feature rollout schedule for users? For each phase, how many users will we reach, and for how long?> <outline the strategy for launch, marketing and distribution to target users>
+
+3.0 Development Plan
+<What are the next steps or action items needed to accomplish this GTM plan? Who is the Directly Responsible Individual (DRI) for each action item? When does each item need to be done?>
+
+4.0 FAQ
+<What are the obvious questions that stakeholders might have?>
+
+5.0 Investigative Metrics
+<These metrics provide information that will help you make a decision or answer a question about the launched product or feature. usage, such as, “How often is this feature being used?  functionality additions, or, “What do users want to do that they can’t do today  user experience improvements, or, “Where can I improve my UX?”
+
+
+
+
+
+
+
+
+Features
+Description
+
+
+Server-Side
+Authentication
+Roles
+Permissions
+Authorization
+Fine-grained control over roles and permissions for internal users, including artists, admins, and label partners.
+Improvements in security mechanisms for internal and external authentication.
+Implementation of additional security layers to control internal data access based on roles and permissions.
+Grants different levels of access to internal teams based on their roles (e.g., content editors, managers).
+
+
+Playing a Sermon
+Efficient audio file delivery, low-latency streaming, and optimized server resources for handling high-volume traffic.
+
+
+Sermon Metadata Handling
+Manages metadata like song titles, albums, artists, duration, and genre for content discovery and organization.
+
+
+Sermon Interactions
+Backend logic for processing sermon interactions, including handling likes, shares, queues, and syncing playlists across devices.
+
+
+Seeing a Video Clip
+Backend services for serving video content and tracking views and likes.
+
+
+Videos Metadata Handling
+Manages metadata like video titles, albums, artists, duration, and genre for content discovery and organization.
+
+
+Video Clip Interactions
+Backend processing of video clip interactions, including handling likes, shares, queues, and syncing data with user playlists.
+
+
+Playlists & Library
+Backend management for storing, creating, and updating playlists, as well as managing user libraries and preferences.
+
+
+Search and Discovery
+Backend functionality for processing search queries and serving results, including trending content.
+
+
+Advanced Search
+Optimized queries and efficient filtering using indexing for faster search results (by date, minister, sermon, or topic).
+
+
+User Account & Settings
+Backend operations for storing profile data, handling account settings, account preferences, and managing security settings (e.g., two-factor authentication).
+
+
+Push Notifications Management
+Backend management of user notification preferences, including storing settings and handling delivery mechanisms.
+
+
+Embedded Sermons
+Backend logic for generating embeddable sermon links and handling cross-platform sharing.
+
+
+Ad-Free Premium
+Backend logic for checking subscription status and delivering ad-free content for premium users.
+
+
+Enhanced Discovery	
+Running recommendation algorithms based on user preferences and listening habits.
+
+
+Offline Listening
+Backend support for managing downloads and serving offline content.
+
+
+Personalized Notifications
+Backend services for push notifications to notify users about new content or personalized recommendations.
+
+
+Analytics and Progress Tracking
+Backend services for collecting and processing user engagement data, tracking listening habits, and analyzing sermon progress and completion rates.
+
+
+Localization Handling
+Handles regional content, language preferences, and country-specific regulations (e.g., time zones, region codes).
+
+
+Caching and Queueing
+Performance optimization for data retrieval and job processing (e.g., content uploads, track requests).
+
+
+Notification System
+Sends alerts internally for key events (e.g., system errors, new content uploads, release notifications).
+
+
+Audit Logging
+Tracks and records all actions within the backend for security and troubleshooting purposes.
+
+
+Monitoring & Observability
+Tools to monitor real-time performance metrics such as server load, response time, and error rates.
+
+
+Website Application
+Content Discovery
+Features tools for browsing and discovering new music, playlists, and podcasts.
+
+
+SEO Optimization
+Ensures the website is optimized for search engines, improving content visibility and discovery.
+
+
+User Application (mobile)
+User Registration & Login
+Allows new users to sign up, log in, and authenticate their account using email, phone number, or third-party services (Google, Facebook, Apple).
+
+
+Playing a Sermon
+Core playback functionality for sermons, including playback controls (play, pause, stop), shuffle, repeat, and sleep timer UI for continuous and timed listening.
+
+
+Sermon Interactions
+Features for user interaction with sermons, including like, share, queue, and add to playlist functionality. The UI is optimized for easy engagement.
+
+
+Seeing a Video Clip
+Video clips browsing and interaction features, including infinite scroll through clips and swipe for engagement. UI for engaging with clips (like, share, etc.).
+
+
+Video Clip Interactions
+Features to interact with video clips, including like, share, queue, and add to playlist functionality.
+
+
+Playlists & Library
+Library management and playlist creation features, including playlist UI with grid view and tools to manage a user's library.
+
+
+Search and Discovery
+Search functionality to help users find sermons, including a search input field with trending content suggestions.
+
+
+Advanced Search
+Advanced filtering options, allowing users to search by date, minister, or sermon topic.
+
+
+User Account & Settings
+User profile and settings management, including profile editing and account settings UI.
+
+
+Offline Listening
+Offline sermon playback, including UI for downloading and managing offline content.
+
+
+Enhanced Discovery	
+Recommendation and discovery features, including curated playlists and personalized recommendations UI.
+
+
+Ad-Free Premium
+Premium subscription feature, including UI to hide ads for premium users.
+
+
+Embedded Sermons
+Embedded sermon feature, including UI for embedding sermons into social media or external platforms.
+
+
+Personalized Notifications
+Personalized notification system, including UI displaying notifications based on user preferences.
+
+
+Subscription Management
+Provides users with the ability to upgrade to Premium, manage their subscriptions, view billing information, and cancel subscriptions.
+
+
+Sermon Streaming
+Core functionality for streaming music, podcasts, and audiobooks. Users can search, discover, and play tracks or episodes.
+
+
+Playlist Creation & Sharing
+Users can create personal playlists, add/remove songs, and share them with others through social media or direct links.
+
+
+Discover Weekly & Personalization
+Offers personalized recommendations through algorithms like "Discover Weekly," "Daily Mix," and "Release Radar."
+
+
+Admin Application
+User Management
+Allows administrators to manage user accounts, permissions, and access levels.
+
+
+Content Management
+Track Uploading
+Content Curation
+Content Scheduling
+Metadata Management
+Allows internal teams and creators to upload new tracks to the platform.
+Internal team tools for curating playlists, featured content, and recommendations.
+Ability to schedule content releases, ensuring global synchronization for drops.
+System to handle music metadata, including track names, genres, release dates, and lyrics.
+
+
+User Activity Analytics
+Real-time tracking of user activity on the platform, including listening habits, preferences, and demographics to offers insights into platform performance, user behavior, and growth metrics.
+
+
+Subscription Management
+Manages user subscriptions, renewals, and payment processing, including free and premium tiers.
+
+
+System Monitoring
+Real-time tools to monitor platform health, including streaming server load and response times.
+
+
+Fraud Detection
+Systems to detect fraudulent activities, such as subscription fraud or bots streaming content artificially.
+
+
+
+ 
+troott - sermon streaming application
+Product Requirement Document (PRD)
+
+[IMPORTANT DOCS + LINKS TO THEM GO HERE] / FILE / FILE / FILE
+Figma Design (Old): streamsqr design file 
+Troot figma file: 
+
+
+Product Engineering
+ Damola Oladipo justiehussein@gmail.com
+PRD Status
+ Under review
+Last Updated
+ Jan 15, 2025
+
+
+1.0 Product Summary
+<concise and informative overview of the feature >
+We are building a landing page to test our biggest assumption about troott: that customers will see its value and be willing to pay for it. This page will also help us attract early adopters to join the waitlist and create a group of user testers for our app. 
+
+Problem Space
+
+1.0 Product Opportunity
+<should explain what user problem you’re solving and why the time is right to prioritise this feature. >
+Many Christians find it hard to listen to both new and old sermons from their favorite preachers on their mobile phones anytime, anywhere  without struggling with unwanted Ads. It’s frustrating to search for specific content without knowing the exact title, and downloading sermons often leads to a disorganized mess on their phones.
+On top of that, the current  platforms don’t offer a great mobile experience  for listening to sermons, making it harder than it should be for users to engage with the content they care about.
+Fixing these problems is key to delivering a seamless, enjoyable experience. By making it easier to find, organize, access  and listen to sermons, we can help users grow spiritually and stay more connected.
+2.0 Customer Segmentation
+< explains who you’re building the product or feature for.>
+
+User Group
+Segments
+Description
+Premium Users
+Casual Users
+Users who will pay for a subscription to enjoy ad-free sermons and other premium features.
+
+
+Sermon Lovers
+Users who listen to a lot of sermons and want an ad-free experience with full control over playback for uninterrupted listening.
+
+
+Sermon Explorers
+People who listen to sermons during workouts and value uninterrupted playlists.
+
+
+Preacher Fans
+Fans who follow specific preachers and want easy access to their messages and sermons.
+
+
+
+3.0 Customer Insights
+<captures the most important insights from our user research.>
+
+Jobs to Be Done (JTBD)
+Description
+#1: Take control of spiritual life
+Help users improve their lifestyle and deepen their morality by easily accessing sermons that guide their spiritual journey.
+#2:Mobile-first sermons
+experience 
+Allow users to fully engage with sermons, offering comfort, satisfaction, and meaningful spiritual growth.
+#3: Organise sermon collection & free up space
+Help users stay organized removing the frustration of downloads, letting them carry their entire sermon library on their phone while freeing up storage for other important things.
+#4:Build faith and grow spiritually.
+Help  users to deepen their faith and share their beliefs by sharing sermons, creating meaningful connections with others.  
+#5: Bond with loved ones through shared sermon experiences
+Enable users to strengthen their bonds with family and friends by listening to sermons together, fostering shared experiences and spiritual connection.  
+
+
+4.0 Features and Functionality Benchmarks
+<highlight examples of products that do similar solutions >
+
+Website for design inspiration 
+https://trybaze.com
+Tiiny.host
+https://maven.com/teach
+https://maven.com/teach
+https://www.spotify.com/ng/free/
+https://www.spotify.com/ng/premium/
+https://artists.spotify.com/home
+trybaze.com
+
+
+
+5.0 Success Metrics
+<These are the metrics that will define whether or not your new feature or product is successful.>
+
+Metric Category
+Metric
+Description
+Acquisition
+Conversion Rate
+The percentage of visitors who sign up and pay NGN 1000 for troott.
+Goal Achievement 
+Total Number of Sign-ups
+Tracking the progress and time to goal in reaching the goal of 2,000 sign-ups.
+
+
+
+Solution Space
+
+
+1.0 What are we building
+<describe the ideas and solutions and how it will deliver value for the users>
+We are developing a mobile app that makes it easy for users to access and engage with sermons anytime, anywhere. Our solution focuses on helping users grow spiritually by providing organized access to sermons, offering ad-free listening, and saving space on their devices. It also allows users to share content, deepen their faith, and build connections with others. This platform aims to deliver real value by making the sermon experience seamless, enjoyable, and more meaningful for users.
+2.0 Feature Specifications 
+<the specific functionality or features the landing page of troott  will have to meet user needs and achieve its intended goals>
+The troott landing page will need to clearly showcase the app’s value, making it easy for users to understand its purpose and benefits. It should feature simple and engaging messaging that highlights the core functionalities—such as accessing sermons, organizing content, and providing a seamless listening experience. The page will need to make it easy for users to sign up and pay.
+
+Feature OR Functionality
+Job Stories
+Acceptance Criteria
+Status
+What troott is about
+A user searching for a convenient way to listen to sermons without interruptions will land on the page and quickly understand how Troott solves this problem in 30-seconds.
+The website has a clear and concise headline explaining troott’s unique value proposition.
+Visual elements (images or videos) reinforce the value proposition.
+ Not Started
+Features Overview
+When I explore the page, I want to know what features I will enjoy, so I can anticipate my experience.
+
+
+
+A dedicated section on the page describes  key features with short descriptions.
+
+When I sign up, I want to know which preachers and sermons will be available on the platform, so I can see if they align with my spiritual needs.
+ Not Started
+Payment  Call to Action 
+When I see the CTA, I want it to be clear, direct and visible  so that I feel motivated to sign up for early access by paying..
+The CTA buttons ("Be the first to experience", "Unlock Early Access") are prominently displayed creating urgency and making it easy to take action..
+
+Join 10,000+ users already on the waitlist
+ Not Started
+Waitlist Signup
+As a visitor, especially a student, I want to be able to sign up for the waitlist;
+
+
+The form has fields for basic details (name, email) and takes less than 30- seconds to complete.
+After submission, I should receive an automated confirmation message to confirm my sign-up.
+ Not Started
+FAQs
+When I have common questions about troott, I want quick and easy access to the FAQ section so I can find answers right away.
+Answers are concise and informative, addressing common user concerns.
+ Not Started
+Send us a mail
+When I have specific inquiries, I want a clear way to contact support so that my questions are answered promptly OR request for a FEATURE.
+Send us a mail at team@troott.com
+There should be clear communication about response time, such as (e.g., "We will respond within 24 hours").
+ Not Started
+Mobile First
+When I access the landing page on my mobile device, I want it to be responsive so that all key elements are visible and functional.
+All essential elements—UVP, CTA, FAQs—should display correctly and work smoothly on mobile devices.
+ Not Started
+
+
+
+
+Execution Space
+
+1.0 Technical Specifications: 
+<What, if anything, in the functional requirements do we expect to significantly alter the user experience? What metrics need to be instrumented for us in-product to gather data on feature usage?>
+
+< Information about the technical requirements, architecture, and any specific technologies that should be used in the development.>
+
+
+Email Content
+
+Subject: Welcome to Troott — your journey starts here!
+Hi Damola,
+I'm so glad you’re here.
+Troott is your new mobile space for:
+ 🎧 Life-giving sermons
+ 📁 Save messages to revisit anytime
+⚙️  Share with your friends and family
+ 🌍 Discover content for your season
+Why now?
+ You’re part of something new.
+ We're in early access, and you're invited into The Flocks — our inner circle of first users.
+There, you’ll:
+ ✨ Get early feature access
+ 💬 Share your voice and feedback
+ 🚀 Help shape the future of discipleship through audio sermons. 
+   => Join the first flock
+Whether you're on the move, in the office, or in quiet time —
+Troott helps you stay rooted in God’s Word.
+This is just the beginning. Let’s grow deeper and together. 
+Damola Oladipo 
+- for the Troott team
+
+
+
+—---------------------------------------------------
+
+
+
+
+Signup Form
+
+Get early access to Troott 🎧
+Stream sermons. Grow deeper. Be among the first to experience it.
+
+Troott is your new home for life-giving sermons, powerful messages, 
+and spiritual nourishment, anytime, anywhere, all on your mobile phone.
+
+First Name + Email
+      =>  🔒 Get early access
+
+—---------------------------------------------------
+
+
+Stream sermons. Grow Spiritually. Be among the first to experience it.
+
+Join our exclusive small group of users and help shape the future of discipleship through audio sermons. Signup below to get your invite:
+
+
+
+
+
+Troott is your new home for life-giving sermons and soul-stirring messages — anytime, anywhere, right from your phone.
+
+
+
+
+
+
+
+Inspirations:
+Miro
+Customer.io
+
+
+
+
+Hi Samson,
+We are excited to have you onboard!
+
+Troott is your new home for life-giving sermons, powerful messages, 
+and spiritual nourishment, anytime, anywhere, all on your mobile phone.
+
+With troott, you can:
+🎧 Stream sermons from favourites voices
+📁 Save your favourites to listen later
+🌍 Discover audio content that speaks to your season
+
+You’re invited to The Flocks — our private early access group for first believers like you.
+It’s where we: ✨ Share what’s new 💬 Listen to your feedback 🚀 Roll out features before anyone else
+
+
+
+Wherever you are — on the move, at work, or in quiet reflection,  Troott makes it easy to stay connected to God’s Word.
+
+
+
+
+If you need
+
+Welcome to our growing list of listeners of 
+Use troott to find, listen, and share audio sermons with your friends and family.
+I’m happy you’re here!
+
+Join our waitlist community.
+You give us your thoughts and feedback 
+You get early insider access
+You get 3 months free subscription at launch
+
+      => Secure your spot!
+Ready to press play?
+
+We are a promise that troott will be versatile, we envision a discipleship tool.
+Thank you for following us on this journey.
+
+Happy listening,
+
+Damola,
+Co-founder and CEO
+
+If you need
+—--------------------------------------------------------------------------------------------------------
+
+ ✅ You’re in! Early access, 3 months free, and more…
+Body:
+Hey [First Name],
+You’re officially on the Troott waitlist — thanks for joining us early!
+Here’s what happens next:
+✅ You’ll be among the first to try Troott when we launch
+🎁 You get 3 months free as an early supporter
+💬 You can join our WhatsApp early adopters group for behind-the-scenes updates, feedback, and special perks
+👇 Tap below to join the group now:
+Join WhatsApp Group
+Want to move up the waitlist? Share your referral link and invite others to join Troott. The more people you invite, the sooner you get access.
+Thanks again — we're building this with you in mind.
+Warmly,
+ The Troott Team
+
+
+
+
+
+Supercharge your spiritual growth with troott
+
+
+Thanks for being one of Troott’s incoming 10 million users
+Join the celebration
+
+
+
+Stay rooted in God’s word. Get early access!
+
+
+
+, an app which comes with the sense of holding the world’s sermons and teaching in your pocket.
+
+
+John 17:21 — “that they may be one”
+A personal retreat toolbox.
+The sense of holding the world’s sermons and teaching in your pocket.
+A space for shared fellowship
+
+
+
+
+Christian ministers suffer from piracy and unmonetized content. Troott is the new mobile space for life-giving sermons and teachings, anytime, anywhere.  We are building a discipleship tool for the christian community using audio sermons.
+
+
+
+Christianity is the largest faith in the world, over 2.3 billion people. More than 1.5 billion of them already have a phone and an internet connection. They’re not just reading scripture on paper anymore. They’re watching, listening, and sharing online. Faith-based media apps are downloaded over 150 million times every year, and that number is climbing. If you add up subscriptions, donations, and content licensing, the market is somewhere between $3 and $5 billion. We’re starting with the 50+ million digitally active Christians in Africa, North America, and diaspora communities, but the rest of the market is waiting.
+
+
+Most pastors and Christian teachers give away their sermons for free, not because they want to, but because there’s no good way to distribute or monetize them. A lot of their work gets pirated, passed around with no credit, or buried on platforms where no one finds it. 
+
+
+Our founding team works closely together like one product team. I’m the Full Stack Engineer, building the product from back to front and making sure it works well at scale. Our UX Designer focuses on understanding users and creating simple, engaging experiences. Our Data Engineer makes sure we collect sermons effectively and use vital data to guide our decisions. We solve problems together. Each of us has our own skills, but we share one goal: build a product Christians love to use every day.
+
+
+We love sermons. For years, I’ve been hunting for them across WhatsApp groups, YouTube channels, and random blogs. It’s something we deal with every day, and it’s frustrating. There’s no single place to find the voices you trust. That’s why we’re building Troott. We know the pain, we know what good looks like, and we have the skills to make it happen. We’re set on fixing this, no matter what it takes.
+
+
+We’ve built the first version of Troott and have eight ministers ready to use it. We’re in a private alpha, testing with a small group to make sure the experience works before opening it up. We already have 200 people on our waitlist, eager to join once we launch. The early feedback has been strong ministers see it as a way to reach more listeners and protect their content. This phase is about refining the product, learning from real usage, and preparing for a wider release.
+
+In 6 months, we target 150 ministers, 20,000 sermon catalogue, 20,000 monthly active users, and 2,000 premium subscribers. We aim at 15% growth and 60% retention rate. That’s enough to prove the model works. In 3 years, we target 2500 ministers, 1.5m sermons, 5m+ users, and 1.5m premium subscribers.
+
+
+We’re number-driven, using direct church onboarding and network effects from existing connections. Growth starts invite-only, with “share an invite” rewards for subscription points. We’ll gamify sermon discovery, leverage virality, and measure relentlessly to compound acquisition, retention, and monetization toward our 3-year targets.

@@ -158,8 +158,8 @@ export const homeHeroContent: HeroSectionContent = {
     },
     secondaryCtaIcon: 'upload',
     heroImage: {
-        src: '/images/hero-listener.png',
-        alt: 'A preview of Troott for listeners',
+        src: '/images/hero-image.png',
+        alt: 'Troott mobile app preview',
     },
 };
 
