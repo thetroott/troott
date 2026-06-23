@@ -38,16 +38,15 @@ switch (process.env.APP_ENV) {
 
     case ENVType.DEVELOPMENT:
         config = {
-            host: process.env.REDIS_HOST_DEV!,
-            port: Number(process.env.REDIS_PORT),
-            user: process.env.REDIS_USER!,
-            password: process.env.REDIS_PASSWORD_DEV!,
-            db: Number(process.env.REDIS_DB!),
+            host: process.env.REDIS_HOST_DEV ?? '127.0.0.1',
+            port: Number(process.env.REDIS_PORT ?? 6379),
+            user: process.env.REDIS_USER ?? 'default',
+            password: process.env.REDIS_PASSWORD_DEV ?? '',
+            db: Number(process.env.REDIS_DB ?? 0),
             managed: process.env.REDIS_CONFIG === 'true',
             tls: {
                 rejectUnauthorized:
-                    (process.env.REDIS_TLS_REJECT_UNAUTHORIZED as string) ===
-                    'false',
+                    process.env.REDIS_TLS_REJECT_UNAUTHORIZED === 'true',
             },
         };
         break;
