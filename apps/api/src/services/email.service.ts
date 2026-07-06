@@ -397,7 +397,7 @@ class AppEmailService {
             case OtpType.CHANGEPASSWORD:
                 return 'Change Password Code';
             case OtpType.VERIFY:
-                return 'Verify Your Pacepard Account';
+                return 'Verify Your Troott Account';
             default:
                 return 'Verify Account';
         }
@@ -460,7 +460,7 @@ class AppEmailService {
             case OtpType.REGISTER:
                 return {
                     salute: `${user.firstName}, let's verify your account`,
-                    bodyOne: `Welcome to Pacepard! Please verify your account.`,
+                    bodyOne: `Welcome to Troott! Please verify your account.`,
                     bodyTwo: `Use the OTP below to activate your profile.`,
                     bodyThree: `This code will expire in 15 minutes.`,
                     buttonText: 'Verify Account',
@@ -470,7 +470,7 @@ class AppEmailService {
             case OtpType.LOGIN:
                 return {
                     salute: `Hi ${user.firstName},`,
-                    bodyOne: `You're trying to log in to your Pacepard account.`,
+                    bodyOne: `You're trying to log in to your Troott account.`,
                     bodyTwo: `Use the OTP code below to complete login.`,
                     bodyThree: `If this wasn’t you, please ignore this email.`,
                     buttonText: 'Verify Login',
@@ -490,7 +490,7 @@ class AppEmailService {
             case OtpType.CHANGEPASSWORD:
                 return {
                     salute: `Hi ${user.firstName},`,
-                    bodyOne: `You're changing your Pacepard password.`,
+                    bodyOne: `You're changing your Troott password.`,
                     bodyTwo: `Enter the OTP code below to confirm the change.`,
                     bodyThree: `If this wasn’t you, contact support.`,
                     buttonText: 'Change Password',
@@ -519,7 +519,7 @@ class AppEmailService {
             user,
             template: EmailTemplate.WELCOME,
             options: {
-                subject: `Welcome to Pacepard, ${user.firstName}!`,
+                subject: `Welcome to Troott, ${user.firstName}!`,
                 bodyOne: `We're glad to have you onboard.`,
                 bodyTwo: `Explore sermons, join discussions, and grow in your faith.`,
                 buttonText: 'Go to Dashboard',
@@ -535,7 +535,7 @@ class AppEmailService {
             template: EmailTemplate.WELCOME,
             options: {
                 subject: `Welcome Minister, ${user.firstName}!`,
-                bodyOne: `You’ve been onboarded as a minister on Pacepard.`,
+                bodyOne: `You’ve been onboarded as a minister on Troott.`,
                 bodyTwo: `Start uploading sermons to bless your listeners.`,
                 buttonText: 'Upload Sermon',
                 buttonUrl: `${this.config.clientUrl}/sermons/upload`,
@@ -565,7 +565,7 @@ class AppEmailService {
             template: EmailTemplate.WELCOME,
             options: {
                 subject: `Welcome to the Team!`,
-                bodyOne: `You’ve been added as a staff member on Pacepard.`,
+                bodyOne: `You’ve been added as a staff member on Troott.`,
                 bodyTwo: `Access your dashboard and start supporting the mission.`,
                 buttonText: 'View Staff Dashboard',
                 buttonUrl: `${this.config.clientUrl}/dashboard`,
@@ -593,7 +593,7 @@ class AppEmailService {
             user,
             template: EmailTemplate.PASSWORD_RESET,
             options: {
-                subject: 'Reset your Pacepard password',
+                subject: 'Reset your Troott password',
                 bodyOne: `Hi ${user.firstName},`,
                 bodyTwo: `We received a request to reset your password.`,
                 bodyThree: `If this wasn’t you, ignore this email.`,
@@ -623,9 +623,9 @@ class AppEmailService {
             user: inviteeUser as IUserDoc,
             template: EmailTemplate.INVITE,
             options: {
-                subject: `You've been invited to join Pacepard as ${invitationType}`,
+                subject: `You've been invited to join Troott as ${invitationType}`,
                 salute: `Hello,`,
-                bodyOne: `${inviterName} has invited you to join Pacepard as ${invitationType.toLowerCase()}.`,
+                bodyOne: `${inviterName} has invited you to join Troott as ${invitationType.toLowerCase()}.`,
                 bodyTwo: `Click the button below to accept your invitation and set up your account.`,
                 bodyThree: `This invitation will expire in 7 days.`,
                 buttonText: 'Accept Invitation',

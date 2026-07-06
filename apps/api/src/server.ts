@@ -29,7 +29,7 @@ const startServer = async (): Promise<void> => {
 const server = app.listen(PORT, () => {
     console.log(
         colors.bold.yellow(
-            `Pacepard server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
+            `Troott server running in ${process.env.NODE_ENV} mode on port ${PORT}`,
         ),
     );
 });
