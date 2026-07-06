@@ -14,12 +14,12 @@ process.env.JWT_EXPIRE = '30d';
 process.env.MONGODB_DEV_URI = 'mongodb://localhost:27017/test';
 
 // Mock email config environment variables
-process.env.EMAIL_FROM_EMAIL = 'test@pacepard.com';
-process.env.EMAIL_FROM_NAME = 'Pacepard Test';
-process.env.EMAIL_REPLY_TO = 'test@pacepard.com';
+process.env.EMAIL_FROM_EMAIL = 'test@troott.com';
+process.env.EMAIL_FROM_NAME = 'Troott Test';
+process.env.EMAIL_REPLY_TO = 'test@troott.com';
 process.env.MAILERSEND_API_KEY = 'test-api-key';
 process.env.MAILSEND_TEMPLATE_ID = 'test-template-id';
-process.env.EMAIL_DOMAIN = 'test.pacepard.com';
+process.env.EMAIL_DOMAIN = 'test.troott.com';
 process.env.CLIENT_LOCAL_URL = 'http://localhost:3000';
 
 // Mock AWS config
@@ -42,23 +42,23 @@ jest.mock('../src/configs/email.config', () => {
     return {
         EMAIL_CONFIG: {
             service: 'mailsend',
-            fromEmail: 'test@pacepard.com',
-            fromName: 'Pacepard Test',
-            replyTo: 'test@pacepard.com',
+            fromEmail: 'test@troott.com',
+            fromName: 'Troott Test',
+            replyTo: 'test@troott.com',
             apiKey: 'test-api-key',
             templateId: 'test-template-id',
-            sendingDomain: 'test.pacepard.com',
+            sendingDomain: 'test.troott.com',
             clientUrl: 'http://localhost:3000',
             isTestMode: true,
         },
         getEmailConfig: () => ({
             service: 'mailsend',
-            fromEmail: 'test@pacepard.com',
-            fromName: 'Pacepard Test',
-            replyTo: 'test@pacepard.com',
+            fromEmail: 'test@troott.com',
+            fromName: 'Troott Test',
+            replyTo: 'test@troott.com',
             apiKey: 'test-api-key',
             templateId: 'test-template-id',
-            sendingDomain: 'test.pacepard.com',
+            sendingDomain: 'test.troott.com',
             clientUrl: 'http://localhost:3000',
             isTestMode: true,
         }),

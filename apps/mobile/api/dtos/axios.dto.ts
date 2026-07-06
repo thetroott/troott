@@ -15,7 +15,7 @@ export type ApiMethodType = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 /**
  * Single-call contract passed from feature services into the shared HTTP layer.
- * Mirrors the Pacepard `AxiosService.call` shape (method, path, auth flag, body).
+ * Mirrors the Troott `AxiosService.call` shape (method, path, auth flag, body).
  */
 export interface CallApiDTO {
     /** Parser / service variant; use `default` unless a split stack is introduced. */

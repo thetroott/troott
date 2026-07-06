@@ -1,6 +1,6 @@
 # API Test Suite
 
-Production-grade test setup for the Pacepard API using Jest, Supertest, and MongoDB Memory Server.
+Production-grade test setup for the Troott API using Jest, Supertest, and MongoDB Memory Server.
 
 ## Overview
 
@@ -1519,4 +1519,4 @@ When adding new tests:
 ---
 
 **Last Updated:** 2024
-**Maintained by:** Pacepard Development Team
+**Maintained by:** Troott Development Team
