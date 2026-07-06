@@ -8,7 +8,7 @@ import ErrorResponse from '../utils/error.util';
  * @name getPlans
  * @description Retrieve a list of all available plans.
  * @route GET /plans
- * @access Private (Pacepard Admins only)
+ * @access Private (Troott Admins only)
  */
 export const getPlans: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -24,7 +24,7 @@ export const getPlans: RequestHandler = asyncHandler(
             );
         }
 
-        // check if user is pacepard admin
+        // check if user is troott admin
         if (!user.isAdmin) {
             return next(
                 new ErrorResponse('Access denied: Admins only', 403, []),
@@ -67,7 +67,7 @@ export const getPlans: RequestHandler = asyncHandler(
  * @name addNewPlan
  * @description Add a new plan to the system.
  * @route POST /plans
- * @access Private (Pacepard Admins only)
+ * @access Private (Troott Admins only)
  */
 export const addNewPlan: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -83,7 +83,7 @@ export const addNewPlan: RequestHandler = asyncHandler(
             );
         }
 
-        // check if user is pacepard admin
+        // check if user is troott admin
         if (!user.isAdmin) {
             return next(
                 new ErrorResponse('Access denied: Admins only', 403, []),
@@ -118,7 +118,7 @@ export const addNewPlan: RequestHandler = asyncHandler(
  * @name updatePlan
  * @description Update an existing plan.
  * @route PATCH /plans/:planId
- * @access Private (Pacepard Admins only)
+ * @access Private (Troott Admins only)
  */
 export const updatePlan: RequestHandler = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -134,7 +134,7 @@ export const updatePlan: RequestHandler = asyncHandler(
             );
         }
 
-        // check if user is pacepard admin
+        // check if user is troott admin
         if (!user.isAdmin) {
             return next(
                 new ErrorResponse('Access denied: Admins only', 403, []),

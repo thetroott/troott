@@ -1,6 +1,6 @@
 # Role and Permission System
 
-This document explains how the Role-Based Access Control (RBAC) system works in the Pacepard API, including both global roles and contextual roles.
+This document explains how the Role-Based Access Control (RBAC) system works in the Troott API, including both global roles and contextual roles.
 
 ## Table of Contents
 

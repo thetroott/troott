@@ -1083,5 +1083,5 @@ class InvitationService {
 }
 
 export default new InvitationService();
-//$ pnpm swagger-cli bundle "C:\Users\Infinitystudio\pacepard\apps\docs\api-reference\openApi\root.yaml" --outfile
-//  "C:\Users\Infinitystudio\pacepard\apps\docs\api-reference\openApi\output.yaml" --type yaml --dereference
+//$ pnpm swagger-cli bundle "C:\Users\Infinitystudio\troott\apps\docs\api-reference\openApi\root.yaml" --outfile
+//  "C:\Users\Infinitystudio\troott\apps\docs\api-reference\openApi\output.yaml" --type yaml --dereference
