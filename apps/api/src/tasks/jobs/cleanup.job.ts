@@ -2,6 +2,12 @@ import { Job, DoneCallback } from 'bull';
 import logger from '../../utils/logger.util';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import S3MultipartSession from '@/models/s3-multipart-session.model';
+import {
+    S3_MULTIPART_SESSION_CLEANUP_GRACE_MS,
+    S3_MULTIPART_SESSION_EXPIRY_HOURS,
+} from '@/configs/s3-multipart.config';
+import { abortS3MultipartOnAws } from '@/controllers/s3-multipart.storage.controller';
 
 /**
  * Process cleanup job
@@ -23,7 +29,42 @@ const processCleanupJob = async (
     try {
         let result: any = { type, cleanedCount: 0 };
 
-        if (type === 'temp-files') {
+        if (type === 's3-multipart-sessions') {
+            const cutoff = new Date(
+                Date.now() -
+                    S3_MULTIPART_SESSION_EXPIRY_HOURS * 3600 * 1000,
+            );
+            const graceCutoff = new Date(
+                Date.now() - S3_MULTIPART_SESSION_CLEANUP_GRACE_MS,
+            );
+
+            const stale = await S3MultipartSession.find({
+                finalized: false,
+                status: { $ne: 'aborted' },
+                createdAt: { $lt: cutoff },
+                updatedAt: { $lt: graceCutoff },
+            }).lean();
+
+            let cleanedCount = 0;
+            for (const session of stale) {
+                try {
+                    await abortS3MultipartOnAws(session);
+                    await S3MultipartSession.updateOne(
+                        { sessionId: session.sessionId },
+                        { status: 'aborted' },
+                    );
+                    cleanedCount++;
+                    logger.log({
+                        data: `event=s3-multipart-cleanup sessionId=${session.sessionId} key=${session.s3Key}`,
+                        label: 'cleanup-job',
+                        type: 'info',
+                    });
+                } catch {
+                    /* skip */
+                }
+            }
+            result.cleanedCount = cleanedCount;
+        } else if (type === 'temp-files') {
             // TODO: Implement temporary file cleanup logic
             // Example: Clean up files older than maxAge in temp directory
             const tempDir = path.join(process.cwd(), 'tmp');

@@ -66,6 +66,7 @@ export enum DbModels {
     RECOMMENDATION = 'recommendation',
     TOPIC = 'topic',
     USER = 'user',
+    S3_MULTIPART_SESSION = 's3MultipartSession',
 }
 
 export enum EmailService {

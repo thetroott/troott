@@ -125,23 +125,56 @@ class SermonService {
         };
         const s3Key = uploadPayload.s3Key;
 
-        try {
-            logger.log({
-                data: `event=upload-transfer stage=end uploadId=${uploadId} ms=${Date.now() - uploadStarted} bytes=${size ?? 0} mimeType=${mimeType}`,
-                label: 'sermon-upload',
-                type: 'info',
-            });
+        logger.log({
+            data: `event=upload-transfer stage=end uploadId=${uploadId} ms=${Date.now() - uploadStarted} bytes=${size ?? 0} mimeType=${mimeType}`,
+            label: 'sermon-upload',
+            type: 'info',
+        });
 
+        return this.completeS3AudioUpload({
+            uploadId: uploadId as string,
+            s3Key,
+            mimeType,
+            size: size ?? 0,
+            fileType,
+            userId: data.uploadedBy,
+            rawFileUrl: uploadPayload.rawFile,
+        });
+    }
+
+    /**
+     * Shared tail after audio object exists on S3 (legacy stream upload or multipart complete).
+     */
+    public async completeS3AudioUpload(input: {
+        uploadId: string;
+        s3Key: string;
+        mimeType: string;
+        size: number;
+        fileType: string;
+        userId?: string;
+        rawFileUrl: string;
+    }): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: {},
+        };
+
+        const { uploadId, s3Key, mimeType, size, fileType, userId, rawFileUrl } =
+            input;
+
+        try {
             const uploadDate = new Date().toISOString();
 
             const originalSermonItem = {
-                item: uploadPayload.rawFile,
+                item: rawFileUrl,
                 duration: 0,
                 size: size ?? 0,
                 fileType,
                 mimetype: mimeType,
-                itemId: uploadId as string,
-                uploadedBy: data.uploadedBy,
+                itemId: uploadId,
+                uploadedBy: userId,
                 uploadStatus: UploadStatus.UPLOADED,
                 createdAt: uploadDate,
                 updatedAt: uploadDate,
@@ -157,7 +190,7 @@ class SermonService {
             const metaPayload: IAudioMetadataJobDTO = {
                 sourceS3Key: s3Key,
                 mimeType: mimeType,
-                uploadId: uploadId as string,
+                uploadId,
                 sermonId,
             };
 
@@ -173,7 +206,7 @@ class SermonService {
             });
 
             const hlsPayload: IAudioHLSJobDTO = {
-                uploadId: uploadId as string,
+                uploadId,
                 sourceS3Key: s3Key,
                 mimeType,
                 sermonId,
@@ -202,7 +235,7 @@ class SermonService {
             result.data = SermonUpload;
 
             return result;
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Sermon upload failed with a specific error:', err);
 
             await this.storageService.deleteFile(
@@ -212,7 +245,82 @@ class SermonService {
 
             result.error = true;
             result.code = 500;
-            result.message = err.message;
+            result.message =
+                err instanceof Error ? err.message : 'Sermon upload failed';
+            return result;
+        }
+    }
+
+    /**
+     * Attach cover image metadata after object exists on troott-storage (multipart complete).
+     */
+    public async completeS3CoverUpload(
+        sermonId: string,
+        input: {
+            uploadId: string;
+            s3Key: string;
+            mimeType: string;
+            size: number;
+            fileType: string;
+            userId?: string;
+        },
+    ): Promise<IResult> {
+        const result: IResult = {
+            error: false,
+            message: '',
+            code: 200,
+            data: null,
+        };
+
+        const { uploadId, s3Key, mimeType, size, fileType, userId } = input;
+        const imageUrl = buildStoragePublicUrl(s3Key);
+
+        try {
+            const uploadDate = new Date().toISOString();
+            const s3Location = `https://${this.StorageBucket}.s3.amazonaws.com/${s3Key}`;
+
+            const originalImageItem = {
+                item: s3Location,
+                width: 0,
+                height: 0,
+                size: size ?? 0,
+                fileType,
+                mimetype: mimeType,
+                itemId: uploadId,
+                uploadedBy: userId,
+                uploadStatus: UploadStatus.COMPLETED,
+                createdAt: uploadDate,
+                updatedAt: uploadDate,
+            };
+
+            const uploadImage = await Sermon.findByIdAndUpdate(
+                sermonId,
+                {
+                    image: originalImageItem,
+                    imageUrl,
+                    status: MediaStatus.DRAFT,
+                },
+                { new: true, runValidators: true },
+            );
+
+            if (!uploadImage) {
+                result.error = true;
+                result.code = 404;
+                result.message = 'Sermon not found';
+                return result;
+            }
+
+            result.message = 'Sermon image uploaded successfully';
+            result.data = uploadImage;
+
+            return result;
+        } catch (err: unknown) {
+            await this.storageService.deleteFile(s3Key, this.StorageBucket);
+
+            result.error = true;
+            result.code = 500;
+            result.message =
+                err instanceof Error ? err.message : 'Cover upload failed';
             return result;
         }
     }

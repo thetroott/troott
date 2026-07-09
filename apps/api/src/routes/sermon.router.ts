@@ -33,10 +33,52 @@ import {
     sermonUploadRateLimiter,
 } from '../middlewares/sermon-upload.security.mdw';
 import { requireMinisterProfile } from '../middlewares/require-minister.mdw';
+import {
+    abortSermonAudioMultipart,
+    completeSermonAudioMultipart,
+    completeSermonCoverMultipart,
+    createSermonAudioMultipart,
+    listSermonAudioParts,
+    signSermonAudioPart,
+} from '@/controllers/s3-multipart.sermon.controller';
 
 const sermonRouter = Router({ mergeParams: true });
 
 // Creator / editor mutations (authenticated)
+sermonRouter.post(
+    '/s3/multipart/create',
+    Protect,
+    sermonUploadRateLimiter,
+    requireMinisterProfile,
+    createSermonAudioMultipart,
+);
+sermonRouter.post(
+    '/s3/multipart/sign-part',
+    Protect,
+    signSermonAudioPart,
+);
+sermonRouter.get(
+    '/s3/multipart/list-parts',
+    Protect,
+    listSermonAudioParts,
+);
+sermonRouter.post(
+    '/s3/multipart/abort',
+    Protect,
+    abortSermonAudioMultipart,
+);
+sermonRouter.post(
+    '/s3/multipart/complete-audio',
+    Protect,
+    requireMinisterProfile,
+    completeSermonAudioMultipart,
+);
+sermonRouter.post(
+    '/s3/multipart/complete-cover',
+    Protect,
+    completeSermonCoverMultipart,
+);
+
 sermonRouter.post(
     '/start-upload',
     Protect,
