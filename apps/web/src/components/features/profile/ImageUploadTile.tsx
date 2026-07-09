@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Camera, UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import api from '@/api/config';
+import { uploadStorageFile } from '@/services/upload/storage-upload.service';
 import type { Asset } from '@/app/profile/profile.types';
 
 type Variant = 'cover' | 'avatar';
@@ -120,15 +120,14 @@ export function ImageUploadTile({
             setState('uploading');
             setProgress(0);
             try {
-                const res = await api.storage.uploadImage(
-                    file,
-                    (p: number) => setProgress(p),
-                );
-                const dto = parseStorageUploadEnvelope(res?.data);
-                if (!dto) {
-                    throw new Error('Upload failed');
-                }
-                onChange(assetFromStorageUpload(dto));
+                const dto = await uploadStorageFile(file, {
+                    onProgress: (p: number) => setProgress(p),
+                });
+                onChange({
+                    fileName: dto.fileName,
+                    s3Key: dto.s3Key,
+                    url: dto.url,
+                });
                 setState('idle');
                 setProgress(0);
             } catch (e) {

@@ -8,3 +8,7 @@ export {
     type StartSermonAudioUploadParams,
     type StartSermonAudioUploadResult,
 } from './upload/sermon-upload.service';
+export {
+    uploadStorageFile,
+    type StorageUploadResult,
+} from './upload/storage-upload.service';

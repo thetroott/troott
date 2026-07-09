@@ -1,16 +1,10 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
-import api from '@/api/config';
 import type { Asset } from '@/app/profile/profile.types';
+import { uploadStorageFile } from '@/services/upload/storage-upload.service';
 
 type UploadImageVars = {
     file: File | FormData;
     onProgress?: (percent: number) => void;
-};
-
-type StorageUploadDto = {
-    file?: string;
-    s3Key?: string;
-    fileName?: string;
 };
 
 /**
@@ -25,23 +19,18 @@ export default function useUploadImageMutation(
     return useMutation({
         ...options,
         mutationFn: async ({ file, onProgress }) => {
-            const res = await api.storage.uploadImage(file, onProgress);
-            if (!res?.data || typeof res.data !== 'object') {
-                throw new Error('Upload failed');
+            const uploadTarget =
+                file instanceof File
+                    ? file
+                    : (file.get('file') as File | null);
+            if (!uploadTarget) {
+                throw new Error('No file to upload');
             }
-            const envelope = res.data as { data?: unknown };
-            const inner =
-                envelope.data && typeof envelope.data === 'object'
-                    ? envelope.data
-                    : res.data;
-            const dto = inner as StorageUploadDto;
-            if (!dto?.s3Key) {
-                throw new Error('Upload failed');
-            }
+            const dto = await uploadStorageFile(uploadTarget, { onProgress });
             return {
-                fileName: dto.fileName ?? '',
+                fileName: dto.fileName,
                 s3Key: dto.s3Key,
-                url: dto.file,
+                url: dto.url,
             };
         },
     });

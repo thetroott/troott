@@ -90,11 +90,8 @@ export function useStudioSermonAudioUpload({
 
         void (async () => {
             try {
-                const formData = new FormData();
-                formData.append('file', activeFile);
-
                 const result = await startSermonAudioUpload({
-                    formData,
+                    file: activeFile,
                     onProgress: (pct: number) => {
                         if (cancelled) {
                             return;

@@ -7,6 +7,7 @@ import {
     type LucideIcon,
 } from 'lucide-react';
 import api from '@/api/config';
+import { uploadStorageFile } from '@/services/upload/storage-upload.service';
 import cookieService from '@/api/services/cookies';
 import { DocumentType } from '@/dtos/minister.dto';
 import type { DocumentUpload } from '@/dtos/minister.dto';
@@ -208,8 +209,10 @@ async function uploadFileToUrl(file: File): Promise<string> {
         );
     }
 
-    const res = await api.storage.uploadImage(file);
-    const url = parseStorageUploadEnvelope(res.data);
+    const dto = await uploadStorageFile(file, {
+        purpose: isPdf ? 'storage-document' : 'storage-image',
+    });
+    const url = dto.url;
     if (!url) {
         throw new Error('Upload failed');
     }

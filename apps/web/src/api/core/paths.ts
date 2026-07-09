@@ -102,6 +102,12 @@ export const URL_SUBSCRIPTIONS = '/subscriptions';
 export const URL_TRANSACTION = '/transactions';
 
 export const URL_STORAGE_UPLOAD = '/storage/upload';
+export const URL_STORAGE_UPLOAD_DOCUMENT = '/storage/upload-document';
+export const URL_STORAGE_S3_MULTIPART_CREATE = '/storage/s3/multipart/create';
+export const URL_STORAGE_S3_MULTIPART_SIGN_PART = '/storage/s3/multipart/sign-part';
+export const URL_STORAGE_S3_MULTIPART_LIST_PARTS = '/storage/s3/multipart/list-parts';
+export const URL_STORAGE_S3_MULTIPART_ABORT = '/storage/s3/multipart/abort';
+export const URL_STORAGE_S3_MULTIPART_COMPLETE = '/storage/s3/multipart/complete';
 
 export const URL_ROLES = '/roles';
 export const URL_ROLES_LIST = `${URL_ROLES}/list`;
@@ -115,6 +121,12 @@ export const URL_ROLES_USER_DETACH = (userId: string) =>
 export const URL_SERMON = '/sermon';
 export const URL_SERMON_START_UPLOAD = `${URL_SERMON}/start-upload`;
 export const URL_SERMON_IMAGE_UPLOAD = `${URL_SERMON}/image-upload`;
+export const URL_SERMON_S3_MULTIPART_CREATE = `${URL_SERMON}/s3/multipart/create`;
+export const URL_SERMON_S3_MULTIPART_SIGN_PART = `${URL_SERMON}/s3/multipart/sign-part`;
+export const URL_SERMON_S3_MULTIPART_LIST_PARTS = `${URL_SERMON}/s3/multipart/list-parts`;
+export const URL_SERMON_S3_MULTIPART_ABORT = `${URL_SERMON}/s3/multipart/abort`;
+export const URL_SERMON_S3_MULTIPART_COMPLETE_AUDIO = `${URL_SERMON}/s3/multipart/complete-audio`;
+export const URL_SERMON_S3_MULTIPART_COMPLETE_COVER = `${URL_SERMON}/s3/multipart/complete-cover`;
 export const URL_SERMON_PUBLISH = (id: string) => `${URL_SERMON}/publish/${id}`;
 export const URL_SERMON_UPDATE = (id: string) => `${URL_SERMON}/update/${id}`;
 export const URL_SERMON_MOVE_TO_BIN = (id: string) =>

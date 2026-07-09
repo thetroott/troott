@@ -7,20 +7,10 @@ import api from '@/api/config';
 
 const S3_MULTIPART_THRESHOLD_BYTES = 6 * 1024 * 1024;
 
-export function coverFileFingerprint(file: File): string {
-    return `${file.name}:${file.size}:${file.lastModified}`;
-}
-
-export function resolveSermonCoverUrl(
-    doc: Record<string, unknown>,
-): string | null {
-    const imageUrl =
-        typeof doc.imageUrl === 'string' ? doc.imageUrl.trim() : '';
-    return imageUrl || null;
-}
-
-export type SermonCoverUploadResult = {
-    imageUrl: string;
+export type StorageUploadResult = {
+    fileName: string;
+    s3Key: string;
+    url?: string;
 };
 
 type TroottMeta = {
@@ -35,28 +25,11 @@ function unwrapEnvelope<T>(res: AxiosResponse<{ data?: T }>): T {
     return payload;
 }
 
-function parseCoverResponse(
-    envelope: Record<string, unknown>,
-): SermonCoverUploadResult {
-    if (envelope.error) {
-        throw new Error(
-            typeof envelope.message === 'string'
-                ? envelope.message
-                : 'Cover upload failed',
-        );
-    }
-    const imageUrl = resolveSermonCoverUrl(envelope);
-    if (!imageUrl) {
-        throw new Error('Cover upload succeeded but no image URL returned');
-    }
-    return { imageUrl };
-}
-
-async function uploadSermonCoverViaS3(
-    sermonId: string,
+async function uploadStorageViaS3(
     file: File,
+    purpose: 'storage-image' | 'storage-document',
     onProgress?: (percent: number) => void,
-): Promise<SermonCoverUploadResult> {
+): Promise<StorageUploadResult> {
     const uppy = new Uppy({ restrictions: { maxNumberOfFiles: 1 } });
 
     uppy.use(AwsS3, {
@@ -64,9 +37,9 @@ async function uploadSermonCoverViaS3(
         createMultipartUpload: async (uppyFile: UppyFile) => {
             const res = await api.storage.createStorageMultipart({
                 filename: file.name,
-                contentType: file.type || 'image/jpeg',
+                contentType: file.type || 'application/octet-stream',
                 contentLength: file.size,
-                purpose: 'storage-image',
+                purpose,
             });
             const data = unwrapEnvelope<{
                 sessionId: string;
@@ -103,19 +76,20 @@ async function uploadSermonCoverViaS3(
         },
         completeMultipartUpload: async (uppyFile, { parts }) => {
             const meta = uppyFile.meta as TroottMeta;
-            await api.storage.completeStorageMultipart({
+            const res = await api.storage.completeStorageMultipart({
                 sessionId: String(meta.sessionId),
                 parts: parts.map((p) => ({
                     partNumber: p.PartNumber ?? 0,
                     etag: String(p.ETag ?? ''),
                 })),
             });
-            const coverRes = await api.sermon.completeSermonCoverMultipart({
-                sessionId: String(meta.sessionId),
-                sermonId,
-            });
-            (uppyFile.meta as TroottMeta & { coverResponse?: Record<string, unknown> }).coverResponse =
-                unwrapEnvelope(coverRes) as Record<string, unknown>;
+            (uppyFile.meta as TroottMeta & {
+                completeDto?: { file?: string; s3Key?: string; fileName?: string };
+            }).completeDto = unwrapEnvelope(res) as {
+                file?: string;
+                s3Key?: string;
+                fileName?: string;
+            };
         },
         abortMultipartUpload: async (uppyFile) => {
             const meta = uppyFile.meta as TroottMeta;
@@ -138,7 +112,7 @@ async function uploadSermonCoverViaS3(
 
     uppy.addFile({
         name: file.name,
-        type: file.type || 'image/jpeg',
+        type: file.type || 'application/octet-stream',
         data: file,
     });
 
@@ -146,47 +120,59 @@ async function uploadSermonCoverViaS3(
     uppy.destroy();
 
     if (result.failed.length > 0) {
-        throw new Error(result.failed[0]?.error ?? 'Cover upload failed');
+        throw new Error(result.failed[0]?.error ?? 'Storage upload failed');
     }
 
     const uploaded = result.successful[0];
-    const coverPayload = (
-        uploaded?.meta as TroottMeta & { coverResponse?: Record<string, unknown> }
-    )?.coverResponse;
+    const dto = (
+        uploaded?.meta as TroottMeta & {
+            completeDto?: { file?: string; s3Key?: string; fileName?: string };
+        }
+    )?.completeDto;
 
-    if (!coverPayload) {
-        throw new Error('Cover upload completed without sermon response');
+    if (!dto?.s3Key) {
+        throw new Error('Storage upload succeeded but no s3Key returned');
     }
 
-    return parseCoverResponse(coverPayload);
+    return {
+        fileName: dto.fileName ?? file.name,
+        s3Key: dto.s3Key,
+        url: dto.file,
+    };
 }
 
 /**
- * Upload sermon cover image and attach to an existing sermon row.
+ * Upload image or document to troott-storage (S3 multipart when >6 MB).
  */
-export async function uploadSermonCoverForSermon(
-    sermonId: string,
+export async function uploadStorageFile(
     file: File,
-    onProgress?: (percent: number) => void,
-): Promise<SermonCoverUploadResult> {
+    opts?: {
+        purpose?: 'storage-image' | 'storage-document';
+        onProgress?: (percent: number) => void;
+    },
+): Promise<StorageUploadResult> {
+    const purpose =
+        opts?.purpose ??
+        (file.type === 'application/pdf' ? 'storage-document' : 'storage-image');
+
     if (file.size > S3_MULTIPART_THRESHOLD_BYTES) {
-        return uploadSermonCoverViaS3(sermonId, file, onProgress);
+        return uploadStorageViaS3(file, purpose, opts?.onProgress);
     }
 
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('sermonId', sermonId);
-    const res = (await api.sermon.uploadCover(
-        formData,
-        onProgress,
-    )) as AxiosResponse<{
-        data?: { error?: boolean; message?: string } | Record<string, unknown>;
-        error?: boolean;
-        message?: string;
-    }>;
-    const envelope = res.data?.data ?? res.data;
-    if (envelope && typeof envelope === 'object') {
-        return parseCoverResponse(envelope as Record<string, unknown>);
+    const res =
+        purpose === 'storage-document'
+            ? await api.storage.uploadDocument(file, opts?.onProgress)
+            : await api.storage.uploadImage(file, opts?.onProgress);
+    const envelope = res.data as { data?: Record<string, unknown> };
+    const dto = envelope?.data ?? (res.data as Record<string, unknown>);
+    const s3Key = typeof dto.s3Key === 'string' ? dto.s3Key : '';
+    if (!s3Key) {
+        throw new Error('Upload failed');
     }
-    throw new Error('Cover upload failed');
+    return {
+        fileName:
+            typeof dto.fileName === 'string' ? dto.fileName : file.name,
+        s3Key,
+        url: typeof dto.file === 'string' ? dto.file : undefined,
+    };
 }

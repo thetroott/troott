@@ -131,15 +131,16 @@ export function useStartSermonUploadMutation(
         StartSermonAudioUploadResult,
         Error,
         {
-            formData: FormData;
+            file: File;
             onProgress?: (percent: number) => void;
             signal?: AbortSignal;
+            forceLegacy?: boolean;
         }
     >,
 ) {
     return useMutation({
-        mutationFn: async ({ formData, onProgress, signal }) =>
-            startSermonAudioUpload({ formData, onProgress, signal }),
+        mutationFn: async ({ file, onProgress, signal, forceLegacy }) =>
+            startSermonAudioUpload({ file, onProgress, signal, forceLegacy }),
         ...options,
     });
 }
