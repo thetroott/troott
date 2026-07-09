@@ -10,9 +10,22 @@ import { IFile, IFIleUpload } from '@/interfaces/common.interface';
 import { determineFileType, genFileName } from '@/utils/helpers.util';
 
 const acceptedMimeType = Object.values(FileMimeType);
-/** Default max file size per field (bytes); sermon audio may be capped separately via route middleware. */
-const expectedSize =
-    Number(process.env.MULTIPART_MAX_FILE_BYTES) || 100 * 1024 * 1024;
+
+const DEFAULT_MULTIPART_MAX_BYTES = 100 * 1024 * 1024;
+const DEFAULT_SERMON_AUDIO_MAX_BYTES = 512 * 1024 * 1024;
+
+function resolveMultipartMaxBytes(req: Request): number {
+    const generic =
+        Number(process.env.MULTIPART_MAX_FILE_BYTES) || DEFAULT_MULTIPART_MAX_BYTES;
+    const path = `${req.originalUrl ?? ''}${req.url ?? ''}`;
+    if (path.includes('/sermon/start-upload')) {
+        const sermonMax =
+            Number(process.env.SERMON_AUDIO_MAX_BYTES) ||
+            DEFAULT_SERMON_AUDIO_MAX_BYTES;
+        return Math.max(generic, sermonMax);
+    }
+    return generic;
+}
 
 /**
  * @name uploadHandler
@@ -31,11 +44,12 @@ const uploadHandler: RequestHandler = asyncHandler(
 
         // Case 1: Raw file upload (multipart/form-data)
         if (contentType?.includes('multipart/form-data')) {
+            const maxFileBytes = resolveMultipartMaxBytes(req);
             const stream = busboy({
                 headers: req.headers as IncomingHttpHeaders,
                 limits: {
                     files: 10,
-                    fileSize: expectedSize,
+                    fileSize: maxFileBytes,
                 },
             });
 
@@ -65,12 +79,17 @@ const uploadHandler: RequestHandler = asyncHandler(
                 const fileId = genFileName(fieldname, fileType);
                 const chunks: Buffer[] = [];
                 let fileSize = 0;
+                let fileLimitHit = false;
+
+                file.on('limit', () => {
+                    fileLimitHit = true;
+                });
 
                 file.on('data', (chunk: Buffer) => {
                     chunks.push(chunk);
                     fileSize += chunk.length;
 
-                    const percent = ((fileSize / expectedSize) * 100).toFixed(
+                    const percent = ((fileSize / maxFileBytes) * 100).toFixed(
                         2,
                     );
 
@@ -84,6 +103,15 @@ const uploadHandler: RequestHandler = asyncHandler(
                 });
 
                 file.on('end', () => {
+                    if (fileLimitHit) {
+                        return next(
+                            new ErrorResponse(
+                                `File "${filename}" exceeds maximum size (${maxFileBytes} bytes).`,
+                                413,
+                                [],
+                            ),
+                        );
+                    }
                     if (fileSize === 0) {
                         return next(
                             new ErrorResponse(
@@ -169,7 +197,7 @@ const uploadHandler: RequestHandler = asyncHandler(
             const buffer = Buffer.from(base64, 'base64');
             const size = buffer.length;
 
-            if (size > expectedSize) {
+            if (size > resolveMultipartMaxBytes(req)) {
                 return next(
                     new ErrorResponse('File size exceeds limit', 400, []),
                 );
