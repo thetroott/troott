@@ -23,6 +23,7 @@ Product and technical specifications for the Troott **API** service.
 | feat-0015 | Sermon cover field contract (`image` provenance vs `imageUrl` CDN) | [PRODUCT](./feature/feat-0015/PRODUCT.md) | [TECH](./feature/feat-0015/TECH.md) | — |
 | feat-0016 | Profile `banner` / `avatar` CDN on GET (cover visible on web) | [PRODUCT](./feature/feat-0016/PRODUCT.md) | [TECH](./feature/feat-0016/TECH.md) | — |
 | feat-0017 | Superadmin — one login, all persona flags + profiles (phase 2) | [PRODUCT](./feature/feat-0017/PRODUCT.md) | [TECH](./feature/feat-0017/TECH.md) | — |
+| feat-0018 | Resumable uploads — direct S3 multipart (Uppy); **sermon audio primary** | [PRODUCT](./feature/feat-0018/PRODUCT.md) | [TECH](./feature/feat-0018/TECH.md) · [TASKS](./feature/feat-0018/TASKS.md) | — |
 
 ## Flow / integration docs
 
@@ -46,6 +47,7 @@ Product and technical specifications for the Troott **API** service.
 - [`feature/feat-0015/`](./feature/feat-0015/PRODUCT.md) — Sermon cover **`image`** (S3 provenance) vs **`imageUrl`** (CDN); supersedes CDN-in-`image.item` guidance
 - [`feature/feat-0016/`](./feature/feat-0016/PRODUCT.md) — Profile **`banner`** / **`avatar`**: store `s3Key`, return CDN on GET; web [feat-0033](../../web/feature/feat-0033/PRODUCT.md)
 - [`feature/feat-0017/`](./feature/feat-0017/PRODUCT.md) — Superadmin: one login, all flags (phase 1); Minister/Studio/Creator/Listener profiles + portal access (phase 2 planned)
+- [`feature/feat-0018/`](./feature/feat-0018/PRODUCT.md) — Direct **S3 multipart** (presigned URLs); API orchestrates, browser uploads via Uppy; `complete-audio` → Bull jobs; web [feat-0037](../../web/feature/feat-0037/PRODUCT.md); [TASKS](./feature/feat-0018/TASKS.md)
 - [`web-flow.md`](./web-flow.md) — Web ↔ API integration notes
 - [`mobile-flow.md`](./mobile-flow.md) — Mobile listener ↔ API
 - [`search.md`](./search.md) — Search behavior

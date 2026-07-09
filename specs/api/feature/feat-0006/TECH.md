@@ -4,9 +4,11 @@
 
 See [`PRODUCT.md`](./PRODUCT.md). Primary implementation in **`apps/api`**.
 
+**Resumable ingest (direct S3):** [API feat-0018](../feat-0018/PRODUCT.md) — browser uploads via Uppy; API `complete-audio` triggers the same pipeline as §1 below. See **§1b**.
+
 ---
 
-## 1. Upload endpoint
+## 1. Upload endpoint (legacy API multipart)
 
 ### Request
 
@@ -75,6 +77,25 @@ HTTP **200** with standard API envelope; `data` is mapped sermon DTO ([`sermon.m
 | **413** | Body exceeds `SERMON_AUDIO_MAX_BYTES` |
 | **429** | Rate limit exceeded |
 | **500** | S3 failure, DB failure, unexpected error |
+
+---
+
+## 1b. Upload endpoint (direct S3 multipart — preferred for studio)
+
+Canonical spec: [feat-0018 TECH](../feat-0018/TECH.md). Web client: [feat-0037](../../web/feature/feat-0037/PRODUCT.md).
+
+| Property | Value |
+| -------- | ----- |
+| **Ingest** | Browser → S3 `troott-originals` via presigned multipart (Uppy) |
+| **Orchestration** | `POST /api/v1/sermon/s3/multipart/*` + `POST …/complete-audio` |
+| **When** | Studio sermon audio default; legacy §1 for `file.size ≤ 6 MB` only |
+| **Auth / actor** | Same as §1 (`Protect`, `requireMinisterProfile`, rate limit on create) |
+
+**After `complete-audio`:** `sermonService.completeS3AudioUpload` must produce the **same** sermon document fields and Bull payloads as [`handleUploadSermon`](../../../../apps/api/src/services/core/sermon.service.ts) (see feat-0018 TECH §16). Workers in §4 below are unchanged — they only need `sourceS3Key` on `troott-originals`.
+
+**Web polling after upload:** [web feat-0018 UPLOAD_STATUS_POLLING_SPEC](../../web/feature/feat-0018/UPLOAD_STATUS_POLLING_SPEC.md).
+
+**Implementation tasks:** [feat-0018 TASKS](../feat-0018/TASKS.md).
 
 ---
 

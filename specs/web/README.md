@@ -28,6 +28,7 @@ Product and technical specifications for **`apps/web`**.
 | feat-0034 | Dashboard sidebar — always show onboarding Dashboard UI | [PRODUCT](./feature/feat-0034/PRODUCT.md) | [TECH](./feature/feat-0034/TECH.md) |
 | feat-0035 | `/get-troott` smart redirect (app host) | [PRODUCT](./feature/feat-0035/PRODUCT.md) | [TECH](./feature/feat-0035/TECH.md) |
 | feat-0036 | Portal shell loading — sidebar-first, region-scoped fetch | [PRODUCT](./feature/feat-0036/PRODUCT.md) | [TECH](./feature/feat-0036/TECH.md) |
+| feat-0037 | Resumable uploads — Uppy `@uppy/aws-s3` direct to S3; **sermon audio primary** | [PRODUCT](./feature/feat-0037/PRODUCT.md) | [TECH](./feature/feat-0037/TECH.md) · [TASKS](./feature/feat-0037/TASKS.md) |
 
 **Cross-cutting:** [feat-0026 EMPTY_STATE_LAYOUT_SPEC](./feature/feat-0026/EMPTY_STATE_LAYOUT_SPEC.md) — all empty states centered in page / region / panel.
 
@@ -40,6 +41,8 @@ Product and technical specifications for **`apps/web`**.
 **Dashboard sidebar:** [feat-0034 PRODUCT](./feature/feat-0034/PRODUCT.md) — always render onboarding **Dashboard UI** (`AppSidebar`); do not unmount on sermon edit workspace.
 
 **Get Started:** [feat-0031 GET_STARTED_UPLOAD_SERMON_CTA_SPEC](./feature/feat-0031/GET_STARTED_UPLOAD_SERMON_CTA_SPEC.md) — hub item 4 **Upload sermon** preflight and studio upload launch.
+
+**Resumable uploads:** [feat-0037 PRODUCT](./feature/feat-0037/PRODUCT.md) — **Uppy** + direct S3 multipart for sermon audio (default), cover, KYC, profile; Troott API signs URLs — [feat-0018 API](../../api/feature/feat-0018/PRODUCT.md). Post-upload polling: [feat-0018 UPLOAD_STATUS_POLLING_SPEC](./feature/feat-0018/UPLOAD_STATUS_POLLING_SPEC.md) (not API feat-0018). [TASKS](./feature/feat-0037/TASKS.md).
 
 ## Numbered UX / flow docs
 
