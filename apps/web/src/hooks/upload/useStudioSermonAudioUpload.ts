@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useCallback, useEffect, useRef } from 'react';
 import type { QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -11,6 +11,30 @@ import {
     buildSermonUploadFileSignature,
     shouldSkipSermonUploadStart,
 } from '@/utils/sermon-upload-file-signature.util';
+
+function uploadErrorMessage(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+        const apiMessage = error.response?.data?.message;
+        if (typeof apiMessage === 'string' && apiMessage.trim()) {
+            return apiMessage.trim();
+        }
+        if (error.code === 'ERR_NETWORK') {
+            return 'Network error during upload. Check your connection and try again.';
+        }
+        if (error.message) {
+            return error.message;
+        }
+    }
+    if (
+        error &&
+        typeof error === 'object' &&
+        'message' in error &&
+        typeof (error as { message: unknown }).message === 'string'
+    ) {
+        return (error as { message: string }).message;
+    }
+    return 'Upload failed. Please try again.';
+}
 
 export type UseStudioSermonAudioUploadParams = {
     file: File | null | undefined;
@@ -133,13 +157,7 @@ export function useStudioSermonAudioUpload({
                 }
                 startedForSignatureRef.current = null;
                 lastProgressPctRef.current = -1;
-                const message =
-                    e &&
-                    typeof e === 'object' &&
-                    'message' in e &&
-                    typeof (e as { message: unknown }).message === 'string'
-                        ? (e as { message: string }).message
-                        : 'Upload failed. Please try again.';
+                const message = uploadErrorMessage(e);
                 toast.error(message);
                 onUploadErrorRef.current();
                 dispatchRef.current(uploadActions.setProgress(0));
