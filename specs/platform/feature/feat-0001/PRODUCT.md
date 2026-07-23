@@ -98,12 +98,13 @@ Align with Pacepard **branch → environment** convention (adapt branch names to
 | ---------- | ----------- | ---------- | ----------------- | -------------- |
 | `development` (or team `*-development`) | development | yes | yes | yes |
 | `staging` | staging | yes | yes | yes |
-| `main` / `master` | production | yes | yes | yes |
+| `main` / `master` | **staging** (primary / Alpha) | yes | yes | yes |
 
-**Normative for Troott:**
+**Normative for Troott (Alpha):**
 
 - Long-lived integration branches (`favour-development`, `damola-development`, etc.) run **CI only** unless explicitly mapped to Coolify `development`.
-- **`staging` and `main`** are the only branches that auto-deploy to staging/production without `workflow_dispatch`.
+- **`staging` and `master`** both auto-deploy to **staging** Coolify (`IMAGE_TAG=staging`).
+- **Production** is optional via manual `workflow_dispatch` until a dedicated production Coolify environment exists.
 
 ---
 

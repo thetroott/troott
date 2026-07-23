@@ -7,7 +7,7 @@
 # (2) Docker Compose + pre-built image (recommended for git-connected apps):
 #     deploy/coolify/docker-compose.api.yaml | .web.yaml | .website.yaml
 #     Build Pack = Docker Compose; "Docker Compose Location" = file above.
-#     Resource env: GHCR_ORG (lowercase GitHub org/user), IMAGE_TAG = development | staging | production
+#     Resource env: GHCR_ORG (lowercase GitHub org/user), IMAGE_TAG = staging (primary) | development | production
 #     Compose pulls image only (no build: on the server).
 #
 # Floating tag = environment; CI also pushes immutable :<env>-<shortsha>.

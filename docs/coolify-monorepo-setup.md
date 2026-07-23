@@ -11,11 +11,11 @@ Reference compose files: [`deploy/coolify/`](../deploy/coolify/README.md)
    - `troott-api`
    - `troott-web` (studio portal)
    - `troott-website` (marketing)
-3. Tags per environment: `production`, `staging`, `development`, plus immutable `production-abc1234`.
+3. Tags per environment: **`staging`** (primary / Alpha), `development`, plus immutable `staging-abc1234`. Optional later: `production`.
 
 ## 2. Coolify application (each app)
 
-Create **six** Coolify resources if you run staging + production (three surfaces × two environments). Do not reuse production UUIDs for staging.
+Create **three** Coolify resources for staging (API, studio, website) on Troott Alpha. Add three more only when you introduce production. Do not reuse staging UUIDs for production later.
 
 | Troott app | Compose file | GHCR image | Coolify port |
 | ---------- | ------------ | ---------- | ------------ |
@@ -23,7 +23,7 @@ Create **six** Coolify resources if you run staging + production (three surfaces
 | Studio | `deploy/coolify/docker-compose.web.yaml` | `ghcr.io/<org>/troott-web:<tag>` | 8080 |
 | Marketing | `deploy/coolify/docker-compose.website.yaml` | `ghcr.io/<org>/troott-website:<tag>` | 3000 |
 
-`<tag>` = `IMAGE_TAG` = `staging` \| `production` \| `development`.
+`<tag>` = `IMAGE_TAG` = **`staging`** (primary) \| `development` \| `production` (manual later).
 
 ### Configuration (all three)
 
@@ -39,8 +39,8 @@ Create **six** Coolify resources if you run staging + production (three surfaces
 
 Enter **full URLs with protocol**, not bare hostnames:
 
-| App | Staging domains | Production domains | Port |
-| --- | --------------- | ------------------ | ---- |
+| App | Staging domains (primary / Alpha) | Production domains (later) | Port |
+| --- | --------------------------------- | -------------------------- | ---- |
 | Website | `https://staging.troott.com` | `https://troott.com,https://www.troott.com` | **3000** |
 | Studio | `https://app.staging.troott.com` | `https://app.troott.com` | **8080** |
 | API | `https://api.staging.troott.com` | `https://api.troott.com` | **5025** |
@@ -51,14 +51,14 @@ In **Advanced**, disable **Strip Prefixes** unless you intentionally need path s
 
 ### Required resource environment variables
 
-| Variable | Staging | Production | Notes |
-| -------- | ------- | ---------- | ----- |
+| Variable | Staging (required now) | Production (later) | Notes |
+| -------- | ---------------------- | ------------------ | ----- |
 | `GHCR_ORG` | `thetroott` | `thetroott` | Lowercase; must match CI push namespace |
-| `IMAGE_TAG` | `staging` | `production` | Must match GHCR floating tag from Deploy workflow |
+| `IMAGE_TAG` | **`staging`** | `production` | Must match GHCR floating tag from Deploy workflow |
 
 If Coolify shows `ghcr.io/.../troott-api:staging: not found`, run GitHub **Deploy** for environment **staging** first so the tag exists.
 
-Set runtime secrets (MongoDB, JWT, AWS, etc.) in Coolify as usual — not in this doc. For staging API use `NODE_ENV=staging`, `APP_ENV=staging`, `MONGODB_STAGING_URI`, and mark those **Runtime only**.
+Set runtime secrets (MongoDB, JWT, AWS, etc.) in Coolify as usual — not in this doc. For staging API use **`NODE_ENV=staging`**, **`APP_ENV=staging`**, `MONGODB_STAGING_URI` / staging Mongo URI, and mark those **Runtime only**. Do **not** use `APP_ENV=production` on Alpha.
 
 ## 3. GitHub → Coolify trigger
 
@@ -102,8 +102,8 @@ Fix:
 4. **Git Source** connected; branch includes that file (e.g. `master`).
 5. Click **Save**, then **Reload Compose File**. Raw box should list `services: website:` with `image: ghcr.io/...`.
 6. If reload still fails, paste the file contents from the repo into the raw box manually, then Save.
-7. Set **Environment Variables**: `GHCR_ORG=thetroott`, `IMAGE_TAG=staging` (or `production`).
-8. **Domains**: staging `https://staging.troott.com` or production `https://troott.com,https://www.troott.com` with port **3000**.
+7. Set **Environment Variables**: `GHCR_ORG=thetroott`, **`IMAGE_TAG=staging`**.
+8. **Domains**: staging `https://staging.troott.com` (or Alpha host) with port **3000**. Use production domains only when you add a separate production Coolify resource.
 9. **Redeploy** (Force Stop in Danger Zone first if a phantom deployment persists).
 
 Verify on server:
@@ -112,7 +112,7 @@ Verify on server:
 docker inspect <website-container> --format '{{json .Config.Labels}}' | jq 'with_entries(select(.key|test("traefik")))'
 ```
 
-Router rule should include `Host(\`troott.com\`)` or `Host(\`www.troott.com\`)`, not empty `Host(\`\`)`.
+Router rule should include `Host(\`staging.troott.com\`)` (or your Alpha host), not empty `Host(\`\`)`.
 
 ### 4.6 SSL / ERR_CERT_AUTHORITY_INVALID
 
@@ -121,12 +121,14 @@ See section **Domains** above. Ensure port **80/443** open on the server, Let’
 ## 5. Local smoke test
 
 ```bash
-# From repo root — same Dockerfiles CI uses
+# From repo root — same Dockerfiles CI uses (staging-shaped build args)
 docker build -f apps/api/Dockerfile -t troott-api:local .
 docker build -f apps/web/Dockerfile -t troott-web:local \
-  --build-arg VITE_APP_API_URL=https://api.troott.com \
-  --build-arg VITE_APP_ENVIRONMENT=prod .
+  --build-arg VITE_APP_API_URL=https://api.staging.troott.com \
+  --build-arg VITE_APP_ENVIRONMENT=staging .
 docker build -f apps/website/Dockerfile -t troott-website:local \
-  --build-arg NEXT_PUBLIC_APP_API_URL=https://api.troott.com \
-  --build-arg NEXT_PUBLIC_APP_ENVIRONMENT=production .
+  --build-arg NEXT_PUBLIC_APP_API_URL=https://api.staging.troott.com \
+  --build-arg NEXT_PUBLIC_APP_ENVIRONMENT=staging \
+  --build-arg NEXT_PUBLIC_SITE_URL=https://staging.troott.com \
+  --build-arg NEXT_PUBLIC_WEB_APP_URL=https://app.staging.troott.com .
 ```
