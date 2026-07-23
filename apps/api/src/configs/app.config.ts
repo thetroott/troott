@@ -59,6 +59,10 @@ app.use(
             if (getOrigins(origin as string)) {
                 return callback(null, true);
             }
+            // feat-0038: log rejected Origin so Coolify staging CORS misconfig is obvious
+            console.error(
+                `[cors] Not allowed by CORS origin=${JSON.stringify(origin)}`,
+            );
             callback(new Error('Not allowed by CORS'));
         },
         credentials: true,
