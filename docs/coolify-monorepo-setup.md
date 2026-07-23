@@ -15,13 +15,15 @@ Reference compose files: [`deploy/coolify/`](../deploy/coolify/README.md)
 
 ## 2. Coolify application (each app)
 
-Create one Coolify resource per surface (API, studio web, marketing).
+Create **six** Coolify resources if you run staging + production (three surfaces × two environments). Do not reuse production UUIDs for staging.
 
 | Troott app | Compose file | GHCR image | Coolify port |
 | ---------- | ------------ | ---------- | ------------ |
 | API | `deploy/coolify/docker-compose.api.yaml` | `ghcr.io/<org>/troott-api:<tag>` | 5025 |
-| Studio (`app.troott.com`) | `deploy/coolify/docker-compose.web.yaml` | `ghcr.io/<org>/troott-web:<tag>` | 8080 |
-| Marketing (`troott.com`) | `deploy/coolify/docker-compose.website.yaml` | `ghcr.io/<org>/troott-website:<tag>` | 3000 |
+| Studio | `deploy/coolify/docker-compose.web.yaml` | `ghcr.io/<org>/troott-web:<tag>` | 8080 |
+| Marketing | `deploy/coolify/docker-compose.website.yaml` | `ghcr.io/<org>/troott-website:<tag>` | 3000 |
+
+`<tag>` = `IMAGE_TAG` = `staging` \| `production` \| `development`.
 
 ### Configuration (all three)
 
@@ -37,11 +39,11 @@ Create one Coolify resource per surface (API, studio web, marketing).
 
 Enter **full URLs with protocol**, not bare hostnames:
 
-| App | Example domains field | Container port |
-| --- | --------------------- | -------------- |
-| Website | `https://troott.com,https://www.troott.com` | **3000** |
-| Studio | `https://app.troott.com` | **8080** |
-| API | `https://api.troott.com` | **5025** |
+| App | Staging domains | Production domains | Port |
+| --- | --------------- | ------------------ | ---- |
+| Website | `https://staging.troott.com` | `https://troott.com,https://www.troott.com` | **3000** |
+| Studio | `https://app.staging.troott.com` | `https://app.troott.com` | **8080** |
+| API | `https://api.staging.troott.com` | `https://api.troott.com` | **5025** |
 
 Wrong domain format (e.g. `troott.com` without `https://`) can produce broken Traefik rules like `Host(\`\`) && PathPrefix(\`troott.com\`)` and **no available server** / 503. After changing domains, **Redeploy**.
 
@@ -49,12 +51,14 @@ In **Advanced**, disable **Strip Prefixes** unless you intentionally need path s
 
 ### Required resource environment variables
 
-| Variable | Example | Notes |
-| -------- | ------- | ----- |
-| `GHCR_ORG` | `thetroott` | Lowercase GitHub org/user; must match CI push namespace |
-| `IMAGE_TAG` | `production` | `development` \| `staging` \| `production` — matches deploy branch env |
+| Variable | Staging | Production | Notes |
+| -------- | ------- | ---------- | ----- |
+| `GHCR_ORG` | `thetroott` | `thetroott` | Lowercase; must match CI push namespace |
+| `IMAGE_TAG` | `staging` | `production` | Must match GHCR floating tag from Deploy workflow |
 
-Set runtime secrets (MongoDB, JWT, AWS, etc.) in Coolify as usual — not in this doc.
+If Coolify shows `ghcr.io/.../troott-api:staging: not found`, run GitHub **Deploy** for environment **staging** first so the tag exists.
+
+Set runtime secrets (MongoDB, JWT, AWS, etc.) in Coolify as usual — not in this doc. For staging API use `NODE_ENV=staging`, `APP_ENV=staging`, `MONGODB_STAGING_URI`, and mark those **Runtime only**.
 
 ## 3. GitHub → Coolify trigger
 
@@ -98,8 +102,8 @@ Fix:
 4. **Git Source** connected; branch includes that file (e.g. `master`).
 5. Click **Save**, then **Reload Compose File**. Raw box should list `services: website:` with `image: ghcr.io/...`.
 6. If reload still fails, paste the file contents from the repo into the raw box manually, then Save.
-7. Set **Environment Variables**: `GHCR_ORG` (lowercase, e.g. `thetroott`), `IMAGE_TAG` (`production`).
-8. **Domains**: `https://troott.com,https://www.troott.com` with port **3000**.
+7. Set **Environment Variables**: `GHCR_ORG=thetroott`, `IMAGE_TAG=staging` (or `production`).
+8. **Domains**: staging `https://staging.troott.com` or production `https://troott.com,https://www.troott.com` with port **3000**.
 9. **Redeploy** (Force Stop in Danger Zone first if a phantom deployment persists).
 
 Verify on server:

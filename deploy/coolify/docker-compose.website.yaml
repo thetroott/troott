@@ -1,9 +1,10 @@
-# Coolify: marketing site (@troott/website) — troott.com
+# Coolify: marketing site (@troott/website)
+# Domains: staging (primary) → https://staging.troott.com | production → https://troott.com
 # Build Pack = Docker Compose. Docker Compose Location = this file.
 #
 # Resource env:
 #   GHCR_ORG = GitHub org/user (lowercase)
-#   IMAGE_TAG = development | staging | production
+#   IMAGE_TAG = staging (Alpha / primary) | development | production
 #
 # CI image: ghcr.io/${GHCR_ORG}/troott-website:${IMAGE_TAG}
 #
