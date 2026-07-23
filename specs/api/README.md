@@ -25,6 +25,8 @@ Product and technical specifications for the Troott **API** service.
 | feat-0017 | Superadmin — one login, all persona flags + profiles (phase 2) | [PRODUCT](./feature/feat-0017/PRODUCT.md) | [TECH](./feature/feat-0017/TECH.md) | — |
 | feat-0018 | Resumable uploads — direct S3 multipart (Uppy); **sermon audio primary** | [PRODUCT](./feature/feat-0018/PRODUCT.md) | [TECH](./feature/feat-0018/TECH.md) · [TASKS](./feature/feat-0018/TASKS.md) | — |
 
+**Related (web):** Staging Progress upload failures — [web feat-0038](../web/feature/feat-0038/PRODUCT.md) (ops CORS / Coolify / client error UX; uses feat-0018 routes).
+
 ## Flow / integration docs
 
 - **[`feature/feat-0006/`](./feature/feat-0006/PRODUCT.md)** — **Canonical** sermon audio: upload → S3 → metadata + HLS jobs → playback

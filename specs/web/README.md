@@ -29,6 +29,7 @@ Product and technical specifications for **`apps/web`**.
 | feat-0035 | `/get-troott` smart redirect (app host) | [PRODUCT](./feature/feat-0035/PRODUCT.md) | [TECH](./feature/feat-0035/TECH.md) |
 | feat-0036 | Portal shell loading — sidebar-first, region-scoped fetch | [PRODUCT](./feature/feat-0036/PRODUCT.md) | [TECH](./feature/feat-0036/TECH.md) |
 | feat-0037 | Resumable uploads — Uppy `@uppy/aws-s3` direct to S3; **sermon audio primary** | [PRODUCT](./feature/feat-0037/PRODUCT.md) | [TECH](./feature/feat-0037/TECH.md) · [TASKS](./feature/feat-0037/TASKS.md) |
+| feat-0038 | Staging sermon Progress upload keeps failing (generic error) | [PRODUCT](./feature/feat-0038/PRODUCT.md) | [TECH](./feature/feat-0038/TECH.md) · [TASKS](./feature/feat-0038/TASKS.md) |
 
 **Cross-cutting:** [feat-0026 EMPTY_STATE_LAYOUT_SPEC](./feature/feat-0026/EMPTY_STATE_LAYOUT_SPEC.md) — all empty states centered in page / region / panel.
 
@@ -43,6 +44,8 @@ Product and technical specifications for **`apps/web`**.
 **Get Started:** [feat-0031 GET_STARTED_UPLOAD_SERMON_CTA_SPEC](./feature/feat-0031/GET_STARTED_UPLOAD_SERMON_CTA_SPEC.md) — hub item 4 **Upload sermon** preflight and studio upload launch.
 
 **Resumable uploads:** [feat-0037 PRODUCT](./feature/feat-0037/PRODUCT.md) — **Uppy** + direct S3 multipart for sermon audio (default), cover, KYC, profile; Troott API signs URLs — [feat-0018 API](../../api/feature/feat-0018/PRODUCT.md). Post-upload polling: [feat-0018 UPLOAD_STATUS_POLLING_SPEC](./feature/feat-0018/UPLOAD_STATUS_POLLING_SPEC.md) (not API feat-0018). [TASKS](./feature/feat-0037/TASKS.md).
+
+**Staging upload reliability:** [feat-0038 PRODUCT](./feature/feat-0038/PRODUCT.md) — Progress step generic failure on `app.staging.troott.com`; diagnose Uppy vs legacy; CORS / Coolify / baked `VITE_APP_API_URL`; actionable error UX. [TECH](./feature/feat-0038/TECH.md) · [TASKS](./feature/feat-0038/TASKS.md).
 
 ## Numbered UX / flow docs
 
