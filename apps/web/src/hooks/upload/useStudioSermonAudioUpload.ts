@@ -7,34 +7,11 @@ import { sermonQueryKeys } from '@/constants/sermon-query-keys';
 import { uploadActions } from '@/context/upload/uploadState';
 import type { UploadDispatch } from '@/context/upload/types';
 import { startSermonAudioUpload } from '@/services/upload/sermon-upload.service';
+import { sermonUploadErrorMessage } from '@/utils/sermon-upload-error-message.util';
 import {
     buildSermonUploadFileSignature,
     shouldSkipSermonUploadStart,
 } from '@/utils/sermon-upload-file-signature.util';
-
-function uploadErrorMessage(error: unknown): string {
-    if (axios.isAxiosError(error)) {
-        const apiMessage = error.response?.data?.message;
-        if (typeof apiMessage === 'string' && apiMessage.trim()) {
-            return apiMessage.trim();
-        }
-        if (error.code === 'ERR_NETWORK') {
-            return 'Network error during upload. Check your connection and try again.';
-        }
-        if (error.message) {
-            return error.message;
-        }
-    }
-    if (
-        error &&
-        typeof error === 'object' &&
-        'message' in error &&
-        typeof (error as { message: unknown }).message === 'string'
-    ) {
-        return (error as { message: string }).message;
-    }
-    return 'Upload failed. Please try again.';
-}
 
 export type UseStudioSermonAudioUploadParams = {
     file: File | null | undefined;
@@ -45,11 +22,13 @@ export type UseStudioSermonAudioUploadParams = {
     dispatch: UploadDispatch;
     queryClient: QueryClient;
     ministerId: string;
-    onUploadError: () => void;
+    /** feat-0038: receives actionable message for Progress UI + toast */
+    onUploadError: (message: string) => void;
 };
 
 /**
- * feat-0008: exactly one in-flight `POST /sermon/start-upload` per file signature.
+ * feat-0008: exactly one in-flight upload per file signature.
+ * Default transport: Uppy S3 multipart (feat-0037); legacy only with forceLegacy.
  */
 export function useStudioSermonAudioUpload({
     file,
@@ -157,9 +136,9 @@ export function useStudioSermonAudioUpload({
                 }
                 startedForSignatureRef.current = null;
                 lastProgressPctRef.current = -1;
-                const message = uploadErrorMessage(e);
+                const message = sermonUploadErrorMessage(e);
                 toast.error(message);
-                onUploadErrorRef.current();
+                onUploadErrorRef.current(message);
                 dispatchRef.current(uploadActions.setProgress(0));
                 dispatchRef.current(uploadActions.setUploadComplete(false));
             } finally {

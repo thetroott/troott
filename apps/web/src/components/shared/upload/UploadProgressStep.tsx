@@ -42,6 +42,9 @@ const UploadProgressStep: React.FC = () => {
     const [showRemoveDialog, setShowRemoveDialog] = useState(false);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [uploadError, setUploadError] = useState(false);
+    const [uploadErrorDetail, setUploadErrorDetail] = useState<string | null>(
+        null,
+    );
     const [retryToken, setRetryToken] = useState(0);
 
     const file = uploadData.file;
@@ -50,8 +53,9 @@ const UploadProgressStep: React.FC = () => {
         [file],
     );
 
-    const onUploadError = useCallback(() => {
+    const onUploadError = useCallback((message: string) => {
         setUploadError(true);
+        setUploadErrorDetail(message);
     }, []);
 
     const { clearUploadFlight } = useStudioSermonAudioUpload({
@@ -97,6 +101,7 @@ const UploadProgressStep: React.FC = () => {
     const handleRetry = () => {
         clearUploadFlight();
         setUploadError(false);
+        setUploadErrorDetail(null);
         setRetryToken((t) => t + 1);
     };
 
@@ -186,9 +191,15 @@ const UploadProgressStep: React.FC = () => {
                 {uploadError ? (
                     <div className="flex w-full max-w-[28rem] flex-col items-center justify-center gap-4 text-center">
                         <p className="font-matter text-[14px] leading-5 tracking-wide text-destructive">
-                            Something went wrong while uploading. You can retry
-                            without selecting the file again.
+                            {uploadErrorDetail?.trim()
+                                ? uploadErrorDetail
+                                : 'Something went wrong while uploading. You can retry without selecting the file again.'}
                         </p>
+                        {!uploadErrorDetail?.trim() ? null : (
+                            <p className="font-matter text-[12px] leading-4 tracking-wide text-[#9a9a9a]">
+                                You can retry without selecting the file again.
+                            </p>
+                        )}
                         <Button
                             type="button"
                             size="sm"
