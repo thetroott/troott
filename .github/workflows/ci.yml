@@ -1,7 +1,6 @@
 # feat-0001 — CI: lint, typecheck, test, build, expo-doctor
 #
-# GitHub Environments (staging, production): jobs targeting master or staging attach
-# `environment:` so env-scoped secrets/vars resolve (same pattern as deploy.yml).
+# GitHub Environments: master and staging attach `environment: staging`.
 # development branch / PRs use repository-level secrets and variables only.
 #
 # Spec: specs/platform/feature/feat-0001/TECH.md
@@ -54,15 +53,13 @@ jobs:
                   else
                     BRANCH="${{ github.ref_name }}"
                   fi
-                  if [ "$BRANCH" = "master" ]; then
-                    echo "env=production" >> "$GITHUB_OUTPUT"
-                    echo "protected_environment=production" >> "$GITHUB_OUTPUT"
-                  elif [ "$BRANCH" = "staging" ]; then
-                    echo "env=staging" >> "$GITHUB_OUTPUT"
-                    echo "protected_environment=staging" >> "$GITHUB_OUTPUT"
-                  else
+                  if [ "$BRANCH" = "development" ]; then
                     echo "env=development" >> "$GITHUB_OUTPUT"
                     echo "protected_environment=" >> "$GITHUB_OUTPUT"
+                  else
+                    # master and staging → staging (Alpha / primary Coolify).
+                    echo "env=staging" >> "$GITHUB_OUTPUT"
+                    echo "protected_environment=staging" >> "$GITHUB_OUTPUT"
                   fi
 
     validate:

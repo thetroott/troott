@@ -17,9 +17,20 @@
 # Secrets: COOLIFY_API_TOKEN, COOLIFY_APP_UUID_* ; optional TURBO_TOKEN.
 # Variables: COOLIFY_API_URL, TURBO_TEAM, per-env API_URL / WEB_URL / WEBSITE_URL.
 #
-# GitHub Environments (staging, production): build/deploy jobs attach `environment:` for
-# env-scoped vars (e.g. API_URL). development branch deploys use repository-level vars.
-# Manual workflow_dispatch targets staging or production only.
+# Per-environment URL examples (set on GitHub Environment staging | production):
+#   staging (primary / Alpha): API_URL=https://api.staging.troott.com
+#                              WEB_URL=https://app.staging.troott.com
+#                              WEBSITE_URL=https://staging.troott.com
+#   production (manual only):  API_URL=https://api.troott.com
+#                              WEB_URL=https://app.troott.com
+#                              WEBSITE_URL=https://troott.com
+#
+# Image tags match env name: ghcr.io/<org>/troott-api:staging | :production | :development
+# Coolify IMAGE_TAG must match (Alpha / primary apps → IMAGE_TAG=staging).
+#
+# GitHub Environments: build/deploy jobs attach `environment:` for env-scoped vars.
+# Push to master or staging → staging. development → development.
+# Manual workflow_dispatch may target staging (default) or production.
 #
 # Spec: specs/platform/feature/feat-0001/TECH.md
 
@@ -38,12 +49,13 @@ on:
     workflow_dispatch:
         inputs:
             environment:
-                description: Environment to deploy to
+                description: Environment to deploy to (staging is primary / Alpha)
                 required: true
                 type: choice
                 options:
                     - staging
                     - production
+                default: staging
             apps:
                 description: 'Apps (comma-separated: api,web,website)'
                 required: false
@@ -60,7 +72,7 @@ env:
     TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 concurrency:
-    group: deploy-${{ github.event.inputs.environment || (github.ref_name == 'master' && 'production' || (github.ref_name == 'staging' && 'staging' || 'development')) }}
+    group: deploy-${{ github.event.inputs.environment || (github.ref_name == 'development' && 'development' || 'staging') }}
     cancel-in-progress: false
 
 jobs:
@@ -77,15 +89,13 @@ jobs:
                   if [ -n "${{ github.event.inputs.environment }}" ]; then
                     echo "env=${{ github.event.inputs.environment }}" >> "$GITHUB_OUTPUT"
                     echo "protected_environment=${{ github.event.inputs.environment }}" >> "$GITHUB_OUTPUT"
-                  elif [ "${{ github.ref_name }}" = "master" ]; then
-                    echo "env=production" >> "$GITHUB_OUTPUT"
-                    echo "protected_environment=production" >> "$GITHUB_OUTPUT"
-                  elif [ "${{ github.ref_name }}" = "staging" ]; then
-                    echo "env=staging" >> "$GITHUB_OUTPUT"
-                    echo "protected_environment=staging" >> "$GITHUB_OUTPUT"
-                  else
+                  elif [ "${{ github.ref_name }}" = "development" ]; then
                     echo "env=development" >> "$GITHUB_OUTPUT"
                     echo "protected_environment=" >> "$GITHUB_OUTPUT"
+                  else
+                    # master and staging both deploy to staging (Alpha / primary Coolify).
+                    echo "env=staging" >> "$GITHUB_OUTPUT"
+                    echo "protected_environment=staging" >> "$GITHUB_OUTPUT"
                   fi
 
     detect-changes:
@@ -216,10 +226,11 @@ jobs:
               env:
                   DOCKER_BUILDKIT: 1
                   VITE_APP_API_URL: ${{ vars.API_URL }}
-                  VITE_APP_ENVIRONMENT: prod
+                  # Observability loads only when value is exactly "prod" (production).
+                  VITE_APP_ENVIRONMENT: ${{ needs.determine-environment.outputs.env == 'production' && 'prod' || needs.determine-environment.outputs.env }}
                   VITE_TROOTT_PLAY_STORE_URL: ${{ vars.TROOTT_PLAY_STORE_URL || 'https://play.google.com/store/apps/details?id=com.troott.app' }}
                   VITE_TROOTT_APP_STORE_URL: ${{ vars.TROOTT_APP_STORE_URL || 'https://apps.apple.com/ng/app/troott/id1234567890' }}
-                  VITE_TROOTT_WEB_APP_URL: ${{ vars.WEB_APP_URL || vars.API_URL }}
+                  VITE_TROOTT_WEB_APP_URL: ${{ vars.WEB_URL }}
               run: |
                   OWNER="${{ steps.meta.outputs.owner }}"
                   FLOAT="${{ steps.meta.outputs.float }}"
@@ -273,7 +284,12 @@ jobs:
               env:
                   DOCKER_BUILDKIT: 1
                   NEXT_PUBLIC_APP_API_URL: ${{ vars.API_URL }}
-                  NEXT_PUBLIC_APP_ENVIRONMENT: production
+                  NEXT_PUBLIC_APP_ENVIRONMENT: ${{ needs.determine-environment.outputs.env }}
+                  NEXT_PUBLIC_SITE_URL: ${{ vars.WEBSITE_URL }}
+                  NEXT_PUBLIC_WEB_APP_URL: ${{ vars.WEB_URL }}
+                  NEXT_PUBLIC_GET_TROOTT_PATH: ${{ vars.GET_TROOTT_PATH || '/get-troott' }}
+                  NEXT_PUBLIC_GET_TROOTT_ENABLED: ${{ vars.GET_TROOTT_ENABLED || 'true' }}
+                  NEXT_PUBLIC_REQUEST_DEMO_URL: ${{ vars.REQUEST_DEMO_URL || '' }}
               run: |
                   OWNER="${{ steps.meta.outputs.owner }}"
                   FLOAT="${{ steps.meta.outputs.float }}"
@@ -284,6 +300,11 @@ jobs:
                     --cache-to type=gha,mode=max,scope=troott-website \
                     --build-arg NEXT_PUBLIC_APP_API_URL \
                     --build-arg NEXT_PUBLIC_APP_ENVIRONMENT \
+                    --build-arg NEXT_PUBLIC_SITE_URL \
+                    --build-arg NEXT_PUBLIC_WEB_APP_URL \
+                    --build-arg NEXT_PUBLIC_GET_TROOTT_PATH \
+                    --build-arg NEXT_PUBLIC_GET_TROOTT_ENABLED \
+                    --build-arg NEXT_PUBLIC_REQUEST_DEMO_URL \
                     -f apps/website/Dockerfile \
                     -t "ghcr.io/${OWNER}/troott-website:${FLOAT}" \
                     -t "ghcr.io/${OWNER}/troott-website:${FLOAT}-${SHA}" \
@@ -306,7 +327,7 @@ jobs:
                   coolify-api-url: ${{ vars.COOLIFY_API_URL }}
                   coolify-api-token: ${{ secrets.COOLIFY_API_TOKEN }}
                   app-uuid: ${{ secrets.COOLIFY_APP_UUID_API }}
-                  app-label: api.troott.com
+                  app-label: ${{ vars.API_URL || 'troott-api' }}
 
     deploy-web:
         name: Deploy studio web
@@ -325,7 +346,7 @@ jobs:
                   coolify-api-url: ${{ vars.COOLIFY_API_URL }}
                   coolify-api-token: ${{ secrets.COOLIFY_API_TOKEN }}
                   app-uuid: ${{ secrets.COOLIFY_APP_UUID_WEB }}
-                  app-label: app.troott.com
+                  app-label: ${{ vars.WEB_URL || 'troott-web' }}
 
     deploy-website:
         name: Deploy marketing website
@@ -344,4 +365,4 @@ jobs:
                   coolify-api-url: ${{ vars.COOLIFY_API_URL }}
                   coolify-api-token: ${{ secrets.COOLIFY_API_TOKEN }}
                   app-uuid: ${{ secrets.COOLIFY_APP_UUID_WEBSITE }}
-                  app-label: troott.com
+                  app-label: ${{ vars.WEBSITE_URL || 'troott-website' }}
